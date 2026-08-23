@@ -10,6 +10,7 @@ export const EDITOR_EDITABLE_DOMAINS = Object.freeze([
     "anchors",
     "recoveryRoute",
     "enemySlots",
+    "worldObjects",
     "wind",
     "camera"
 ]);

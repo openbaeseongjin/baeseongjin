@@ -12,7 +12,7 @@
 6. **의존성보다 기존 기반을 우선한다.** 새 패키지는 명시적인 필요와 승인 없이는 추가하지 않는다.
 7. **임시 완성을 금지한다.** 실행되지 않는 placeholder, 생략 부호, 설명 없는 TODO를 결과물로 남기지 않는다.
 8. **반복 수정은 구조 검증 신호다.** 같은 기능에서 유사 수정이 계속되거나 한 수정 뒤 연관 버그가 이어지면 추가 증상 패치를 멈추고 정체성·상태 소유권·capability·권한 경계를 검증한다.
-9. **이동 가능성은 합성 충돌로 검증한다.** 개별 발판이 맞아 보여도 Stage 경계의 source/target deck, seam, city wing을 모두 합친 수평 구간이 전체 폭을 막을 수 있다. 같은 Sector 안의 양방향 이동 계약은 경계마다 Player가 통과할 수 있는 하강 개구부를 수치로 검사한다. 렌더되는 단단한 수평 플랫폼은 별도 차단 장치로 명시·표현되지 않는 한 Rope 부착 가능해야 하며 `oneWay`와 `grappleable`을 서로 독립적인 우연 값으로 두지 않는다.
+9. **Map Editor가 Stage 공간의 단일 권위다.** 일반 Stage의 surface·좌우 벽·상하 격벽·연결 발판·장식물 collision과 world object 위치는 canonical `AREA-SPEC.v2.json`에 명시한다. Runtime compiler는 `city-wing`, `sector-seam`, boundary divider, transit barrier 같은 지형을 추가하지 않는다. 출구는 통과한 Player 한 명만 다음 authored Entry로 텔레포트하며 별도 `currentStageId`를 저장하지 않는다. parity validator는 각 landmark의 surface ID가 authored surface ID와 정확히 같고 Editor가 모든 authored object를 같은 객체 단위로 노출하는지 검사한다.
 10. **Ropeable은 collision capability다.** `grappleable: true` surface는 실제 collision geometry를 가져야 하며 Rope는 그 surface boundary의 최근접 점에만 부착한다. route marker·중심점 Actor·비충돌 helper는 Rope target을 만들지 않는다. 움직이는 Ropeable body는 같은 collider snapshot을 collision·Rope·renderer에 공유한다.
 
 ## 2. 작업 시작과 종료
@@ -340,7 +340,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 월드 좌표와 화면 좌표 변환은 카메라가 소유한다.
 - 시나리오가 구간별 Shot을 요구하면 local Y 범위·desktop/mobile zoom·player screen ratio를 area definition의 `cameraZones`에 선언하고 싱글·멀티 공용 Camera Director가 해석한다. 모바일의 최종 zoom은 Full HD `1920×1080` 기준 viewport를 현재 CSS viewport 안에 맞춘 값에 authored `mobileZoom / 0.72` 상대 Shot 비율을 곱하며, renderer·입력 계층이 별도 보정식을 만들지 않는다. 멀티에서 공용 진행보다 뒤에 남은 플레이어가 있으므로 현재 Shot은 공용 `currentAreaId`가 아니라 로컬 플레이어의 물리 좌표로 고른다.
 - 표시 시간이 있는 Objective Sequence의 진행·완료와 Gate 개방은 공용 월드 진행 상태가 소유한다. Presentation은 사건을 읽어 문구·그래픽·오디오만 재생하며 완료 시각이나 Gate 상태를 변경하지 않는다. 문서가 입력 차단을 명시하지 않으면 연출 중 이동을 허용한다.
-- 같은 Sector 안의 정적 `sector-seam`과 Stage surface를 진행 상태로 추가·제거하지 않는다. Sector 경계를 실제로 잠글 때는 stable transit device의 visual과 blocker collider를 같은 geometry에서 파생하고 `blockedByRouteId`처럼 unlock 시 blocker만 비활성화하는 반대 극성 계약을 사용한다. `requiredRouteId` 발판을 잠금 장치로 재사용해 unlock 순간 새 바닥이 생기게 하지 않는다. 공용 unlock camera scene은 event ID로 중복 제거하고 gameplay pause·무적 여부를 제품 계약대로 명시한다.
+- Stage 진행은 authored surface를 추가·제거하지 않는다. Gate·Access 조건은 portal 사용 가능 여부만 바꾸며 visual·blocker가 필요하면 Map Editor source에 같은 객체와 geometry를 명시한다. Runtime에서 잠금 장치 geometry를 파생하지 않는다. 공용 unlock 연출은 event ID로 중복 제거하고 gameplay pause·무적 여부를 제품 계약대로 명시한다.
 - 90~120초 같은 첫 플레이 시간은 강제 대기나 영역 전용 이동 제한으로 맞추지 않는다. 권위 시뮬레이션의 영역 체류·클리어 시간을 설정 버튼 길게 누르기로 여는 디버그 수치에서 수집하고, 실제 표본이 벗어날 때 Geometry·Camera·Recovery 동선을 조정한다.
 - DPR 보정과 resize는 렌더링 경계에서 한 번만 처리한다.
 - 색만으로 상태를 전달하지 않고 형태, 굵기, 움직임, 문구를 함께 사용한다.

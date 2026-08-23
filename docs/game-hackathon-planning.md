@@ -17,7 +17,7 @@
 | 공간 경험   | 하나의 붕괴 도시 안에서 48개 진행 영역을 아래에서 위로 연속 돌파 | 점프킹, 할로우 나이트 |
 | 성장 구조   | 플레이 외 시간에도 누적되는 자동 성장                            | 팰월드, OpenFront     |
 
-장르 중심은 **로프 액션 로그라이크**로 확정한다. 한 런은 하나의 붕괴 도시 월드 안에서 계속되며, 시나리오의 `맵`은 별도 월드가 아니라 Sector 안의 landmark·objective·encounter를 뜻한다. 개인 사망은 최근 접촉한 Stage 세이브 포인트에서 즉시 재개하고 공용 진행을 되돌리지 않는다.
+장르 중심은 **로프 액션 로그라이크**로 확정한다. 한 런의 공용 진행은 하나로 계속되지만 각 Stage 공간은 Map Editor가 소유하는 독립 authored 맵이다. 출구를 통과한 Player 한 명만 다음 Stage Entry로 이동하며 개인 사망은 최근 접촉한 Stage 세이브 포인트에서 즉시 재개한다.
 
 ## 3. 핵심 플레이 경험
 
@@ -111,13 +111,13 @@
 
 전문 작업물의 완료는 메인 개발, 플레이테스트, 최종 스퍼트와 예선 제출의 선행 조건이 아니다. 정해진 통합 마감까지 validator와 실제 화면·청취 검증을 통과한 결과만 제출 빌드에 반영하고, 준비되지 않았거나 통합 위험이 큰 영역은 검증된 mock을 유지한다. 다만 공개 manifest·loader·이벤트 binding처럼 전문 작업과 메인 개발이 함께 사용하는 계약 변경은 양쪽 작업 전에 먼저 합의한다.
 
-제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. `1-1`, `1-2` 같은 `stageId`는 canonical AREA-SPEC v2와 연속 Sector landmark·objective·encounter를 연결하는 안정 식별자다. 현재 기본 Runtime에서 Sector 01~~03은 강제 Gate 포탈과 Stage별 문 없이 가로 4,800px의 하나의 물리 공간이며, 기존 아래→위 콘텐츠 순서를 local vertical stack으로 보존한다. 넓어진 양옆은 실제 exploration·combat·recovery wing이고 진행을 좌우 지그재그로 바꾸지 않는다. future Boss room은 Sector transition slot에 삽입해 downstream Stage local 좌표를 다시 쓰지 않는다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리하고 전문 담당자는 stable landmark·encounter·object·cue ID를 이어받는다. Sector 04~~06의 canonical v2는 scenario-only이고 `AREA-SPEC-REV*-DESIGN.json`은 non-Runtime 기획 비교 근거이므로 둘 다 Runtime 구현 완료를 뜻하지 않는다.
+제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. `stageId`는 canonical AREA-SPEC v2와 landmark·objective·encounter를 연결하는 안정 식별자다. 48개 Stage 모두 authored bounds·surface·object만 Runtime에 사용하며 compiler가 city wing·seam·boundary를 추가하지 않는다. Gate portal은 Stage local 좌표를 바꾸지 않고 다음 authored Entry로 이동한다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리한다.
 
 ### 월드와 진행 영역 기준
 
 - `SectorDefinition`과 Sector validator는 canonical `stageId`를 landmark·encounter authoring 경계로 사용한다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`, `stageId`이며 별도 legacy Stage alias나 preview adapter를 권위로 두지 않는다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
-- 현재 `seamless-sector-runtime-v10`은 Sector 01~~03의 canonical v2/generated Stage 정의를 local vertical stack으로 보존하고 compiler가 actual lateral city wing과 future Boss room용 transition slot을 조립한다. Sector 04~~06은 scenario-only 입력이며 과거 flat Area/Gate catalog와 revision compatibility 경로는 production에서 제거됐다.
-- Sector 01~03은 각 Sector의 정확히 세 Carrier를 모두 처리해 Access Module 3/3을 모은 뒤 다음 Sector transit device를 연다. Sector 01은 1-3·1-6·1-7, Sector 02는 2-2·2-5·2-7, Sector 03은 3-2·3-5·3-7의 기존 경비 slot을 사용한다. 같은 Sector 안의 Stage 이동은 잠그지 않고 개인·전원 사망 뒤에도 module·objective 진행을 보존한다.
+- 현재 `authored-stage-portal-runtime-v14-six-boss-stage`는 Sector 01~~06의 canonical v2/generated Stage 48개를 격리된 authored 맵으로 배치하고 source Gate→target Entry portal과 Boss01~06 전환을 조립한다. 일반 Stage derived geometry와 legacy fallback은 없다.
+- Sector 01~03은 각 Sector의 정확히 세 Carrier를 모두 처리해 Access Module 3/3을 모은 뒤 outgoing authored Gate portal을 연다. 별도 transit barrier geometry는 없으며 개인·전원 사망 뒤에도 module·objective 진행을 보존한다.
 - 0.32.0은 Sector 01~03을 authored safe slot과 결정적 enemy pool로 채운다. 1-1·1-2는 비전투, 이후는 화면당 약 1기와 후반 역할 중첩을 기준으로 하며 exact slot 예산과 보존 계약은 [`enemy-density-composition.md`](./enemy-density-composition.md)를 따른다.
 - 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.
 - 한 런의 실제 월드는 하나이며 영역 전환 때 월드나 런 상태를 초기화하지 않는다.

@@ -29,7 +29,7 @@
 
 ## Geometry
 - [ ] bounds 3200×1472
-- [ ] Media Wall causes all direction changes
+- [ ] Media Wall design reference는 지형 흐름만 설명하고 collision·Rope target을 만들지 않음
 - [ ] backside return not filler
 - [ ] no recovery bypass
 - [ ] no blind >400px mandatory relation

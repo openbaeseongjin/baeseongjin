@@ -566,6 +566,7 @@
       "anchors",
       "recoveryRoute",
       "enemySlots",
+      "worldObjects",
       "wind",
       "camera"
     ],

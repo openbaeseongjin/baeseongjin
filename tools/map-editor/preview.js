@@ -137,7 +137,7 @@ async function createPreview() {
         currentApp.start();
         label.textContent = `${stageId} · ${previewScope.landmarkId} · production Gameplay View`;
         setStatus(
-            `리비전 ${revision} · production seamless compiler/renderer · Stage 지형 ${previewScope.surfaceCount}개(표시 ${previewScope.visibleSurfaceCount}개) · 전체 world 지형 ${previewScope.worldSurfaceCount}개`
+            `리비전 ${revision} · authored Stage portal compiler / production renderer · Stage authored 지형 ${previewScope.surfaceCount}개(표시 ${previewScope.visibleSurfaceCount}개) · 전체 world 지형 ${previewScope.worldSurfaceCount}개`
         );
     } catch (cause) {
         label.textContent = "미리보기를 시작할 수 없습니다.";

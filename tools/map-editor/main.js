@@ -36,6 +36,7 @@ const EDITABLE_GROUPS = Object.freeze([
     ["surfaces", "지형 표면", "surface", "실게임 요소"],
     ["anchors", "앵커", "anchor", "실게임 요소"],
     ["enemySlots", "적 슬롯", "enemy", "실게임 요소"],
+    ["worldObjects", "표시 / 상호작용 오브젝트", null, "실게임 요소"],
     ["wind", "바람", "wind", "실게임 요소"],
     ["bounds", "맵 경계", null, "표시형 오브젝트"],
     ["recoveryRoute", "복구 / 경로", "route", "표시형 오브젝트"],
@@ -71,6 +72,7 @@ const DOMAIN_LABELS = Object.freeze({
     combatAnchors: "Rope 표면 참조",
     recoveryRoute: "복구 / 경로",
     enemySlots: "적 슬롯",
+    worldObjects: "표시 / 상호작용 오브젝트",
     wind: "바람",
     camera: "카메라 구역",
     objectives: "목표",
@@ -98,6 +100,9 @@ const KIND_LABELS = Object.freeze({
     "phase-zone": "Phase 구역",
     route: "경로 지점",
     enemy: "적 슬롯",
+    "story-display": "제어 패널",
+    "augment-node": "강화 장치",
+    "calibration-frame": "검증 장치",
     "wind-source": "바람원",
     "wind-zone": "바람 구역",
     "camera-zone": "카메라 구역",
@@ -300,8 +305,8 @@ function entityAnnotation(entity, spec) {
     if (entity.domain === "surfaces") {
         const surface = spec.definition.surfaces.find(({ id: surfaceId }) => surfaceId === entity.id);
         const effects = [
-            surface?.oneWay ? "아래에서 통과" : "충돌 표면",
-            surface?.grappleable ? "갈고리 부착" : "부착 불가"
+            surface?.collision === false ? "비충돌 디자인 기준" : surface?.oneWay ? "아래에서 통과" : "충돌 표면",
+            surface?.collision === false ? "실게임 지형 제외" : surface?.grappleable ? "갈고리 부착" : "부착 불가"
         ];
         return { name: `지형 · ${id}`, effect: effects.join(" · ") };
     }
@@ -314,6 +319,9 @@ function entityAnnotation(entity, spec) {
     if (entity.domain === "enemySlots") {
         const enemy = spec.definition.objects.find(({ id: objectId }) => objectId === entity.id);
         return { name: `적 · ${id}`, effect: enemy?.enemyType ? `${enemy.enemyType} 생성` : "적 생성 지점" };
+    }
+    if (entity.domain === "worldObjects") {
+        return { name: `오브젝트 · ${id}`, effect: `${kindLabel(entity.kind)} · 위치 편집` };
     }
     if (entity.kind === "wind-source") return { name: `바람원 · ${id}`, effect: "바람 구역 발생점" };
     if (entity.kind === "wind-zone") {
@@ -1929,6 +1937,15 @@ function drawCanvas() {
             (selected?.domain === "exit" && surface.id === exitEntity?.sourceId);
         drawSurface(surface, selectedSurface);
     }
+    if (entryEntity?.bounds) drawRect(entryEntity.bounds, "#86c99d", true);
+    for (const object of spec.definition.objects.filter(({ gateId }) => gateId === spec.definition.gate?.id)) {
+        drawMarker(
+            object.position,
+            object.kind === "gate-panel" ? "#f6c453" : "#66e6ff",
+            object.kind === "gate-panel" ? "square" : "diamond",
+            isSelected("exit", exitEntity?.id)
+        );
+    }
     if (entryEntity) drawMarker(entryEntity.point, "#e6f2f5", "triangle", isSelected("entry", entryEntity.id));
     if (exitEntity) drawMarker(exitEntity.point, "#66e6ff", "diamond", isSelected("exit", exitEntity.id));
     for (const point of spec.definition.routePoints)
@@ -1939,6 +1956,9 @@ function drawCanvas() {
         context.setLineDash([6, 4]);
         drawRect(enemy.bounds, isSelected("enemySlots", enemy.id) ? "#ffcb78" : "#8f6a31");
         context.setLineDash([]);
+    }
+    for (const object of canvasEntities.filter((entry) => entry.domain === "worldObjects")) {
+        drawMarker(object.point, "#f6c453", "square", isSelected("worldObjects", object.id));
     }
     for (const object of spec.definition.objects) {
         if (!object.position) continue;

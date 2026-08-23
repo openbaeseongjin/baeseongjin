@@ -16,6 +16,7 @@
       "anchors",
       "recoveryRoute",
       "enemySlots",
+      "worldObjects",
       "wind",
       "camera"
     ],
@@ -411,9 +412,10 @@
       },
       {
         "id": "media-wall-body",
-        "kind": "solid-architectural-blocker",
+        "kind": "design-reference",
+        "collision": false,
         "oneWay": false,
-        "grappleable": true,
+        "grappleable": false,
         "coordinateAnchor": "center",
         "position": {
           "x": 0,
@@ -439,6 +441,7 @@
         ],
         "damage": false,
         "purpose": "causes underframe/backside/crown wrap",
+        "renderable": false,
         "sourceId": "media-wall-body"
       }
     ],

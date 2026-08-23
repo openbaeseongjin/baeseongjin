@@ -1,13 +1,15 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { extname, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { GRAPPLE_LINK_BUDGET, ROPE_CONFIG, ropeHookReach } from "../src/game/config.js";
+import { ROPE_CONFIG, ropeHookReach } from "../src/game/config.js";
 import { ENEMY_TYPE } from "../src/game/EnemyType.js";
 import { EMPTY_AREA_BEHAVIOR_REGISTRY } from "../src/game/world/area-authoring-v2/AreaBehaviorRegistry.js";
 import { AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS } from "../src/game/world/area-authoring-v2/AreaRuntimePromotion.js";
 import { canonicalizeAreaSpecV2, createAreaDefinitionFromV2 } from "../src/game/world/area-authoring-v2/AreaSpecV2.js";
 import { validateAreaSpecV2 } from "../src/game/world/area-authoring-v2/AreaSpecV2Validator.js";
 import { AreaEntryEditorComponent } from "../src/game/world/area-authoring-v2/editor/AreaEntryEditorComponent.js";
+import { AreaExitEditorComponent } from "../src/game/world/area-authoring-v2/editor/AreaExitEditorComponent.js";
+import { collectEditorEntities } from "../src/game/world/area-authoring-v2/editor/AreaEditorProjection.js";
 import { SECTOR_01_AREA_CATALOG } from "../src/game/world/areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "../src/game/world/areas/sector02/Sector02AreaCatalog.js";
 import { SECTOR_03_AREA_CATALOG } from "../src/game/world/areas/sector03/Sector03AreaCatalog.js";
@@ -15,7 +17,10 @@ import { SECTOR_04_AREA_CATALOG } from "../src/game/world/areas/sector04/Sector0
 import { SECTOR_05_AREA_CATALOG } from "../src/game/world/areas/sector05/Sector05AreaCatalog.js";
 import { SECTOR_06_AREA_CATALOG } from "../src/game/world/areas/sector06/Sector06AreaCatalog.js";
 import { AUTHORED_SECTOR_CATALOG } from "../src/game/world/sectors/AuthoredSectorCatalog.js";
-import { createAuthoredSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/AuthoredSeamlessSectorRuntime.js";
+import {
+    AUTHORED_STAGE_ISOLATION_GAP,
+    createAuthoredSeamlessSectorRuntimeWorld
+} from "../src/game/world/sectors/AuthoredSeamlessSectorRuntime.js";
 import { SectorProgressState } from "../src/game/world/SectorProgressState.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "../src/game/world/sectors/SectorDefinition.js";
 import {
@@ -94,11 +99,6 @@ const EXPECTED_SECTOR_06_RECALL = Object.freeze({
     patrolStageId: "6-6",
     cutterStageId: "6-7"
 });
-const SEAMLESS_WIDTH = 4800;
-const CITY_WING_INSET = 96;
-const CITY_WING_CORE_GAP = 64;
-const CITY_WING_THICKNESS = 32;
-const TRANSIT_BARRIER_THICKNESS = 24;
 const SURFACE_SEMANTIC_KEYS = Object.freeze([
     "areaId",
     "blockedByRouteId",
@@ -291,95 +291,6 @@ function shiftedSemanticSurface(surface, landmark) {
         vertices,
         ...(surface.oneWay ? { oneWayEdgeEnd: surface.oneWayEdgeEnd ?? 1 } : {})
     });
-}
-
-function rectangleVertices({ x, y, width, height }) {
-    return [
-        { x, y },
-        { x: x + width, y },
-        { x: x + width, y: y + height },
-        { x, y: y + height }
-    ];
-}
-
-function horizontalSurface(id, landmark, x, topY, width, kind) {
-    return {
-        id,
-        kind,
-        landmarkId: landmark.id,
-        stageId: landmark.stageId,
-        oneWay: true,
-        oneWayEdgeEnd: 1,
-        grappleable: true,
-        x,
-        y: topY,
-        width,
-        height: CITY_WING_THICKNESS,
-        topY,
-        position: { x: x + width * 0.5, y: topY },
-        vertices: rectangleVertices({ x, y: topY, width, height: CITY_WING_THICKNESS })
-    };
-}
-
-function sameSurfaceBounds(left, right) {
-    const leftVertices = left.vertices;
-    const rightVertices = right.vertices;
-    return JSON.stringify(leftVertices) === JSON.stringify(rightVertices);
-}
-
-function expectedCityWingSurfaces({ area, landmark, landmarkIndex, inheritedEntrySurfaces }) {
-    const halfWidth = SEAMLESS_WIDTH * 0.5;
-    const coreLeft = -area.bounds.width * 0.5;
-    const coreRight = coreLeft + area.bounds.width;
-    const coreTop = landmark.origin.y - area.bounds.height;
-    const leftStart = -halfWidth + CITY_WING_INSET;
-    const rightStart = coreRight + CITY_WING_CORE_GAP;
-    const leftWidth = coreLeft - CITY_WING_CORE_GAP - leftStart;
-    const rightWidth = halfWidth - CITY_WING_INSET - rightStart;
-    const middleY = Math.round((coreTop + area.bounds.height * 0.52) / 32) * 32;
-    const leftMid = landmarkIndex % 2 === 0;
-    const surfaces = [];
-    for (const [side, start, width] of [
-        ["left", leftStart, leftWidth],
-        ["right", rightStart, rightWidth]
-    ]) {
-        if (width <= 0) continue;
-        const entry = horizontalSurface(
-            `${landmark.id}:city-wing:${side}:entry`,
-            landmark,
-            start,
-            landmark.entry.y + 32,
-            width,
-            "safe-deck"
-        );
-        if (!inheritedEntrySurfaces.some((surface) => sameSurfaceBounds(surface, entry))) surfaces.push(entry);
-        surfaces.push(
-            horizontalSurface(
-                `${landmark.id}:city-wing:${side}:exit`,
-                landmark,
-                start,
-                landmark.exit.y + 32,
-                width,
-                "recovery"
-            )
-        );
-    }
-    const midInset = leftMid ? 256 : 96;
-    const midStart = (leftMid ? leftStart : rightStart) + midInset;
-    const midWidth = (leftMid ? leftWidth : rightWidth) - midInset * 2;
-    if (midWidth > 0) {
-        surfaces.push(
-            horizontalSurface(
-                `${landmark.id}:city-wing:${leftMid ? "left" : "right"}:mid`,
-                landmark,
-                midStart,
-                middleY,
-                midWidth,
-                "safe-deck"
-            )
-        );
-    }
-    return Object.freeze(surfaces);
 }
 
 function validateEditorCatalog(editorCatalog, issues) {
@@ -666,98 +577,6 @@ function validateCollisionFootprintDuplicates(surfaces, issues) {
     }
 }
 
-function walkingSurfaceAt(surfaces, point) {
-    return surfaces
-        .filter((surface) => {
-            const bounds = surfaceBounds(surface);
-            return surface.topY === point.y + 32 && bounds.x <= point.x && bounds.x + bounds.width >= point.x;
-        })
-        .sort((left, right) => surfaceBounds(left).width - surfaceBounds(right).width)[0];
-}
-
-function expectedConnectorSurface(connector, supportingSurfaces) {
-    const thickness = 32;
-    const sourceSupport = walkingSurfaceAt(supportingSurfaces, connector.start);
-    const targetSupport = walkingSurfaceAt(supportingSurfaces, connector.end);
-    let vertices;
-    if (connector.start.y === connector.end.y && sourceSupport && targetSupport) {
-        const sourceBounds = surfaceBounds(sourceSupport);
-        const targetBounds = surfaceBounds(targetSupport);
-        const leftSupport = sourceBounds.x < targetBounds.x ? sourceBounds : targetBounds;
-        const rightSupport = leftSupport === sourceBounds ? targetBounds : sourceBounds;
-        const left = leftSupport.x + leftSupport.width;
-        const right = rightSupport.x;
-        if (right <= left) return null;
-        const top = connector.start.y + 32;
-        vertices = rectangleVertices({ x: left, y: top, width: right - left, height: thickness });
-    } else {
-        const dx = connector.end.x - connector.start.x;
-        const dy = connector.end.y - connector.start.y;
-        const length = Math.max(1, Math.hypot(dx, dy));
-        const normalX = (-dy / length) * thickness * 0.5;
-        const normalY = (dx / length) * thickness * 0.5;
-        vertices = [
-            { x: connector.start.x + normalX, y: connector.start.y + normalY },
-            { x: connector.end.x + normalX, y: connector.end.y + normalY },
-            { x: connector.end.x - normalX, y: connector.end.y - normalY },
-            { x: connector.start.x - normalX, y: connector.start.y - normalY }
-        ];
-    }
-    const bounds = {
-        x: Math.min(...vertices.map(({ x }) => x)),
-        y: Math.min(...vertices.map(({ y }) => y)),
-        width: Math.max(...vertices.map(({ x }) => x)) - Math.min(...vertices.map(({ x }) => x)),
-        height: Math.max(...vertices.map(({ y }) => y)) - Math.min(...vertices.map(({ y }) => y))
-    };
-    return {
-        id: connector.surfaceId,
-        kind: "sector-seam",
-        landmarkId: connector.sourceLandmarkId,
-        oneWay: false,
-        grappleable: true,
-        ...bounds,
-        topY: bounds.y,
-        position: {
-            x: (connector.start.x + connector.end.x) * 0.5,
-            y: (connector.start.y + connector.end.y) * 0.5
-        },
-        vertices
-    };
-}
-
-function expectedTransitBarrierSurfaces(lock, source, target) {
-    const boundaryY = source.bounds.y;
-    const overlapBottom = Math.min(source.bounds.y + source.bounds.height, target.bounds.y + target.bounds.height);
-    const pathX = (source.exit.x + target.entry.x) * 0.5;
-    const segments = [
-        {
-            x: source.bounds.x - GRAPPLE_LINK_BUDGET,
-            y: boundaryY,
-            width: source.bounds.width + GRAPPLE_LINK_BUDGET * 2,
-            height: TRANSIT_BARRIER_THICKNESS
-        },
-        {
-            x: pathX - TRANSIT_BARRIER_THICKNESS * 0.5,
-            y: boundaryY,
-            width: TRANSIT_BARRIER_THICKNESS,
-            height: Math.max(TRANSIT_BARRIER_THICKNESS, overlapBottom - boundaryY)
-        }
-    ];
-    return segments.map((bounds, index) => ({
-        id: `${lock.id}:barrier:${index + 1}`,
-        kind: "sector-transit-barrier",
-        landmarkId: source.id,
-        oneWay: false,
-        grappleable: false,
-        renderable: false,
-        blockedByRouteId: lock.id,
-        ...bounds,
-        topY: bounds.y,
-        position: { x: bounds.x + bounds.width * 0.5, y: bounds.y + bounds.height * 0.5 },
-        vertices: rectangleVertices(bounds)
-    }));
-}
-
 function completeLandmarkObjectives(progress, landmark) {
     let changed = true;
     while (changed) {
@@ -775,33 +594,22 @@ function progressSurfaceIndex(world, progress) {
     );
 }
 
-function assertTransitMatrixState({ label, lock, barriers, progress, world, expectedEnabled, issues }) {
-    const activeIndex = progressSurfaceIndex(world, progress);
-    if (progress.isRouteUnlocked(lock.id) === expectedEnabled) {
-        issue(issues, "transit-matrix-route-state", { routeId: lock.id, label, expectedEnabled });
+function assertRouteState({ label, lock, progress, expectedUnlocked, issues }) {
+    const actual = progress.isRouteUnlocked(lock.id);
+    if (actual !== expectedUnlocked) {
+        issue(issues, "stage-transition-route-state", {
+            routeId: lock.id,
+            label,
+            expectedUnlocked,
+            actual
+        });
     }
-    for (const barrier of barriers) {
-        const active = Boolean(activeIndex[barrier.id]);
-        const enabled = isSurfaceEnabledForProgress(barrier, progress);
-        if (active !== expectedEnabled || enabled !== expectedEnabled) {
-            issue(issues, "transit-matrix-barrier-state", {
-                routeId: lock.id,
-                surfaceId: barrier.id,
-                label,
-                expectedEnabled,
-                active,
-                enabled
-            });
-        }
-    }
-    return activeIndex;
 }
 
-function validateProgressGates(world, surfaceIndex, areaIndex, issues) {
+function validateProgressGates(world, areaIndex, issues) {
     const reports = Object.create(null);
     for (const lock of world.routeLocks.filter(({ requiredAccessModuleCount }) => requiredAccessModuleCount > 0)) {
         const source = world.landmarks.find(({ id }) => id === lock.sourceLandmarkId);
-        const target = world.landmarks.find(({ id }) => id === lock.targetLandmarkId);
         const sector = world.sectors.find(({ id }) => id === source.sectorId);
         const expectedAccessModuleRequirement = ACCESS_MODULE_REQUIREMENT_BY_SECTOR_ID[sector.id];
         const area = areaIndex[source.areaId];
@@ -830,153 +638,115 @@ function validateProgressGates(world, surfaceIndex, areaIndex, issues) {
                 actual: lock.requiredObjectiveIds
             });
         }
-        const expectedBarriers = expectedTransitBarrierSurfaces(lock, source, target);
-        for (const expected of expectedBarriers) {
-            const actual = surfaceIndex[expected.id];
-            if (!actual || JSON.stringify(semanticSurface(expected)) !== JSON.stringify(semanticSurface(actual))) {
-                issue(issues, "transit-barrier-semantics-mismatch", { routeId: lock.id, surfaceId: expected.id });
-            }
-        }
 
         const objectiveOnly = new SectorProgressState(world);
         completeLandmarkObjectives(objectiveOnly, source);
-        const objectiveOnlyIndex = assertTransitMatrixState({
+        const lockedSurfaceIndex = progressSurfaceIndex(world, objectiveOnly);
+        assertRouteState({
             label: "objective-only",
             lock,
-            barriers: expectedBarriers,
             progress: objectiveOnly,
-            world,
-            expectedEnabled: true,
+            expectedUnlocked: false,
             issues
         });
         for (let count = 1; count < expectedAccessModuleRequirement; count += 1) {
             objectiveOnly.collectAccessModule(sector.accessModuleIds[count - 1]);
-            assertTransitMatrixState({
+            assertRouteState({
                 label: `objective+${count}/${expectedAccessModuleRequirement}`,
                 lock,
-                barriers: expectedBarriers,
                 progress: objectiveOnly,
-                world,
-                expectedEnabled: true,
+                expectedUnlocked: false,
                 issues
             });
         }
 
         const modulesOnly = new SectorProgressState(world);
         for (const moduleId of sector.accessModuleIds) modulesOnly.collectAccessModule(moduleId);
-        assertTransitMatrixState({
+        assertRouteState({
             label: `${expectedAccessModuleRequirement}/${expectedAccessModuleRequirement}-only`,
             lock,
-            barriers: expectedBarriers,
             progress: modulesOnly,
-            world,
-            expectedEnabled: true,
+            expectedUnlocked: lock.requiredObjectiveIds.length === 0,
             issues
         });
 
         objectiveOnly.collectAccessModule(sector.accessModuleIds[expectedAccessModuleRequirement - 1]);
-        const unlockedIndex = assertTransitMatrixState({
+        assertRouteState({
             label: `objective+${expectedAccessModuleRequirement}/${expectedAccessModuleRequirement}`,
             lock,
-            barriers: expectedBarriers,
             progress: objectiveOnly,
-            world,
-            expectedEnabled: false,
+            expectedUnlocked: true,
             issues
         });
-        for (const [surfaceId, surface] of Object.entries(objectiveOnlyIndex)) {
-            if (expectedBarriers.some(({ id }) => id === surfaceId)) continue;
-            const unlockedSurface = unlockedIndex[surfaceId];
-            if (
-                !unlockedSurface ||
-                JSON.stringify(semanticSurface(surface)) !== JSON.stringify(semanticSurface(unlockedSurface))
-            ) {
-                issue(issues, "progress-unrelated-surface-drift", { routeId: lock.id, surfaceId });
-            }
+        const unlockedSurfaceIndex = progressSurfaceIndex(world, objectiveOnly);
+        if (JSON.stringify(lockedSurfaceIndex) !== JSON.stringify(unlockedSurfaceIndex)) {
+            issue(issues, "stage-transition-unlock-surface-drift", { routeId: lock.id });
         }
-        const removedIds = Object.keys(objectiveOnlyIndex).filter((surfaceId) => !unlockedIndex[surfaceId]);
-        const expectedRemovedIds = expectedBarriers.map(({ id }) => id);
-        if (JSON.stringify(removedIds) !== JSON.stringify(expectedRemovedIds)) {
-            issue(issues, "transit-unlock-removal-mismatch", {
-                routeId: lock.id,
-                expected: expectedRemovedIds,
-                actual: removedIds
-            });
-        }
-        reports[source.stageId] = Object.freeze(expectedBarriers.map(({ id }) => id));
+        reports[source.stageId] = Object.freeze([]);
     }
     return Object.freeze(reports);
 }
 
-function validateSeams(world, landmarkIndex, surfaceIndex, issues) {
-    const connectorIndex = indexBy(world.connectors, "id", issues, "connector-duplicate");
+function validateStageTransitions(world, landmarkIndex, issues) {
+    const transitionIndex = indexBy(world.stageTransitions, "id", issues, "stage-transition-duplicate");
     const routeLockIndex = indexBy(world.routeLocks, "id", issues, "route-lock-duplicate");
-    const expectedSeamCount = 44;
-    if (world.connectors.length !== expectedSeamCount || world.routeLocks.length !== expectedSeamCount) {
-        issue(issues, "seam-count-mismatch", {
-            expected: expectedSeamCount,
-            connectors: world.connectors.length,
+    const expectedTransitionCount = 44;
+    if (
+        world.stageTransitions.length !== expectedTransitionCount ||
+        world.routeLocks.length !== expectedTransitionCount
+    ) {
+        issue(issues, "stage-transition-count-mismatch", {
+            expected: expectedTransitionCount,
+            stageTransitions: world.stageTransitions.length,
             routeLocks: world.routeLocks.length
         });
     }
-    const supportingSurfaces = world.surfaces.filter(
-        ({ kind }) => kind !== "sector-seam" && kind !== "sector-transit-barrier"
-    );
-    for (const connector of Object.values(connectorIndex)) {
-        const source = landmarkIndex[connector.sourceLandmarkId];
-        const target = landmarkIndex[connector.targetLandmarkId];
-        const lock = routeLockIndex[connector.routeLockId];
-        if (!source || !target || !lock) issue(issues, "seam-owner-missing", { connectorId: connector.id });
+    for (const transition of Object.values(transitionIndex)) {
+        const source = landmarkIndex[transition.sourceLandmarkId];
+        const target = landmarkIndex[transition.targetLandmarkId];
+        const lock = routeLockIndex[transition.routeLockId];
+        if (!source || !target || !lock) {
+            issue(issues, "stage-transition-owner-missing", { stageTransitionId: transition.id });
+            continue;
+        }
         if (source && AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS.includes(source.stageId)) {
-            issue(issues, "content-boundary-outbound-connector", {
-                connectorId: connector.id,
+            issue(issues, "content-boundary-outbound-stage-transition", {
+                stageTransitionId: transition.id,
                 stageId: source.stageId
             });
         }
         if (source && target && source.sectorId !== target.sectorId) {
             const transitionKey = `${source.stageId}:${target.stageId}`;
             if (!ALLOWED_CROSS_SECTOR_CONNECTORS[transitionKey]) {
-                issue(issues, "cross-sector-connector-forbidden", { connectorId: connector.id, transitionKey });
-            }
-        }
-        if (
-            lock?.sourceLandmarkId !== connector.sourceLandmarkId ||
-            lock?.targetLandmarkId !== connector.targetLandmarkId ||
-            lock?.connectorId !== connector.id
-        ) {
-            issue(issues, "seam-lock-owner-mismatch", { connectorId: connector.id });
-        }
-        if (connector.surfaceId) {
-            const surface = surfaceIndex[connector.surfaceId];
-            if (!surface || surface.kind !== "sector-seam" || surface.landmarkId !== connector.sourceLandmarkId) {
-                issue(issues, "seam-surface-owner-mismatch", {
-                    connectorId: connector.id,
-                    surfaceId: connector.surfaceId
+                issue(issues, "cross-sector-stage-transition-forbidden", {
+                    stageTransitionId: transition.id,
+                    transitionKey
                 });
             }
         }
-        const expectedSurface = expectedConnectorSurface(connector, supportingSurfaces);
-        if (Boolean(expectedSurface) !== Boolean(connector.surfaceId)) {
-            issue(issues, "seam-surface-presence-mismatch", { connectorId: connector.id });
-        } else if (
-            expectedSurface &&
-            JSON.stringify(semanticSurface(expectedSurface)) !==
-                JSON.stringify(semanticSurface(surfaceIndex[connector.surfaceId]))
+        if (
+            lock.sourceLandmarkId !== transition.sourceLandmarkId ||
+            lock.targetLandmarkId !== transition.targetLandmarkId ||
+            lock.stageTransitionId !== transition.id
         ) {
-            issue(issues, "seam-surface-semantics-mismatch", {
-                connectorId: connector.id,
-                surfaceId: connector.surfaceId
-            });
+            issue(issues, "stage-transition-lock-owner-mismatch", { stageTransitionId: transition.id });
         }
         if (
-            source &&
-            target &&
-            (connector.start.x !== source.exit.x ||
-                connector.start.y !== source.exit.y ||
-                connector.end.x !== target.entry.x ||
-                connector.end.y !== target.entry.y)
+            transition.gateId !== source.gateId ||
+            transition.sourceAreaId !== source.areaId ||
+            transition.targetAreaId !== target.areaId ||
+            JSON.stringify(transition.trigger) !== JSON.stringify(source.gateTrigger) ||
+            JSON.stringify(transition.targetEntry) !== JSON.stringify(target.entry)
         ) {
-            issue(issues, "seam-endpoint-mismatch", { connectorId: connector.id });
+            issue(issues, "stage-transition-authored-endpoint-mismatch", { stageTransitionId: transition.id });
+        }
+        const verticalGap = source.bounds.y - (target.bounds.y + target.bounds.height);
+        if (verticalGap < AUTHORED_STAGE_ISOLATION_GAP) {
+            issue(issues, "stage-map-isolation-gap", {
+                stageTransitionId: transition.id,
+                expectedMinimum: AUTHORED_STAGE_ISOLATION_GAP,
+                actual: verticalGap
+            });
         }
     }
     for (const stageId of AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS) {
@@ -1045,6 +815,45 @@ function validateSector04QuorumCollision(world, issues) {
     }
 }
 
+function validateEditorEntityCoverage(spec, issues) {
+    const definition = spec.definition;
+    const entities = collectEditorEntities(spec);
+    const entityKeys = Object.freeze(Object.fromEntries(entities.map(({ domain, id }) => [`${domain}:${id}`, true])));
+    const entry = AreaEntryEditorComponent.from(definition);
+    const exit = AreaExitEditorComponent.from(definition);
+    const expected = [
+        ["bounds", `${definition.id}:bounds`],
+        ...(entry ? [["entry", entry.id]] : []),
+        ...(exit ? [["exit", exit.id]] : []),
+        ...(definition.surfaces ?? []).map((surface) => [
+            entry?.ownsSurface(surface.id) ? "entry" : exit?.ownsSurface(surface.id) ? "exit" : "surfaces",
+            entry?.ownsSurface(surface.id) ? entry.id : exit?.ownsSurface(surface.id) ? exit.id : surface.id
+        ]),
+        ...(spec.anchors ?? []).map(({ landmark }) => ["anchors", landmark.id]),
+        ...(definition.recoveryPoints ?? []).map(({ id }) => ["recoveryRoute", id]),
+        ...(definition.routePoints ?? [])
+            .filter(({ id }) => !exit?.ownsRoutePoint(id))
+            .map(({ id }) => ["recoveryRoute", id]),
+        ...(definition.objects ?? []).map((object) => [
+            object.gateId === definition.gate?.id
+                ? "exit"
+                : object.enemyType || object.enemySelection || object.kind === "sentry"
+                  ? "enemySlots"
+                  : object.kind === "wind-source"
+                    ? "wind"
+                    : "worldObjects",
+            object.gateId === definition.gate?.id ? exit?.id : object.id
+        ]),
+        ...(definition.windZones ?? []).map(({ id }) => ["wind", id]),
+        ...(definition.cameraZones ?? []).map(({ id }) => ["camera", id])
+    ];
+    for (const [domain, id] of expected) {
+        if (id && entityKeys[`${domain}:${id}`] !== true) {
+            issue(issues, "map-editor-entity-coverage-missing", { stageId: spec.stage.id, domain, id });
+        }
+    }
+}
+
 function validateRuntimeStages({ runtimeEntries, world, issues }) {
     const reports = [];
     const landmarkIndex = indexBy(world.landmarks, "stageId", issues, "runtime-landmark-stage-duplicate");
@@ -1059,15 +868,14 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
     validateCollisionFootprintDuplicates(world.surfaces, issues);
     validateAccessModuleAuthority(world, issues);
     validateSectorRecallContracts(world, surfaceIndex, issues);
-    const progressGateReports = validateProgressGates(world, surfaceIndex, areaIndex, issues);
-    let inheritedEntrySurfaces = Object.freeze([]);
-    let previousSectorId = null;
+    const progressGateReports = validateProgressGates(world, areaIndex, issues);
 
     for (const entry of runtimeEntries) {
         const spec = readJson(entry.sourcePath);
         collectForbiddenKeys(spec, entry.sourcePath, issues);
         const validation = validateAreaSpecV2(spec, { file: entry.sourcePath, registry: EMPTY_AREA_BEHAVIOR_REGISTRY });
         issues.push(...validation.issues);
+        validateEditorEntityCoverage(spec, issues);
         const generatedArea = areaIndex[entry.areaId];
         const compiledArea = createAreaDefinitionFromV2(spec);
         const firstRoutePoint = compiledArea.routePoints[0];
@@ -1104,7 +912,16 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
             issue(issues, "runtime-landmark-mismatch", { stageId: entry.stageId, areaId: entry.areaId });
             continue;
         }
-        if (landmark.sectorId !== previousSectorId) inheritedEntrySurfaces = Object.freeze([]);
+        const expectedRuntimeObjectIds = generatedArea.objects
+            .filter(({ enemyType, enemySelection, kind }) => !enemyType && !enemySelection && kind !== "sentry")
+            .map(({ id }) => id);
+        if (JSON.stringify(landmark.objectIds) !== JSON.stringify(expectedRuntimeObjectIds)) {
+            issue(issues, "runtime-stage-object-mismatch", {
+                stageId: entry.stageId,
+                expected: expectedRuntimeObjectIds,
+                actual: landmark.objectIds
+            });
+        }
         const authoredSurfaces = generatedArea?.surfaces ?? [];
         const expectedSurfaceIndex = Object.freeze(
             Object.fromEntries(
@@ -1119,27 +936,6 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
             (surfaceId) => !runtimeStageSurfaceIndex[surfaceId]
         );
         const derivedIds = runtimeStageSurfaceIds.filter((surfaceId) => !expectedSurfaceIndex[surfaceId]);
-        const expectedDerivedSurfaces = expectedCityWingSurfaces({
-            area: generatedArea,
-            landmark,
-            landmarkIndex: landmark.landmarkOrder - 1,
-            inheritedEntrySurfaces
-        });
-        inheritedEntrySurfaces = Object.freeze(expectedDerivedSurfaces.filter(({ id }) => id.endsWith(":exit")));
-        previousSectorId = landmark.sectorId;
-        const expectedDerivedIndex = Object.freeze(
-            Object.fromEntries(expectedDerivedSurfaces.map((surface) => [surface.id, surface]))
-        );
-        const derivedMissingIds = Object.keys(expectedDerivedIndex).filter(
-            (surfaceId) => !runtimeStageSurfaceIndex[surfaceId]
-        );
-        const unexpectedDerivedIds = derivedIds.filter((surfaceId) => !expectedDerivedIndex[surfaceId]);
-        const derivedMismatchIds = Object.entries(expectedDerivedIndex)
-            .filter(([surfaceId, expected]) => {
-                const actual = runtimeStageSurfaceIndex[surfaceId];
-                return actual && JSON.stringify(semanticSurface(expected)) !== JSON.stringify(semanticSurface(actual));
-            })
-            .map(([surfaceId]) => surfaceId);
         const mismatchIds = [];
         for (const [surfaceId, surface] of Object.entries(expectedSurfaceIndex)) {
             const runtimeSurface = runtimeStageSurfaceIndex[surfaceId];
@@ -1154,12 +950,10 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
         if (missingIds.length > 0 || mismatchIds.length > 0) {
             issue(issues, "runtime-stage-surface-mismatch", { stageId: entry.stageId, missingIds, mismatchIds });
         }
-        if (derivedMissingIds.length > 0 || unexpectedDerivedIds.length > 0 || derivedMismatchIds.length > 0) {
+        if (derivedIds.length > 0) {
             issue(issues, "runtime-stage-derived-surface-mismatch", {
                 stageId: entry.stageId,
-                missingIds: derivedMissingIds,
-                unexpectedIds: unexpectedDerivedIds,
-                mismatchIds: derivedMismatchIds
+                unexpectedIds: derivedIds
             });
         }
         const progressGatedIds = progressGateReports[entry.stageId] ?? Object.freeze([]);
@@ -1175,13 +969,11 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
                 entrySupportSurfaceId: entryComponent?.supportSurface.id ?? null,
                 missingIds: Object.freeze(missingIds),
                 mismatchIds: Object.freeze(mismatchIds),
-                derivedMissingIds: Object.freeze(derivedMissingIds),
-                unexpectedDerivedIds: Object.freeze(unexpectedDerivedIds),
-                derivedMismatchIds: Object.freeze(derivedMismatchIds)
+                unexpectedDerivedIds: Object.freeze(derivedIds)
             })
         );
     }
-    validateSeams(world, indexBy(world.landmarks, "id", issues, "runtime-landmark-id-duplicate"), surfaceIndex, issues);
+    validateStageTransitions(world, indexBy(world.landmarks, "id", issues, "runtime-landmark-id-duplicate"), issues);
     return Object.freeze(reports);
 }
 
@@ -1213,9 +1005,7 @@ export function main() {
                 `entry-route=${report.entryRouteDistance.toFixed(2)} support=${report.entrySupportSurfaceId} ` +
                 `progress-gated=${report.progressGated}[${report.progressGatedIds.join(",")}] ` +
                 `authored-missing=[${report.missingIds.join(",")}] authored-mismatch=[${report.mismatchIds.join(",")}] ` +
-                `derived-missing=[${report.derivedMissingIds.join(",")}] ` +
-                `derived-unexpected=[${report.unexpectedDerivedIds.join(",")}] ` +
-                `derived-mismatch=[${report.derivedMismatchIds.join(",")}]`
+                `derived-unexpected=[${report.unexpectedDerivedIds.join(",")}]`
         );
     }
     if (!result.valid) {

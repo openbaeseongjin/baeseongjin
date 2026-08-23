@@ -160,6 +160,13 @@ function validateEditableRuntimeFields(issues, file, definition) {
 
 function specDomainValue(spec, domain) {
     const definition = spec?.definition ?? {};
+    const authoredWorldObjects = () =>
+        (definition.objects ?? []).filter(
+            (object) =>
+                !isEditableEnemyObject(object) &&
+                object?.kind !== "wind-source" &&
+                object.gateId !== definition.gate?.id
+        );
     switch (domain) {
         case "bounds":
             return definition.bounds;
@@ -221,21 +228,20 @@ function specDomainValue(spec, domain) {
         case "scenarioMetadata":
             return spec?.scenario ?? null;
         case "worldObjects":
-            return (definition.objects ?? []).filter(
-                (object) =>
-                    !isEditableEnemyObject(object) &&
-                    object?.kind !== "wind-source" &&
-                    object.gateId !== definition.gate?.id
+            return authoredWorldObjects().map(({ id, position, bounds, activation, patrol }) => ({
+                id,
+                position,
+                ...(bounds ? { bounds } : {}),
+                ...(activation ? { activation } : {}),
+                ...(patrol ? { patrol } : {})
+            }));
+        case "worldObjectDefinitions":
+            return authoredWorldObjects().map(
+                ({ position: _position, bounds: _bounds, activation: _activation, patrol: _patrol, ...object }) =>
+                    object
             );
         case "objectLayout":
-            return (definition.objects ?? [])
-                .filter(
-                    (object) =>
-                        !isEditableEnemyObject(object) &&
-                        object?.kind !== "wind-source" &&
-                        object.gateId !== definition.gate?.id
-                )
-                .map((object) => ({ id: object?.id ?? null, domain: "worldObjects" }));
+            return authoredWorldObjects().map((object) => ({ id: object?.id ?? null, domain: "worldObjects" }));
         default:
             throw new TypeError(`area-spec-domain-unknown:${domain}`);
     }
@@ -333,7 +339,7 @@ export const AREA_SPEC_EDITOR_CONTRACT = Object.freeze({
             "identity",
             "scenarioMetadata",
             "objectLayout",
-            "worldObjects",
+            "worldObjectDefinitions",
             "objectives",
             "progression",
             "story",

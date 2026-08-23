@@ -19,11 +19,11 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 1. 스테이지를 고르고 왼쪽 `오브젝트 찾기`에서 Stable ID 또는 종류로 오브젝트를 찾는다.
 2. 먼저 `0` 또는 `전체 보기`로 선택한 Stage의 전체 Bounds를 화면에 맞춘다. 시나리오 기준과 비교할 때는 `C` 또는 `시나리오 비교`를 열어 Runtime/v2 캔버스와 같은 Stage의 `MAP-PREVIEW.html`을 함께 본다.
 3. 목록이나 캔버스에서 오브젝트를 선택한 뒤, 필요하면 `선택 집중`으로 화면 중앙에 가져온다.
-4. 캔버스 또는 속성 패널에서 초안을 편집한다. 시작 지점과 아래 지지 플랫폼, 앵커 표식과 24×24 갈고리 부착 대상은 각각 함께 이동한다. 출구는 데크·출구점·Gate trigger·Gate panel·Gate visual·마지막 route point가 하나의 복합 객체로 이동한다. Entry·Exit는 Stage마다 각각 최대 1개이며 삭제 후 새 위치에 다시 추가할 수 있다. 복구·일반 경로·등록된 기본 Enemy slot을 추가할 수 있으며 적 슬롯은 위치·종류·허용 목록과 활성화 영역/설정을 편집한다.
+4. 캔버스 또는 속성 패널에서 초안을 편집한다. 시작 지점·지지 플랫폼·Stage Save 표현, 앵커 표식·24×24 갈고리 표면은 각각 하나의 복합 객체로 이동한다. 출구는 데크·출구점·Gate trigger·Gate panel·Gate visual·마지막 route point가 하나의 복합 객체로 이동한다. Story display·Augment Node·검증 장치 같은 world object는 실게임과 같은 Stable ID로 표시하며 위치만 편집하고 cue·문구·진행 규칙은 읽기 전용이다. 복구·일반 경로·등록된 기본 Enemy slot을 추가할 수 있다.
 
 Enemy의 `적 종류`는 실제 Runtime `AUTHORABLE_ENEMY_TYPE_IDS`를 사용하는 비어 있지 않은 다중 select다. 한 종류만 선택하면 고정 생성하고 둘 이상이면 run seed와 world revision이 같은 목록에서 결정적으로 선택한다. 별도 fallback 종류나 자유 문자열을 저장하지 않으며 Gameplay View와 실제 seamless Runtime이 같은 선택 계약을 사용한다.
 
-Enemy 종류·activation anchor·Wind mode·Boss visual preset/mechanic/vulnerability/transition처럼 Runtime enum·Registry 또는 현재 Spec ID로 닫힌 값은 단일/다중 select로만 편집한다. Phase 이름·HUD 목표·UI 제목처럼 사람이 새 문구를 저작하는 값만 텍스트 입력으로 둔다. 5. **메모리 초안 저장**으로 v2 검증을 통과한 현재 Draft를 서버 메모리에 저장한다. 파일은 쓰지 않으며 이 상태부터 **Gameplay View**로 현재 변경을 확인할 수 있다. 6. **저장 적용**으로 v2 JSON을 갱신한다. Runtime Stage는 결정적 generated JS도 함께 갱신한다. stale revision, 읽기 전용 영역, 2 MiB 초과 요청은 거부된다. 7. **Gameplay View**는 `Runtime 적용` Stage를 production seamless compiler로 전체 월드에 조립하고 선택한 landmark에서 시작한다. 실제 게임 renderer·환경 표현·HUD·입력 경로를 그대로 사용하며 시나리오 전용 Stage에는 제공하지 않는다.
+Enemy 종류·activation anchor·Wind mode·Boss visual preset/mechanic/vulnerability/transition처럼 Runtime enum·Registry 또는 현재 Spec ID로 닫힌 값은 단일/다중 select로만 편집한다. Phase 이름·HUD 목표·UI 제목처럼 사람이 새 문구를 저작하는 값만 텍스트 입력으로 둔다. 5. **메모리 초안 저장**으로 v2 검증을 통과한 현재 Draft를 서버 메모리에 저장한다. 파일은 쓰지 않으며 이 상태부터 **Gameplay View**로 현재 변경을 확인할 수 있다. 6. **저장 적용**으로 v2 JSON을 갱신한다. Runtime Stage는 결정적 generated JS도 함께 갱신한다. stale revision, 읽기 전용 영역, 2 MiB 초과 요청은 거부된다. 7. **Gameplay View**는 48개 Stage를 서로 격리한 production portal compiler 안에서 선택 Stage의 authored bounds·surface·object만 보이는 위치에서 시작한다. 실제 게임 renderer·환경 표현·HUD·입력 경로를 그대로 사용한다.
 
 Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor·등록된 Mechanic·Phase 순서와 수·전환·HUD를 편집한다. `phases[].basePhaseHealth`, `combat.additionalPlayerMultiplier`, `combat.closedBodyDamageMultiplier`, `combat.weakFixedPercent`와 Beam Failure의 `failureProgress`가 피해·전환 저작 권위이며, Inspector의 1~4인 총 HP·Phase HP·floor·약점 고정 피해는 저장되지 않는 읽기 전용 파생값이다. Boss Preview는 메모리에 저장한 현재 Boss Stage Spec을 독립 `GameSimulation`의 전투 시작 상태로 열고 Player를 실제 Carriage 근처에 배치한 뒤 둘 사이를 framing해 Polygon mock·이동·Rope·일반 공격·Boss HUD를 즉시 확인한다. Boss01의 현행 기획 권위는 [`boss/01/README.md`](./boss/01/README.md) 한 문서이며 `legacy/`의 정적 Preview는 비교 패널에 노출하지 않는다. 실제 Stage 진입 위치와 진행 규칙은 바꾸지 않는다. 새 mechanic 종류는 Editor 텍스트만으로 만들 수 없고 먼저 코드 Registry와 validator를 추가해야 한다.
 
@@ -31,9 +31,9 @@ Boss의 Arena 경계는 캔버스 드래그와 Inspector X/Y로 이동할 수 �
 
 Boss의 MAP HTML이 catalog의 `mapReferencePath`로 등록되면 `시나리오 비교`가 그 HTML을 실제 Gameplay View의 공간 기준으로 읽기 전용 대조한다. Boss03·05·06의 현행 MAP HTML은 각각 Atrium Scanner/Arm, Control Chamber, Pad Security Court의 발판·위협·Recovery·탈출 관계 기준이며 Runtime spec은 이를 축약한 별도 arena를 만들 수 없다. Ropeable은 중심점 Anchor가 아니라 collision surface의 `grappleable: true` capability다. Anchor는 route 설명과 surface ID 참조만 소유하며 별도 non-collision grapple target을 생성하지 않는다.
 
-왼쪽 레이어 목록은 `실게임 요소`, `표시형 오브젝트`, `규칙 / 설정`으로 구분한다. 표시형 오브젝트는 일반 Area의 맵 경계·복구/예상 경로·카메라 구역과 Boss의 Arena 경계·예상 Rope 경로·Recovery·Phase 구역을 포함하며, 실제 게임 오브젝트보다 낮은 선택·표현 우선순위를 가진다.
+왼쪽 레이어 목록은 `실게임 요소`, `표시형 오브젝트`, `규칙 / 설정`으로 구분한다. 일반 Area의 `표시 / 상호작용 오브젝트`는 Story display·Augment Node 등 실제 renderer가 그리는 authored object를 포함하고 위치를 편집한다. 맵 경계·복구/예상 경로·카메라 구역은 비게임플레이 안내 레이어다.
 
-맵 경계·시작 지점·출구·지형 표면·앵커·복구/경로·기존 적 슬롯·바람·카메라 구역은 편집 가능하다. 목표·출구의 목적지/해제 조건·스토리·스캐너·행동 레지스트리는 표시 전용이며 초안과 서버가 모두 변경을 거부한다. 위치가 있는 편집 요소는 드래그와 X/Y 수치 입력 모두 가장 가까운 5px 격자로 스냅하며, 카메라 구역의 최소/최대 Y도 같은 규칙을 따른다. 캔버스 드래그는 이동 중 임시 상태만 갱신하고 pointer release에서 되돌리기 한 건으로 확정한다.
+맵 경계·시작 지점·출구·지형 표면·앵커·복구/경로·기존 적 슬롯·world object 위치·바람·카메라 구역은 편집 가능하다. 목표·출구의 목적지/해제 조건·world object의 종류/cue/상호작용 규칙·스토리·스캐너·행동 레지스트리는 표시 전용이며 초안과 서버가 변경을 거부한다. 위치가 있는 편집 요소는 드래그와 X/Y 수치 입력 모두 가장 가까운 5px 격자로 스냅한다.
 
 Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·Enemy·Wind·Camera는 Inspector의 `선택 요소 삭제` 또는 `Delete`로 초안에서 제거하며 Undo로 복구할 수 있다. Entry·Exit를 삭제한 동안 Draft는 검증 오류 상태이고 각각 하나를 다시 추가하거나 Undo해야 Apply할 수 있다. Anchor는 landmark/target 쌍을, Wind는 source/zone 쌍을 함께 삭제한다.
 
@@ -59,11 +59,11 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - 해커톤 운영에서는 맵 에디터를 한 번에 한 명만 사용한다. 다중 사용자 mutex와 서버 crash까지 견디는 완전한 다중 파일 원자 저장은 후속 범위다.
 - generated output은 수기 편집하지 않는다. 특수 동작은 Stable ID를 수기 Behavior Registry에서 해석한다.
 - Boss Stage Apply도 진행 중 전투를 hot reload하지 않는다. 저장된 Spec은 다음 Boss Stage 시작 또는 새 게임에서만 읽으며, 참가자 수와 scaled Phase HP는 최초 Boss Stage 시작에서 고정한다.
-- Gameplay View는 선택 Stage의 검증된 memory draft를 Area override로 주입해 `AuthoredSeamlessSectorRuntime`의 production world 전체를 만들고 canonical `stageId`에 해당하는 landmark에서 시작한다. 나머지 Stage와 compiler 계약은 production과 같고 출구를 바꾼 별도 preview world를 만들지 않으며 정상 Catalog, 실행 중인 Run, multiplayer에는 hot-swap하지 않는다.
-- Gameplay View는 에디터 전용 polygon renderer가 아니라 `GameRendererFactory`의 실제 게임 renderer를 사용한다. production renderer가 숨기는 `renderable: false` surface도 동일하게 숨기며 상태 줄은 Stage 전체 surface 수와 실제 표시 수를 나눠 보여 준다.
+- Gameplay View는 선택 Stage의 검증된 memory draft를 Area override로 주입해 production portal world를 만들고 canonical `stageId`에 해당하는 authored landmark에서 시작한다. Stage들은 화면·충돌 범위가 겹치지 않게 배치되므로 선택 Stage에서는 Editor source의 surface와 object만 보인다. Runtime이 city wing·seam·boundary·transit geometry를 보충하지 않는다.
+- Gameplay View는 에디터 전용 polygon renderer가 아니라 `GameRendererFactory`의 실제 게임 renderer를 사용한다. `renderable: false` 디자인 기준 surface는 Editor 캔버스에는 보이지만 Gameplay에서는 collision·Rope·terrain에서 제외되며 상태 줄은 Stage 전체 surface 수와 실제 표시 수를 나눠 보여 준다.
 - Gameplay View의 `저사양 비행 테스트` 패널은 Rope 입력을 끄고 WASD·방향키로 production world의 선택 Stage Bounds 안을 비행한다. 일반 Area와 Boss Preview 모두에서 제공하며, 이 상태는 Gameplay View 인스턴스만 소유하고 일반 게임·멀티플레이·맵 source에는 포함하지 않는다.
 - Boss Preview의 `약점 타격`은 현재 노출된 약점에만 Preview 전용 normal Boss impact를 넣는다. Phase 번호·상태를 강제하지 않으며 실제 약점 판정·피해·전환을 사용한다.
-- Sector 01~06의 48개 Stage는 `AREA-SPEC.v2.json → generated module → generated catalog → authored seamless compiler` 한 경로를 일반 싱글·멀티와 Gameplay View가 함께 사용한다. 수기 catalog, v1 AREA-SPEC, migration provenance 기반 복원과 실행 fallback은 없다.
+- Sector 01~06의 48개 Stage는 `AREA-SPEC.v2.json → generated module → generated catalog → authored portal compiler` 한 경로를 일반 싱글·멀티와 Gameplay View가 함께 사용한다. 일반 Stage surface와 world object는 Editor source 밖에서 추가하지 않는다. 출구를 통과한 Player 한 명만 다음 authored Entry로 텔레포트하고 현재 Stage ID를 별도 저장하지 않는다.
 - 기존 `AREA-SPEC-REV*-DESIGN.json`과 `MAP-PREVIEW.html`은 읽기 전용 기획 근거일 뿐 Editor Apply·generated catalog·Runtime fallback 입력이 아니다.
 - `MAP-PREVIEW.html`은 시나리오의 지도 구성 비교 근거다. 비교 패널은 이 파일을 읽기 전용으로 표시할 뿐, v2 AREA-SPEC·generated JS·Runtime Catalog의 단일 권위를 대체하거나 저장 적용·미리보기·멀티플레이에 영향을 주지 않는다.
 - 시나리오 입력은 `x/y`, `x/topY`, `cx/topY` 좌표 형식을 같은 지형 표면으로 정규화한다. 위치·크기가 없는 건축 설명은 임의 collision이나 좌표를 발명하지 않고 non-Runtime `AREA-SPEC-REV*-DESIGN.json` 기획 근거에만 남긴다. 그 Stage에 새 지형이 필요하면 canonical v2 Draft에서 명시적으로 추가해 저작한다.
@@ -88,7 +88,7 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - `충돌 지형 미저작`: 좌표 없는 기획 설명을 collision으로 추정하지 않는다.
 - `적 Runtime 타입 미연결`: 기획용 적 ID가 Runtime Registry에 없다.
 
-현재 Sector 01~~06의 48개 Stage는 모두 canonical v2/generated Runtime source이며 scenario-only Stage는 없다. Apply는 Stage source와 generated output을 함께 갱신하고 Gameplay View는 같은 production compiler·renderer로 결과를 표시한다. 1-1~~3-7의 기존 연결과 4-1~~4-7·5-1~~5-7·6-1~6-7의 Sector 내부 연결만 만들며, 3-8·4-8·5-8·6-8은 `content-boundary`로 끝나 Post-Sector Boss나 다음 Sector를 직접 연결하지 않는다.
+현재 Sector 01~~06의 48개 Stage는 모두 canonical v2/generated Runtime source이며 scenario-only Stage는 없다. Apply는 Stage source와 generated output을 함께 갱신하고 Gameplay View는 같은 production compiler·renderer로 결과를 표시한다. 일반 연결은 source Gate→target authored Entry의 개별 Player portal이며, 3-8·4-8·5-8·6-8은 `content-boundary`로 끝나 portal을 만들지 않는다.
 
 Sector의 Access 해제 요구 수는 manifest의 `accessModuleRequirement`가 소유한다. 개별 module은 authored enemy의 `enemy-defeat` 또는 authored objective의 `objective-completion` source를 사용하며, 같은 module ID를 두 source가 가리켜도 shared progress에는 한 번만 수집된다. Sector 01~~03은 기존 3-of-3 enemy-defeat, Sector 04는 세 Resident Security Override objective 중 두 개를 요구하는 2-of-3, Sector 05~~06은 Access Module 없음이 현재 계약이다.
 

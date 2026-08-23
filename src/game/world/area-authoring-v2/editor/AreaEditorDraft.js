@@ -17,6 +17,7 @@ const EDITABLE_POINTER_ROOTS = Object.freeze({
     anchors: Object.freeze(["/anchors"]),
     recoveryRoute: Object.freeze(["/definition/recoveryPoints", "/definition/routePoints"]),
     enemySlots: Object.freeze(["/definition/objects"]),
+    worldObjects: Object.freeze(["/definition/objects"]),
     wind: Object.freeze(["/definition/objects", "/definition/windZones"]),
     camera: Object.freeze(["/definition/cameraZones"])
 });

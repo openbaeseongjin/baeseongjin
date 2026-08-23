@@ -1029,17 +1029,19 @@ const SPEC = {
         ]
       },
       {
+        "collision": false,
         "coordinateAnchor": "center",
         "damage": false,
-        "grappleable": true,
+        "grappleable": false,
         "id": "media-wall-body",
-        "kind": "solid-architectural-blocker",
+        "kind": "design-reference",
         "oneWay": false,
         "position": {
           "x": 0,
           "y": -740
         },
         "purpose": "causes underframe/backside/crown wrap",
+        "renderable": false,
         "sourceId": "media-wall-body",
         "vertices": [
           {
@@ -1072,6 +1074,7 @@ const SPEC = {
       "anchors",
       "recoveryRoute",
       "enemySlots",
+      "worldObjects",
       "wind",
       "camera"
     ],
