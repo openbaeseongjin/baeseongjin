@@ -1,8 +1,8 @@
 # BOSS 03 — 중앙 교환기 점검 시스템
 ## 핵심 브리프 + 스토리/연출
 
-> 상태: **AUTHORED FINAL CONTENT / RUNTIME NOT IMPLEMENTED**
-> AUTHORING SNAPSHOT: `6a8911d354df6b218a64970b5d35d41359ef62f2`
+> 상태: **FINAL CONTENT HANDOFF / 미구현**
+> AUTHORING SNAPSHOT: GitHub `main` `6a8911d354df6b218a64970b5d35d41359ef62f2`. 현재 main과 Runtime 연결 상태는 `docs/scenario-development-integration.md`가 소유한다.
 > Sector: **03 CENTRAL EXCHANGE COMPLEX**
 
 ## 1. 한 줄 정의

@@ -31,3 +31,5 @@ Direction Runtime v1 exists on main.
 ## Critical
 Do not infer causality.
 Do not connect directly to Sector04.
+
+Boss03의 Central Exchange Scanner·점검 Arm·좌/중앙/우 route 최종 인계는 [`../../../../boss/03/README.md`](../../../../boss/03/README.md)가 소유한다. 이는 authored content이며 Boss Runtime·전환·Timer를 구현하거나 `3-8` 경계를 연결하지 않는다.

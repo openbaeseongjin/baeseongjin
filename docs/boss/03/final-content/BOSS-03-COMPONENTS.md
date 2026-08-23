@@ -2,8 +2,7 @@
 
 > 목적: **개발자가 무엇을 만들어야 하는지**만 정리한다.
 > 구현 방법·파일 수정 방법·의사코드는 포함하지 않는다.
-> 상태: **AUTHORED FINAL CONTENT / RUNTIME NOT IMPLEMENTED**
-> AUTHORING SNAPSHOT: `6a8911d354df6b218a64970b5d35d41359ef62f2`
+> AUTHORING SNAPSHOT: GitHub `main` `6a8911d354df6b218a64970b5d35d41359ef62f2`. 현재 main과 Runtime 연결 상태는 `docs/scenario-development-integration.md`가 소유한다.
 
 ## 1. 상태 구분
 

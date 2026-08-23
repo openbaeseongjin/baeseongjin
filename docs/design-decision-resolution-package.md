@@ -118,7 +118,7 @@ and never:
 
 Only Sector01 and Sector06 are detailed in this package.
 
-Sector02~03 names/mechanics remain later contracts. Boss04와 Boss05의 authored handoff는 각각 `docs/boss/04/README.md`, `docs/boss/05/README.md`가 소유하며 Runtime·전환 계약은 별도다.
+Sector02 names/mechanics remain later contracts. Boss03~05의 authored handoff는 각각 `docs/boss/03/README.md`, `docs/boss/04/README.md`, `docs/boss/05/README.md`가 소유하며 Runtime·전환 계약은 별도다.
 
 ---
 
