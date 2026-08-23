@@ -9,6 +9,7 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         ropeObject,
         foundation,
         augmentCombat,
+        statusEffects,
         weapon,
         ropeImpactAttack,
         ropeImpactState,
@@ -20,6 +21,7 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         this.ropeObject = ropeObject;
         this.foundation = foundation;
         this.augmentCombat = augmentCombat;
+        this.statusEffects = statusEffects;
         this.weapon = weapon;
         this.ropeImpactAttack = ropeImpactAttack;
         this.ropeImpactState = ropeImpactState;

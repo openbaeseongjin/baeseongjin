@@ -77,6 +77,7 @@ export class EnemyWeaponState {
 
     advance(enemy, { visibleTargets, range, dt, ...context }) {
         const currentState = enemyWeaponStateById(this.state);
+        const shouldAdvancePatrol = currentState.canAdvancePatrol;
         const target = selectEnemyWeaponTarget({
             enemy,
             visibleTargets,
@@ -106,7 +107,7 @@ export class EnemyWeaponState {
             spawnedProjectile = result.spawnedProjectile ?? spawnedProjectile;
             if (!result.continueState) break;
         }
-        return Object.freeze({ spawnedProjectile, shouldAdvancePatrol: false });
+        return Object.freeze({ spawnedProjectile, shouldAdvancePatrol });
     }
 
     spawnProjectile({ enemy, target, config, registerProjectile, registry }) {

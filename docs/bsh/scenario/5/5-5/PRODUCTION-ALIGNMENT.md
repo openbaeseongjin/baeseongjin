@@ -22,6 +22,6 @@ REV3.8 already established:
 ## Runtime status
 
 - AEGIS basis: available in current Runtime.
-- Jammer: new/not implemented.
+- Jammer: dynamic normal-surface selection and owner-first shock/cut implemented; browser/multiplayer playtest pending.
 - corporate proof interaction: may require production implementation.
 - approved geometry: not implemented.

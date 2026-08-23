@@ -2,6 +2,7 @@ import { ENEMY_TYPE } from "../game/EnemyType.js";
 import {
     ARTILLERY_BEHAVIOR_STATE,
     ENEMY_BEHAVIOR_KIND,
+    JAMMER_BEHAVIOR_STATE,
     PURSUIT_BEHAVIOR_STATE,
     SHIELD_BEHAVIOR_STATE,
     SUPPORT_BEHAVIOR_STATE,
@@ -54,6 +55,7 @@ const BEHAVIOR_PRESENTATION_BY_STATE = Object.freeze({
         [ARTILLERY_BEHAVIOR_STATE.TELEGRAPH]: "artillery-telegraph",
         [ARTILLERY_BEHAVIOR_STATE.COOLDOWN]: "artillery-cooldown"
     }),
+    [ENEMY_BEHAVIOR_KIND.JAMMER]: Object.freeze({ [JAMMER_BEHAVIOR_STATE.ROAM]: "jammer-roam" }),
     [ENEMY_BEHAVIOR_KIND.SUPPORT]: Object.freeze({
         [SUPPORT_BEHAVIOR_STATE.IDLE]: "support-idle",
         [SUPPORT_BEHAVIOR_STATE.LINK]: "support-link"
@@ -122,7 +124,11 @@ class EnemyPresentationDefinition {
 
 class HardpointJammerPresentationDefinition extends EnemyPresentationDefinition {
     constructor() {
-        super({ usesProjectileAttack: false, additionalStates: Object.values(JAMMER_PRESENTATION_BY_PHASE) });
+        super({
+            behaviorKind: ENEMY_BEHAVIOR_KIND.JAMMER,
+            usesProjectileAttack: false,
+            additionalStates: Object.values(JAMMER_PRESENTATION_BY_PHASE)
+        });
         Object.freeze(this);
     }
 

@@ -78,17 +78,17 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 5. Sector manifest/composer는 generated module을 실제 싱글·멀티 공용 World Catalog에 포함한다. `시나리오 전용` Stage는 v2 source만 저장하고 Runtime에는 연결하지 않는다.
 6. 실행 중인 Run은 hot reload하지 않는다. 실제 게임은 새 게임·새 서버 세션부터 변경된 Catalog를 사용한다.
 
-## Sector 04~06 Runtime 승격 게이트
+## Runtime source 게이트
 
 시나리오 전용 Stage를 불완전한 Runtime으로 자동 전환하지 않는다. Editor는 각 Stage를 불러올 때 같은 v2 spec을 가상 `runtime` 모드로 검증하고 다음 차단 사유를 표시한다.
 
 - `진행 Gate 미저작`: Runtime Area가 요구하는 exit trigger·조건이 없다.
 - `다음 스테이지 전환 미정`: `nextAreaId`와 연결 계약이 확정되지 않았다.
-- `콘텐츠 경계 전환 오류`: 3-8·4-8·5-8·6-8은 `nextAreaId: null`과 `completionMode: "content-boundary"`를 함께 소유해야 한다. compiler는 3-8·4-8·5-8의 위치 기반 Gate를 해당 Boss 최초 입구로 사용하고, 완료된 Boss는 같은 Gate에서 다음 Sector Entry로 직행시킨다. 6-8은 terminal Boss 진입만 소유한다.
+- `콘텐츠 경계 전환 오류`: 3-8·4-8·5-8·6-8은 `nextAreaId: null`과 `completionMode: "content-boundary"`를 함께 소유해야 한다. compiler는 3-8을 Boss03 entry·완료 뒤 4-1로 연결하고 4-8·5-8은 각각 5-1·6-1 Entry로 직접 연결한다. 6-8은 terminal Boss06 진입만 소유한다.
 - `충돌 지형 미저작`: 좌표 없는 기획 설명을 collision으로 추정하지 않는다.
 - `적 Runtime 타입 미연결`: 기획용 적 ID가 Runtime Registry에 없다.
 
-현재 Sector 01~~06의 48개 Stage는 모두 canonical v2/generated Runtime source이며 scenario-only Stage는 없다. Apply는 먼저 canonical `AREA-SPEC.v2.json`을 갱신하고 같은 transaction에서 generated output을 다시 만들며, generated 파일을 먼저 수기 편집하지 않는다. 일반 연결은 source Gate→target authored Entry의 개별 Player portal이다. 3-8·4-8·5-8은 Boss 완료 전에는 Boss 입구, 완료 뒤에는 다음 Sector Entry로 연결되고 6-8은 terminal Boss 입구다.
+현재 Sector 01~~06의 48개 Stage는 모두 canonical v2/generated Runtime source이며 scenario-only Stage는 없다. Apply는 먼저 canonical `AREA-SPEC.v2.json`을 갱신하고 같은 transaction에서 generated output을 다시 만들며, generated 파일을 먼저 수기 편집하지 않는다. 일반 연결은 source Gate→target authored Entry의 개별 Player portal이다. 3-8만 Boss03 완료 전에는 Boss 입구, 완료 뒤에는 4-1 Entry로 연결한다. 4-8·5-8은 다음 Sector Entry로 직접 연결하고 6-8은 terminal Boss06 입구다.
 
 Sector의 Access 해제 요구 수는 manifest의 `accessModuleRequirement`가 소유한다. 개별 module은 authored enemy의 `enemy-defeat` 또는 authored objective의 `objective-completion` source를 사용하며, 같은 module ID를 두 source가 가리켜도 shared progress에는 한 번만 수집된다. Sector 01~~03은 기존 3-of-3 enemy-defeat, Sector 04는 세 Resident Security Override objective 중 두 개를 요구하는 2-of-3, Sector 05~~06은 Access Module 없음이 현재 계약이다.
 

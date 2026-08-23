@@ -483,16 +483,7 @@ const SPEC = {
       }
     },
     "id": "sector-05-06",
-    "jammerGroups": [
-      {
-        "eligibleSurfaceIds": [
-          "jam-a1-surface",
-          "jam-b1-surface"
-        ],
-        "id": "sector-05-06:jammer-a:field",
-        "sourceObjectId": "sector-05-06:jammer-a"
-      }
-    ],
+    "jammerGroups": [],
     "name": "INCIDENT AUTHORIZATION ANNEX",
     "nextAreaId": "sector-05-07",
     "objectives": [
@@ -540,9 +531,6 @@ const SPEC = {
         "coordinateAnchor": "center",
         "enemyType": "hardpoint-jammer-v1",
         "id": "sector-05-06:jammer-a",
-        "jammer": {
-          "groupId": "sector-05-06:jammer-a:field"
-        },
         "kind": "sentry",
         "position": {
           "x": 650,

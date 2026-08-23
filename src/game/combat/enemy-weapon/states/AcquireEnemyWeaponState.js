@@ -2,6 +2,10 @@ import { ENEMY_ATTACK_STATE, ENEMY_WEAPON_CONFIG } from "../EnemyWeaponDefinitio
 import { EnemyWeaponAttackState, enemyWeaponStepResult } from "./EnemyWeaponAttackState.js";
 
 export class AcquireEnemyWeaponState extends EnemyWeaponAttackState {
+    get canAdvancePatrol() {
+        return true;
+    }
+
     advance(weapon, { enemy, target, config, remainingDt }) {
         const nextRemainingDt = remainingDt - weapon.consume(remainingDt);
         if (weapon.remainingSeconds > ENEMY_WEAPON_CONFIG.ZERO) {

@@ -1,5 +1,7 @@
 import { Vector2 } from "../../../game-kit/index.js";
+import { COMBAT_CONFIG } from "../../config.js";
 import { ENEMY_BEHAVIOR_CONFIG, ENEMY_BEHAVIOR_KIND, SHIELD_BEHAVIOR_STATE } from "./EnemyBehaviorDefinition.js";
+import { EnemyRoamingMotion } from "./EnemyRoamingMotion.js";
 import { clamp, directionBetween, frozenDirection, nearestTarget, validateBehaviorDt } from "./EnemyBehaviorSupport.js";
 
 export class ShieldEnemyBehavior {
@@ -10,8 +12,12 @@ export class ShieldEnemyBehavior {
         maximumAngularSpeed = 0.55,
         angularDamping = 1.4,
         trackingResponse = 0.9,
-        acquireRange = 1440,
-        guardHalfAngle = Math.PI / 3
+        acquireRange = COMBAT_CONFIG.enemyAttackRange,
+        guardHalfAngle = Math.PI / 3,
+        moveSpeed = 85,
+        roamRadius = 100,
+        preferredRange = 300,
+        mobility = null
     } = {}) {
         this.kind = ENEMY_BEHAVIOR_KIND.SHIELD;
         this.guardDirection = new Vector2(guardDirection.x, guardDirection.y).normalize();
@@ -23,11 +29,18 @@ export class ShieldEnemyBehavior {
         this.trackingResponse = trackingResponse;
         this.acquireRange = acquireRange;
         this.guardHalfAngle = guardHalfAngle;
+        this.mobility = new EnemyRoamingMotion({
+            speed: moveSpeed,
+            roamRadius,
+            preferredRange,
+            ...(mobility ?? {})
+        });
     }
     advance(enemy, { targets = [], dt = 0 } = {}) {
         validateBehaviorDt(dt);
         const currentAngle = Math.atan2(this.guardDirection.y, this.guardDirection.x);
         const target = nearestTarget(enemy, targets, this.acquireRange, { respectActivation: false });
+        this.mobility.advance(enemy, { focusPosition: target?.physics.position ?? null, dt });
         if (!target) {
             this.angularVelocity *= Math.exp(-this.angularDamping * dt);
             const coastAngle = currentAngle + this.angularVelocity * dt;
@@ -68,12 +81,14 @@ export class ShieldEnemyBehavior {
             state: SHIELD_BEHAVIOR_STATE.GUARD,
             guardDirection: frozenDirection(this.guardDirection),
             angularVelocity: this.angularVelocity,
-            guardHalfAngle: this.guardHalfAngle
+            guardHalfAngle: this.guardHalfAngle,
+            mobility: this.mobility.snapshot()
         });
     }
     restore(snapshot = {}) {
         this.guardDirection.set(snapshot.guardDirection?.x ?? 1, snapshot.guardDirection?.y ?? 0).normalize();
         if (this.guardDirection.length() === ENEMY_BEHAVIOR_CONFIG.ZERO) this.guardDirection.set(1, 0);
         this.angularVelocity = Number.isFinite(snapshot.angularVelocity) ? snapshot.angularVelocity : 0;
+        this.mobility.restore(snapshot.mobility);
     }
 }

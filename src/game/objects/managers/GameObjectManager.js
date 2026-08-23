@@ -45,6 +45,10 @@ export class GameObjectManager {
         return this.spatial.querySurfaceBounds({ x: minX, y: minY, width: maxX - minX, height: maxY - minY });
     }
 
+    ropeAttachmentSurfacesInBounds(bounds) {
+        return this.spatial.querySurfaceBounds(bounds);
+    }
+
     beginSimulationFrame({ tick, surfaces, neutralActors = EMPTY_OBJECTS }) {
         return this.enemies.beginFrame({
             collisionBroadPhase: this.spatial,

@@ -399,12 +399,8 @@
         "status": "CURRENT_RUNTIME"
       },
       {
-        "id": "surface.grappleable=false",
-        "status": "CURRENT_RUNTIME"
-      },
-      {
-        "id": "canAttachToSurface(surface)",
-        "status": "CURRENT_RUNTIME_HOOK"
+        "id": "hardpoint-jammer-v1",
+        "status": "CURRENT_DYNAMIC_SURFACE_AND_ELECTRIFIED_RUNTIME"
       }
     ],
     "explicitlyNotRequired": [

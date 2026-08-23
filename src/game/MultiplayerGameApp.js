@@ -34,6 +34,7 @@ import {
     localBossStageSnapshot
 } from "./presentation/BossStageLocalView.js";
 import { ropeAnchorState } from "./rope/RopeAttachment.js";
+import { PLAYER_IMPACT_SOURCE_KIND } from "./network/PlayerImpactClaim.js";
 
 function ropeAtBossTransform(rope, bossStage) {
     if (!rope?.isAttached || !rope.anchorOwnerId || !rope.anchorLocalOffset) return rope;
@@ -50,6 +51,7 @@ function renderPlayer(state, predicted = null, bossStage = null) {
         ...state,
         angle: predicted?.angle ?? state.angle,
         angularVelocity: predicted?.angularVelocity ?? state.angularVelocity,
+        statusEffects: predicted?.statusEffects ?? state.statusEffects,
         rope: ropeAtBossTransform(rope, bossStage),
         position: new Vector2(position.x, position.y),
         velocity: new Vector2(velocity.x, velocity.y)
@@ -427,6 +429,11 @@ export class MultiplayerGameApp {
         }
         for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "boss-hazard")) {
             this.authority.submitPredictedBossImpact(event);
+        }
+        for (const event of predictedEvents.filter(
+            ({ parameters }) => parameters?.sourceKind === PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER
+        )) {
+            this.authority.submitPredictedJammerImpact(event);
         }
         this.predictableProjectiles.predict(predictedSpawns);
         for (const event of predictedSpawns) this.authority.submitProjectileSpawnClaim(event);

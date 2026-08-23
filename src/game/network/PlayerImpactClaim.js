@@ -2,9 +2,18 @@ import { normalizeNetworkJson } from "./NetworkJson.js";
 import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 12;
-const IMPACT_TYPES = new Set(["rope-cut", "player-hit", "fall-damage"]);
-export const PLAYER_IMPACT_SOURCE_KIND = Object.freeze({ BOSS_HAZARD: "boss-hazard" });
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 13;
+export const PLAYER_IMPACT_TYPE = Object.freeze({
+    ROPE_CUT: "rope-cut",
+    PLAYER_HIT: "player-hit",
+    FALL_DAMAGE: "fall-damage",
+    JAMMER_SHOCK: "jammer-shock"
+});
+const IMPACT_TYPES = new Set(Object.values(PLAYER_IMPACT_TYPE));
+export const PLAYER_IMPACT_SOURCE_KIND = Object.freeze({
+    BOSS_HAZARD: "boss-hazard",
+    HARDPOINT_JAMMER: "hardpoint-jammer"
+});
 const FNV_64_OFFSET = 0xcbf29ce484222325n;
 const FNV_64_PRIME = 0x100000001b3n;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
@@ -149,6 +158,9 @@ function normalizeImpactRecoveryState(state) {
     if (normalized.rope.isAttached) {
         assertFiniteVector(normalized.rope.anchor, "outcome.state.rope.anchor");
         assertId(normalized.rope.attachmentId, "outcome.state.rope.attachmentId");
+        if (normalized.rope.anchorSurfaceId !== null) {
+            assertId(normalized.rope.anchorSurfaceId, "outcome.state.rope.anchorSurfaceId");
+        }
         const ownerId = normalized.rope.anchorOwnerId ?? null;
         const localOffset = normalized.rope.anchorLocalOffset ?? null;
         if ((ownerId === null) !== (localOffset === null)) {
@@ -168,6 +180,9 @@ function normalizeImpactRecoveryState(state) {
         if (normalized.rope.anchor !== null) throw new Error("outcome.state.rope.anchor must be null when detached");
         if (normalized.rope.attachmentId !== null) {
             throw new Error("outcome.state.rope.attachmentId must be null when detached");
+        }
+        if (normalized.rope.anchorSurfaceId !== null) {
+            throw new Error("outcome.state.rope.anchorSurfaceId must be null when detached");
         }
         if (normalized.rope.attachmentOffset !== null) {
             throw new Error("outcome.state.rope.attachmentOffset must be null when detached");
@@ -213,6 +228,21 @@ function normalizeImpactRecoveryState(state) {
     assertFinite(normalized.weapon?.cooldown, "outcome.state.weapon.cooldown", { minimum: 0 });
     assertFoundationState(normalized.foundationAugment, normalized.augmentRuntimeState, "outcome.state");
     assertLauncher(normalized.launcher, "outcome.state.launcher");
+    const electrified = normalized.statusEffects?.electrified ?? null;
+    if (electrified !== null) {
+        assertBoolean(electrified.active, "outcome.state.statusEffects.electrified.active");
+        assertFinite(electrified.remainingSeconds, "outcome.state.statusEffects.electrified.remainingSeconds", {
+            minimum: 0
+        });
+        assertFinite(
+            electrified.secondsUntilNextPulse,
+            "outcome.state.statusEffects.electrified.secondsUntilNextPulse",
+            { minimum: 0 }
+        );
+        if (electrified.sourceId !== null) {
+            assertId(electrified.sourceId, "outcome.state.statusEffects.electrified.sourceId");
+        }
+    }
     return normalized;
 }
 
@@ -242,11 +272,27 @@ function launcherProjection(state) {
 }
 
 function impactStateProjection(state, { impactType, respawned }) {
-    if (impactType === "rope-cut") {
+    if (impactType === PLAYER_IMPACT_TYPE.ROPE_CUT) {
         return {
             ropeDisabledTicks: quantized(state.ropeDisabledRemaining, 1 / 120),
             ropeAttached: state.rope.isAttached,
             launcher: launcherProjection(state)
+        };
+    }
+    if (impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK) {
+        const electrified = state.statusEffects?.electrified ?? null;
+        return {
+            ropeDisabledTicks: quantized(state.ropeDisabledRemaining, 1 / 120),
+            ropeAttached: state.rope.isAttached,
+            launcher: launcherProjection(state),
+            electrified: electrified
+                ? {
+                      active: electrified.active,
+                      remainingTicks: quantized(electrified.remainingSeconds, 1 / 120),
+                      nextPulseTicks: quantized(electrified.secondsUntilNextPulse, 1 / 120),
+                      sourceId: electrified.sourceId
+                  }
+                : null
         };
     }
     const projection = {
@@ -270,6 +316,7 @@ function impactStateProjection(state, { impactType, respawned }) {
             isAttached: state.rope.isAttached,
             anchor: state.rope.isAttached ? quantizedVector(state.rope.anchor, 0.1) : null,
             attachmentId: state.rope.isAttached ? state.rope.attachmentId : null,
+            anchorSurfaceId: state.rope.isAttached ? state.rope.anchorSurfaceId : null,
             anchorOwnerId: state.rope.isAttached ? (state.rope.anchorOwnerId ?? null) : null,
             anchorLocalOffset:
                 state.rope.isAttached && state.rope.anchorLocalOffset
@@ -333,23 +380,32 @@ export function createPlayerImpactClaim({
         throw new Error("velocity must contain finite x and y");
     }
     if (!Number.isFinite(damage) || damage < 0) throw new Error("damage must be non-negative and finite");
-    if (sourceKind !== null && sourceKind !== PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD) {
+    if (sourceKind !== null && !Object.values(PLAYER_IMPACT_SOURCE_KIND).includes(sourceKind)) {
         throw new Error(`unsupported impact sourceKind: ${sourceKind}`);
     }
-    if (sourceKind === PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD) {
+    if (
+        sourceKind === PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD ||
+        sourceKind === PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER
+    ) {
         assertId(sourceId, "sourceId");
         assertId(sourceType, "sourceType");
         assertTick(sourceSequence, "sourceSequence");
     } else if (sourceId !== null || sourceType !== null || sourceSequence !== null) {
         throw new Error("impact source metadata requires sourceKind");
     }
+    if (
+        (sourceKind === PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER) !==
+        (impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK)
+    ) {
+        throw new Error("jammer-shock impacts require Hardpoint Jammer source metadata");
+    }
     if (!outcome || Array.isArray(outcome) || typeof outcome !== "object") {
         throw new Error("outcome must be an object");
     }
     assertBoolean(outcome.respawned, "outcome.respawned");
     if (!/^[0-9a-f]{16}$/.test(outcome.digest)) throw new Error("outcome.digest must be a 64-bit hex digest");
-    if (impactType === "rope-cut" && outcome.respawned) {
-        throw new Error("rope-cut impacts may not respawn the victim");
+    if ([PLAYER_IMPACT_TYPE.ROPE_CUT, PLAYER_IMPACT_TYPE.JAMMER_SHOCK].includes(impactType) && outcome.respawned) {
+        throw new Error(`${impactType} impacts may not respawn the victim`);
     }
 
     const hasRecoveryState = outcome.state !== undefined;

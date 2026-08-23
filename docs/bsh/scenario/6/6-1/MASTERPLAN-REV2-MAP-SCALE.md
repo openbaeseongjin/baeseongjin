@@ -5,7 +5,7 @@
 > Authoring snapshot: 3c9f661bba58af6f7351e00754c12aef86575a12
 > Sector06 Master: ROOFTOP / EVACUATION
 > Sector sentence: THE GOAL IS VISIBLE; THE ROOM IS GONE.
-> 5-8 direct wiring: FORBIDDEN until Post-Sector05 Boss / Transition is separately approved.
+> Current integration override: Issue #933 removed the Post-Sector05 Boss boundary; 5-8 now enters 6-1 through the authored Gate portal. The remaining body is a reference-only pre-package spatial draft.
 
 ## 1. Purpose
 

@@ -16,6 +16,7 @@ export class FixedLengthRope {
         this.anchor = null;
         this.anchorVelocity = new Vector2();
         this.attachmentId = null;
+        this.anchorSurfaceId = null;
         this.anchorOwnerId = null;
         this.anchorLocalOffset = null;
         this.attachmentOffset = null;
@@ -34,6 +35,7 @@ export class FixedLengthRope {
         {
             angle = FIXED_LENGTH_ROPE.ZERO,
             attachmentOffset = null,
+            anchorSurfaceId = null,
             anchorOwnerId = null,
             anchorLocalOffset = null,
             anchorVelocity = null,
@@ -52,6 +54,9 @@ export class FixedLengthRope {
         }
         if (attachmentId !== null && (typeof attachmentId !== "string" || !attachmentId)) {
             throw new Error("attachmentId must be null or a non-empty string");
+        }
+        if (anchorSurfaceId !== null && (typeof anchorSurfaceId !== "string" || !anchorSurfaceId)) {
+            throw new Error("anchorSurfaceId must be null or a non-empty string");
         }
         const selectedOffset = attachmentOffset
             ? finiteVector(attachmentOffset, "attachmentOffset")
@@ -78,6 +83,7 @@ export class FixedLengthRope {
         }
         this.anchor = new Vector2(anchor.x, anchor.y);
         this.attachmentId = attachmentId;
+        this.anchorSurfaceId = anchorSurfaceId;
         const selectedAnchorVelocity = finiteVector(anchorVelocity ?? { x: 0, y: 0 }, "anchorVelocity");
         this.anchorVelocity.set(selectedAnchorVelocity.x, selectedAnchorVelocity.y);
         this.anchorOwnerId = anchorOwnerId;
@@ -98,6 +104,7 @@ export class FixedLengthRope {
         this.anchor = null;
         this.anchorVelocity.set(FIXED_LENGTH_ROPE.ZERO, FIXED_LENGTH_ROPE.ZERO);
         this.attachmentId = null;
+        this.anchorSurfaceId = null;
         this.anchorOwnerId = null;
         this.anchorLocalOffset = null;
         this.attachmentOffset = null;

@@ -253,15 +253,14 @@ Forbidden:
 
 # 6. Jammer contract
 
-Same Sector05 V1 contract:
+Current Sector05 dynamic-surface contract:
 
-- one jam target
-- Warning → Active → restore
-- current attached Hardpoint not eligible
-- already launched Hook resolves in V1
-- no damage
-- no force release
-- no Rope cut
+- one automatically selected normal Rope surface per Jammer
+- Warning → Active → Clear
+- current attached surface is excluded
+- attachment is not pre-blocked
+- Active attachment starts one shock, cuts the new Rope and applies 25 damage over 0.5 seconds
+- pulse-level network events are forbidden
 - at least one Base-clear route remains
 - death/disable clears Jam deterministically
 - shared authoritative multiplayer state

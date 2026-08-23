@@ -183,15 +183,14 @@ UPPER CROSS-LINK
 LOWER CROSS-LINK
 ```
 
-Jammer may block only one first candidate.
+Jammer may charge only one automatically selected normal Rope surface while leaving another Hook-reachable candidate.
 
 Rules:
 - current attached Hardpoint cannot be Jam target
 - one Base-clear crossing always remains
-- no damage
-- no forced release
-- no Rope cut
-- launched-before-active Hook resolves in V1
+- attachment is not pre-blocked
+- Active target attachment starts one shock and immediately cuts the new Rope
+- Electrified applies 25 total damage over 0.5 seconds without pulse-level network events
 
 AEGIS is out before Jam Warning begins.
 
@@ -429,18 +428,15 @@ ROOFTOP SERVICE ACCESS
 ROUTE AVAILABLE
 ```
 
-Important integration boundary:
+Current integration boundary:
 
 ```text
 5-8
-→ POST-SECTOR05 BOSS / TRANSITION TBD
-→ Sector06
+→ authored Gate portal
+→ sector-06-01 Entry
 ```
 
-Do NOT directly wire 5-8 to `sector-06-01`.
-
-Current Sector06 6-1 also expects its previous boundary to remain
-`POST-SECTOR 05 BOSS / TRANSITION — TBD`.
+The former Post-Sector05 Boss boundary was removed by Issue #933 and is not an authoring input.
 
 ---
 
@@ -527,7 +523,7 @@ Approve/revise:
 4. no special-threat overlap
 5. final Authority Record wording
 6. Player Bark
-7. Rooftop Pad 03 reveal without direct 6-1 wiring
+7. Rooftop Pad 03 reveal followed by the authored direct 6-1 portal
 
 
 ---

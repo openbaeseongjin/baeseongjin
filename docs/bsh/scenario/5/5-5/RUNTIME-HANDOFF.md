@@ -8,10 +8,10 @@ Existing:
 - `shield-drone-t1`
 - current directional shield behavior
 - `surface.grappleable === false`
-- Rope candidate filtering through `canAttachToSurface(surface)`
+- normal Rope surface spatial query and Hook reach
 
-New dependency:
-- `hardpoint-jammer-v1`
+Current dependency:
+- implemented `hardpoint-jammer-v1`
 - `corporate-proof-terminal-v1` or equivalent proof interaction
 
 ## Do not preserve old REV3.8 unlock semantics blindly
@@ -50,9 +50,9 @@ Do not add:
 Reuse the Sector05 Jammer V1 contract:
 - one target at a time
 - never current attached Hardpoint
-- no Rope cut
-- no force release
-- no damage
+- no dedicated candidate Anchor authoring
+- Active target attachment cuts the new Rope and starts non-stacking Electrified
+- total 25 over 0.5s as 2.5 per 0.05s; one start event and no pulse events
 - launched-before-active Hook resolves
 - one Base-clear flank always remains
 

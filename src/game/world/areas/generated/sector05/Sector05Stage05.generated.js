@@ -423,16 +423,7 @@ const SPEC = {
       }
     },
     "id": "sector-05-05",
-    "jammerGroups": [
-      {
-        "eligibleSurfaceIds": [
-          "upper-1-surface",
-          "lower-1-surface"
-        ],
-        "id": "sector-05-05:jammer-a:field",
-        "sourceObjectId": "sector-05-05:jammer-a"
-      }
-    ],
+    "jammerGroups": [],
     "name": "PRIORITY ROUTING HALL",
     "nextAreaId": "sector-05-06",
     "objectives": [
@@ -480,9 +471,6 @@ const SPEC = {
         "coordinateAnchor": "center",
         "enemyType": "hardpoint-jammer-v1",
         "id": "sector-05-05:jammer-a",
-        "jammer": {
-          "groupId": "sector-05-05:jammer-a:field"
-        },
         "kind": "sentry",
         "position": {
           "x": -945,

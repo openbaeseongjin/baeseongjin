@@ -405,10 +405,7 @@
         },
         "rules": [
           "no-projectile-attack"
-        ],
-        "jammer": {
-          "groupId": "sector-05-03:jammer-a:field"
-        }
+        ]
       },
       {
         "id": "sector-05-03:jammer-b",
@@ -428,10 +425,7 @@
         },
         "rules": [
           "no-projectile-attack"
-        ],
-        "jammer": {
-          "groupId": "sector-05-03:jammer-b:field"
-        }
+        ]
       },
       {
         "id": "sector-05-03:exit-panel",
@@ -484,24 +478,7 @@
     "routes": [],
     "cameraZones": [],
     "cueIds": [],
-    "jammerGroups": [
-      {
-        "id": "sector-05-03:jammer-a:field",
-        "sourceObjectId": "sector-05-03:jammer-a",
-        "eligibleSurfaceIds": [
-          "a-left-1-surface",
-          "a-right-1-surface"
-        ]
-      },
-      {
-        "id": "sector-05-03:jammer-b:field",
-        "sourceObjectId": "sector-05-03:jammer-b",
-        "eligibleSurfaceIds": [
-          "b-upper-1-surface",
-          "b-lower-1-surface"
-        ]
-      }
-    ],
+    "jammerGroups": [],
     "gate": {
       "id": "sector-05-03:gate",
       "nextAreaId": "sector-05-04",

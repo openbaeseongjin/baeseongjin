@@ -61,7 +61,11 @@ import { DebugEnemyTrainingDummy } from "../debug/DebugEnemyTrainingDummy.js";
 import { GameObjectManager } from "../objects/managers/GameObjectManager.js";
 import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInput.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
-import { createPlayerImpactStateDigest, PLAYER_IMPACT_SOURCE_KIND } from "../network/PlayerImpactClaim.js";
+import {
+    createPlayerImpactStateDigest,
+    PLAYER_IMPACT_SOURCE_KIND,
+    PLAYER_IMPACT_TYPE
+} from "../network/PlayerImpactClaim.js";
 import { createPredictableResolveEvent, createPredictableSpawnEvent } from "../network/PredictableObjectEvent.js";
 import {
     ROPE_ANCHOR_RELEASE_REASON,
@@ -73,6 +77,7 @@ import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
 import { rotateVector } from "../physics/AngularMotion.js";
 import { CollisionBroadPhase } from "../physics/spatial/CollisionBroadPhase.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
+import { ELECTRIFIED_STATUS_ID } from "../status-effects/ElectrifiedStatusEffect.js";
 import { releaseRopeFromBody, ropeAnchorState } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
 import { ROPE_AUGMENT_PERCENTAGES } from "../augments/rope/RopeAugmentTuning.js";
@@ -97,7 +102,12 @@ import {
 } from "../world/WorldForceField.js";
 import { accessScanStateMap, isSurfaceAccessAllowed, snapshotAccessScanStates } from "../world/AccessScanField.js";
 import { authoredRegionForPosition } from "../world/AuthoredLandmarkResolver.js";
-import { HARDPOINT_JAMMER_AUTHORITY, HardpointJammerField } from "../world/HardpointJammerField.js";
+import {
+    HARDPOINT_JAMMER_AUTHORITY,
+    HARDPOINT_JAMMER_IMPACT,
+    HardpointJammerField
+} from "../world/HardpointJammerField.js";
+import { resolveHardpointJammerCandidateSurfaceIds } from "../world/HardpointJammerTargetSelector.js";
 import { advanceWorldProgress, completeWorldProgressObjective } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 
@@ -1367,7 +1377,7 @@ export class GameSimulation {
         const blockers = this.enemies.filter(({ id, health }) => id !== previousDummyId && health > 0);
         const candidates = [];
         for (const surface of this.activeCollisionSurfaces) {
-            if (surface.collision === false || surface.oneWay === true || surface.kind === "cover") continue;
+            if (surface.collision === false || surface.kind === "cover") continue;
             const span = horizontalSurfaceSpan(surface);
             if (!span) continue;
             const minimumX = Math.max(span.minX + padding, viewport.minX + padding);
@@ -1730,6 +1740,7 @@ export class GameSimulation {
                 const attached = player.ropeObject.rope.attach(player.physics.position, anchor.position, {
                     angle: player.physics.angle,
                     attachmentOffset: state.rope.attachmentOffset,
+                    anchorSurfaceId: state.rope.anchorSurfaceId ?? null,
                     anchorOwnerId: state.rope.anchorOwnerId ?? null,
                     anchorLocalOffset: state.rope.anchorLocalOffset ?? null,
                     anchorVelocity: anchor.velocity,
@@ -1939,6 +1950,7 @@ export class GameSimulation {
             projectile,
             foundationEvents: inputOutcome.foundationEvents,
             fallImpactEvents: inputOutcome.fallImpactEvents,
+            jammerImpactEvents: inputOutcome.jammerImpactEvents,
             bossImpactEvents,
             ropeImpactEvents: collisionExplosionEvents === null ? ropeImpactOutcome.impacts : Object.freeze([]),
             augmentImpactEvents,
@@ -1960,6 +1972,14 @@ export class GameSimulation {
 
     applyPredictedOwnerImpact(ownerId, event) {
         const player = this.#requirePlayer(ownerId);
+        if (event.resolution === PLAYER_IMPACT_TYPE.JAMMER_SHOCK) {
+            this.releasePlayerRope(ownerId, { transferAngularMomentum: true });
+            player.ropeObject.attachBufferRemaining = 0;
+            player.ropeObject.launcher.clear();
+            player.ropeDisabledRemaining = this.ropeDisabledSeconds;
+            player.statusEffects.applyElectrified({ sourceId: event.parameters?.sourceId ?? null });
+            return true;
+        }
         if (event.resolution === "rope-cut") {
             this.releasePlayerRope(ownerId, { transferAngularMomentum: true });
             player.ropeObject.attachBufferRemaining = 0;
@@ -2031,7 +2051,8 @@ export class GameSimulation {
             weaponCooldown: state.weapon.cooldown,
             selectedAugmentIds: state.selectedAugmentIds,
             foundationAugment: state.foundationAugment,
-            augmentRuntimeState: state.augmentRuntimeState
+            augmentRuntimeState: state.augmentRuntimeState,
+            statusEffects: state.statusEffects
         };
     }
 
@@ -2064,6 +2085,7 @@ export class GameSimulation {
             player.ropeObject.rope.anchor = new Vector2(state.rope.anchor.x, state.rope.anchor.y);
             player.ropeObject.rope.anchorVelocity.set(0, 0);
             player.ropeObject.rope.attachmentId = state.rope.attachmentId ?? null;
+            player.ropeObject.rope.anchorSurfaceId = state.rope.anchorSurfaceId ?? null;
             player.ropeObject.rope.anchorOwnerId = state.rope.anchorOwnerId ?? null;
             player.ropeObject.rope.anchorLocalOffset = state.rope.anchorLocalOffset
                 ? new Vector2(state.rope.anchorLocalOffset.x, state.rope.anchorLocalOffset.y)
@@ -2096,6 +2118,7 @@ export class GameSimulation {
         player.weapon.cooldown = state.weapon.cooldown;
         player.foundation.restore(state.foundationAugment ?? null, state.augmentRuntimeState);
         player.augmentCombat.restore(state.augmentRuntimeState?.combat ?? null, player.foundation, player.maxHealth);
+        player.statusEffects.restore(state.statusEffects ?? null);
         const effectiveRopeConfig = player.foundation.effectiveRopeConfig(this.ropeConfig);
         player.ropeObject.rope.config = effectiveRopeConfig;
         player.ropeObject.launcher.ropeConfig = effectiveRopeConfig;
@@ -2205,14 +2228,15 @@ export class GameSimulation {
             this.metrics.recordProgressTime(progressId, dt);
         }
         this.elapsedSeconds += dt;
-        this.#advanceHardpointJammers(dt);
         this.#prepareCollisionFrame();
+        this.#advanceHardpointJammers(dt);
         for (const player of this.players) {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
             this.#prepareOwnerStep(player, dt);
             if (advanceInputDrivenObjects) {
                 this.#applyWorldForce(player, dt);
                 const inputOutcome = this.dispatchOwnerInput(player.id, playerCommand, dt);
+                this.#commitHardpointJammerImpacts(inputOutcome.jammerImpactEvents);
                 this.commitFoundationEvents(inputOutcome.foundationEvents);
                 const ropeImpactOutcome = this.#advanceRopeImpactAttacks(player, { commit: false });
                 const collisionExplosionEvents = player.augmentCombat.collisionExplosionEvents({
@@ -2387,6 +2411,7 @@ export class GameSimulation {
         const fallImpactEvents = [];
         const augmentImpactEvents = [];
         const augmentEvents = [];
+        const jammerImpactEvents = [];
         const canControl = player.lifeState === "active";
         const effectiveCommand = canControl
             ? player.augmentCombat.prepareCommand(player, player.foundation, command)
@@ -2420,7 +2445,37 @@ export class GameSimulation {
                 canAttachToSurface: this.#accessScanPredicate(),
                 createAttachmentId: () => ROPE_ATTACHMENT_ID.forOwnerTick(player.id, this.tick),
                 getRopeInputModifiers: () => player.foundation.ropeInputModifiers(effectiveRopeConfig),
-                onAttach: () => player.ropeImpactState.beginAttachment(),
+                onAttach: ({ surfaceId, position, attachmentId }) => {
+                    player.ropeImpactState.beginAttachment();
+                    const impact = this.hardpointJammers.activeImpactForSurface(surfaceId, {
+                        playerId: player.id,
+                        attachmentId
+                    });
+                    if (!impact) return;
+                    jammerImpactEvents.push(
+                        Object.freeze({
+                            eventType: impact.eventType,
+                            impactId: impact.impactId,
+                            projectileId: impact.impactId,
+                            clientTick: this.tick,
+                            targetId: player.id,
+                            playerId: player.id,
+                            resolution: PLAYER_IMPACT_TYPE.JAMMER_SHOCK,
+                            position,
+                            velocity: vectorState(player.physics.physicsStepVelocity()),
+                            damage: impact.totalDamage,
+                            parameters: Object.freeze({
+                                sourceKind: PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER,
+                                sourceId: impact.groupId,
+                                sourceType: impact.surfaceId,
+                                sourceSequence: impact.cycleSequence,
+                                sourceObjectId: impact.sourceObjectId,
+                                effectId: impact.effectId,
+                                damage: impact.totalDamage
+                            })
+                        })
+                    );
+                },
                 onRelease: () => {
                     player.ropeImpactState.beginReleaseCarry();
                     if (player.foundation.has("release-propulsion")) {
@@ -2486,6 +2541,7 @@ export class GameSimulation {
         return Object.freeze({
             foundationEvents: Object.freeze(foundationEvents),
             fallImpactEvents: Object.freeze(fallImpactEvents),
+            jammerImpactEvents: Object.freeze(jammerImpactEvents),
             augmentImpactEvents: Object.freeze(augmentImpactEvents),
             augmentEvents: Object.freeze(augmentEvents)
         });
@@ -2982,6 +3038,30 @@ export class GameSimulation {
         return events.length;
     }
 
+    #commitHardpointJammerImpacts(events, { replicate = true } = {}) {
+        for (const event of events) {
+            if (!this.applyPredictedOwnerImpact(event.playerId, event)) continue;
+            const payload = Object.freeze({
+                ...event,
+                objectId: event.impactId,
+                respawned: false
+            });
+            if (replicate) {
+                this.recordProjectileResolution(
+                    {
+                        projectileId: event.impactId,
+                        resolution: event.resolution,
+                        position: new Vector2(event.position.x, event.position.y)
+                    },
+                    { ...event.parameters, targetId: event.playerId, damage: event.damage }
+                );
+            }
+            this.metrics.recordPlayerImpact(event.resolution);
+            this.eventFlash = { type: event.resolution, age: 0, ...payload };
+        }
+        return events.length;
+    }
+
     commitFoundationEvents(events, { replicate = true } = {}) {
         for (const event of events) {
             const { eventType, ...payload } = event;
@@ -2996,6 +3076,17 @@ export class GameSimulation {
         player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
         player.ropeImpactState.advance(dt);
         player.foundation.advance(dt);
+        const electrified = player.statusEffects.advance(dt).electrified;
+        if (electrified.damage <= 0 || player.lifeState !== "active") return;
+        const protection = player.augmentCombat.absorbPlayerDamage({
+            amount: electrified.damage,
+            type: "combat-hp",
+            sourceKind: ELECTRIFIED_STATUS_ID,
+            attackerId: null
+        });
+        player.health = Math.max(0, player.health - protection.appliedDamage);
+        this.metrics.recordPlayerImpact(PLAYER_IMPACT_TYPE.PLAYER_HIT, protection.appliedDamage);
+        if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, ELECTRIFIED_STATUS_ID, electrified.sourceId);
     }
 
     #applyWorldForce(player, dt) {
@@ -3009,11 +3100,9 @@ export class GameSimulation {
 
     #accessScanPredicate() {
         const scannerGroups = this.world.scannerGroups ?? [];
-        const hasJammers = (this.world.jammerGroups ?? []).length > 0;
-        if (scannerGroups.length === 0 && !hasJammers) return null;
+        if (scannerGroups.length === 0) return null;
         const stateMap = accessScanStateMap(scannerGroups, this.elapsedSeconds);
-        return (surface) =>
-            isSurfaceAccessAllowed(surface, stateMap) && this.hardpointJammers.canAttachToSurface(surface);
+        return (surface) => isSurfaceAccessAllowed(surface, stateMap);
     }
 
     #advanceHardpointJammers(dt) {
@@ -3022,16 +3111,28 @@ export class GameSimulation {
         const activeSourceObjectIds = new Set(
             this.enemies.filter(({ health, awakened }) => health > 0 && awakened).map(({ objectId }) => objectId)
         );
-        const attachedSurfaceIds = new Set();
-        for (const player of this.players) {
-            const anchor = player.ropeObject.rope.anchor;
-            if (!anchor) continue;
-            for (const surface of this.activeCollisionSurfaces) {
-                const point = closestPointOnSurface(anchor, surface);
-                if (Math.hypot(point.x - anchor.x, point.y - anchor.y) <= 0.5) attachedSurfaceIds.add(surface.id);
-            }
-        }
-        this.hardpointJammers.advance(dt, { activeSourceObjectIds, attachedSurfaceIds });
+        const activeSourceByObjectId = Object.freeze(
+            Object.fromEntries(
+                this.enemies
+                    .filter(({ objectId, health, awakened }) => objectId && health > 0 && awakened)
+                    .map((enemy) => [enemy.objectId, enemy])
+            )
+        );
+        const attachedSurfaceIds = new Set(
+            this.players.map(({ ropeObject }) => ropeObject.rope.anchorSurfaceId).filter(Boolean)
+        );
+        this.hardpointJammers.advance(dt, {
+            activeSourceObjectIds,
+            attachedSurfaceIds,
+            candidateSurfaceIdsFor: (group, reservedSurfaceIds) =>
+                resolveHardpointJammerCandidateSurfaceIds({
+                    source: activeSourceByObjectId[group.sourceObjectId],
+                    players: this.players,
+                    querySurfaces: (bounds) => this.objects.ropeAttachmentSurfacesInBounds(bounds),
+                    ropeConfig: this.ropeConfig,
+                    excludedSurfaceIds: new Set([...attachedSurfaceIds, ...reservedSurfaceIds])
+                })
+        });
     }
 
     #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0, resolveInteractChoice = true } = {}) {
@@ -3827,14 +3928,48 @@ export class GameSimulation {
         });
     }
 
+    #validateHardpointJammerClaim(player, claim) {
+        if (claim.sourceKind !== PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER) {
+            return Object.freeze({ accepted: true });
+        }
+        const rope = player.ropeObject.rope;
+        if (!rope.isAttached || rope.anchorSurfaceId !== claim.sourceType || typeof rope.attachmentId !== "string") {
+            return Object.freeze({ accepted: false, reason: "jammer-attachment-mismatch" });
+        }
+        if (
+            !this.hardpointJammers.validatesImpact({
+                groupId: claim.sourceId,
+                surfaceId: claim.sourceType,
+                cycleSequence: claim.sourceSequence,
+                playerId: player.id,
+                attachmentId: rope.attachmentId,
+                impactId: claim.impactId
+            })
+        ) {
+            return Object.freeze({ accepted: false, reason: "jammer-state-mismatch" });
+        }
+        if (claim.damage !== HARDPOINT_JAMMER_IMPACT.totalDamage) {
+            return Object.freeze({ accepted: false, reason: "jammer-damage-mismatch" });
+        }
+        return Object.freeze({ accepted: true, damage: HARDPOINT_JAMMER_IMPACT.totalDamage });
+    }
+
     #resolvePlayerImpactClaim(authenticatedPlayerId, claim, { allowRecoveryState }) {
         const player = this.players.find(({ id }) => id === authenticatedPlayerId);
         if (!player) return Object.freeze({ accepted: false, reason: "player-missing" });
         const bossHazard = this.#validateBossHazardClaim(player, claim);
         if (!bossHazard.accepted) return bossHazard;
+        const hardpointJammer =
+            allowRecoveryState &&
+            claim.outcome?.state &&
+            claim.sourceKind === PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER
+                ? Object.freeze({ accepted: true, damage: HARDPOINT_JAMMER_IMPACT.totalDamage })
+                : this.#validateHardpointJammerClaim(player, claim);
+        if (!hardpointJammer.accepted) return hardpointJammer;
         const impactId = claim.impactId ?? claim.projectileId;
-        const isFallDamage = claim.impactType === "fall-damage";
-        const projectile = isFallDamage ? null : this.objects.enemyProjectiles.find(impactId);
+        const isFallDamage = claim.impactType === PLAYER_IMPACT_TYPE.FALL_DAMAGE;
+        const isJammerShock = claim.impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK;
+        const projectile = isFallDamage || isJammerShock ? null : this.objects.enemyProjectiles.find(impactId);
         if (projectile && this.debugTrainingDummy.ownsProjectile(projectile)) {
             this.objects.enemyProjectiles.remove(projectile.id);
             this.recordProjectileResolution({
@@ -3859,7 +3994,10 @@ export class GameSimulation {
             return Object.freeze({ accepted: false, reason: "fall-damage-mismatch" });
         }
         if (claim.outcome) {
-            const damage = bossHazard.damage ?? (isFallDamage ? fallDamage : (projectile?.damage ?? claim.damage));
+            const damage =
+                bossHazard.damage ??
+                hardpointJammer.damage ??
+                (isFallDamage ? fallDamage : (projectile?.damage ?? claim.damage));
             let bossContactApplied = false;
             if (claim.outcome.state) {
                 if (!allowRecoveryState) {
@@ -3916,7 +4054,7 @@ export class GameSimulation {
             }
             return this.#finalizeVictimImpact(player, claim, projectile, damage);
         }
-        if (isFallDamage) return Object.freeze({ accepted: false, reason: "impact-outcome-required" });
+        if (isFallDamage || isJammerShock) return Object.freeze({ accepted: false, reason: "impact-outcome-required" });
         if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
         if (projectile.targetId !== authenticatedPlayerId) {
             return Object.freeze({ accepted: false, reason: "target-mismatch" });
@@ -3986,6 +4124,16 @@ export class GameSimulation {
     }
 
     #applyVictimImpactTransition(player, claim, damage) {
+        if (claim.impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK) {
+            player.ropeObject.rope.detach();
+            player.ropeObject.swingDrag = null;
+            player.ropeImpactState.reset();
+            player.ropeObject.attachBufferRemaining = 0;
+            player.ropeObject.launcher.clear();
+            player.ropeDisabledRemaining = this.ropeDisabledSeconds;
+            player.statusEffects.applyElectrified({ sourceId: claim.sourceId });
+            return;
+        }
         if (claim.impactType === "rope-cut") {
             player.ropeObject.rope.detach();
             player.ropeObject.swingDrag = null;
@@ -4062,6 +4210,14 @@ export class GameSimulation {
                 playerId: player.id
             };
         }
+        if (claim.impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK) {
+            this.eventFlash = {
+                type: claim.impactType,
+                age: 0,
+                position: new Vector2(claim.position.x, claim.position.y),
+                playerId: player.id
+            };
+        }
         if (claim.sourceKind === PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD) {
             this.recordReplicationEvent("boss-player-hit", {
                 impactId,
@@ -4085,8 +4241,20 @@ export class GameSimulation {
                 position: new Vector2(claim.position.x, claim.position.y)
             },
             {
-                damage: claim.impactType === "player-hit" ? damage : 0,
-                targetId: player.id
+                damage:
+                    claim.impactType === "player-hit" || claim.impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK
+                        ? damage
+                        : 0,
+                targetId: player.id,
+                ...(claim.sourceKind === PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER
+                    ? {
+                          sourceKind: claim.sourceKind,
+                          sourceId: claim.sourceId,
+                          sourceType: claim.sourceType,
+                          sourceSequence: claim.sourceSequence,
+                          effectId: HARDPOINT_JAMMER_IMPACT.effectId
+                      }
+                    : {})
             }
         );
         this.metrics.recordPlayerImpact(claim.impactType, damage);
@@ -4114,13 +4282,7 @@ export class GameSimulation {
                 tick: this.tick,
                 resolution,
                 position,
-                parameters: combatEvent
-                    ? {
-                          damage: combatEvent.damage,
-                          ...(combatEvent.sourcePlayerId ? { sourcePlayerId: combatEvent.sourcePlayerId } : {}),
-                          ...(combatEvent.targetId ? { targetId: combatEvent.targetId } : {})
-                      }
-                    : {}
+                parameters: combatEvent ? { ...combatEvent } : {}
             })
         );
     }
@@ -4167,6 +4329,7 @@ export class GameSimulation {
         player.lifeState = "active";
         player.foundation.resetRuntime();
         player.augmentCombat.resetForRespawn(player.foundation, player.maxHealth);
+        player.statusEffects.reset();
     }
 
     #deathPosition(position, playerId = this.#primaryPlayerId) {

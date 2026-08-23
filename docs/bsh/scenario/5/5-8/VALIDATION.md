@@ -9,13 +9,14 @@
 - [x] Patrol / Pursuit / Standard Sentry = 0
 - [x] Twin-spine macro distinct from 5-1 through 5-7
 - [x] Player spoken dialogue Korean
-- [x] direct 6-1 wiring forbidden
+- [x] authored Gate portal connects directly to 6-1 Entry
 
 ## Runtime
 - [ ] special activation bands do not overlap
 - [ ] Base Rope clears every mandatory relation
 - [ ] recovery ≤5 sec
-- [ ] Jammer preserves one Base-clear cross-link
+- [ ] Jammer automatically targets one normal Rope surface and preserves another Hook-reachable cross-link
+- [ ] Active Jam attachment starts one shock, cuts the Rope, and does not emit pulse-level network events
 - [ ] Cutter only cuts on actual projectile/Rope intersection
 - [ ] Artillery uses stored position
 - [ ] all kills optional
