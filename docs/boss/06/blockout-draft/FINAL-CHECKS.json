@@ -1,0 +1,38 @@
+{
+  "latest_main": "20e6c22deb6e95d9a5a7e351a95874d931a0a845",
+  "design_preflight": "PASS",
+  "damage_design_preflight": "PASS",
+  "runtime_implemented": false,
+  "html_duplicate_ids": 0,
+  "js_syntax": "PASS",
+  "mode_mapping": "PASS",
+  "upper_adjacent_max_px": 363.46,
+  "nonadjacent_shortcuts_le400": 0,
+  "low_escape_coverage_start": 996.51,
+  "low_escape_coverage_end": 4123.49,
+  "usable_main_center_start": 1015,
+  "usable_main_center_end": 4105,
+  "low_escape_continuous": "PASS",
+  "anchor_solid_overlap_count": 0,
+  "legal_warden_nearest_anchor_worst_px": 380.43,
+  "rope_reach_margin_px": 19.57,
+  "simplified_damage_samples": 121,
+  "simplified_damage_failures": 0,
+  "simplified_min_impact_speed": 656.98,
+  "guard_counter_corridor": [
+    1250,
+    3870
+  ],
+  "guard_left_failures": 0,
+  "guard_right_failures": 0,
+  "four_player_spawn_body_range": [
+    1045,
+    1195
+  ],
+  "four_player_spawn": "PASS",
+  "r1_max_reach_px": 368.57,
+  "r3_max_reach_px": 312.0,
+  "ledge_under_clearance_px": 234,
+  "warden_side_margin_on_ledge_px": 92,
+  "runtime_damage_loop_verified": false
+}
