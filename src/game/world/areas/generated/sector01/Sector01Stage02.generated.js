@@ -68,15 +68,15 @@ const SPEC = {
         "desktopZoom": 0.94,
         "horizontalPlayerRatio": 0.68,
         "id": "left-cross",
-        "maxY": -224,
-        "minY": -448,
+        "maxY": -223,
+        "minY": -447,
         "mobileZoom": 0.7
       },
       {
         "desktopZoom": 0.9,
         "id": "airborne-reattach",
-        "maxY": -448,
-        "minY": -640,
+        "maxY": -449,
+        "minY": -641,
         "mobileZoom": 0.68
       },
       {
@@ -447,25 +447,25 @@ const SPEC = {
         "kind": "counterweight-tower",
         "oneWay": false,
         "position": {
-          "x": -544,
-          "y": -704
+          "x": -595,
+          "y": -705
         },
         "vertices": [
           {
-            "x": -592,
-            "y": -704
+            "x": -643,
+            "y": -705
           },
           {
-            "x": -496,
-            "y": -704
+            "x": -547,
+            "y": -705
           },
           {
-            "x": -496,
-            "y": -256
+            "x": -547,
+            "y": -257
           },
           {
-            "x": -592,
-            "y": -256
+            "x": -643,
+            "y": -257
           }
         ]
       },

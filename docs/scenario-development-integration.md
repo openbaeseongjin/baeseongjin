@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획 범위와 현재 Runtime 연결 상태를 한 체크포인트에서 비교하는 기준 문서다. Stage 문서가 존재한다는 사실을 구현 완료로 해석하지 않으며, 마지막으로 어디까지 확인했는지와 다음 구현을 막는 결정을 함께 남긴다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 946d187aa82fa7501ba90377c7e95f4558e136af4bf228468e9b4ef41b13e722
-authored-area-sha256: 4667ead0fa131f573d74efe1d20321700780d2515afc64fff936411a9e0bf6c9
+scenario-source-sha256: 3bc2a62979615d517dce9da84890f1832173eaf8241439c8c6123f30a1868aca
+authored-area-sha256: 84734fa46466bb5fcdcf2e5d3686e597db1bac7ce1eded1420f14e753cf33751
 authored-sector-sha256: 16ea029d1636ceb950e65475eb9e5a092e81718d9b51b13c0082d48cd25ca4fc
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 24be8f80bae7c9efe6586bcd26fd9db0ae3a3e15
+reviewed-upstream: ea007998cef6168bfa4139d06f443eb444acfda5
 -->
 
 ## 상태를 읽는 법
@@ -47,6 +47,7 @@ reviewed-upstream: 24be8f80bae7c9efe6586bcd26fd9db0ae3a3e15
 
 ## 최근 반영된 시나리오 변화
 
+- 2026-08-23 충돌 복구로 Sector 01 `1-2`·`1-4`와 Sector 03 `3-2`·`3-8`의 canonical `AREA-SPEC.v2.json` authored 좌표·경로·오브젝트 배치를 최신 Map Editor 계약 위에 복원하고 generated catalog를 다시 일치시켰다. 새 gameplay·multiplayer·Boss 전환은 추가하지 않았다. `3-2`의 `media-wall-body`는 최신 계약대로 충돌·Rope surface가 아닌 비충돌 `design-reference`로 유지한다.
 - 2026-08-23 Boss03·Boss06을 canonical BossStageSpec/generated catalog와 전용 composite Runtime으로 연결했다. Boss03은 정적 MAP의 Atrium topology와 공용 Scanner cycle을 실제 collision surface·Arm hazard·Polygon 화면으로 재현하고 `3-8→Boss03→4-1`을 연다. Boss06은 별도 weakpoint 없는 96×150 Warden body, 공격자 충돌 위치 기반 Guard/Counter, flat Main·정확한 U1~U8/RR1/RR3, Security Beam과 terminal `6-8→Boss06→Gate/Bridge/Shuttle→전원 Boarding→Escape`를 소유한다. 정적 HTML은 runtime image/collision 입력이 아니며 실제 Gameplay View의 공간 비교 기준이다. 자동 party teleport, Boss Timer/Arena collapse와 Timer/Purge HOLD는 추가하지 않았다.
 - 같은 candidate의 Map Editor `시나리오 비교`에서 Boss03/06 authored canvas와 현행 MAP HTML의 전체 Bounds·주요 surface·Anchor·Recovery·Gate 관계를 나란히 대조했다. production Gameplay View에서 Boss03 P1/P2/P3/승리와 desktop/mobile Scanner·Arm·HUD, Boss06 desktop/mobile neutral·Guard·승리 Gate/Bridge/Shuttle camera를 실제 GameSimulation으로 실행했고 browser console warning/error는 0이었다. one-off simulation은 Boss03 세 Phase→4-1, Boss06 Guard/Counter 정면·후면, Security 단독 hazard, 4P 2500 HP와 3명 ready 미완료→4명 ready 완료를 확인했다. 이는 전체 Rope traversal·실제 두 브라우저 multiplayer·장시간 플레이 완료 판정은 아니다.
 - Boss03/06 final candidate 검증 ledger: base/merge-base/origin `33bf998c6ba2582143d9628cda1074fd84d25986`, pre-ledger binary diff fingerprint `968345dc6eed16194f72319cf6ba54b95b163843`, Node `v25.9.0`. 단일 소유자 Codex가 `npm run check`, `npm run format:check`, 종료 `npm run check:scenario-integration`, staged/unstaged `git diff --check`을 PASS했다. 저장소 기본 자동 test suite는 사용자 결정으로 실행·추가하지 않았다. production 배포와 게임 서버 재시작·Pages `/health.version` 확인은 로컬 구현 범위가 아니며, 0.58.0 병합·배포 작업에서 수행한다.

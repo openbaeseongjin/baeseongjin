@@ -31,11 +31,11 @@
     "subtitle": "EMERGENCY CALIBRATION",
     "surfaces": [
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-04:p0",
         "kind": "platform",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 256,
           "y": 0
@@ -60,11 +60,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-04:vestibule-deck",
         "kind": "platform",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 320,
           "y": -160
@@ -89,11 +89,11 @@
         ]
       },
       {
+        "coordinateAnchor": "bottom-center",
+        "grappleable": false,
         "id": "sector-01-04:service-baffle",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
-        "coordinateAnchor": "bottom-center",
         "position": {
           "x": 96,
           "y": -160
@@ -118,11 +118,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-04:node-deck",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -96,
           "y": -288
@@ -147,11 +147,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-04:calibration-floor",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 32,
           "y": -512
@@ -176,11 +176,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-04:calibration-upper-lip",
         "kind": "platform",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -256,
           "y": -640
@@ -205,40 +205,11 @@
         ]
       },
       {
-        "id": "sector-01-04:exit-transfer",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
         "coordinateAnchor": "top-center",
-        "position": {
-          "x": -256,
-          "y": -704
-        },
-        "vertices": [
-          {
-            "x": -416,
-            "y": -704
-          },
-          {
-            "x": -96,
-            "y": -704
-          },
-          {
-            "x": -96,
-            "y": -680
-          },
-          {
-            "x": -416,
-            "y": -680
-          }
-        ]
-      },
-      {
+        "grappleable": false,
         "id": "sector-01-04:room-casing-left",
         "kind": "room-casing",
         "oneWay": false,
-        "grappleable": false,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -560,
           "y": -832
@@ -263,11 +234,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": false,
         "id": "sector-01-04:room-casing-right",
         "kind": "room-casing",
         "oneWay": false,
-        "grappleable": false,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 560,
           "y": -832
@@ -292,11 +263,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-04:exit-deck",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -256,
           "y": -768
@@ -362,92 +333,78 @@
     "checkpoints": [],
     "objects": [
       {
+        "coordinateAnchor": "bottom-center",
         "id": "sector-01-04:maintenance-node",
+        "interactionRadius": 80,
         "kind": "augment-node",
-        "presentationId": "world-object:augment-node",
+        "objectiveId": "sector-01-04:augment-selected",
         "position": {
           "x": -96,
           "y": -288
         },
-        "coordinateAnchor": "bottom-center",
-        "interactionRadius": 80,
-        "objectiveId": "sector-01-04:augment-selected"
+        "presentationId": "world-object:augment-node"
       },
       {
+        "coordinateAnchor": "center",
         "id": "sector-01-04:universal-calibration-frame",
+        "interactionRadius": 400,
         "kind": "calibration-frame",
-        "presentationId": "world-object:calibration-frame",
+        "objectiveId": "sector-01-04:augment-calibrated",
         "position": {
           "x": 32,
           "y": -512
         },
-        "interactionRadius": 400,
-        "objectiveId": "sector-01-04:augment-calibrated",
-        "coordinateAnchor": "center"
+        "presentationId": "world-object:calibration-frame"
       },
       {
+        "coordinateAnchor": "center",
+        "cueIds": [],
+        "gameplay": false,
         "id": "sector-01-04:calibration-far-sensor",
         "kind": "background-prop",
-        "presentationId": "world-object:background-prop",
         "position": {
           "x": 264,
           "y": -608
         },
-        "gameplay": false,
-        "cueIds": [],
-        "coordinateAnchor": "center"
+        "presentationId": "world-object:background-prop"
       },
       {
+        "coordinateAnchor": "center",
+        "cueIds": [],
+        "gameplay": false,
         "id": "sector-01-04:calibration-receiver",
         "kind": "background-prop",
-        "presentationId": "world-object:background-prop",
         "position": {
           "x": 224,
           "y": -512
         },
-        "gameplay": false,
-        "cueIds": [],
-        "coordinateAnchor": "center"
+        "presentationId": "world-object:background-prop"
       },
       {
+        "coordinateAnchor": "center",
+        "cueIds": [],
+        "gameplay": false,
         "id": "sector-01-04:calibration-pulse-emitter",
         "kind": "background-prop",
-        "presentationId": "world-object:background-prop",
         "position": {
           "x": -208,
           "y": -576
         },
-        "gameplay": false,
-        "cueIds": [],
-        "coordinateAnchor": "center"
+        "presentationId": "world-object:background-prop"
       },
       {
+        "coordinateAnchor": "center",
+        "cueIds": [],
+        "gameplay": false,
         "id": "sector-01-04:calibration-scan-field",
         "kind": "background-prop",
-        "presentationId": "world-object:background-prop",
         "position": {
           "x": -256,
           "y": -608
         },
-        "gameplay": false,
-        "cueIds": [],
-        "coordinateAnchor": "center"
+        "presentationId": "world-object:background-prop"
       },
       {
-        "id": "sector-01-04:node-approach-guard",
-        "kind": "sentry",
-        "presentationId": "world-object:sentry",
-        "position": {
-          "x": 432,
-          "y": -160
-        },
-        "enemyType": "sentry-t1",
-        "enemySelection": {
-          "allowedEnemyTypes": [
-            "sentry-t1",
-            "pursuit-drone-t1"
-          ]
-        },
         "activationSpec": {
           "anchor": "center",
           "offset": {
@@ -455,67 +412,81 @@
             "y": 0
           },
           "size": {
-            "width": 224,
-            "height": 320
+            "height": 320,
+            "width": 224
           }
         },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "pursuit-drone-t1"
+          ]
+        },
+        "enemyType": "sentry-t1",
+        "id": "sector-01-04:node-approach-guard",
+        "kind": "sentry",
+        "position": {
+          "x": 432,
+          "y": -160
+        },
+        "presentationId": "world-object:sentry",
         "rules": [
           "standard-projectile",
           "no-rope-cut"
-        ],
-        "coordinateAnchor": "center"
+        ]
       },
       {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-04:gate",
         "id": "sector-01-04:exit-panel",
+        "interactionRadius": 72,
         "kind": "gate-panel",
-        "presentationId": "world-object:gate-panel",
+        "objectiveId": "sector-01-04:exit-panel-engaged",
         "position": {
           "x": -240,
           "y": -768
         },
-        "coordinateAnchor": "bottom-center",
-        "interactionRadius": 72,
-        "objectiveId": "sector-01-04:exit-panel-engaged",
-        "gateId": "sector-01-04:gate",
+        "presentationId": "world-object:gate-panel",
         "requiredObjectiveIds": [
           "sector-01-04:augment-selected",
           "sector-01-04:augment-calibrated"
         ]
       },
       {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-04:gate",
         "id": "sector-01-04:exit-gate",
         "kind": "gate",
-        "presentationId": "world-object:gate",
         "position": {
           "x": -128,
           "y": -768
         },
-        "coordinateAnchor": "bottom-center",
-        "gateId": "sector-01-04:gate"
+        "presentationId": "world-object:gate"
       }
     ],
     "objectives": [
       {
         "id": "sector-01-04:augment-selected",
-        "type": "interact-choice",
-        "sourceObjectId": "sector-01-04:maintenance-node"
+        "sourceObjectId": "sector-01-04:maintenance-node",
+        "type": "interact-choice"
       },
       {
         "id": "sector-01-04:augment-calibrated",
-        "type": "augment-calibration",
-        "sourceObjectId": "sector-01-04:universal-calibration-frame",
         "requiredObjectiveIds": [
           "sector-01-04:augment-selected"
-        ]
+        ],
+        "sourceObjectId": "sector-01-04:universal-calibration-frame",
+        "type": "augment-calibration"
       },
       {
         "id": "sector-01-04:exit-panel-engaged",
-        "type": "interact",
-        "sourceObjectId": "sector-01-04:exit-panel",
         "requiredObjectiveIds": [
           "sector-01-04:augment-selected",
           "sector-01-04:augment-calibrated"
-        ]
+        ],
+        "sourceObjectId": "sector-01-04:exit-panel",
+        "type": "interact"
       }
     ],
     "windZones": [],
@@ -536,34 +507,34 @@
     ],
     "cameraZones": [
       {
-        "id": "vestibule",
-        "minY": -192,
-        "maxY": 0,
         "desktopZoom": 1.1,
+        "id": "vestibule",
+        "maxY": 0,
+        "minY": -192,
         "mobileZoom": 0.76,
         "verticalPlayerRatio": 0.55
       },
       {
-        "id": "node",
-        "minY": -384,
-        "maxY": -192,
         "desktopZoom": 1.12,
+        "id": "node",
+        "maxY": -192,
+        "minY": -384,
         "mobileZoom": 0.77,
         "verticalPlayerRatio": 0.58
       },
       {
-        "id": "calibration",
-        "minY": -672,
-        "maxY": -384,
         "desktopZoom": 0.98,
+        "id": "calibration",
+        "maxY": -384,
+        "minY": -672,
         "mobileZoom": 0.7,
         "verticalPlayerRatio": 0.62
       },
       {
-        "id": "exit",
-        "minY": -832,
-        "maxY": -672,
         "desktopZoom": 1.12,
+        "id": "exit",
+        "maxY": -670,
+        "minY": -830,
         "mobileZoom": 0.77,
         "verticalPlayerRatio": 0.68
       }

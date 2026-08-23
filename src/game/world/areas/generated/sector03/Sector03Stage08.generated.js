@@ -721,8 +721,8 @@ const SPEC = {
           "waitSeconds": 0.45
         },
         "position": {
-          "x": -1504,
-          "y": -896
+          "x": -1220,
+          "y": -730
         },
         "presentationId": "world-object:patrol-drone",
         "rules": [
@@ -764,8 +764,8 @@ const SPEC = {
           "waitSeconds": 0.45
         },
         "position": {
-          "x": 1088,
-          "y": -1408
+          "x": 475,
+          "y": -1300
         },
         "presentationId": "world-object:patrol-drone",
         "rules": [
@@ -800,8 +800,8 @@ const SPEC = {
         "id": "sector-03-08:market-lower-guard",
         "kind": "sentry",
         "position": {
-          "x": 240,
-          "y": -864
+          "x": -215,
+          "y": -910
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -836,8 +836,8 @@ const SPEC = {
         "id": "sector-03-08:market-upper-guard",
         "kind": "sentry",
         "position": {
-          "x": -704,
-          "y": -1712
+          "x": -125,
+          "y": -1670
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -872,8 +872,8 @@ const SPEC = {
         "id": "sector-03-08:final-control-guard",
         "kind": "sentry",
         "position": {
-          "x": 960,
-          "y": -1712
+          "x": 595,
+          "y": -1860
         },
         "presentationId": "world-object:sentry",
         "rules": [
