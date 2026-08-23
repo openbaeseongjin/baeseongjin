@@ -37,10 +37,7 @@ function normalizePhase(phase, index) {
             minimum: 1
         }),
         weakTargetId: requireId(
-            phase.weakTargetId ??
-                phase.targetId ??
-                phase.vulnerability?.targetId ??
-                `boss-01:weakpoint:phase-${phaseNumber}`,
+            phase.weakTargetId ?? phase.targetId ?? phase.vulnerability?.targetId,
             `Boss phase ${phaseNumber} weakTargetId`
         ),
         mechanicId: requireId(phase.mechanicId ?? phase.mechanicIds?.[0], `Boss phase ${phaseNumber} mechanicId`),

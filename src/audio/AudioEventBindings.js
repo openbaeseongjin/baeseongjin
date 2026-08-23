@@ -71,32 +71,20 @@ function playerHitBinding(event, context) {
 }
 
 const BOSS_CUE_BY_EVENT_TYPE = Object.freeze({
-    "boss-full-beam-sweep-telegraphed": "gameplay-boss-beam-telegraph",
-    "boss-directional-beam-sweep-telegraphed": "gameplay-boss-beam-telegraph",
-    "boss-beam-failure-telegraphed": "gameplay-boss-beam-telegraph",
-    "boss-full-beam-sweep-started": "gameplay-boss-beam-sweep",
-    "boss-directional-beam-sweep-started": "gameplay-boss-beam-sweep",
-    "boss-beam-failure-sweep-started": "gameplay-boss-beam-sweep",
-    "boss-beam-failed": "gameplay-boss-beam-break",
-    "boss-rail-ram-telegraphed": "gameplay-boss-ram-telegraph",
     "boss-attack-telegraphed": "gameplay-boss-beam-telegraph",
     "boss-attack-started": "gameplay-boss-beam-sweep",
     "boss-weakpoint-opened": "gameplay-boss-beam-break",
-    "boss-control-signal": "ui-confirm",
-    "boss-guard-destroyed": "gameplay-boss-beam-break",
     "boss-encounter-completed": "ui-confirm"
 });
 
 function bossEventBinding(event, context) {
-    const cueId =
-        BOSS_CUE_BY_EVENT_TYPE[event.eventType] ??
-        (event.eventType === "boss-player-hit" && event.hazardKind === "rail-ram" ? "gameplay-boss-ram-impact" : null);
+    const cueId = BOSS_CUE_BY_EVENT_TYPE[event.eventType] ?? null;
     if (!cueId) return null;
     return Object.freeze({
         cueId,
         request: Object.freeze({
             ...context,
-            emitterId: event.bossStageId ?? "boss-01",
+            emitterId: event.bossStageId ?? event.sourceId ?? "boss",
             causalId: eventCausalId("boss", event),
             position: eventPosition(event) ?? context.listener
         })

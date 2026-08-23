@@ -1,22 +1,4 @@
 const NORMALIZED_VERTICES_BY_PRESET = Object.freeze({
-    "gate-locking-carriage": Object.freeze([
-        [-0.45, -0.25],
-        [-0.33, -0.42],
-        [0.33, -0.42],
-        [0.45, -0.25],
-        [0.4, 0.25],
-        [-0.4, 0.25]
-    ]),
-    "residential-security-pursuer": Object.freeze([
-        [-0.5, -0.32],
-        [-0.38, -0.5],
-        [0.34, -0.5],
-        [0.5, -0.2],
-        [0.5, 0.32],
-        [0.32, 0.5],
-        [-0.38, 0.5],
-        [-0.5, 0.22]
-    ]),
     "central-exchange-maintenance-system": Object.freeze([
         [-0.5, -0.22],
         [-0.34, -0.5],

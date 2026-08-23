@@ -9,6 +9,4 @@ AEGIS / JAMMER / ARTILLERY / CUTTER.
 
 REV2.1 recalls all four sequentially without overlap and closes Sector05's causal story.
 
-5-8 완료 뒤 Boss05로 진입하고 Boss05 처치 뒤 6-1로 전환한다. direct 5-8 → 6-1 wiring은 계속 금지한다.
-
-Boss05의 `CONTINUITY CONTROL CORE` 최종 인계는 [`../../../../boss/05/README.md`](../../../../boss/05/README.md)에 보존한다. 인계는 authored content이며 Boss Runtime·전환·Timer를 구현하거나 이 경계를 연결하지 않는다.
+5-8 objective 완료 뒤 authored Gate portal로 6-1 Entry에 직접 전환한다. 별도 Boss Stage·전투 완료 조건은 없다.

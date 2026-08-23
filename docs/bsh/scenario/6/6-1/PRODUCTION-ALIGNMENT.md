@@ -2,7 +2,7 @@
 
 Runtime: `AREA-SPEC.v2.json` generated source, threat-free, five visible recovery catches; browser tuning pending.
 
-Entry authority: Boss05 defeat transitions to 6-1; direct 5-8 → 6-1 wiring remains forbidden.
+Entry authority: 5-8 objective 완료 뒤 authored Gate portal이 6-1 Entry로 직접 전환한다.
 
 Baseline `1009af0ef14ec9f64af891833156e6af8a1abdc1`.
 

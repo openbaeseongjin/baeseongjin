@@ -111,11 +111,7 @@ const KIND_LABELS = Object.freeze({
     combat: "HP / 피해",
     hud: "Boss HUD",
     transition: "전환",
-    phase: "Phase",
-    "full-crossbeam-sweep": "Full Crossbeam",
-    "directional-broken-beam-sweep": "Directional Beam",
-    "beam-failure": "Beam Failure",
-    "rail-ram": "Rail Ram"
+    phase: "Phase"
 });
 const MAX_ZOOM = 2.4;
 const MIN_ZOOM = 0.08;
@@ -604,14 +600,18 @@ function addPreset(kind) {
             apply: (spec) => {
                 spec.mechanics.push({
                     id,
-                    type: "rail-ram",
+                    type: BOSS_MECHANIC_TYPE.CENTRAL_EXCHANGE_MAINTENANCE,
                     position: point,
-                    parameters: { travelSpeed: 300, telegraphSeconds: 0.5, recoverySeconds: 1.5 }
+                    parameters: {}
                 });
                 return true;
             }
         });
-        state.draft.select({ domain: "mechanics", id, kind: "rail-ram" });
+        state.draft.select({
+            domain: "mechanics",
+            id,
+            kind: BOSS_MECHANIC_TYPE.CENTRAL_EXCHANGE_MAINTENANCE
+        });
         return render();
     }
     if (kind === "entry") {

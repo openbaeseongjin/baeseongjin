@@ -43,7 +43,7 @@ Safe/Flow final read
 - `sealed-corporate-surface-v1` authoring preset
 - 5-1 Direction migration
 - 5-1 story / Bark runtime presentation
-- approved Boss04 defeat → 5-1 wiring
+- authored 4-8 completion → 5-1 Gate portal wiring
 
 ## Story Continuity
 

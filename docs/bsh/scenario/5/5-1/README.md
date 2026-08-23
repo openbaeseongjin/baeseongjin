@@ -455,7 +455,7 @@ Progression target:
 5-2
 ```
 
-5-1 entry authority: `BOSS04 DEFEATED → 5-1`.
+5-1 entry authority: `4-8 COMPLETE → 5-1` authored Gate portal.
 
 Direct `4-8 → 5-1` wiring은 금지한다.
 

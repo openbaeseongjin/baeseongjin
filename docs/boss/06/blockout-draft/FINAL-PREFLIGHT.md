@@ -114,9 +114,9 @@ Warden가 Main에 서 있을 때 머리 위 잔여 여유 = `84px`
 - Shield/Baton은 solid collider에 포함하지 않음
 - Charge/Dash 공격 판정은 hazard geometry로 분리
 
-## 6. Boss02 최신 플레이테스트 교훈 반영
+## 6. 이동형 Boss 공간 교훈 반영
 
-최신 main의 Boss02는 실제 플레이테스트 뒤 Arena를 크게 확장하고,
+이동형 Boss는 실제 플레이테스트 뒤 Arena를 충분히 확보하고,
 Boss body/회전 Polygon/hazard가 현재 구역 밖으로 나가지 않게 제한했으며,
 재배치 후보가 구조물과 겹치면 관통 이동을 하지 않도록 수정됐다.
 

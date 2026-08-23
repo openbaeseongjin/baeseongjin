@@ -6,7 +6,7 @@
 
 > Authoring snapshot: `3c9f661bba58af6f7351e00754c12aef86575a12`<br>
 > This package supersedes legacy 4-8 `TRANSIT CONTROL TRUNK`.<br>
-> Downstream authority: `4-8 COMPLETE → BOSS04 → BOSS04 DEFEATED → 5-1`.
+> Downstream authority: `4-8 COMPLETE → 5-1`.
 
 ## Stage sentence
 
@@ -76,4 +76,4 @@ Sector 04 ends on the contradiction that this protected system remains operation
 Stage-local completion:
 `FINAL ASCENT CONTROL reached`
 
-The completed Stage enters Boss04; Boss04 defeat enters 5-1. Direct `4-8 → 5-1`, General Timer stop and Boss Timer start remain outside this Stage.
+The completed Stage opens the authored Gate portal to 5-1. General Timer transition policy remains outside this Stage.

@@ -2,22 +2,6 @@
     "schemaVersion": "area-editor-catalog-v2",
     "stages": [
         {
-            "stageId": "boss-01",
-            "bossStageId": "boss-01",
-            "specType": "boss-stage",
-            "authoringMode": "runtime-generated",
-            "sourcePath": "src/game/boss-authoring/specs/boss-01.json",
-            "outputPath": "src/game/boss-authoring/generated/Boss01Stage.generated.js"
-        },
-        {
-            "stageId": "boss-02",
-            "bossStageId": "boss-02",
-            "specType": "boss-stage",
-            "authoringMode": "runtime-generated",
-            "sourcePath": "src/game/boss-authoring/specs/boss-02.json",
-            "outputPath": "src/game/boss-authoring/generated/Boss02Stage.generated.js"
-        },
-        {
             "stageId": "boss-03",
             "bossStageId": "boss-03",
             "specType": "boss-stage",
@@ -25,24 +9,6 @@
             "mapReferencePath": "docs/boss/03/final-content/MAP-PREVIEW.html",
             "sourcePath": "src/game/boss-authoring/specs/boss-03.json",
             "outputPath": "src/game/boss-authoring/generated/Boss03Stage.generated.js"
-        },
-        {
-            "stageId": "boss-04",
-            "bossStageId": "boss-04",
-            "specType": "boss-stage",
-            "authoringMode": "runtime-generated",
-            "mapReferencePath": "docs/boss/04/final-content/MAP-PREVIEW.html",
-            "sourcePath": "src/game/boss-authoring/specs/boss-04.json",
-            "outputPath": "src/game/boss-authoring/generated/Boss04Stage.generated.js"
-        },
-        {
-            "stageId": "boss-05",
-            "bossStageId": "boss-05",
-            "specType": "boss-stage",
-            "authoringMode": "runtime-generated",
-            "mapReferencePath": "docs/boss/05/final-content/MAP-PREVIEW.html",
-            "sourcePath": "src/game/boss-authoring/specs/boss-05.json",
-            "outputPath": "src/game/boss-authoring/generated/Boss05Stage.generated.js"
         },
         {
             "stageId": "boss-06",

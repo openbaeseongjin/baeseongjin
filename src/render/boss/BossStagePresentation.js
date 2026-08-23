@@ -54,106 +54,13 @@ function freezeWorldObject(object) {
     });
 }
 
-const MECHANIC_PRESENTATION_KIND = Object.freeze({
-    "full-crossbeam-sweep": "beam",
-    "directional-broken-beam-sweep": "beam",
-    "beam-failure": "beam",
-    "rail-ram": "ram"
-});
 const PRESENTATION_KIND = Object.freeze({
-    "boss-carriage": "carriage",
-    "boss-beam": "beam",
-    "boss-rail-ram": "ram",
-    "boss-weakpoint": "weakpoint",
-    "boss-grapple-anchor": "grapple-anchor",
-    "boss-residential-pursuer": "residential-pursuer",
-    "boss-charge-line": "charge-line",
-    "boss-slam-zone": "slam-zone",
-    "boss-dive-line": "dive-line",
-    "boss-architecture-impact": "architecture-impact"
+    "boss-grapple-anchor": "grapple-anchor"
 });
 const DIRECTION_LABEL = Object.freeze({ "-1": "left", 1: "right" });
 
 function directionLabel(direction) {
     return DIRECTION_LABEL[String(direction)] ?? null;
-}
-
-function stageSpecWorldObjects(stageSpec, snapshot) {
-    if (!stageSpec?.boss) return [];
-    const mechanicStateById = snapshot.mechanicStates ?? {};
-    const mechanism = snapshot.mechanism ?? {};
-    const currentMechanicIds = Object.freeze(
-        stageSpec.phases?.[Math.max(0, (snapshot.phase ?? 1) - 1)]?.mechanicIds ?? []
-    );
-    const objects = [
-        {
-            id: stageSpec.boss.actorId,
-            kind: stageSpec.boss.visualPresetId === "residential-security-pursuer" ? "residential-pursuer" : "carriage",
-            variant: stageSpec.boss.visualPresetId,
-            state: snapshot.status === "completed" ? "disabled" : "active",
-            position: snapshot.bossPosition ?? {
-                x: Number.isFinite(mechanism.positionX) ? mechanism.positionX : stageSpec.boss.position.x,
-                y: stageSpec.boss.position.y
-            },
-            size: {
-                width: stageSpec.boss.collider?.width,
-                height: stageSpec.boss.collider?.height
-            },
-            direction: snapshot.travelDirection ?? directionLabel(mechanism.direction)
-        },
-        ...(stageSpec.mechanics ?? [])
-            .filter((mechanic) => currentMechanicIds.includes(mechanic.id) || mechanicStateById[mechanic.id])
-            .map((mechanic) => ({
-                id: mechanic.id,
-                kind: MECHANIC_PRESENTATION_KIND[mechanic.type] ?? "mechanism",
-                variant: mechanic.type,
-                state: mechanicStateById[mechanic.id]?.state ?? mechanism.state ?? "idle",
-                actionState: mechanism.state ?? "idle",
-                damaging: mechanism.state === "sweep",
-                movementProgress: finite(mechanism.movementProgress),
-                position: mechanicStateById[mechanic.id]?.position ?? mechanic.position,
-                size: mechanic.bounds ? { width: mechanic.bounds.width, height: mechanic.bounds.height } : undefined,
-                direction:
-                    mechanicStateById[mechanic.id]?.direction ??
-                    mechanism.beamDirection ??
-                    directionLabel(mechanism.direction)
-            }))
-    ];
-    const activeTargetId = snapshot.activeTargetId ?? snapshot.currentTargetId ?? snapshot.vulnerability?.targetId;
-    if (activeTargetId) {
-        objects.push({
-            id: activeTargetId,
-            kind: "weakpoint",
-            variant: stageSpec.phases?.[Math.max(0, (snapshot.phase ?? 1) - 1)]?.vulnerability?.visualPresetId,
-            state:
-                snapshot.weakpointExposed || snapshot.vulnerability?.active || mechanism.weakpointExposed
-                    ? "exposed"
-                    : "secured",
-            position: snapshot.activeTargetPosition ??
-                snapshot.bossPosition ?? {
-                    x: Number.isFinite(mechanism.positionX) ? mechanism.positionX : stageSpec.boss.position.x,
-                    y: stageSpec.boss.position.y
-                },
-            size: snapshot.activeTargetSize ?? { width: 96, height: 96 },
-            active: true
-        });
-    }
-    return objects;
-}
-
-function enrichRuntimeWorldObject(object, stageSpec, phase) {
-    if (object.size || object.bounds || !stageSpec) return object;
-    const kind = PRESENTATION_KIND[object.kind] ?? object.kind;
-    if (kind === "carriage" || kind === "residential-pursuer") {
-        return { ...object, size: stageSpec.boss?.collider };
-    }
-    if (kind === "weakpoint") return { ...object, size: { width: 96, height: 96 } };
-    if (kind !== "beam") return object;
-    const currentMechanicIds = stageSpec.phases?.[phase - 1]?.mechanicIds ?? [];
-    const beam = stageSpec.mechanics?.find(
-        (mechanic) => currentMechanicIds.includes(mechanic.id) && MECHANIC_PRESENTATION_KIND[mechanic.type] === "beam"
-    );
-    return beam?.bounds ? { ...object, size: beam.bounds } : object;
 }
 
 export function createBossStagePresentation(snapshot, stageSpec = null) {
@@ -214,12 +121,8 @@ export function createBossStagePresentation(snapshot, stageSpec = null) {
             vulnerabilityDurationSeconds: finite(currentPhase.vulnerability?.durationSeconds)
         }),
         world: Object.freeze({
-            name: presentation.name ?? snapshot.name ?? hud.title ?? hud.name ?? "GATE LOCKING CARRIAGE",
-            objects: Object.freeze(
-                (presentation.objects ?? snapshot.presentationObjects ?? stageSpecWorldObjects(stageSpec, snapshot))
-                    .map((object) => enrichRuntimeWorldObject(object, stageSpec, phase))
-                    .map(freezeWorldObject)
-            )
+            name: presentation.name ?? snapshot.name ?? hud.title ?? hud.name ?? "BOSS",
+            objects: Object.freeze((presentation.objects ?? snapshot.presentationObjects ?? []).map(freezeWorldObject))
         })
     });
 }

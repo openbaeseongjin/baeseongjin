@@ -38,6 +38,15 @@ const runtimeCatalogs = Object.freeze([
 const RUNTIME_STAGE_COUNT = 48;
 const SCENARIO_STAGE_COUNT = 0;
 const TOTAL_STAGE_COUNT = RUNTIME_STAGE_COUNT + SCENARIO_STAGE_COUNT;
+const EXPECTED_BOSS_STAGE_IDS = Object.freeze(["boss-03", "boss-06"]);
+const EXPECTED_SECTOR_END_FLOW = Object.freeze({
+    "1-8": Object.freeze({ targetStageId: "2-1", bossStageId: null }),
+    "2-8": Object.freeze({ targetStageId: "3-1", bossStageId: null }),
+    "3-8": Object.freeze({ targetStageId: "4-1", bossStageId: "boss-03" }),
+    "4-8": Object.freeze({ targetStageId: "5-1", bossStageId: null }),
+    "5-8": Object.freeze({ targetStageId: "6-1", bossStageId: null }),
+    "6-8": Object.freeze({ targetStageId: null, bossStageId: "boss-06" })
+});
 const PROMOTED_STAGE_ENTRY_SECTOR_RANGE = Object.freeze({ first: 4, last: 6 });
 const BASE_ROPE_REACH = ropeHookReach(ROPE_CONFIG);
 const FORBIDDEN_AUTHORITY_KEYS = Object.freeze({
@@ -294,6 +303,16 @@ function validateEditorCatalog(editorCatalog, issues) {
         return Object.freeze({ runtimeEntries: [], scenarioEntries: [] });
     }
     collectForbiddenKeys(editorCatalog, editorCatalogPath, issues);
+    const bossStageEntries = editorCatalog.stages.filter(({ specType }) => specType === "boss-stage");
+    const bossStageIds = bossStageEntries
+        .map(({ stageId }) => stageId)
+        .sort((left, right) => left.localeCompare(right));
+    if (JSON.stringify(bossStageIds) !== JSON.stringify(EXPECTED_BOSS_STAGE_IDS)) {
+        issue(issues, "editor-boss-stage-catalog-mismatch", {
+            expected: EXPECTED_BOSS_STAGE_IDS,
+            actual: bossStageIds
+        });
+    }
     const authoredStageEntries = editorCatalog.stages.filter(({ stageId }) => /^\d+-\d+$/.test(stageId));
     const stageIndex = indexBy(authoredStageEntries, "stageId", issues, "editor-stage-duplicate");
     const expectedIds = expectedStageIds(1, 6);
@@ -333,6 +352,38 @@ function validateEditorCatalog(editorCatalog, issues) {
         issue(issues, "scenario-stage-count", { expected: SCENARIO_STAGE_COUNT, actual: scenarioEntries.length });
     }
     return Object.freeze({ runtimeEntries, scenarioEntries });
+}
+
+function validateBossStageFlow(world, issues) {
+    const bossStageIds = world.bossStages.map(({ id }) => id).sort((left, right) => left.localeCompare(right));
+    if (JSON.stringify(bossStageIds) !== JSON.stringify(EXPECTED_BOSS_STAGE_IDS)) {
+        issue(issues, "runtime-boss-stage-catalog-mismatch", {
+            expected: EXPECTED_BOSS_STAGE_IDS,
+            actual: bossStageIds
+        });
+    }
+    for (const [sourceStageId, expected] of Object.entries(EXPECTED_SECTOR_END_FLOW)) {
+        const source = world.landmarks.find(({ stageId }) => stageId === sourceStageId);
+        const transition = world.stageTransitions.find(({ sourceLandmarkId }) => sourceLandmarkId === source?.id);
+        const target = world.landmarks.find(({ id }) => id === transition?.targetLandmarkId);
+        const bossStage = world.bossStages.find(({ sourceLandmarkId }) => sourceLandmarkId === source?.id);
+        const expectedEntryRouteId = expected.bossStageId ? (transition?.routeLockId ?? null) : null;
+        if (
+            !source ||
+            (target?.stageId ?? null) !== expected.targetStageId ||
+            (bossStage?.id ?? null) !== expected.bossStageId ||
+            (bossStage?.entryRouteId ?? null) !== expectedEntryRouteId
+        ) {
+            issue(issues, "sector-end-boss-flow-mismatch", {
+                sourceStageId,
+                expected,
+                targetStageId: target?.stageId ?? null,
+                bossStageId: bossStage?.id ?? null,
+                bossEntryRouteId: bossStage?.entryRouteId ?? null,
+                transitionRouteId: transition?.routeLockId ?? null
+            });
+        }
+    }
 }
 
 function validateScenarioExclusion({ scenarioEntries, world, issues }) {
@@ -1018,6 +1069,7 @@ export function validateProductionMapParity() {
         });
     }
     validateScenarioExclusion({ scenarioEntries: catalogValidation.scenarioEntries, world, issues });
+    validateBossStageFlow(world, issues);
     validateContentBoundaryProgress(world, issues);
     validateSector04QuorumCollision(world, issues);
     const reports = validateRuntimeStages({ runtimeEntries: catalogValidation.runtimeEntries, world, issues });

@@ -57,6 +57,4 @@ Remove from 4-8 authored content:
 
 ## Post-sector boundary
 
-`4-8 완료 → Boss04 → Boss04 처치 → 5-1`을 사용한다. direct `4-8 → 5-1`, timer transition과 corporate continuity reveal은 4-8이 소유하지 않는다.
-
-Boss04의 최종 Guard A/B·Central Security Hub 인계는 [`../../../../boss/04/README.md`](../../../../boss/04/README.md)가 소유한다. 이는 authored content이며 Boss Runtime·전환·Timer를 구현하거나 `4-8` 경계를 연결하지 않는다.
+`4-8 완료 → 5-1` authored Gate portal을 사용한다. 2-of-3 quorum과 source objective가 route unlock을 소유하며 별도 Boss Stage는 없다. Timer transition과 corporate continuity reveal은 4-8이 소유하지 않는다.

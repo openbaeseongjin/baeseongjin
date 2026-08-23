@@ -1,7 +1,8 @@
 # BOSS 03 — 중앙 교환기 점검 시스템
 ## 핵심 브리프 + 스토리/연출
 
-> 상태: **FINAL CONTENT HANDOFF / 미구현**
+> 상태: **RETIRED AS NEW DESIGN INPUT / TEMPORARY RUNTIME HISTORY**
+> 이 문서의 Scanner·Arm 정체성·공간·공격은 신규 이동형 Boss03 기획으로 승계하지 않는다.
 > AUTHORING SNAPSHOT: GitHub `main` `6a8911d354df6b218a64970b5d35d41359ef62f2`. 현재 main과 Runtime 연결 상태는 `docs/scenario-development-integration.md`가 소유한다.
 > Sector: **03 CENTRAL EXCHANGE COMPLEX**
 
@@ -44,7 +45,7 @@ Player는 동시에:
 - P2→P3 Safe Landing
 - 최종 Atrium 대횡단
 
-Boss02처럼 Player를 직접 따라붙는 보스가 아니라 **공간 전체를 장악하는 보스**여야 한다.
+과거 추격형 Boss처럼 Player를 직접 따라붙는 보스가 아니라 **공간 전체를 장악하는 보스**여야 한다.
 
 ## 3. 변하지 않는 규칙
 
@@ -244,7 +245,7 @@ MAINTENANCE OVERRIDE / OFFLINE
 - Scanner가 랜덤하게 바뀌는 전투
 - LOCKED 순간 기존 Rope를 강제로 끊는 것
 - Scanner를 Damage Laser처럼 사용하는 것
-- Boss가 Player를 직접 쫓아다니는 Boss02 반복
+- Boss가 Player를 직접 쫓아다니는 과거 추격형 패턴 반복
 - 점검 팔을 단순 탄막처럼 많이 추가
 - 특정 Build만 통과 가능한 Route
 - 중앙/좌/우 중 항상 정답인 고정 Route
