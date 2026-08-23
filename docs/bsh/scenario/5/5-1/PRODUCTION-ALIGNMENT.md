@@ -43,7 +43,7 @@ Safe/Flow final read
 - `sealed-corporate-surface-v1` authoring preset
 - 5-1 Direction migration
 - 5-1 story / Bark runtime presentation
-- Post-Sector04 Boss/Transition → 5-1 wiring
+- approved Boss04 defeat → 5-1 wiring
 
 ## Story Continuity
 

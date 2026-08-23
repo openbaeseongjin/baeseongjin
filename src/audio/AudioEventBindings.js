@@ -78,7 +78,13 @@ const BOSS_CUE_BY_EVENT_TYPE = Object.freeze({
     "boss-directional-beam-sweep-started": "gameplay-boss-beam-sweep",
     "boss-beam-failure-sweep-started": "gameplay-boss-beam-sweep",
     "boss-beam-failed": "gameplay-boss-beam-break",
-    "boss-rail-ram-telegraphed": "gameplay-boss-ram-telegraph"
+    "boss-rail-ram-telegraphed": "gameplay-boss-ram-telegraph",
+    "boss-attack-telegraphed": "gameplay-boss-beam-telegraph",
+    "boss-attack-started": "gameplay-boss-beam-sweep",
+    "boss-weakpoint-opened": "gameplay-boss-beam-break",
+    "boss-control-signal": "ui-confirm",
+    "boss-guard-destroyed": "gameplay-boss-beam-break",
+    "boss-encounter-completed": "ui-confirm"
 });
 
 function bossEventBinding(event, context) {

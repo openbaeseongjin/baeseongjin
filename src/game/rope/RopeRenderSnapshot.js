@@ -19,6 +19,8 @@ export const withRopeRenderSnapshot = createRenderSnapshotCapabilityMixin({
             rope: {
                 isAttached: this.rope.isAttached,
                 anchor: snapshotVector(this.rope.anchor),
+                anchorOwnerId: this.rope.anchorOwnerId,
+                anchorLocalOffset: snapshotVector(this.rope.anchorLocalOffset),
                 attachmentOffset: snapshotVector(this.rope.attachmentOffset),
                 length: this.rope.length,
                 currentLength: this.rope.currentLength,

@@ -5,6 +5,7 @@ import { SURFACE_MOTION_TYPE } from "../SurfacePhysicsDefinition.js";
 const COLLIDER_EPSILON = 1e-7;
 const DYNAMIC_ACTOR_RESTITUTION = 0.25;
 const PLAYER_REFERENCE_RADIUS = 15;
+const GRAVITY_DIRECTION = Object.freeze({ x: 0, y: 1 });
 const STATIC_ENEMY_TYPE = Object.freeze({
     [ENEMY_TYPE.SENTRY]: true,
     [ENEMY_TYPE.SENTRY_T1]: true
@@ -250,6 +251,14 @@ export function colliderSnapshotsEqual(left, right) {
     );
 }
 
+export function isGravitySupportingContactNormal(normal, gravityDirection = GRAVITY_DIRECTION) {
+    if (!Number.isFinite(normal?.x) || !Number.isFinite(normal?.y)) return false;
+    if (!Number.isFinite(gravityDirection?.x) || !Number.isFinite(gravityDirection?.y)) {
+        throw new Error("gravity direction must contain finite x and y values");
+    }
+    return normal.x * gravityDirection.x + normal.y * gravityDirection.y < 0;
+}
+
 function actorMotionType(actor, fallback = SURFACE_MOTION_TYPE.DYNAMIC) {
     if (VALID_SURFACE_MOTION_TYPE[actor?.motionType] === true) return actor.motionType;
     if (STATIC_ENEMY_TYPE[actor?.enemyType] === true) return SURFACE_MOTION_TYPE.STATIC;
@@ -327,7 +336,7 @@ export function resolveActorCollider({
     }
     return Object.freeze({
         collided: true,
-        isGrounded: isGrounded || (other.canGroundActors !== false && normal.y < -0.55),
+        isGrounded: isGrounded || (other.canGroundActors !== false && isGravitySupportingContactNormal(normal)),
         velocityDelta: Object.freeze({ x: velocityDeltaX, y: velocityDeltaY })
     });
 }

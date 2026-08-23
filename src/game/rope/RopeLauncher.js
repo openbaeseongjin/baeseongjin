@@ -17,6 +17,28 @@ function finiteVector(value, label) {
     return value;
 }
 
+function attachmentTarget(value) {
+    if (value === undefined || value === null) return null;
+    if (typeof value.ownerId !== "string" || !value.ownerId) {
+        throw new TypeError("rope attachment target ownerId must be non-empty");
+    }
+    finiteVector(value.localAnchor, "rope attachment target localAnchor");
+    return Object.freeze({
+        ownerId: value.ownerId,
+        localAnchor: Object.freeze({ x: value.localAnchor.x, y: value.localAnchor.y })
+    });
+}
+
+function launchTarget(target) {
+    if (!target) return null;
+    finiteVector(target, "launch target");
+    return Object.freeze({
+        x: target.x,
+        y: target.y,
+        ropeAttachment: attachmentTarget(target.ropeAttachment)
+    });
+}
+
 export class RopeLauncher {
     constructor(ropeConfig) {
         if (!ropeConfig) throw new Error("RopeLauncher requires a rope config");
@@ -52,7 +74,7 @@ export class RopeLauncher {
         this.shot = {
             origin: { x: origin.x, y: origin.y },
             direction: { x: direction.x / magnitude, y: direction.y / magnitude },
-            target: target ? { x: target.x, y: target.y } : null,
+            target: launchTarget(target),
             traveled: 0,
             elapsed: 0
         };
@@ -83,7 +105,7 @@ export class RopeLauncher {
             if (distance <= this.reach + LAUNCHER_NUMERIC_TOLERANCE && this.shot.traveled >= distance) {
                 const target = this.shot.target;
                 this.shot = null;
-                return Object.freeze({ status: "hit", target: Object.freeze({ ...target }) });
+                return Object.freeze({ status: "hit", target: target });
             }
         }
         if (this.shot.elapsed >= this.flightSeconds) {
@@ -92,6 +114,20 @@ export class RopeLauncher {
             return Object.freeze({ status: "expired" });
         }
         return Object.freeze({ status: "flying" });
+    }
+
+    refreshAttachmentTarget(resolveAttachmentTarget) {
+        if (!this.shot?.target?.ropeAttachment) return true;
+        if (typeof resolveAttachmentTarget !== "function") return false;
+        const target = resolveAttachmentTarget(this.shot.target.ropeAttachment.ownerId);
+        if (!target?.position) return false;
+        finiteVector(target.position, "rope attachment target position");
+        this.shot.target = Object.freeze({
+            x: target.position.x,
+            y: target.position.y,
+            ropeAttachment: this.shot.target.ropeAttachment
+        });
+        return true;
     }
 
     cancel() {
@@ -126,7 +162,7 @@ export class RopeLauncher {
             shot: Object.freeze({
                 origin: Object.freeze({ ...this.shot.origin }),
                 direction: Object.freeze({ ...this.shot.direction }),
-                target: this.shot.target ? Object.freeze({ ...this.shot.target }) : null,
+                target: this.shot.target ? this.shot.target : null,
                 traveled: this.shot.traveled,
                 elapsed: this.shot.elapsed
             }),
@@ -171,7 +207,7 @@ export class RopeLauncher {
         this.shot = {
             origin: { x: origin.x, y: origin.y },
             direction: { x: direction.x, y: direction.y },
-            target: shot.target ? { x: shot.target.x, y: shot.target.y } : null,
+            target: launchTarget(shot.target),
             traveled: shot.traveled,
             elapsed: shot.elapsed
         };

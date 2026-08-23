@@ -180,15 +180,19 @@ ENTRY LEFT
 Gameplay-relevant collision only.
 
 ### CORE A
+
 `x=-480..+480 / y=-620..-300`
 
 ### CORE B
+
 `x=-650..+650 / y=-1110..-830`
 
 ### CORE C
+
 `x=-520..+520 / y=-1580..-1330`
 
 ### CORE D
+
 `x=-700..+700 / y=-2080..-1840`
 
 All:
@@ -451,8 +455,9 @@ Progression target:
 5-2
 ```
 
-The incoming Post-Sector04→5-1 transition is still provisional.
-Do not hard-lock the 5-1 Entry to an unauthored Boss/Transition.
+5-1 entry authority: `BOSS04 DEFEATED → 5-1`.
+
+Direct `4-8 → 5-1` wiring은 금지한다.
 
 ---
 
@@ -497,18 +502,23 @@ A failed crossing should not always reset the entire 7.7k-px route.
 ## 18. Camera
 
 ### C0 Entry Establish
+
 Player + large CORE A + H1 + Reception.
 
 ### C1 Gap 1 Read
+
 Current and next Hardpoint + gap direction.
 
 ### C2 Control Void
+
 Player small in frame + CORE B + reverse route clue.
 
 ### C3 Inspection
+
 H4 SAFE + H4 FLOW candidates in one frame.
 
 ### C4 Final Core
+
 CORE D mass + H5/H6 + Final Deck.
 
 Never zoom out enough to display the whole 4608×2432 Stage at once during normal gameplay.
@@ -617,4 +627,4 @@ REDESIGN / BLOCK release if:
 - the Player Bark fires before the network state is read.
 - Player dialogue claims causality.
 - Direction Runtime duplicates legacy Story presentation.
-- incoming Post-Sector04 transition is invented.
+- direct `4-8 → 5-1` transition is added.

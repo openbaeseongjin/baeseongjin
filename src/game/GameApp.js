@@ -26,7 +26,9 @@ const BOSS_CAMERA_ZOOM_RATIO = 0.72;
 
 function bossCameraPlayer(player, bossStage) {
     if (bossStage?.status !== "active") return player;
-    const carriage = bossStage.presentation?.objects?.find(({ kind }) => kind === "boss-carriage");
+    const carriage = bossStage.presentation?.objects?.find(
+        ({ kind }) => kind === "boss-carriage" || kind === "boss-security-hub" || kind === "boss-continuity-core"
+    );
     if (!carriage?.position) return player;
     return {
         ...player,

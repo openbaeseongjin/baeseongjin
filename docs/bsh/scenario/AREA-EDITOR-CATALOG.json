@@ -18,6 +18,22 @@
             "outputPath": "src/game/boss-authoring/generated/Boss02Stage.generated.js"
         },
         {
+            "stageId": "boss-04",
+            "bossStageId": "boss-04",
+            "specType": "boss-stage",
+            "authoringMode": "runtime-generated",
+            "sourcePath": "src/game/boss-authoring/specs/boss-04.json",
+            "outputPath": "src/game/boss-authoring/generated/Boss04Stage.generated.js"
+        },
+        {
+            "stageId": "boss-05",
+            "bossStageId": "boss-05",
+            "specType": "boss-stage",
+            "authoringMode": "runtime-generated",
+            "sourcePath": "src/game/boss-authoring/specs/boss-05.json",
+            "outputPath": "src/game/boss-authoring/generated/Boss05Stage.generated.js"
+        },
+        {
             "stageId": "1-1",
             "areaId": "sector-01-01",
             "authoringMode": "runtime-generated",

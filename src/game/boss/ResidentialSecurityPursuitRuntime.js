@@ -269,7 +269,9 @@ export class ResidentialSecurityPursuitRuntime {
             id: this.bossSpec.actorId ?? `${definition.id}:pursuer`,
             actorKind: PHYSICS_ACTOR_KIND.BOSS,
             position: this.phaseStartPositions[0],
-            collider: this.#collider()
+            collider: this.#collider(),
+            canGroundActors: true,
+            ropeAttachment: true
         });
         this.hazardBody = new KinematicPhysicsBody({
             id: `${definition.id}:attack-hazard`,
@@ -837,7 +839,8 @@ export class ResidentialSecurityPursuitRuntime {
                 rotation: this.body.angle,
                 direction: this.direction,
                 damaging: false,
-                movementProgress: this.movementProgress
+                movementProgress: this.movementProgress,
+                ropeAttachable: this.body.ropeAttachment !== null
             },
             {
                 id: this.hazardBody.id,

@@ -9,12 +9,16 @@ export const BOSS_MECHANIC_TYPE = Object.freeze({
     SIMPLE_LOCK_CHARGE: "simple-lock-charge",
     ROTATING_GROUND_SLAM: "rotating-ground-slam",
     DIAGONAL_DIVE: "diagonal-dive",
-    PHASE_REPOSITION: "phase-reposition"
+    PHASE_REPOSITION: "phase-reposition",
+    RESIDENT_SECURITY_SYSTEM: "residential-security-system",
+    CONTINUITY_CONTROL_CORE: "continuity-control-core"
 });
 
 export const BOSS_VISUAL_PRESET_ID = Object.freeze({
     GATE_LOCKING_CARRIAGE: "gate-locking-carriage",
-    RESIDENTIAL_SECURITY_PURSUER: "residential-security-pursuer"
+    RESIDENTIAL_SECURITY_PURSUER: "residential-security-pursuer",
+    RESIDENTIAL_SECURITY_HUB: "residential-security-hub",
+    CONTINUITY_CONTROL_CORE: "continuity-control-core"
 });
 
 export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
@@ -23,7 +27,16 @@ export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
     CENTRAL_LOCK_CORE: "boss-01:central-lock-core",
     REAR_THRUSTER: "boss-02:rear-thruster",
     LOWER_STABILIZER: "boss-02:lower-stabilizer",
-    CENTRAL_SENSOR: "boss-02:central-sensor"
+    CENTRAL_SENSOR: "boss-02:central-sensor",
+    GUARD_A_BODY: "boss-04:guard-a:body",
+    GUARD_A_REAR_THRUSTER: "boss-04:guard-a:rear-thruster",
+    GUARD_B_BODY: "boss-04:guard-b:body",
+    GUARD_B_SIDE_CONTROLLER: "boss-04:guard-b:side-controller",
+    SECURITY_HUB_CORE: "boss-04:security-hub:core",
+    AUX_A_COUPLING: "boss-05:aux-a:coupling",
+    AUX_B_COUPLING: "boss-05:aux-b:coupling",
+    MAIN_COUPLING: "boss-05:main:coupling",
+    CONTINUITY_CORE: "boss-05:continuity-core"
 });
 
 export const BOSS_VULNERABILITY_TRIGGER = Object.freeze({
@@ -40,7 +53,9 @@ export const BOSS_TRANSITION_TRIGGER = Object.freeze({
 
 export const BOSS_VICTORY_PRESENTATION_ID = Object.freeze({
     POWER_LOSS_FULL_STOP: "boss-01:power-loss-full-stop",
-    PURSUER_SHUTDOWN: "boss-02:pursuer-shutdown"
+    PURSUER_SHUTDOWN: "boss-02:pursuer-shutdown",
+    RESIDENT_SECURITY_OFFLINE: "boss-04:resident-security-offline",
+    CONTROL_LOST: "boss-05:control-lost"
 });
 
 export const BOSS_HEALTH_BAR_STYLE = Object.freeze({

@@ -1,7 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 6;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 7;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
@@ -17,6 +17,38 @@ function finiteVector(value, label) {
 function finiteNonNegative(value, label) {
     if (!Number.isFinite(value) || value < 0) throw new Error(`${label} must be non-negative`);
     return value;
+}
+
+function ropeAnchorOwner(rope) {
+    const ownerId = rope?.anchorOwnerId ?? null;
+    const localOffset = rope?.anchorLocalOffset ?? null;
+    if ((ownerId === null) !== (localOffset === null)) {
+        throw new Error("rope anchor owner ID and local offset must be paired");
+    }
+    if (ownerId === null) return Object.freeze({ ownerId: null, localOffset: null });
+    if (typeof ownerId !== "string" || !ownerId) throw new Error("rope anchor ownerId must be non-empty");
+    return Object.freeze({ ownerId, localOffset: finiteVector(localOffset, "rope.anchorLocalOffset") });
+}
+
+function normalizeLauncherTarget(target) {
+    if (target === null || target === undefined) return null;
+    const attachment = target.ropeAttachment ?? null;
+    if (attachment !== null) {
+        if (typeof attachment.ownerId !== "string" || !attachment.ownerId) {
+            throw new Error("launcher target rope attachment ownerId must be non-empty");
+        }
+        finiteVector(attachment.localAnchor, "launcher target rope attachment localAnchor");
+    }
+    return Object.freeze({
+        ...finiteVector(target, "launcher.shot.target"),
+        ropeAttachment:
+            attachment === null
+                ? null
+                : Object.freeze({
+                      ownerId: attachment.ownerId,
+                      localAnchor: finiteVector(attachment.localAnchor, "launcher target rope attachment localAnchor")
+                  })
+    });
 }
 
 function normalizeLauncher(launcher) {
@@ -45,10 +77,7 @@ function normalizeLauncher(launcher) {
         shot: Object.freeze({
             origin: finiteVector(shot.origin, "launcher.shot.origin"),
             direction,
-            target:
-                shot.target !== null && shot.target !== undefined
-                    ? finiteVector(shot.target, "launcher.shot.target")
-                    : null,
+            target: normalizeLauncherTarget(shot.target),
             traveled: shot.traveled,
             elapsed: shot.elapsed
         }),
@@ -71,6 +100,7 @@ export function createOwnerMotionState({
 }) {
     if (typeof isGrounded !== "boolean") throw new Error("isGrounded must be boolean");
     if (typeof rope?.isAttached !== "boolean") throw new Error("rope.isAttached must be boolean");
+    const anchorOwner = ropeAnchorOwner(rope);
     if (!Number.isFinite(angle)) throw new Error("angle must be finite");
     if (!Number.isFinite(angularVelocity)) throw new Error("angularVelocity must be finite");
     if (respawnAnchorId !== null && (typeof respawnAnchorId !== "string" || respawnAnchorId.length === 0)) {
@@ -89,6 +119,8 @@ export function createOwnerMotionState({
         rope: Object.freeze({
             isAttached: rope.isAttached,
             anchor: rope.isAttached ? finiteVector(rope.anchor, "rope.anchor") : null,
+            anchorOwnerId: rope.isAttached ? anchorOwner.ownerId : null,
+            anchorLocalOffset: rope.isAttached ? anchorOwner.localOffset : null,
             attachmentOffset: rope.isAttached ? finiteVector(rope.attachmentOffset, "rope.attachmentOffset") : null
         }),
         launcher: normalizeLauncher(launcher),

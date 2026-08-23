@@ -12,7 +12,7 @@ import {
     BASE_ACTION_ID
 } from "../augments/actions/ActionAugmentDefinition.js";
 import { BOSS_STAGE_CATALOG } from "../boss-authoring/BossStageCatalog.js";
-import { BossEncounterRuntime } from "../boss/BossEncounterRuntime.js";
+import { createBossEncounterRuntime } from "../boss/BossEncounterRuntimeFactory.js";
 import { defineBossStage } from "../boss/BossStageDefinition.js";
 import {
     advanceEnemyProjectiles,
@@ -77,6 +77,7 @@ import {
     createFoundationRewardSelection
 } from "../rewards/FoundationRewardSelection.js";
 import { closestPointOnSurface, generateWorld, WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
+import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
 import { resolveEnemyEncounter } from "../world/EnemyEncounterSelection.js";
 import { advanceSectorProgress } from "../world/SectorProgressController.js";
@@ -297,7 +298,7 @@ export class GameSimulation {
             : Object.freeze([]);
         this.completedBossStageIds = new Set();
         this.bossHazardRecords = new Map();
-        this.bossRuntime = this.isSeamlessSectorWorld ? new BossEncounterRuntime(this.bossDefinitions[0]) : null;
+        this.bossRuntime = this.isSeamlessSectorWorld ? createBossEncounterRuntime(this.bossDefinitions[0]) : null;
         this.worldProgress = this.isSeamlessSectorWorld
             ? new SectorProgressState(this.world)
             : worldCatalog
@@ -577,9 +578,12 @@ export class GameSimulation {
         const stage = this.#bossStageWorld();
         if (!stage) return runtime;
         const worldOffset = this.#bossWorldOffset();
-        const collisionActors = this.bossRuntime.mechanism.collisionActors(worldOffset);
+        const collisionActors = this.#bossCollisionActors();
         const bodyActor = collisionActors.find(({ physicsActorKind }) => physicsActorKind === PHYSICS_ACTOR_KIND.BOSS);
-        const suppliedObjects = this.bossRuntime.mechanism.presentationObjects?.(worldOffset, runtime) ?? null;
+        const suppliedObjects =
+            this.bossRuntime.presentationObjects?.(worldOffset, runtime) ??
+            this.bossRuntime.mechanism?.presentationObjects?.(worldOffset, runtime) ??
+            null;
         if (Array.isArray(suppliedObjects)) {
             return Object.freeze({
                 ...runtime,
@@ -628,7 +632,8 @@ export class GameSimulation {
                         state: runtime.mechanism.state,
                         direction: runtime.mechanism.direction,
                         velocity: bodyActor?.velocity ?? runtime.mechanism.velocity,
-                        movementProgress: runtime.mechanism.movementProgress
+                        movementProgress: runtime.mechanism.movementProgress,
+                        ropeAttachable: bodyActor?.ropeAttachment !== null
                     }),
                     Object.freeze({
                         id: beamGeometry.id,
@@ -683,24 +688,17 @@ export class GameSimulation {
     #registerBossImpactTargets() {
         for (const definition of this.bossDefinitions) {
             const bodyId = definition.arena.boss?.actorId ?? `${definition.id}:body`;
-            this.impactTargetRegistry.add(
-                new ImpactTarget({
-                    id: bodyId,
-                    kind: IMPACT_TARGET_KIND.BOSS,
-                    isActive: () => this.#bossImpactTargetActive(definition.id, bodyId, false),
-                    snapshot: () => this.#bossImpactSnapshot(definition.id, bodyId, false),
-                    applyImpact: (impact) => this.#applyRegisteredBossImpact(definition.id, bodyId, impact)
-                })
-            );
-            for (const phase of definition.phases) {
+            const targetIds =
+                definition.arena.boss?.impactTargetIds ??
+                Object.freeze([bodyId, ...definition.phases.map(({ weakTargetId }) => weakTargetId)]);
+            for (const targetId of targetIds) {
                 this.impactTargetRegistry.add(
                     new ImpactTarget({
-                        id: phase.weakTargetId,
+                        id: targetId,
                         kind: IMPACT_TARGET_KIND.BOSS,
-                        isActive: () => this.#bossImpactTargetActive(definition.id, phase.weakTargetId, true),
-                        snapshot: () => this.#bossImpactSnapshot(definition.id, phase.weakTargetId, true),
-                        applyImpact: (impact) =>
-                            this.#applyRegisteredBossImpact(definition.id, phase.weakTargetId, impact)
+                        isActive: () => this.#bossImpactTargetActive(definition.id, targetId, targetId !== bodyId),
+                        snapshot: () => this.#bossImpactSnapshot(definition.id, targetId, true),
+                        applyImpact: (impact) => this.#applyRegisteredBossImpact(definition.id, targetId, impact)
                     })
                 );
             }
@@ -708,6 +706,9 @@ export class GameSimulation {
     }
 
     #bossImpactTargetActive(stageId, targetId, weakpoint) {
+        if (this.bossRuntime?.definition.id === stageId && this.bossRuntime?.impactTargetSnapshot) {
+            return this.bossRuntime.impactTargetSnapshot(targetId, this.#bossWorldOffset())?.active === true;
+        }
         return (
             this.bossRuntime?.definition.id === stageId &&
             this.bossRuntime.status === "active" &&
@@ -719,6 +720,9 @@ export class GameSimulation {
     #bossImpactSnapshot(stageId, targetId, weakpoint) {
         const definition = this.bossDefinitions.find(({ id }) => id === stageId);
         const currentStage = this.bossRuntime?.definition.id === stageId;
+        if (currentStage && this.bossRuntime?.impactTargetSnapshot) {
+            return this.bossRuntime.impactTargetSnapshot(targetId, this.#bossWorldOffset());
+        }
         const runtime = this.bossStageSnapshot();
         const targetObject = runtime?.presentation?.objects.find(({ id }) => id === targetId);
         const body =
@@ -834,7 +838,7 @@ export class GameSimulation {
         for (const completedStage of this.world.bossStages?.slice(0, Math.max(0, stageIndex)) ?? []) {
             this.completedBossStageIds.add(completedStage.id);
         }
-        this.bossRuntime = new BossEncounterRuntime(definition);
+        this.bossRuntime = createBossEncounterRuntime(definition);
         this.collisionBroadPhase.invalidateFrame();
         return this.bossRuntime;
     }
@@ -844,7 +848,7 @@ export class GameSimulation {
             this.world.bossStages?.find(
                 (stage) =>
                     !this.completedBossStageIds.has(stage.id) &&
-                    this.worldProgress?.isRouteUnlocked(stage.entryRouteId) &&
+                    (!stage.entryRouteId || this.worldProgress?.isRouteUnlocked(stage.entryRouteId)) &&
                     this.players.some(
                         ({ lifeState, physics }) =>
                             lifeState === "active" && pointInsideBounds(physics.position, stage.sourceTrigger)
@@ -864,7 +868,53 @@ export class GameSimulation {
 
     #bossCollisionActors() {
         if (!this.bossRuntime || this.bossRuntime.status === "inactive") return Object.freeze([]);
-        return this.bossRuntime.mechanism.collisionActors(this.#bossWorldOffset());
+        return (
+            this.bossRuntime.collisionActors?.(this.#bossWorldOffset()) ??
+            this.bossRuntime.mechanism?.collisionActors(this.#bossWorldOffset()) ??
+            Object.freeze([])
+        );
+    }
+
+    #ropeAttachmentActors() {
+        const byOwnerId = Object.create(null);
+        const add = (entry) => {
+            const attachment = entry?.ropeAttachment;
+            if (!attachment?.ownerId || !attachment.position) return;
+            byOwnerId[attachment.ownerId] = Object.freeze({
+                id: attachment.ownerId,
+                position: Object.freeze({ ...attachment.position }),
+                ropeAttachment: Object.freeze({
+                    ownerId: attachment.ownerId,
+                    localAnchor: Object.freeze({ ...attachment.localAnchor })
+                })
+            });
+        };
+        for (const actor of this.#bossCollisionActors()) add(actor);
+        for (const actor of this.bossRuntime?.ropeAttachmentActors?.(this.#bossWorldOffset()) ?? []) add(actor);
+        return Object.freeze(Object.values(byOwnerId));
+    }
+
+    #ropeAttachmentActorById(ownerId) {
+        return this.#ropeAttachmentActors().find(({ id }) => id === ownerId) ?? null;
+    }
+
+    #syncAttachedActorRopes() {
+        for (const player of this.players) {
+            const rope = player.ropeObject.rope;
+            if (!rope.isAttached || !rope.anchorOwnerId) continue;
+            const ownerId = rope.anchorOwnerId;
+            const owner = this.#ropeAttachmentActorById(ownerId);
+            if (!owner) {
+                releaseRopeFromBody(player.physics, rope);
+                this.recordReplicationEvent("rope-anchor-released", {
+                    playerId: player.id,
+                    ownerId,
+                    reason: "anchor-owner-unavailable"
+                });
+                continue;
+            }
+            rope.updateAnchor(owner.position);
+        }
     }
 
     #advanceBossRuntime(dt) {
@@ -877,8 +927,51 @@ export class GameSimulation {
                     .map(({ id, physics }) => Object.freeze({ id, position: vectorState(physics.position) }))
             ),
             surfaces: stage?.surfaces ?? Object.freeze([]),
+            anchors: stage?.route ?? Object.freeze([]),
             worldOffset: this.#bossWorldOffset()
         });
+        this.#setActiveCollisionSurfaces(
+            this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
+        );
+        this.#syncAttachedActorRopes();
+        const ropeCutSurfaces = this.bossRuntime?.ropeCutSurfaces?.(this.#bossWorldOffset()) ?? Object.freeze([]);
+        for (const player of this.players) {
+            const anchor = player.ropeObject.rope.anchor;
+            if (
+                !anchor ||
+                !ropeCutSurfaces.some(
+                    (surface) =>
+                        surface.id !== player.ropeObject.rope.anchorOwnerId &&
+                        segmentIntersectsSurface(player.physics.position, anchor, surface)
+                )
+            ) {
+                continue;
+            }
+            releaseRopeFromBody(player.physics, player.ropeObject.rope);
+            player.ropeDisabledRemaining = Math.max(player.ropeDisabledRemaining, this.ropeDisabledSeconds);
+            this.recordReplicationEvent("boss-rope-cut", {
+                bossStageId: stage?.id ?? null,
+                playerId: player.id,
+                position: vectorState(player.physics.position)
+            });
+        }
+        if (stage && this.bossRuntime?.recoverPlayer) {
+            const recoveryThreshold = stage.bounds.y + stage.bounds.height + PLAYER_CONFIG.radius;
+            for (const player of this.players) {
+                if (player.lifeState !== "active" || player.physics.position.y <= recoveryThreshold) continue;
+                const recoveryPosition = this.bossRuntime.recoverPlayer(player.id, this.#bossWorldOffset());
+                if (!recoveryPosition) continue;
+                player.physics.reset(recoveryPosition);
+                player.ropeObject.rope.detach();
+                player.ropeObject.swingDrag = null;
+                player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
+                this.recordReplicationEvent("boss-player-recovered", {
+                    bossStageId: stage.id,
+                    playerId: player.id,
+                    position: recoveryPosition
+                });
+            }
+        }
         this.#recordActiveBossHazard();
         return outcome;
     }
@@ -914,13 +1007,11 @@ export class GameSimulation {
     }
 
     #bossFilteredCollisionSurfaces(surfaces) {
-        if (this.completedBossStageIds.size === 0) return surfaces;
-        return Object.freeze(
-            surfaces.filter(
-                ({ blockedByBossStageId }) =>
-                    !blockedByBossStageId || !this.completedBossStageIds.has(blockedByBossStageId)
-            )
+        const filtered = surfaces.filter(
+            ({ blockedByBossStageId }) => !blockedByBossStageId || !this.completedBossStageIds.has(blockedByBossStageId)
         );
+        const dynamic = this.bossRuntime?.dynamicCollisionSurfaces?.(this.#bossWorldOffset()) ?? Object.freeze([]);
+        return dynamic.length === 0 ? Object.freeze(filtered) : Object.freeze([...filtered, ...dynamic]);
     }
 
     #advanceBossStage() {
@@ -992,9 +1083,89 @@ export class GameSimulation {
         }
     }
 
+    #compositeHazardOverlapsPlayer(hazard, player) {
+        const position = player.physics.position;
+        const radius = PLAYER_CONFIG.radius;
+        if (hazard.position && Number.isFinite(hazard.radius)) {
+            return Math.hypot(position.x - hazard.position.x, position.y - hazard.position.y) <= hazard.radius + radius;
+        }
+        const bounds = hazard.bounds;
+        return Boolean(
+            bounds &&
+            position.x + radius >= bounds.x &&
+            position.x - radius <= bounds.x + bounds.width &&
+            position.y + radius >= bounds.y &&
+            position.y - radius <= bounds.y + bounds.height
+        );
+    }
+
+    #resolveCompositeBossHazards({ players, replicate }) {
+        const stage = this.#bossStageWorld();
+        const snapshot = this.bossStageSnapshot();
+        const hazards = this.bossRuntime?.activeHazards?.(this.#bossWorldOffset()) ?? Object.freeze([]);
+        if (!stage || hazards.length === 0) return null;
+        const outcomes = [];
+        for (const hazard of hazards) {
+            for (const player of players) {
+                if (player.lifeState !== "active" || player.health <= 0 || player.hitInvulnerabilityRemaining > 0)
+                    continue;
+                if (!this.#compositeHazardOverlapsPlayer(hazard, player)) continue;
+                const contactId = `${stage.id}:attempt:${snapshot.attempt}:hazard:${hazard.id}:${player.id}`;
+                const contact = this.bossRuntime.applyHazardContact({
+                    contactId,
+                    playerId: player.id,
+                    damage: hazard.damage
+                });
+                if (!contact.changed) continue;
+                const protection = player.augmentCombat.absorbPlayerDamage({
+                    amount: contact.damage,
+                    type: "combat-hp",
+                    sourceKind: `boss-${hazard.kind}`,
+                    attackerId: null
+                });
+                const appliedDamage = protection.appliedDamage;
+                player.health = Math.max(0, player.health - appliedDamage);
+                player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
+                const defeated = player.health <= 0;
+                if (defeated) this.#resolveBossParticipantDefeat(player, `boss-${hazard.kind}`);
+                const event = Object.freeze({
+                    contactId,
+                    bossStageId: stage.id,
+                    hazardKind: hazard.kind,
+                    hazardSequence: hazard.sequence,
+                    playerId: player.id,
+                    damage: contact.damage,
+                    appliedDamage,
+                    health: player.health,
+                    position: vectorState(player.physics.position),
+                    velocity: vectorState(player.physics.velocity),
+                    impactId: contactId,
+                    projectileId: contactId,
+                    clientTick: this.tick,
+                    resolution: "player-hit",
+                    respawned: defeated && player.lifeState === "active",
+                    parameters: Object.freeze({
+                        sourceKind: "boss-hazard",
+                        bossStageId: stage.id,
+                        hazardKind: hazard.kind,
+                        hazardSequence: hazard.sequence,
+                        damage: contact.damage
+                    })
+                });
+                if (replicate) this.recordReplicationEvent("boss-player-hit", event);
+                this.eventFlash = { type: "player-hit", age: 0, ...event };
+                outcomes.push(event);
+            }
+        }
+        if (replicate) this.#commitBossEvents();
+        return Object.freeze(outcomes);
+    }
+
     #resolveBossHazardContacts({ players = this.players, replicate = true } = {}) {
         if (this.bossRuntime?.status !== "active") return Object.freeze([]);
         if (this.victimImpactAuthority === VICTIM_IMPACT_AUTHORITY.CLAIM) return Object.freeze([]);
+        const compositeOutcomes = this.#resolveCompositeBossHazards({ players, replicate });
+        if (compositeOutcomes) return compositeOutcomes;
         const stage = this.#bossStageWorld();
         const snapshot = this.bossStageSnapshot();
         const hazardKind = snapshot.mechanism.hazardKind ?? BOSS_HAZARD_KIND_BY_STATE[snapshot.mechanism.state];
@@ -1498,8 +1669,11 @@ export class GameSimulation {
         } else if (synchronizeRope && state.rope.isAttached) {
             player.ropeObject.rope.attach(player.physics.position, state.rope.anchor, {
                 angle: player.physics.angle,
-                attachmentOffset: state.rope.attachmentOffset
+                attachmentOffset: state.rope.attachmentOffset,
+                anchorOwnerId: state.rope.anchorOwnerId ?? null,
+                anchorLocalOffset: state.rope.anchorLocalOffset ?? null
             });
+            this.#syncAttachedActorRopes();
         } else if (synchronizeRope) {
             this.releasePlayerRope(playerId);
         }
@@ -1810,6 +1984,10 @@ export class GameSimulation {
         player.physics.isGrounded = state.isGrounded;
         if (state.rope.isAttached) {
             player.ropeObject.rope.anchor = new Vector2(state.rope.anchor.x, state.rope.anchor.y);
+            player.ropeObject.rope.anchorOwnerId = state.rope.anchorOwnerId ?? null;
+            player.ropeObject.rope.anchorLocalOffset = state.rope.anchorLocalOffset
+                ? new Vector2(state.rope.anchorLocalOffset.x, state.rope.anchorLocalOffset.y)
+                : null;
             player.ropeObject.rope.attachmentOffset = new Vector2(
                 state.rope.attachmentOffset.x,
                 state.rope.attachmentOffset.y
@@ -1857,6 +2035,7 @@ export class GameSimulation {
                 maxAttachDistance,
                 aimTolerance
             }),
+            attachmentTargets: this.#ropeAttachmentActors(),
             maxAttachDistance,
             aimTolerance,
             canAttachToSurface: this.#accessScanPredicate()
@@ -1995,7 +2174,10 @@ export class GameSimulation {
             config: COMBAT_CONFIG,
             dt,
             resolveHits: resolvePlayerProjectileHits,
-            maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds
+            maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds,
+            projectileOccluders: this.activeCollisionSurfaces.filter(
+                ({ projectileOccluder }) => projectileOccluder === true
+            )
         });
         this.objects.playerProjectiles.commitLifecycle(playerProjectileUpdate);
         const playerProjectileEvents = this.#resolveBossProjectileEvents(playerProjectileUpdate);
@@ -2143,6 +2325,8 @@ export class GameSimulation {
                 ropeConfig: effectiveRopeConfig,
                 surfaces: this.activeCollisionSurfaces,
                 surfaceCandidates: (query) => this.objects.ropeAttachmentSurfaces(query),
+                attachmentTargets: this.#ropeAttachmentActors(),
+                resolveAttachmentTarget: (ownerId) => this.#ropeAttachmentActorById(ownerId),
                 collisionActors: collisionEnemies,
                 collisionBroadPhase: this.collisionBroadPhase,
                 canAttachToSurface: this.#accessScanPredicate(),
@@ -3820,7 +4004,10 @@ export class GameSimulation {
 
     #resetPlayerAtCheckpoint(player) {
         const bossStage = this.bossRuntime?.status === "active" ? this.#bossStageWorld() : null;
-        const respawnPosition = bossStage?.entry ??
+        const bossRespawn = bossStage
+            ? (this.bossRuntime?.respawnPosition?.(this.#bossWorldOffset()) ?? bossStage.entry)
+            : null;
+        const respawnPosition = bossRespawn ??
             (this.isSeamlessSectorWorld ? this.respawnAnchorForPlayer(player.id)?.position : this.activeCheckpoint) ?? {
                 x: 120,
                 y: 500

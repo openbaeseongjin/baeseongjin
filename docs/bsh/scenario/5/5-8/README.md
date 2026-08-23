@@ -43,6 +43,6 @@
 
 단:
 
-`5-8 → POST-SECTOR05 BOSS / TRANSITION TBD → Sector06`
+`5-8 COMPLETE → BOSS05 → BOSS05 DEFEATED → 6-1`
 
 경계를 유지한다.

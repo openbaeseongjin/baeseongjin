@@ -6,7 +6,7 @@
 
 > Authoring snapshot: `3c9f661bba58af6f7351e00754c12aef86575a12`<br>
 > This package supersedes legacy 4-8 `TRANSIT CONTROL TRUNK`.<br>
-> It does **not** authorize Sector 05, a boss entry, or timer transition.
+> Downstream authority: `4-8 COMPLETE → BOSS04 → BOSS04 DEFEATED → 5-1`.
 
 ## Stage sentence
 
@@ -25,6 +25,7 @@ Pressure/smoke-lock actuator, vent, seal, and inspection equipment are distribut
 `4-7 → QUORUM LANDING → 2/3 CHECK → EAST LOWER FACE → CENTER CROSSOVER → WEST LOWER GALLERY → MID INTERLOCK → EAST UPPER FACE → WEST FINAL RETURN → FINAL ASCENT CONTROL`
 
 Pressure:
+
 - Enemy: **NONE**
 - Pursuit: **NONE**
 - Cutter: **NONE**
@@ -34,6 +35,7 @@ Pressure:
 - Kill Gate: **NONE**
 
 Rope:
+
 - Base Reach: `400 px`
 - Max mandatory authored relation: `386.26 px`
 
@@ -74,10 +76,4 @@ Sector 04 ends on the contradiction that this protected system remains operation
 Stage-local completion:
 `FINAL ASCENT CONTROL reached`
 
-Not automatically:
-- Sector 05 entry
-- Boss entry
-- General Timer stop
-- Boss Timer start
-
-Those require separate approved downstream authority.
+The completed Stage enters Boss04; Boss04 defeat enters 5-1. Direct `4-8 → 5-1`, General Timer stop and Boss Timer start remain outside this Stage.

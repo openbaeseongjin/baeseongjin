@@ -1,6 +1,7 @@
 import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 import { PROJECTILE_MOTION_CAPABILITY } from "./ProjectileObject.js";
 import { ENEMY_SIMULATION_CAPABILITY } from "./enemy-weapon/EnemyWeaponDefinition.js";
+import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 
 const simulationDispatcher = new SimulationDispatcher();
 const EMPTY_COLLISION_ACTORS = Object.freeze([]);
@@ -31,7 +32,8 @@ export function updatePlayerProjectiles({
     config,
     dt,
     resolveHits = true,
-    maxLifetimeSeconds = Number.POSITIVE_INFINITY
+    maxLifetimeSeconds = Number.POSITIVE_INFINITY,
+    projectileOccluders = []
 }) {
     const enemyById = Object.freeze(Object.fromEntries(enemies.map((enemy) => [enemy.id, enemy])));
     const survivors = [];
@@ -49,6 +51,7 @@ export function updatePlayerProjectiles({
             );
             continue;
         }
+        const previousPosition = projectile.position.clone();
         advanceSimulationObject(projectile, PROJECTILE_MOTION_CAPABILITY, {
             dt,
             targetPosition: target.position,
@@ -60,6 +63,20 @@ export function updatePlayerProjectiles({
                     projectileId: projectile.id,
                     resolution: "expired",
                     position: projectile.position.clone()
+                })
+            );
+            continue;
+        }
+        const blockingSurface = projectileOccluders.find((surface) =>
+            segmentIntersectsSurface(previousPosition, projectile.position, surface)
+        );
+        if (blockingSurface) {
+            resolutions.push(
+                Object.freeze({
+                    projectileId: projectile.id,
+                    resolution: "projectile-blocked",
+                    position: projectile.position.clone(),
+                    surfaceId: blockingSurface.id
                 })
             );
             continue;

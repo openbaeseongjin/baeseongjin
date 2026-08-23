@@ -918,6 +918,17 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         }
     }
 
+    for (const spec of configuredBossStageSpecs) {
+        if (bossStages.some(({ id }) => id === spec.id)) continue;
+        const sourceLandmark = landmarks.find((landmark) => bossAreaMatches(landmark, spec.sourceAreaId));
+        const targetLandmark = landmarks.find((landmark) => bossAreaMatches(landmark, spec.nextAreaId));
+        if (!sourceLandmark || !targetLandmark) continue;
+        const bossStage = createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, null);
+        bossStages.push(bossStage);
+        surfaces.push(...bossStage.surfaces);
+        route.push(...bossStage.route);
+    }
+
     const accessModules = Object.freeze(Object.values(accessModuleById).map((module) => freezeValue(module)));
     const finalLandmark = landmarks.at(-1);
     return freezeValue({
