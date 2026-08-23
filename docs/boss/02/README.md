@@ -1,6 +1,6 @@
 # 보스 02 — RESIDENTIAL SECURITY PURSUER
 
-> 상태: **인터뷰 기획 확정 / Runtime·Map Editor·polygon mock 구현 / 브라우저 smoke 통과**
+> 상태: **Runtime·Map Editor·polygon mock 구현 / PLAYTEST REV3 반영**
 
 이 문서만 Boss02의 현행 기획 권위다. 이전 초안과 구현 검토 자료는 [`legacy/`](./legacy/)에 보존하며 현재 결정에 사용하지 않는다.
 
@@ -25,9 +25,11 @@
 | P2 | 공동중정, 접근 방향 고정 회전 강타 | Central Service Slab | 하부 안정화 장치, 5초 |
 | P3 | 옥상, 상승·추적 후 방향 고정 대각선 급강하 | Water Tank / Stairwell Head / Heavy Vent | 중앙 센서, 4초 |
 
-- 골목 → 공동중정 → 옥상은 하나의 `5600 × 2800` Stage에서 연속 진행한다.
+- 골목 → 공동중정 → 옥상은 하나의 `8600 × 3700` Stage에서 연속 진행한다. Phase 면적은 P1 < P2 < P3이며 P3가 가로·세로·면적 모두 가장 크다.
 - Phase HP가 0이면 보스가 공격을 멈추고 다음 공간으로 먼저 이동한다. Player는 실제 Rope 조작으로 뒤쫓고, 다음 구역 진입 시 다음 Phase를 시작한다.
 - 전환 구간에는 보스 접촉 피해와 강공격이 없다.
+- Phase 경계는 Player·Rope·Grapple·표현용 벽이 아닌 Boss 이동·공격 안전 경계다. Boss의 회전 Polygon과 공격 hazard 전체가 현재 Phase 안에 남는다.
+- 현재 Phase 밖 Player는 추격과 새 공격 표적에서 제외하며, 경계가 강공격보다 먼저 닿으면 약점 노출 없이 회복한다.
 - 각 Phase 기본 HP는 1000이며 Stage 시작 인원으로 `1000 × (1 + 0.5 × (인원-1))`을 한 번 확정한다. 중도 참가자는 현재 시도 HP를 다시 계산하지 않는다.
 - 닫힌 몸체에는 기존 속도 비례 일반 피해의 25%가 적용된다.
 - 열린 약점에는 기존 속도 비례 일반 피해 100%와 해당 Phase 최대 HP의 25% 고정 피해를 함께 적용한다.
