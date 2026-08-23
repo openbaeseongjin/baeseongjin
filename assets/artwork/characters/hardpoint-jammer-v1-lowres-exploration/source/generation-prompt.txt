@@ -1,0 +1,10 @@
+Use case: stylized-concept
+Asset type: Baeseongjin side-scrolling enemy sprite authoring concept for hardpoint-jammer-v1
+
+Create one low-resolution pixel-art sprite matching the approved enemy family's compact mechanical proportions, dark outline language, limited warm-gunmetal palette, and readable large pixel clusters.
+
+The Hardpoint Jammer is a stationary route-control enemy. It remotely warns and temporarily blocks only new Rope attachment to one selected Hardpoint. It does not walk, fly, dash, fire a projectile, damage the Player, cut an attached Rope, force release, or move a Hardpoint.
+
+Use a squat floor-bolted pedestal, heavy bottom-center contact, compact armored housing, and one dominant forked or opposing-paddle antenna assembly around a central interference emitter. The neutral still uses a cyan core, small amber service fasteners, and a restrained violet/magenta interference cavity. Do not use Cutter red as the primary color.
+
+Design for a transparent 32x32 logical cell and 56x56 world output. Use hard square pixels, nearest-neighbor appearance, a 1-2 pixel dark outline, two or three large value groups, and no antialiasing or gradients. Output one complete centered sprite only, with no text, UI, scenery, shadow, particles, wave lines, alternate pose, sprite sheet, wheels, legs, rotors, hover thrusters, wings, shield, cannon, mortar, missiles, claws, or humanoid face.

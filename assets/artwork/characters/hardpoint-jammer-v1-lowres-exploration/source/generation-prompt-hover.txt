@@ -1,0 +1,8 @@
+Use case: precise-object-edit followed by background-extraction
+Asset type: Baeseongjin hardpoint-jammer-v1 low-resolution pixel-art enemy concept
+
+Convert the floor-mounted Hardpoint Jammer into a stationary hovering enemy. Remove the pedestal, feet, rails, bolts, and every ground-contact shape. Replace the lower support with one compact tapered hover chassis, two or three restrained cyan underside lift cells, and small symmetric stabilizer fins. Keep a transparent gap under the complete enemy and hold the body level, centered, upright, and motionless.
+
+Preserve the opposing antenna paddles, circular cyan status core, violet/magenta interference cavities, amber service accents, warm graphite armor, dark outline, limited palette, and chunky 32x32-era pixel clusters. The enemy remains a wireless route-control jammer with no projectile, Player damage, Rope cutting, or forced release.
+
+Output one complete sprite with genuine transparent alpha. Do not add a floor, shadow, text, UI, radio-wave lines, particles, alternate states, wheels, legs, rotors, propellers, wings, gun, shield, missile, exhaust flame, motion streak, antialiasing, gradient, or soft glow.
