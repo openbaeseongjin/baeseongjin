@@ -1,0 +1,408 @@
+{
+    "$schema": "../enemy-sprite-manifest.schema.json",
+    "formatVersion": 4,
+    "id": "sector-04-enemies",
+    "generator": {
+        "tool": "Codex built-in ImageGen + Pillow normalization",
+        "exportVersion": "2026-08-23",
+        "sourceExport": "../../../artwork/characters/sector-04-enemy-family-material-variant/export/artillery-acquisition-motion.png"
+    },
+    "atlases": {
+        "pursuit-motion": {
+            "image": "pursuit-motion.png",
+            "size": { "width": 128, "height": 160 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "sentry-upright-aim": {
+            "image": "sentry-upright-aim.png",
+            "size": { "width": 64, "height": 32 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "artillery-acquisition-motion": {
+            "image": "artillery-acquisition-motion.png",
+            "size": { "width": 384, "height": 32 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "shield-body": {
+            "image": "shield-body.png",
+            "size": { "width": 128, "height": 32 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "shield-directions": {
+            "image": "shield-directions.png",
+            "size": { "width": 256, "height": 32 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "patrol-motion-attack": {
+            "image": "patrol-motion-attack.png",
+            "size": { "width": 128, "height": 192 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "support-motion": {
+            "image": "support-motion.png",
+            "size": { "width": 128, "height": 64 },
+            "frameSize": { "width": 32, "height": 32 }
+        },
+        "swarm-motion": {
+            "image": "swarm-motion.png",
+            "size": { "width": 128, "height": 96 },
+            "frameSize": { "width": 32, "height": 32 }
+        }
+    },
+    "aliases": {
+        "sentry": "sentry-t1",
+        "patrol-drone": "patrol-drone-t1"
+    },
+    "enemies": {
+        "sentry-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 56, "height": 56 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true,
+                "aimLayer": {
+                    "orientation": "upright-aim",
+                    "atlas": "sentry-upright-aim",
+                    "cell": { "column": 1, "row": 0 }
+                }
+            },
+            "states": {
+                "idle": {
+                    "loop": true,
+                    "frames": [
+                        {
+                            "atlas": "sentry-upright-aim",
+                            "cell": { "column": 0, "row": 0 },
+                            "durationMs": 1000
+                        }
+                    ]
+                },
+                "knockback": { "fallback": "idle" },
+                "attack-acquire": { "fallback": "idle" },
+                "attack-track": { "fallback": "idle" },
+                "attack-lock": { "fallback": "idle" },
+                "attack-fire": { "fallback": "idle" },
+                "attack-cooldown": { "fallback": "idle" }
+            }
+        },
+        "pursuit-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 56, "height": 56 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": { "fallback": "pursuit-seek" },
+                "knockback": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "pursuit-motion", "cell": { "column": 0, "row": 4 }, "durationMs": 90 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 1, "row": 4 }, "durationMs": 90 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 2, "row": 4 }, "durationMs": 110 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 3, "row": 4 }, "durationMs": 140 }
+                    ]
+                },
+                "attack-acquire": { "fallback": "pursuit-seek" },
+                "attack-track": { "fallback": "pursuit-seek" },
+                "attack-lock": { "fallback": "pursuit-seek" },
+                "attack-fire": { "fallback": "pursuit-seek" },
+                "attack-cooldown": { "fallback": "pursuit-seek" },
+                "pursuit-seek": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "pursuit-motion", "cell": { "column": 0, "row": 0 }, "durationMs": 160 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 1, "row": 0 }, "durationMs": 160 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 2, "row": 0 }, "durationMs": 160 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 3, "row": 0 }, "durationMs": 160 }
+                    ]
+                },
+                "pursuit-windup": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "pursuit-motion", "cell": { "column": 0, "row": 1 }, "durationMs": 70 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 1, "row": 1 }, "durationMs": 60 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 2, "row": 1 }, "durationMs": 60 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 3, "row": 1 }, "durationMs": 60 }
+                    ]
+                },
+                "pursuit-dash": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "pursuit-motion", "cell": { "column": 0, "row": 2 }, "durationMs": 50 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 1, "row": 2 }, "durationMs": 50 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 2, "row": 2 }, "durationMs": 50 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 3, "row": 2 }, "durationMs": 50 }
+                    ]
+                },
+                "pursuit-recover": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "pursuit-motion", "cell": { "column": 0, "row": 3 }, "durationMs": 100 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 1, "row": 3 }, "durationMs": 120 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 2, "row": 3 }, "durationMs": 140 },
+                        { "atlas": "pursuit-motion", "cell": { "column": 3, "row": 3 }, "durationMs": 140 }
+                    ]
+                }
+            }
+        },
+        "artillery-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 56, "height": 56 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": {
+                    "loop": true,
+                    "frames": [
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 0, "row": 0 },
+                            "durationMs": 220
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 1, "row": 0 },
+                            "durationMs": 220
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 2, "row": 0 },
+                            "durationMs": 220
+                        }
+                    ]
+                },
+                "knockback": { "fallback": "idle" },
+                "artillery-idle": { "fallback": "idle" },
+                "artillery-telegraph": {
+                    "loop": false,
+                    "frames": [
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 3, "row": 0 },
+                            "durationMs": 80
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 4, "row": 0 },
+                            "durationMs": 100
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 5, "row": 0 },
+                            "durationMs": 120
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 6, "row": 0 },
+                            "durationMs": 150
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 7, "row": 0 },
+                            "durationMs": 200
+                        }
+                    ]
+                },
+                "artillery-cooldown": {
+                    "loop": false,
+                    "frames": [
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 8, "row": 0 },
+                            "durationMs": 180
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 9, "row": 0 },
+                            "durationMs": 220
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 10, "row": 0 },
+                            "durationMs": 400
+                        },
+                        {
+                            "atlas": "artillery-acquisition-motion",
+                            "cell": { "column": 11, "row": 0 },
+                            "durationMs": 600
+                        }
+                    ]
+                }
+            }
+        },
+        "shield-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 60, "height": 60 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true,
+                "guardLayer": {
+                    "orientation": "guard-octants",
+                    "frames": [
+                        { "atlas": "shield-directions", "cell": { "column": 0, "row": 0 } },
+                        { "atlas": "shield-directions", "cell": { "column": 1, "row": 0 } },
+                        { "atlas": "shield-directions", "cell": { "column": 2, "row": 0 } },
+                        { "atlas": "shield-directions", "cell": { "column": 3, "row": 0 } },
+                        { "atlas": "shield-directions", "cell": { "column": 4, "row": 0 } },
+                        { "atlas": "shield-directions", "cell": { "column": 5, "row": 0 } },
+                        { "atlas": "shield-directions", "cell": { "column": 6, "row": 0 } },
+                        { "atlas": "shield-directions", "cell": { "column": 7, "row": 0 } }
+                    ]
+                }
+            },
+            "states": {
+                "idle": { "fallback": "shield-guard" },
+                "knockback": { "fallback": "shield-guard" },
+                "attack-acquire": { "fallback": "shield-guard" },
+                "attack-track": { "fallback": "shield-guard" },
+                "attack-lock": { "fallback": "shield-guard" },
+                "attack-fire": { "fallback": "shield-guard" },
+                "attack-cooldown": { "fallback": "shield-guard" },
+                "shield-guard": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "shield-body", "cell": { "column": 0, "row": 0 }, "durationMs": 140 },
+                        { "atlas": "shield-body", "cell": { "column": 1, "row": 0 }, "durationMs": 140 },
+                        { "atlas": "shield-body", "cell": { "column": 2, "row": 0 }, "durationMs": 180 },
+                        { "atlas": "shield-body", "cell": { "column": 3, "row": 0 }, "durationMs": 140 }
+                    ]
+                }
+            }
+        },
+        "patrol-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 56, "height": 56 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": { "fallback": "patrol-wait" },
+                "patrol-move": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 0 }, "durationMs": 140 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 0 }, "durationMs": 140 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 2, "row": 0 }, "durationMs": 180 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 3, "row": 0 }, "durationMs": 140 }
+                    ]
+                },
+                "patrol-wait": { "fallback": "patrol-move" },
+                "knockback": { "fallback": "patrol-wait" },
+                "attack-acquire": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 2 }, "durationMs": 130 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 2 }, "durationMs": 120 }
+                    ]
+                },
+                "attack-track": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 3 }, "durationMs": 200 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 3 }, "durationMs": 200 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 2, "row": 3 }, "durationMs": 200 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 3, "row": 3 }, "durationMs": 200 }
+                    ]
+                },
+                "attack-lock": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 4 }, "durationMs": 100 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 4 }, "durationMs": 100 }
+                    ]
+                },
+                "attack-fire": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 2, "row": 4 }, "durationMs": 40 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 3, "row": 4 }, "durationMs": 40 }
+                    ]
+                },
+                "attack-cooldown": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 0, "row": 5 }, "durationMs": 200 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 1, "row": 5 }, "durationMs": 250 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 2, "row": 5 }, "durationMs": 250 },
+                        { "atlas": "patrol-motion-attack", "cell": { "column": 3, "row": 5 }, "durationMs": 300 }
+                    ]
+                }
+            }
+        },
+        "support-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 56, "height": 56 },
+                "anchor": { "x": 0.5, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": { "fallback": "support-idle" },
+                "knockback": { "fallback": "support-idle" },
+                "support-idle": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "support-motion", "cell": { "column": 0, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "support-motion", "cell": { "column": 1, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "support-motion", "cell": { "column": 2, "row": 0 }, "durationMs": 200 },
+                        { "atlas": "support-motion", "cell": { "column": 3, "row": 0 }, "durationMs": 200 }
+                    ]
+                },
+                "support-link": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "support-motion", "cell": { "column": 0, "row": 1 }, "durationMs": 160 },
+                        { "atlas": "support-motion", "cell": { "column": 1, "row": 1 }, "durationMs": 160 },
+                        { "atlas": "support-motion", "cell": { "column": 2, "row": 1 }, "durationMs": 160 },
+                        { "atlas": "support-motion", "cell": { "column": 3, "row": 1 }, "durationMs": 160 }
+                    ]
+                }
+            }
+        },
+        "swarm-drone-t1": {
+            "render": {
+                "facing": "right",
+                "size": { "width": 18, "height": 18 },
+                "anchor": { "x": 0.40625, "y": 0.5 },
+                "offset": { "x": 0, "y": 0 },
+                "pixelSnap": true
+            },
+            "states": {
+                "idle": { "fallback": "swarm-chase" },
+                "knockback": { "fallback": "swarm-recoil" },
+                "swarm-chase": {
+                    "loop": true,
+                    "frames": [
+                        { "atlas": "swarm-motion", "cell": { "column": 0, "row": 0 }, "durationMs": 90 },
+                        { "atlas": "swarm-motion", "cell": { "column": 1, "row": 0 }, "durationMs": 90 },
+                        { "atlas": "swarm-motion", "cell": { "column": 2, "row": 0 }, "durationMs": 90 },
+                        { "atlas": "swarm-motion", "cell": { "column": 3, "row": 0 }, "durationMs": 90 }
+                    ]
+                },
+                "swarm-recoil": {
+                    "loop": false,
+                    "frames": [
+                        { "atlas": "swarm-motion", "cell": { "column": 0, "row": 1 }, "durationMs": 30 },
+                        { "atlas": "swarm-motion", "cell": { "column": 1, "row": 1 }, "durationMs": 35 },
+                        { "atlas": "swarm-motion", "cell": { "column": 2, "row": 1 }, "durationMs": 45 },
+                        { "atlas": "swarm-motion", "cell": { "column": 3, "row": 1 }, "durationMs": 50 },
+                        { "atlas": "swarm-motion", "cell": { "column": 0, "row": 2 }, "durationMs": 55 },
+                        { "atlas": "swarm-motion", "cell": { "column": 1, "row": 2 }, "durationMs": 65 },
+                        { "atlas": "swarm-motion", "cell": { "column": 2, "row": 2 }, "durationMs": 80 },
+                        { "atlas": "swarm-motion", "cell": { "column": 3, "row": 2 }, "durationMs": 90 }
+                    ]
+                }
+            }
+        }
+    }
+}
