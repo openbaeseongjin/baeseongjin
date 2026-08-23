@@ -3,7 +3,7 @@
     "formatVersion": 4,
     "id": "sector-03-enemies",
     "generator": {
-        "tool": "Codex built-in ImageGen + Pillow normalization",
+        "tool": "User-approved reference + Pillow normalization",
         "exportVersion": "2026-08-23",
         "sourceExport": "../../../artwork/characters/sector-03-enemy-family-material-variant/export/artillery-acquisition-motion.png"
     },

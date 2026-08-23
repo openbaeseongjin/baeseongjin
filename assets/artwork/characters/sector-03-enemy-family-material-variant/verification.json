@@ -12,7 +12,7 @@
     "changedPixels": 5608,
     "changedOpaqueRatio": 0.953741,
     "sourceSha256": "9dcacd787c0692ec0fe5f3b937d0ae0f4627e533d49860b19ae2318c7c86e037",
-    "exportSha256": "be5f25b05e7b658274538ab181376b6d93120b8ba7bd79498fe26cdb60af34fb"
+    "exportSha256": "36938bf18ffbab4bf9e4754d2a1e772d833d4b7ef68c9bfb77d164cbf59f18cb"
   },
   "sentry-upright-aim.png": {
     "size": [
@@ -27,7 +27,7 @@
     "changedPixels": 463,
     "changedOpaqueRatio": 0.974737,
     "sourceSha256": "25f313ffcbc6cd5297f3606a8ce16841529bfd571780ae0d2a5b7d4755ee9b4c",
-    "exportSha256": "06cadef3b07f982bf45e19b9313c1f53c3cb4e8e58f30f387d7b43332c4c23d9"
+    "exportSha256": "6b148497032cfd718dc7c23bec211ca73e0e68fcb1677bbb4401b07cf46bd62c"
   },
   "artillery-acquisition-motion.png": {
     "size": [
@@ -42,7 +42,7 @@
     "changedPixels": 4872,
     "changedOpaqueRatio": 0.899225,
     "sourceSha256": "07275f03e29f28e00ea4386fbe72f4506ea76138b1551755ec8a3529bbf2419c",
-    "exportSha256": "227de035bdcb6df6c9c413cc9360a66bd43a44fed17820cb64bf2526c6a20cac"
+    "exportSha256": "9c922b127a9a2b94b11882e33643c356adc133cd0cf4265d74afb3e93f2ec175"
   },
   "shield-body.png": {
     "size": [
@@ -72,7 +72,7 @@
     "changedPixels": 204,
     "changedOpaqueRatio": 0.503704,
     "sourceSha256": "0e2fcf3ca83322e216303451dcfddc172906abaa61009fe886dc57d1cace5e73",
-    "exportSha256": "d5d1530543e44a7e853041c6a29c9390551822934ea5e076179701be720494fc"
+    "exportSha256": "e395aa9fda3bcb17943801a589df8b037242dc4db2513ee6ba59f6e5e844e5be"
   },
   "patrol-motion-attack.png": {
     "size": [
@@ -87,7 +87,7 @@
     "changedPixels": 5574,
     "changedOpaqueRatio": 0.920106,
     "sourceSha256": "624497332a4d470a183c40701c0c588cb43c028abbf159919df2c06c725412ff",
-    "exportSha256": "9b9ccb5978540ed5d445fe03159140d44387135f1e624c26b33e08d0bb48c20f"
+    "exportSha256": "32f691821d3a1681ab9a7fc300a175525a42942fab834ee76a78d8f161fd0119"
   },
   "support-motion.png": {
     "size": [
@@ -102,7 +102,7 @@
     "changedPixels": 2380,
     "changedOpaqueRatio": 0.900151,
     "sourceSha256": "5a82cba4a6646f7f3e631771572325a3edf004920a3b8ed59ceabf22b498c143",
-    "exportSha256": "024e3ca882d61afb26d9ae943decc3f12dc518ce20c545079ac3ca607a903127"
+    "exportSha256": "6c47320e8fc1fdbd411e46327055d4278903dbc8b386633b623008d8c4890cf8"
   },
   "swarm-motion.png": {
     "size": [
@@ -117,6 +117,6 @@
     "changedPixels": 3138,
     "changedOpaqueRatio": 0.890213,
     "sourceSha256": "bff6120823c1b57b8e011aa8a68ca263f5f8ef7f4fe94a992816cd5aa6d0bfb3",
-    "exportSha256": "65e709b03991a344d9c0ed9f83efc490765aa9f7acde1ccda96ed62754715333"
+    "exportSha256": "bd813f4f606e20dfd47b9741954fecad1c7514e81d99d95c0cf780860d5521a5"
   }
 }
