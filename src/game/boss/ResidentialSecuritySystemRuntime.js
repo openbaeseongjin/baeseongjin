@@ -11,6 +11,7 @@ import {
 import { KinematicPhysicsBody } from "../physics/KinematicPhysicsBody.js";
 import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
 import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
+import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { boss04GuardGeometry } from "./Boss04GuardGeometry.js";
 
 export const RESIDENT_SECURITY_SYSTEM_STATE = Object.freeze({
@@ -19,6 +20,7 @@ export const RESIDENT_SECURITY_SYSTEM_STATE = Object.freeze({
     WARNING: "warning",
     ACTIVE: "active",
     RECOVERY: "recovery",
+    RETURN: "return",
     DEAD: "dead",
     BEAM_WARNING: "beam-warning",
     BEAM_ACTIVE: "beam-active",
@@ -50,16 +52,11 @@ const BODY_TARGET_BY_GUARD = Object.freeze({
     [ROLE.GUARD_A]: TARGET.GUARD_A_BODY,
     [ROLE.GUARD_B]: TARGET.GUARD_B_BODY
 });
-const START_POSITION = Object.freeze({
-    [ROLE.GUARD_A]: Object.freeze({ x: 920, y: -980 }),
-    [ROLE.GUARD_B]: Object.freeze({ x: 2600, y: -1180 }),
-    [ROLE.HUB]: Object.freeze({ x: 4380, y: -1740 })
-});
-const CORE_SIZE = Object.freeze({ width: 300, height: 280 });
 const DEFAULT_CONFIG = Object.freeze({
     chaseSeconds: 1.2,
     chaseSpeed: 220,
     recoverySpeed: 110,
+    returnSpeed: 180,
     activeSeconds: 0.35,
     guardAWarningSeconds: 0.6,
     guardARecoverySeconds: 1.8,
@@ -132,7 +129,7 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                         position: this.guard[role].position,
                         collider: new PolygonCollider({ vertices: boss04GuardGeometry(role) }),
                         canGroundActors: true,
-                        ropeAttachment: false
+                        ropeAttachment: true
                     })
             )
         );
@@ -143,30 +140,58 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
         const byRole = Object.create(null);
         for (const mechanic of this.definition.arena.mechanics ?? []) {
             const role = mechanic.parameters?.role;
-            if (role) byRole[role] = mechanic.parameters;
+            if (role) byRole[role] = mechanic;
         }
         return freezeComposite({
-            guardAWarningSeconds: positive(byRole[ROLE.GUARD_A]?.telegraphSeconds, DEFAULT_CONFIG.guardAWarningSeconds),
+            guardByRole: freezeComposite({
+                [ROLE.GUARD_A]: freezeComposite({
+                    homePosition: byRole[ROLE.GUARD_A]?.position,
+                    territoryBounds: byRole[ROLE.GUARD_A]?.parameters?.territoryBounds ?? null
+                }),
+                [ROLE.GUARD_B]: freezeComposite({
+                    homePosition: byRole[ROLE.GUARD_B]?.position,
+                    territoryBounds: byRole[ROLE.GUARD_B]?.parameters?.territoryBounds ?? null
+                })
+            }),
+            hubHomePosition: byRole[ROLE.HUB]?.position ?? this.definition.arena.boss.position,
+            hubSize: freezeBounds(this.definition.arena.boss.collider),
+            exitPosition: freezeComposite(this.definition.arena.exit),
+            recoveryPoints: Object.freeze(
+                (this.definition.arena.recoveryPoints ?? []).map((point) => freezeComposite(point))
+            ),
+            guardAWarningSeconds: positive(
+                byRole[ROLE.GUARD_A]?.parameters?.telegraphSeconds,
+                DEFAULT_CONFIG.guardAWarningSeconds
+            ),
             guardAIntervalSeconds: positive(
-                byRole[ROLE.GUARD_A]?.burstIntervalSeconds,
+                byRole[ROLE.GUARD_A]?.parameters?.burstIntervalSeconds,
                 DEFAULT_CONFIG.guardAIntervalSeconds
             ),
             guardARecoverySeconds: positive(
-                byRole[ROLE.GUARD_A]?.recoverySeconds,
+                byRole[ROLE.GUARD_A]?.parameters?.recoverySeconds,
                 DEFAULT_CONFIG.guardARecoverySeconds
             ),
-            guardBWarningSeconds: positive(byRole[ROLE.GUARD_B]?.telegraphSeconds, DEFAULT_CONFIG.guardBWarningSeconds),
+            guardBWarningSeconds: positive(
+                byRole[ROLE.GUARD_B]?.parameters?.telegraphSeconds,
+                DEFAULT_CONFIG.guardBWarningSeconds
+            ),
             guardBRecoverySeconds: positive(
-                byRole[ROLE.GUARD_B]?.recoverySeconds,
+                byRole[ROLE.GUARD_B]?.parameters?.recoverySeconds,
                 DEFAULT_CONFIG.guardBRecoverySeconds
             ),
-            beamWarningSeconds: positive(byRole[ROLE.HUB]?.beamWarningSeconds, DEFAULT_CONFIG.beamWarningSeconds),
-            beamSeconds: positive(byRole[ROLE.HUB]?.beamSeconds, DEFAULT_CONFIG.beamSeconds),
-            burstWarningSeconds: positive(byRole[ROLE.HUB]?.burstWarningSeconds, DEFAULT_CONFIG.burstWarningSeconds),
-            burstSeconds: positive(byRole[ROLE.HUB]?.burstSeconds, DEFAULT_CONFIG.burstSeconds),
-            coreSeconds: positive(byRole[ROLE.HUB]?.coreSeconds, DEFAULT_CONFIG.coreSeconds),
-            guardDamage: positive(byRole[ROLE.GUARD_A]?.damage, DEFAULT_CONFIG.guardDamage),
-            hubDamage: positive(byRole[ROLE.HUB]?.damage, DEFAULT_CONFIG.hubDamage)
+            beamWarningSeconds: positive(
+                byRole[ROLE.HUB]?.parameters?.beamWarningSeconds,
+                DEFAULT_CONFIG.beamWarningSeconds
+            ),
+            beamSeconds: positive(byRole[ROLE.HUB]?.parameters?.beamSeconds, DEFAULT_CONFIG.beamSeconds),
+            burstWarningSeconds: positive(
+                byRole[ROLE.HUB]?.parameters?.burstWarningSeconds,
+                DEFAULT_CONFIG.burstWarningSeconds
+            ),
+            burstSeconds: positive(byRole[ROLE.HUB]?.parameters?.burstSeconds, DEFAULT_CONFIG.burstSeconds),
+            coreSeconds: positive(byRole[ROLE.HUB]?.parameters?.coreSeconds, DEFAULT_CONFIG.coreSeconds),
+            guardDamage: positive(byRole[ROLE.GUARD_A]?.parameters?.damage, DEFAULT_CONFIG.guardDamage),
+            hubDamage: positive(byRole[ROLE.HUB]?.parameters?.damage, DEFAULT_CONFIG.hubDamage)
         });
     }
 
@@ -193,7 +218,7 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                 state: completed ? RESIDENT_SECURITY_SYSTEM_STATE.DEAD : RESIDENT_SECURITY_SYSTEM_STATE.DORMANT,
                 health: completed ? 0 : this.scaledHealth.phaseHealths[index],
                 maxHealth: this.scaledHealth.phaseHealths[index],
-                position: { ...START_POSITION[role] },
+                position: { ...this.config.guardByRole[role].homePosition },
                 timer: 0,
                 attackPositions: [],
                 attackIndex: 0,
@@ -204,7 +229,7 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
             state: RESIDENT_SECURITY_SYSTEM_STATE.DORMANT,
             health: this.scaledHealth.phaseHealths[2],
             maxHealth: this.scaledHealth.phaseHealths[2],
-            position: { ...START_POSITION[ROLE.HUB] },
+            position: { ...this.config.hubHomePosition },
             timer: 0,
             active: false,
             beamDirection: null,
@@ -255,6 +280,29 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
         return true;
     }
 
+    #hasLineOfSight(guardPosition, playerPosition, context) {
+        const offset = context.worldOffset ?? { x: 0, y: 0 };
+        const start = compositeWorldPoint(guardPosition, offset);
+        const end = compositeWorldPoint(playerPosition, offset);
+        return !(context.surfaces ?? []).some(
+            (surface) => surface.losOccluder === true && segmentIntersectsSurface(start, end, surface)
+        );
+    }
+
+    #beginReturn(guard) {
+        guard.state = RESIDENT_SECURITY_SYSTEM_STATE.RETURN;
+        guard.timer = 0;
+        guard.attackPositions = [];
+        this.emit("boss-guard-returning", {
+            guardId: guard.role,
+            targetId: WEAKPOINT_TARGET_BY_GUARD[guard.role]
+        });
+        this.emit("boss-weakpoint-opened", {
+            guardId: guard.role,
+            targetId: WEAKPOINT_TARGET_BY_GUARD[guard.role]
+        });
+    }
+
     #candidatePositions(context, players, count) {
         const anchors = (context.anchors ?? []).map((anchor) =>
             compositeLocalPoint(anchor, context.worldOffset ?? { x: 0, y: 0 })
@@ -284,7 +332,31 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
             guard.state === RESIDENT_SECURITY_SYSTEM_STATE.DORMANT
         )
             return;
+        if (guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RETURN) {
+            const home = this.config.guardByRole[guard.role].homePosition;
+            guard.position = clampStep(guard.position, home, DEFAULT_CONFIG.returnSpeed, dt);
+            if (compositeDistance(guard.position, home) <= 1) {
+                guard.position = { ...home };
+                guard.state = RESIDENT_SECURITY_SYSTEM_STATE.DORMANT;
+                guard.timer = 0;
+                guard.targetPlayerId = null;
+                this.emit("boss-weakpoint-closed", { guardId: guard.role });
+                this.emit("boss-guard-returned", { guardId: guard.role });
+            }
+            return;
+        }
         const target = this.#chooseNearest(players, guard.position);
+        const territory = this.config.guardByRole[guard.role].territoryBounds;
+        if (
+            target &&
+            territory &&
+            !compositeInsideBounds(target.position, territory) &&
+            this.#hasLineOfSight(guard.position, target.position, context) === false &&
+            guard.state !== RESIDENT_SECURITY_SYSTEM_STATE.ACTIVE
+        ) {
+            this.#beginReturn(guard);
+            return;
+        }
         if (target && guard.state !== RESIDENT_SECURITY_SYSTEM_STATE.ACTIVE) {
             const speed =
                 guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY
@@ -461,7 +533,11 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                     reason: "guard-active-invulnerable"
                 });
             }
-            if (weakpoint && guard.state !== RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY) {
+            if (
+                weakpoint &&
+                guard.state !== RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY &&
+                guard.state !== RESIDENT_SECURITY_SYSTEM_STATE.RETURN
+            ) {
                 return freezeComposite({
                     accepted: true,
                     changed: false,
@@ -582,7 +658,8 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                 this.status === "active" &&
                 guard.state !== RESIDENT_SECURITY_SYSTEM_STATE.DEAD &&
                 (weakpoint
-                    ? guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY
+                    ? guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY ||
+                      guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RETURN
                     : guard.state !== RESIDENT_SECURITY_SYSTEM_STATE.ACTIVE);
             const position = compositeWorldPoint(guard.position, worldOffset);
             return freezeComposite({
@@ -636,7 +713,9 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
                 physicsBody: true,
                 ropeAttachable: false
             });
-            const weakpoint = guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY;
+            const weakpoint =
+                guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY ||
+                guard.state === RESIDENT_SECURITY_SYSTEM_STATE.RETURN;
             objects.push({
                 id: WEAKPOINT_TARGET_BY_GUARD[role],
                 kind: OBJECT_KIND.WEAKPOINT,
@@ -668,7 +747,7 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
             kind: OBJECT_KIND.HUB,
             variant: "security-hub",
             position: compositeWorldPoint(this.hub.position, worldOffset),
-            size: CORE_SIZE,
+            size: { width: this.config.hubSize.width, height: this.config.hubSize.height },
             state: this.hub.state,
             active: true,
             ropeAttachable: true
@@ -717,7 +796,7 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
             id: "boss-04:protected-gate",
             kind: OBJECT_KIND.GATE,
             variant: "protected-gate",
-            position: compositeWorldPoint({ x: 5160, y: -2220 }, worldOffset),
+            position: compositeWorldPoint(this.config.exitPosition, worldOffset),
             size: { width: 180, height: 300 },
             state: this.status === "completed" ? "open" : "locked",
             active: true
@@ -791,16 +870,17 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
     }
 
     ropeAttachmentActors() {
-        return Object.freeze([]);
+        return this.collisionActors();
     }
 
     respawnPosition(worldOffset = { x: 0, y: 0 }) {
-        const local =
+        const index =
             this.guard[ROLE.GUARD_A].state !== RESIDENT_SECURITY_SYSTEM_STATE.DEAD
-                ? { x: 300, y: -350 }
+                ? 0
                 : this.guard[ROLE.GUARD_B].state !== RESIDENT_SECURITY_SYSTEM_STATE.DEAD
-                  ? { x: 1740, y: -700 }
-                  : { x: 3700, y: -1600 };
+                  ? 1
+                  : 2;
+        const local = this.config.recoveryPoints[index] ?? this.config.recoveryPoints.at(-1);
         return compositeWorldPoint(local, worldOffset);
     }
 
@@ -817,11 +897,15 @@ export class ResidentialSecuritySystemRuntime extends CompositeBossEncounterRunt
             this.hub.state === RESIDENT_SECURITY_SYSTEM_STATE.CORE_OPEN
                 ? TARGET.CORE
                 : [ROLE.GUARD_A, ROLE.GUARD_B].find(
-                        (role) => this.guard[role].state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY
+                        (role) =>
+                            this.guard[role].state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY ||
+                            this.guard[role].state === RESIDENT_SECURITY_SYSTEM_STATE.RETURN
                     )
                   ? WEAKPOINT_TARGET_BY_GUARD[
                         [ROLE.GUARD_A, ROLE.GUARD_B].find(
-                            (role) => this.guard[role].state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY
+                            (role) =>
+                                this.guard[role].state === RESIDENT_SECURITY_SYSTEM_STATE.RECOVERY ||
+                                this.guard[role].state === RESIDENT_SECURITY_SYSTEM_STATE.RETURN
                         )
                     ]
                   : null;

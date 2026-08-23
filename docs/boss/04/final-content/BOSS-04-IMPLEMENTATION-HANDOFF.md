@@ -25,21 +25,27 @@ local HEAD가 `3301269a4de30f54a71a4361c3f9fc7f665a93cb`과 다르면:
 
 ---
 
-# 1. 절대 구현하지 말 것
+# 1. 복원하는 기존 기획과 계속 금지하는 항목
 
-Boss04의 오래된 authoring 문서를 그대로 따라 아래 시스템을 만들지 않는다.
+사용자 결정으로 아래 기존 흐름은 현재 구현한다.
 
 ```text
-Territory Exit pursuit break
-LOS-break pursuit cancel
-Return state
-Return path
-Dock return
-Return-based weakpoint
-A/B Handoff controller
+추적 구역 이탈
+→ 시야 끊기
+→ 원위치 복귀
+→ 복귀 중 약점 노출
+→ P3 Guard A 복귀 / Guard B 발각 인계
+```
+
+이는 기존 Boss04 Runtime의 Guard state, authored collision surface LOS와 snapshot을 조합하는 범위이며 새 범용 AI/pathfinding 시스템을 만들지 않는다.
+
+아래는 계속 구현하지 않는다.
+
+```text
 P3 Guard reactivation
 Guard docking victory
 combat gate / transparent wall
+두 Guard 공격 순서 제어
 ```
 
 ---

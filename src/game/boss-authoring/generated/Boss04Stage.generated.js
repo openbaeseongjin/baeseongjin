@@ -5,103 +5,113 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
         anchors: [
             {
                 id: "boss-04:route-01",
-                x: 300,
-                y: -420
+                x: 260,
+                y: -290
             },
             {
                 id: "boss-04:route-02",
-                x: 600,
-                y: -560
+                x: 560,
+                y: -450
             },
             {
                 id: "boss-04:route-03",
-                x: 900,
-                y: -720
+                x: 880,
+                y: -590
             },
             {
                 id: "boss-04:route-04",
-                x: 1220,
-                y: -860
+                x: 1180,
+                y: -770
             },
             {
                 id: "boss-04:route-05",
-                x: 1520,
-                y: -700
+                x: 1450,
+                y: -990
             },
             {
                 id: "boss-04:route-06",
-                x: 1780,
-                y: -820
+                x: 1740,
+                y: -1190
             },
             {
                 id: "boss-04:route-07",
-                x: 2050,
-                y: -1040
+                x: 2030,
+                y: -1330
             },
             {
                 id: "boss-04:route-08",
-                x: 2340,
-                y: -1260
-            },
-            {
-                id: "boss-04:route-09",
-                x: 2640,
+                x: 2290,
                 y: -1460
             },
             {
+                id: "boss-04:route-09",
+                x: 2570,
+                y: -1340
+            },
+            {
                 id: "boss-04:route-10",
-                x: 2940,
-                y: -1240
+                x: 2870,
+                y: -1470
             },
             {
                 id: "boss-04:route-11",
-                x: 3200,
-                y: -1060
+                x: 3170,
+                y: -1600
             },
             {
                 id: "boss-04:route-12",
-                x: 3500,
-                y: -1260
+                x: 3370,
+                y: -1360
             },
             {
                 id: "boss-04:route-13",
-                x: 3800,
-                y: -1500
+                x: 3500,
+                y: -1240
             },
             {
                 id: "boss-04:route-14",
-                x: 4050,
-                y: -1760
+                x: 3850,
+                y: -1240
             },
             {
                 id: "boss-04:route-15",
-                x: 4350,
-                y: -1990
+                x: 3850,
+                y: -1590
             },
             {
                 id: "boss-04:route-16",
-                x: 4650,
-                y: -1760
+                x: 3650,
+                y: -1870
             },
             {
                 id: "boss-04:route-17",
-                x: 4920,
-                y: -1510
+                x: 3750,
+                y: -2200
             },
             {
                 id: "boss-04:route-18",
-                x: 5120,
-                y: -1820
+                x: 4200,
+                y: -1240
             },
             {
                 id: "boss-04:route-19",
-                x: 5000,
-                y: -2120
+                x: 4450,
+                y: -1490
             },
             {
                 id: "boss-04:route-20",
-                x: 5160,
-                y: -2300
+                x: 4650,
+                y: -1780
+            },
+            {
+                id: "boss-04:route-21",
+                x: 4500,
+                y: -2070
+            },
+            {
+                id: "boss-04:route-22",
+                x: 4450,
+                y: -2200
             }
         ],
         baseHookReach: 400,
@@ -113,8 +123,8 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
         },
         entry: {
             id: "boss-04:entry",
-            x: 240,
-            y: -332
+            x: 260,
+            y: -522
         },
         exit: {
             id: "boss-04:exit",
@@ -124,30 +134,30 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
         phaseZones: [
             {
                 bounds: {
-                    height: 980,
-                    width: 1640,
-                    x: 80,
-                    y: -1180
+                    height: 1000,
+                    width: 2000,
+                    x: 160,
+                    y: -1200
                 },
                 id: "boss-04:zone-garden",
                 phaseId: "boss-04:phase-1"
             },
             {
                 bounds: {
-                    height: 1500,
-                    width: 1840,
-                    x: 1700,
-                    y: -1840
+                    height: 700,
+                    width: 1500,
+                    x: 2460,
+                    y: -1800
                 },
                 id: "boss-04:zone-skybridge",
                 phaseId: "boss-04:phase-2"
             },
             {
                 bounds: {
-                    height: 1640,
-                    width: 1760,
-                    x: 3520,
-                    y: -2420
+                    height: 650,
+                    width: 1300,
+                    x: 3450,
+                    y: -2320
                 },
                 id: "boss-04:zone-hub",
                 phaseId: "boss-04:phase-3"
@@ -156,18 +166,18 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
         recoveryPoints: [
             {
                 id: "boss-04:recovery-entry",
-                x: 300,
-                y: -350
+                x: 260,
+                y: -522
             },
             {
                 id: "boss-04:recovery-refuge",
-                x: 1740,
-                y: -700
+                x: 2290,
+                y: -1562
             },
             {
                 id: "boss-04:recovery-hub",
-                x: 3700,
-                y: -1600
+                x: 3750,
+                y: -2282
             }
         ],
         routeEdges: [
@@ -252,7 +262,7 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
                 to: "boss-04:route-17"
             },
             {
-                from: "boss-04:route-17",
+                from: "boss-04:route-14",
                 id: "boss-04:edge-17",
                 to: "boss-04:route-18"
             },
@@ -265,75 +275,122 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
                 from: "boss-04:route-19",
                 id: "boss-04:edge-19",
                 to: "boss-04:route-20"
+            },
+            {
+                from: "boss-04:route-20",
+                id: "boss-04:edge-20",
+                to: "boss-04:route-21"
+            },
+            {
+                from: "boss-04:route-21",
+                id: "boss-04:edge-21",
+                to: "boss-04:route-22"
             }
         ],
         surfaces: [
             {
                 bounds: {
-                    height: 100,
-                    width: 1580,
-                    x: 100,
-                    y: -300
+                    height: 42,
+                    width: 520,
+                    x: 250,
+                    y: -490
                 },
                 grappleable: true,
-                id: "boss-04:garden-deck",
-                kind: "platform",
-                oneWay: false
-            },
-            {
-                bounds: {
-                    height: 690,
-                    width: 180,
-                    x: 610,
-                    y: -990
-                },
-                grappleable: true,
-                id: "boss-04:pergola",
-                kind: "architecture",
-                oneWay: false
-            },
-            {
-                bounds: {
-                    height: 70,
-                    width: 480,
-                    x: 1040,
-                    y: -770
-                },
-                grappleable: true,
-                id: "boss-04:garden-terrace",
+                id: "boss-04:garden-entry-terrace",
                 kind: "platform",
                 oneWay: true
             },
             {
                 bounds: {
-                    height: 90,
-                    width: 300,
-                    x: 1640,
-                    y: -640
+                    height: 38,
+                    width: 420,
+                    x: 430,
+                    y: -760
                 },
                 grappleable: true,
-                id: "boss-04:refuge-landing",
+                id: "boss-04:garden-mid-terrace",
                 kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 32,
+                    width: 350,
+                    x: 700,
+                    y: -1030
+                },
+                grappleable: true,
+                id: "boss-04:garden-bridge-west",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 32,
+                    width: 360,
+                    x: 1330,
+                    y: -1140
+                },
+                grappleable: true,
+                id: "boss-04:garden-bridge-east",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 38,
+                    width: 300,
+                    x: 1670,
+                    y: -1050
+                },
+                grappleable: true,
+                id: "boss-04:garden-refuge-terrace",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 620,
+                    width: 180,
+                    x: 610,
+                    y: -1120
+                },
+                grappleable: true,
+                id: "boss-04:pergola",
+                kind: "architecture",
+                losOccluder: true,
                 oneWay: false
             },
             {
                 bounds: {
-                    height: 80,
-                    width: 1380,
-                    x: 1920,
-                    y: -720
+                    height: 120,
+                    width: 420,
+                    x: 2070,
+                    y: -1530
+                },
+                grappleable: true,
+                id: "boss-04:refuge-landing",
+                kind: "safe-deck",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 50,
+                    width: 1480,
+                    x: 2480,
+                    y: -1290
                 },
                 grappleable: true,
                 id: "boss-04:lower-skybridge",
                 kind: "platform",
-                oneWay: false
+                oneWay: true
             },
             {
                 bounds: {
-                    height: 70,
-                    width: 1180,
-                    x: 2050,
-                    y: -1480
+                    height: 50,
+                    width: 1320,
+                    x: 2670,
+                    y: -1680
                 },
                 grappleable: true,
                 id: "boss-04:upper-skybridge",
@@ -342,10 +399,10 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 70,
-                    width: 400,
-                    x: 2740,
-                    y: -1080
+                    height: 55,
+                    width: 360,
+                    x: 3220,
+                    y: -1460
                 },
                 grappleable: true,
                 id: "boss-04:refuge-balcony",
@@ -354,10 +411,22 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 90,
-                    width: 580,
-                    x: 3580,
-                    y: -1550
+                    height: 55,
+                    width: 430,
+                    x: 3440,
+                    y: -1260
+                },
+                grappleable: true,
+                id: "boss-04:skybridge-terrace",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 105,
+                    width: 520,
+                    x: 3480,
+                    y: -2250
                 },
                 grappleable: true,
                 id: "boss-04:left-refuge-terrace",
@@ -366,10 +435,10 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 90,
-                    width: 580,
-                    x: 4620,
-                    y: -1550
+                    height: 105,
+                    width: 520,
+                    x: 4300,
+                    y: -2250
                 },
                 grappleable: true,
                 id: "boss-04:right-refuge-terrace",
@@ -378,10 +447,10 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 70,
-                    width: 680,
-                    x: 4040,
-                    y: -2050
+                    height: 48,
+                    width: 1080,
+                    x: 3600,
+                    y: -2365
                 },
                 grappleable: true,
                 id: "boss-04:high-refuge-skybridge",
@@ -390,13 +459,25 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 280,
-                    width: 300,
-                    x: 4230,
-                    y: -1830
+                    height: 160,
+                    width: 260,
+                    x: 3970,
+                    y: -2280
                 },
                 grappleable: false,
                 id: "boss-04:security-hub-deck",
+                kind: "architecture",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 560,
+                    width: 360,
+                    x: 4860,
+                    y: -2320
+                },
+                grappleable: false,
+                id: "boss-04:protected-gate",
                 kind: "architecture",
                 oneWay: false
             }
@@ -405,10 +486,10 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
     boss: {
         actorId: "boss-04:security-hub",
         collider: {
-            height: 280,
-            width: 300,
-            x: 4230,
-            y: -1880
+            height: 160,
+            width: 260,
+            x: 3970,
+            y: -2280
         },
         impactTargetIds: [
             "boss-04:guard-a:body",
@@ -419,8 +500,8 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
         ],
         mechanicId: "residential-security-system",
         position: {
-            x: 4380,
-            y: -1740
+            x: 4100,
+            y: -2200
         },
         visualPresetId: "residential-security-hub"
     },
@@ -449,10 +530,10 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
     mechanics: [
         {
             bounds: {
-                height: 980,
-                width: 1640,
-                x: 80,
-                y: -1180
+                height: 1000,
+                width: 2000,
+                x: 160,
+                y: -1200
             },
             id: "boss-04:guard-a",
             parameters: {
@@ -460,40 +541,52 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
                 damage: 20,
                 recoverySeconds: 1.8,
                 role: "guard-a",
-                telegraphSeconds: 0.6
+                telegraphSeconds: 0.6,
+                territoryBounds: {
+                    height: 1000,
+                    width: 2000,
+                    x: 160,
+                    y: -1200
+                }
             },
             position: {
-                x: 920,
-                y: -980
+                x: 1130,
+                y: -1220
             },
             type: "residential-security-system"
         },
         {
             bounds: {
-                height: 1500,
-                width: 1840,
-                x: 1700,
-                y: -1840
+                height: 700,
+                width: 1500,
+                x: 2460,
+                y: -1800
             },
             id: "boss-04:guard-b",
             parameters: {
                 damage: 25,
                 recoverySeconds: 1.5,
                 role: "guard-b",
-                telegraphSeconds: 0.55
+                telegraphSeconds: 0.55,
+                territoryBounds: {
+                    height: 700,
+                    width: 1500,
+                    x: 2460,
+                    y: -1800
+                }
             },
             position: {
-                x: 2600,
-                y: -1180
+                x: 3250,
+                y: -1760
             },
             type: "residential-security-system"
         },
         {
             bounds: {
-                height: 1640,
-                width: 1760,
-                x: 3520,
-                y: -2420
+                height: 650,
+                width: 1300,
+                x: 3450,
+                y: -2320
             },
             id: "boss-04:security-hub",
             parameters: {
@@ -506,8 +599,8 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
                 role: "hub"
             },
             position: {
-                x: 4380,
-                y: -1740
+                x: 4100,
+                y: -2200
             },
             type: "residential-security-system"
         }
@@ -518,7 +611,7 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
         {
             basePhaseHealth: 200,
             hud: {
-                objective: "범위 폭발 뒤 후방 추진기를 Rope Impact"
+                objective: "구역 이탈과 시야 끊기 뒤 후방 추진기를 Rope Impact"
             },
             id: "boss-04:phase-1",
             mechanicIds: ["boss-04:guard-a"],
@@ -534,7 +627,7 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
         {
             basePhaseHealth: 200,
             hud: {
-                objective: "돌진 뒤 측면 제어기를 Rope Impact"
+                objective: "구역 이탈과 시야 끊기 뒤 측면 제어기를 Rope Impact"
             },
             id: "boss-04:phase-2",
             mechanicIds: ["boss-04:guard-b"],

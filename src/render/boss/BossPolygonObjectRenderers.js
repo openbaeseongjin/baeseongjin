@@ -432,9 +432,16 @@ class SecurityGuardRenderer extends BossPolygonObjectRenderer {
         const warning = object.state === "warning";
         const active = object.state === "active";
         const recovery = object.state === "recovery";
+        const returning = object.state === "return";
         context.fillStyle = this.elevated ? "#334155" : "#1e3a4a";
-        context.strokeStyle = active ? COLOR.HAZARD : warning ? COLOR.WARNING : recovery ? COLOR.EXPOSED : COLOR.EDGE;
-        context.lineWidth = warning || active || recovery ? 5 : 3;
+        context.strokeStyle = active
+            ? COLOR.HAZARD
+            : warning
+              ? COLOR.WARNING
+              : recovery || returning
+                ? COLOR.EXPOSED
+                : COLOR.EDGE;
+        context.lineWidth = warning || active || recovery || returning ? 5 : 3;
         const vertices = object.geometry?.type === "polygon" ? object.geometry.vertices : null;
         if (vertices) polygon(context, vertices);
         else {
@@ -449,7 +456,7 @@ class SecurityGuardRenderer extends BossPolygonObjectRenderer {
         }
         context.fill();
         context.stroke();
-        context.fillStyle = recovery ? COLOR.EXPOSED : COLOR.DARK;
+        context.fillStyle = recovery || returning ? COLOR.EXPOSED : COLOR.DARK;
         context.fillRect(-width * 0.1, -height * 0.16, width * 0.3, height * 0.32);
         context.strokeStyle = this.elevated ? "#a5f3fc" : "#67e8f9";
         context.beginPath();

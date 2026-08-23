@@ -660,20 +660,17 @@ visual:
 
 ---
 
-# 6. 기존 문서에서 제거할 구성요소
+# 6. 복원하는 기존 기획 구성요소
 
-기존 `BOSS-04-BRIEF.md`, `BOSS-04-COMPONENTS.md`의 아래 항목은 deprecated.
+현재 Boss04는 아래 구성을 다시 사용한다.
 
-- Pursuit Territory break
-- LOS break
-- Return
-- Return Dock
-- Return weakpoint
-- Handoff overlap
-- P3 Guard reactivation
-- Guard docking victory
-- “Guard A 접근 불가”로 Refuge Landing을 hard barrier 처리
-- two-Guard attack coordination
+- 추적 구역 이탈
+- 시야 끊기
+- 원위치 복귀
+- 복귀 중 약점 노출
+- P3 Guard A 복귀 / Guard B 발각 인계
+
+P3 Guard 재활성화, Guard docking victory, Refuge Landing hard barrier와 두 Guard 공격 순서 제어는 계속 구현하지 않는다.
 
 맵의 물리 topology와 Sector04 환경/스토리 테마는 유지 대상이다.
 

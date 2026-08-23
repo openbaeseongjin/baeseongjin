@@ -36,6 +36,33 @@ export function findRopeAttachment({
         }
     }
     for (const target of attachmentTargets) {
+        const surface = target?.ropeableSurface;
+        if (surface && isRopeableCollisionSurface(surface)) {
+            const point = closestPointOnSurface(aimPoint, surface);
+            const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);
+            if (launchDistance > maxAttachDistance) continue;
+            if (
+                ropeOccluders.some(
+                    (divider) => divider.id !== target.id && segmentIntersectsSurface(origin, point, divider)
+                )
+            ) {
+                continue;
+            }
+            const aimDistance = Math.hypot(point.x - aimPoint.x, point.y - aimPoint.y);
+            const score = aimDistance * 2 + launchDistance * 0.05;
+            if (aimDistance <= aimTolerance && score <= bestScore) {
+                best = {
+                    x: point.x,
+                    y: point.y,
+                    ropeAttachment: {
+                        ownerId: target.id,
+                        localAnchor: { x: point.x - target.position.x, y: point.y - target.position.y }
+                    }
+                };
+                bestScore = score;
+            }
+            continue;
+        }
         const point = target?.position;
         const attachment = target?.ropeAttachment;
         if (!point || !attachment || typeof attachment.ownerId !== "string") continue;
