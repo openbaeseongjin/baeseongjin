@@ -208,7 +208,30 @@ function cloneSwingDrag(swingDrag) {
 const PORTAL_ARRIVAL_SPACING = PLAYER_CONFIG.radius * 2 + 10;
 const BOSS_WEAKPOINT_RADIUS = 90;
 const BOSS_HAZARD_KIND_BY_STATE = Object.freeze({ sweep: "beam", ram: "rail-ram" });
-const BOSS_HAZARD_KINDS = Object.freeze(["beam", "rail-ram", "charge", "ground-slam", "diagonal-dive"]);
+const BOSS_HAZARD_KIND = Object.freeze({
+    beam: true,
+    "rail-ram": true,
+    charge: true,
+    "ground-slam": true,
+    "diagonal-dive": true,
+    "maintenance-arm-low": true,
+    "maintenance-arm-high": true,
+    "baton-1": true,
+    "baton-2": true,
+    "overhead-slam": true,
+    "back-swing": true,
+    "ground-thruster-dash": true,
+    "diagonal-thruster-dash": true,
+    "counter-bash": true,
+    "security-beam-low": true,
+    "security-beam-high": true,
+    "landing-burst": true,
+    "directional-beam": true,
+    "hub-beam": true,
+    "hub-burst": true,
+    "control-pulse": true,
+    "partition-wall": true
+});
 const BOSS_RAM_PRESENTATION_STATE = Object.freeze({
     "ram-telegraph": true
 });
@@ -534,7 +557,7 @@ export class GameSimulation {
         return outcome;
     }
 
-    applyBossImpact({ impactId, sourcePlayerId = null, baseDamage, targetId = null }) {
+    applyBossImpact({ impactId, sourcePlayerId = null, baseDamage, targetId = null, impactPosition = null }) {
         if (!this.bossRuntime) {
             return Object.freeze({
                 accepted: false,
@@ -551,7 +574,13 @@ export class GameSimulation {
                 appliedDamage: 0
             });
         }
-        const outcome = this.bossRuntime.applyImpact({ impactId, sourcePlayerId, baseDamage, targetId });
+        const outcome = this.bossRuntime.applyImpact({
+            impactId,
+            sourcePlayerId,
+            baseDamage,
+            targetId,
+            impactPosition
+        });
         this.#commitBossEvents();
         if (outcome.completed) {
             this.completedBossStageIds.add(this.bossRuntime.definition.id);
@@ -608,6 +637,19 @@ export class GameSimulation {
             this.bossRuntime.mechanism?.presentationObjects?.(worldOffset, runtime) ??
             null;
         if (Array.isArray(suppliedObjects)) {
+            const grappleAnchors = stage.route
+                .filter(({ role }) => role === BOSS_ANCHOR_ROLE.SWING_ATTACK)
+                .map((anchor) =>
+                    Object.freeze({
+                        id: anchor.id,
+                        kind: "boss-grapple-anchor",
+                        position: anchor,
+                        size: Object.freeze({ width: 32, height: 32 }),
+                        surfaceId: anchor.surfaceId ?? null,
+                        state: "available",
+                        active: true
+                    })
+                );
             return Object.freeze({
                 ...runtime,
                 environmentAreaId: stage.sourceAreaId,
@@ -618,7 +660,7 @@ export class GameSimulation {
                     exit: stage.exit,
                     recoveryPoints: stage.recoveryPoints
                 }),
-                presentation: Object.freeze({ objects: Object.freeze(suppliedObjects) })
+                presentation: Object.freeze({ objects: Object.freeze([...suppliedObjects, ...grappleAnchors]) })
             });
         }
         const carriagePosition = bodyActor?.position ?? stage.presentationOrigin;
@@ -850,7 +892,8 @@ export class GameSimulation {
             impactId: impact.causalId,
             sourcePlayerId: impact.sourcePlayerId,
             baseDamage: impact.normalDamage,
-            targetId
+            targetId,
+            impactPosition: impact.position
         });
         const resolution = outcome.completed
             ? "boss-defeated"
@@ -1038,6 +1081,27 @@ export class GameSimulation {
         if (this.bossRuntime?.status !== "active") return;
         const stage = this.#bossStageWorld();
         const snapshot = this.bossRuntime.snapshot();
+        const compositeHazards = this.bossRuntime.activeHazards?.(this.#bossWorldOffset()) ?? Object.freeze([]);
+        if (stage && compositeHazards.length > 0) {
+            for (const hazard of compositeHazards) {
+                const key = `${stage.id}:attempt:${snapshot.attempt}:hazard:${hazard.id}`;
+                this.bossHazardRecords.set(
+                    key,
+                    Object.freeze({
+                        stageId: stage.id,
+                        attempt: snapshot.attempt,
+                        phase: snapshot.phase,
+                        sequence: hazard.sequence,
+                        hazardKind: hazard.kind,
+                        damage: hazard.damage
+                    })
+                );
+            }
+            while (this.bossHazardRecords.size > 64) {
+                this.bossHazardRecords.delete(this.bossHazardRecords.keys().next().value);
+            }
+            return;
+        }
         const hazardKind = snapshot.mechanism.hazardKind ?? BOSS_HAZARD_KIND_BY_STATE[snapshot.mechanism.state];
         if (!stage || !hazardKind || snapshot.mechanism.hazardSequence <= 0) return;
         const phaseMechanics = bossPhaseMechanics(stage, this.bossRuntime.definition, snapshot.phase);
@@ -1092,6 +1156,23 @@ export class GameSimulation {
         const stage = this.#bossStageWorld();
         if (!stage) return false;
         if (this.bossRuntime.status !== "completed") return false;
+        if (stage.terminalCompletion) {
+            const boardingZone = this.bossRuntime.boardingZone?.(this.#bossWorldOffset()) ?? null;
+            if (!boardingZone) return false;
+            let changed = false;
+            for (const player of this.players) {
+                if (player.lifeState !== "active" || !pointInsideBounds(player.physics.position, boardingZone))
+                    continue;
+                const outcome = this.bossRuntime.markBoardingReady?.(player.id);
+                changed = outcome?.changed === true || changed;
+            }
+            if (changed) this.#commitBossEvents();
+            if (this.bossRuntime.allParticipantsReady?.() === true) {
+                const completingPlayer = this.players.find(({ lifeState }) => lifeState === "active");
+                if (completingPlayer) this.beginCompletion(completingPlayer.id);
+            }
+            return changed;
+        }
         let transitioned = false;
         const exiting = this.players.filter(
             ({ lifeState, physics }) => lifeState === "active" && pointInsideBounds(physics.position, stage.exitTrigger)
@@ -2551,7 +2632,7 @@ export class GameSimulation {
                 sourcePlayerId: event.sourcePlayerId,
                 sourceKind: "rope-impact",
                 normalDamage: ropeImpactDamageForSpeed(impactSpeed, ROPE_IMPACT_CONFIG),
-                position: event.position,
+                position: event.impactPosition ?? event.position,
                 causalId: event.predictionId
             });
             if (!result.accepted) return result;
@@ -2771,11 +2852,11 @@ export class GameSimulation {
         if (bossTarget) {
             const target = bossTarget.snapshot();
             if (!bossTarget.active) return Object.freeze({ accepted: false, reason: "target-inactive" });
-            const contactDistance = Math.hypot(
-                claim.position.x - target.position.x,
-                claim.position.y - target.position.y
-            );
-            if (contactDistance > (target.radius ?? BOSS_WEAKPOINT_RADIUS) + PLAYER_CONFIG.radius * 2) {
+            const contactMatches = target.collider
+                ? player.physics.collider.overlapsCollider(claim.position, target.position, target.collider)
+                : Math.hypot(claim.position.x - target.position.x, claim.position.y - target.position.y) <=
+                  (target.radius ?? BOSS_WEAKPOINT_RADIUS) + PLAYER_CONFIG.radius * 2;
+            if (!contactMatches) {
                 return Object.freeze({ accepted: false, reason: "target-contact-mismatch" });
             }
             return this.#commitRopeImpact({
@@ -2783,7 +2864,8 @@ export class GameSimulation {
                 sourcePlayerId: authenticatedPlayerId,
                 targetId: claim.targetId,
                 targetKind: IMPACT_TARGET_KIND.BOSS,
-                position: claim.position,
+                position: target.position,
+                impactPosition: claim.position,
                 velocity: claim.velocity
             });
         }
@@ -2800,7 +2882,8 @@ export class GameSimulation {
             predictionId: claim.predictionId,
             sourcePlayerId: authenticatedPlayerId,
             targetId: claim.targetId,
-            position: claim.position,
+            position: target.position,
+            impactPosition: claim.position,
             velocity: claim.velocity,
             damage: ropeImpactDamageForSpeed(Math.hypot(claim.velocity.x, claim.velocity.y), ROPE_IMPACT_CONFIG)
         });
@@ -3738,7 +3821,7 @@ export class GameSimulation {
         const stage = this.#bossStageWorld();
         if (!stage || claim.sourceId !== stage.id)
             return Object.freeze({ accepted: false, reason: "boss-stage-mismatch" });
-        if (!BOSS_HAZARD_KINDS.includes(claim.sourceType)) {
+        if (BOSS_HAZARD_KIND[claim.sourceType] !== true) {
             return Object.freeze({ accepted: false, reason: "boss-hazard-mismatch" });
         }
         const playerSuffix = `:${player.id}`;

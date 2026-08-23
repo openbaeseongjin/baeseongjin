@@ -76,6 +76,7 @@ export class RopeImpactAttack {
                           targetId: target.id,
                           targetKind: target.impactTargetKind ?? "enemy",
                           position: Object.freeze({ x: target.position.x, y: target.position.y }),
+                          impactPosition: Object.freeze({ x: owner.physics.position.x, y: owner.physics.position.y }),
                           velocity: Object.freeze({ x: owner.physics.velocity.x, y: owner.physics.velocity.y }),
                           impactSpeed: speed,
                           damage,

@@ -22,20 +22,34 @@ import {
 } from "./camera/AuthoredCameraDirector.js";
 
 const BOSS_CAMERA_FOCUS_WEIGHT = 0.3;
+const BOSS_VICTORY_CAMERA_FOCUS_WEIGHT = 0.85;
 const BOSS_CAMERA_ZOOM_RATIO = 0.55;
+const BOSS_CAMERA_FOCUS_STATUS = Object.freeze({ active: true, completed: true });
+const BOSS_CAMERA_FOCUS_KIND = Object.freeze({
+    "boss-carriage": true,
+    "boss-security-hub": true,
+    "boss-continuity-core": true,
+    "boss-exchange-maintenance-body": true,
+    "boss-continuity-warden": true,
+    "boss-victory-camera": true
+});
+const BOSS_CAMERA_VICTORY_KIND = "boss-victory-camera";
 
 function bossCameraPlayer(player, bossStage) {
-    if (bossStage?.status !== "active") return player;
-    const carriage = bossStage.presentation?.objects?.find(
-        ({ kind }) => kind === "boss-carriage" || kind === "boss-security-hub" || kind === "boss-continuity-core"
-    );
+    if (!BOSS_CAMERA_FOCUS_STATUS[bossStage?.status]) return player;
+    const objects = bossStage.presentation?.objects ?? [];
+    const carriage =
+        objects.find(({ kind }) => kind === BOSS_CAMERA_VICTORY_KIND) ??
+        objects.find(({ kind }) => BOSS_CAMERA_FOCUS_KIND[kind] === true);
     if (!carriage?.position) return player;
+    const focusWeight =
+        carriage.kind === BOSS_CAMERA_VICTORY_KIND ? BOSS_VICTORY_CAMERA_FOCUS_WEIGHT : BOSS_CAMERA_FOCUS_WEIGHT;
     const carriageFocusY = carriage.position.y - Math.max(0, carriage.suspensionHeight ?? 0) * 0.5;
     return {
         ...player,
         position: {
-            x: player.position.x * (1 - BOSS_CAMERA_FOCUS_WEIGHT) + carriage.position.x * BOSS_CAMERA_FOCUS_WEIGHT,
-            y: player.position.y * (1 - BOSS_CAMERA_FOCUS_WEIGHT) + carriageFocusY * BOSS_CAMERA_FOCUS_WEIGHT
+            x: player.position.x * (1 - focusWeight) + carriage.position.x * focusWeight,
+            y: player.position.y * (1 - focusWeight) + carriageFocusY * focusWeight
         }
     };
 }

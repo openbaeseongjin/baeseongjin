@@ -49,7 +49,7 @@
 - 실제 플레이에서 새로 발견된 실패 사례와 초반 2분 지표 표본
 - 실제 조작 기반 전체 등반 검증
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
-- Sector 03 3-3~~3-8 Direction migration과 각 Post-Sector Boss transition
+- Sector 03 3-3~~3-8 Direction migration과 여섯 Boss의 실제 desktop/mobile·1~4인 멀티플레이 검증
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
@@ -69,9 +69,9 @@
 
 AS IS → Sector 01~~06의 48개 Stage는 canonical v2/generated catalog로 production Runtime에 연결됐고 scenario-only Stage는 없다.
 
-TO BE → 3-8·4-8·5-8·6-8의 content boundary를 유지한 채 Post-Sector Boss·Sector 간 전환을 각각 별도 계약으로 구현하고 실제 desktop/mobile 및 멀티플레이 등반을 검증한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
+TO BE → 여섯 일반 Sector의 content boundary와 독립 Boss Stage 연결은 유지하고, Boss03 Atrium·Boss06 terminal Boarding을 포함한 실제 desktop/mobile 및 멀티플레이 전체 등반을 검증한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 
-Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현했고, 현재 메인 진행은 `2-8 → boss-02 → 3-1 → … → 3-8`이다. Boss02는 Map Editor에서 수정 가능한 독립 Boss Stage로 골목·공동중정·옥상 추격, 지정 구조물 충돌 약점 개방, 3페이즈 HP와 polygon mock을 소유한다. Issue #790에서 offline depth map 기반 fixed background + 좌·우 parallax island 공용 backdrop과 2→3 교차 전환을 표현 계층에 연결했다. Issue #797은 3-1을 REV8 `3072×1088` Market Island topology의 v2 generated Stage로 원자 전환했고, Issue #801은 3-2를 REV8 `3200×1472` Facade Service Gallery의 single Scanner Group·C1~C4·선택 Access A·`3-3` exit 계약으로 원자 전환한다. 3-3~3-8의 REV8/REV8.1 topology와 Direction track은 다음 Stage별 migration이다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss03 전환 결정을 기다린다.
+Sector 03은 Access Scan Field Runtime과 3-1~~3-8 authored catalog를 구현했고, 진행은 `2-8 → Boss02 → 3-1 → … → 3-8 → Boss03 → 4-1`이다. Boss03은 MAP-PREVIEW의 4800×2400 Atrium·L/C/R Scanner surface·LOW/HIGH Arm·Left/Right Module·Central Core를 authored spec과 composite Runtime으로 소유한다. Sector 04~~06은 각각 `4-8 → Boss04 → 5-1`, `5-8 → Boss05 → 6-1`, `6-8 → Boss06 → Gate/Bridge/Shuttle → 전원 Boarding → Escape`로 연결된다. 일반 Timer/Purge와 Boss Timer/Arena collapse는 계속 HOLD다.
 
 `2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 
@@ -81,7 +81,7 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 
 재사용 Canvas particle/VFX foundation은 완료됐다. Player action/shot/impact와 Enemy one-shot, Shield·Support·Swarm·Pursuit·Artillery 및 Wind의 복제 상태 기반 continuous 표현에 더해 Rope launch·flight·attach·tension·swing·release·miss와 Player high-speed/impulse 표현도 동일 preset DTO와 Polygon/Sprite 공통 renderer를 사용한다. Rope Augment는 resolved material/actual-event accent로 합성하고 particle state는 multiplayer protocol에 추가하지 않는다. 기준은 [`particle-system.md`](./particle-system.md)다.
 
-P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI + Boss01 → Sector04/05/06 Runtime → Post-Sector Boss/transition → Timer/Purge mapping → Final Security/Ending → Playtest`다. Sector 04~~06 Stage Runtime은 완료됐지만 Boss/transition과 Timer/Purge는 별도 HOLD다. Boss03~06은 Phase base HP 1000과 공용 0.5 인원 multiplier·25% 약점 고정 보너스를 authoring 기준으로 사용하되 concrete Runtime은 별도 Issue로 구현한다. Map Editor 공개 계약 안의 위치·수치·Phase·mechanic·HUD·전환은 사람이 편집하고 새 mechanic만 AI 개발로 확장한다. 나머지 HOLD와 NPC 우선순위는 기존 기준을 유지한다.
+P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI → Sector04/05/06 Runtime → 여섯 Post-Sector Boss/transition → Final Security/Boarding → Timer/Purge mapping → Playtest`다. Boss01~~06의 authored Runtime 연결은 완료됐고 실제 Gameplay·멀티플레이 검증이 남았다. Boss03은 Phase base HP 1000·0.5 인원 multiplier·25% 약점 고정 보너스, Boss06은 단일 base HP 1000·0.5 인원 multiplier·별도 weakpoint 0을 사용한다. Map Editor 공개 계약 안의 위치·수치·Phase·mechanic·HUD·전환은 사람이 편집하고 새 mechanic만 코드 Registry로 확장한다. Timer/Purge HOLD와 NPC 우선순위는 유지한다.
 
 ### P0. 로그라이크 한 판의 순환 완성
 

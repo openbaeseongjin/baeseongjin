@@ -18,6 +18,15 @@
             "outputPath": "src/game/boss-authoring/generated/Boss02Stage.generated.js"
         },
         {
+            "stageId": "boss-03",
+            "bossStageId": "boss-03",
+            "specType": "boss-stage",
+            "authoringMode": "runtime-generated",
+            "mapReferencePath": "docs/boss/03/final-content/MAP-PREVIEW.html",
+            "sourcePath": "src/game/boss-authoring/specs/boss-03.json",
+            "outputPath": "src/game/boss-authoring/generated/Boss03Stage.generated.js"
+        },
+        {
             "stageId": "boss-04",
             "bossStageId": "boss-04",
             "specType": "boss-stage",
@@ -34,6 +43,15 @@
             "mapReferencePath": "docs/boss/05/final-content/MAP-PREVIEW.html",
             "sourcePath": "src/game/boss-authoring/specs/boss-05.json",
             "outputPath": "src/game/boss-authoring/generated/Boss05Stage.generated.js"
+        },
+        {
+            "stageId": "boss-06",
+            "bossStageId": "boss-06",
+            "specType": "boss-stage",
+            "authoringMode": "runtime-generated",
+            "mapReferencePath": "docs/boss/06/blockout-draft/MAP-PREVIEW.html",
+            "sourcePath": "src/game/boss-authoring/specs/boss-06.json",
+            "outputPath": "src/game/boss-authoring/generated/Boss06Stage.generated.js"
         },
         {
             "stageId": "1-1",
