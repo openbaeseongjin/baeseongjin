@@ -189,6 +189,18 @@ const TERRAIN = Object.freeze({
         "residential-rock": material("residential-rock", 1, 0, 0, 0, "#c8f8e8"),
         "corporate-rock": material("corporate-rock", 1, 1, 1, 0, "#d8fff0"),
         "landing-rock": material("landing-rock", 0, 0, 0, 0, "#e8ffe8")
+    }),
+    blockPool: Object.freeze({
+        fallbackPresetId: "platform",
+        presetByRole: Object.freeze({
+            platform: "platform",
+            "safe-deck": "safe-deck",
+            recovery: "recovery",
+            overhang: "overhang",
+            "sealed-door": "sealed-door",
+            cover: "cover",
+            solid: "solid"
+        })
     })
 });
 

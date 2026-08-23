@@ -143,13 +143,27 @@
     "terrain": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["materials"],
+      "required": ["materials", "blockPool"],
       "properties": {
         "materials": {
           "type": "object",
           "minProperties": 1,
           "propertyNames": { "type": "string", "minLength": 1 },
           "additionalProperties": { "$ref": "#/$defs/terrainMaterial" }
+        },
+        "blockPool": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fallbackPresetId", "presetByRole"],
+          "properties": {
+            "fallbackPresetId": { "type": "string", "minLength": 1 },
+            "presetByRole": {
+              "type": "object",
+              "minProperties": 1,
+              "propertyNames": { "type": "string", "minLength": 1 },
+              "additionalProperties": { "type": "string", "minLength": 1 }
+            }
+          }
         }
       }
     },

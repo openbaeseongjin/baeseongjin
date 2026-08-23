@@ -1,4 +1,5 @@
 import { ENVIRONMENT_MAX_ALTITUDE } from "./EnvironmentAltitude.js";
+import { isTerrainBlockPresetId } from "./terrain/TerrainBlockPool.js";
 
 function positiveInteger(value, label) {
     if (!Number.isInteger(value) || value <= 0) {
@@ -76,6 +77,10 @@ export class EnvironmentDefinition {
         const material = this.terrain.materials[zone.terrainMaterial];
         if (!material) throw new Error(`Unknown terrain material '${zone.terrainMaterial}'`);
         return material;
+    }
+
+    blockPresetForRole(role) {
+        return this.terrain.blockPool.presetByRole[role] ?? this.terrain.blockPool.fallbackPresetId;
     }
 
     decorationGroupFor(zone) {
@@ -314,7 +319,7 @@ function normalizeBackdrop(backdrop, atlases) {
 
 function normalizeTerrain(terrain, atlases) {
     const obj = plainObject(terrain, "terrain");
-    knownKeys(obj, ["materials"], "terrain");
+    knownKeys(obj, ["materials", "blockPool"], "terrain");
     if (!obj.materials || Array.isArray(obj.materials) || typeof obj.materials !== "object") {
         throw new Error("terrain requires materials object");
     }
@@ -339,7 +344,29 @@ function normalizeTerrain(terrain, atlases) {
             ];
         })
     );
-    return Object.freeze({ materials: Object.freeze(materials) });
+    return Object.freeze({ materials: Object.freeze(materials), blockPool: normalizeTerrainBlockPool(obj.blockPool) });
+}
+
+function normalizeTerrainBlockPool(blockPool) {
+    const obj = plainObject(blockPool, "terrain blockPool");
+    knownKeys(obj, ["fallbackPresetId", "presetByRole"], "terrain blockPool");
+    if (!isTerrainBlockPresetId(obj.fallbackPresetId)) {
+        throw new Error(`terrain blockPool fallbackPresetId '${obj.fallbackPresetId}' is unknown`);
+    }
+    if (!obj.presetByRole || Array.isArray(obj.presetByRole) || typeof obj.presetByRole !== "object") {
+        throw new Error("terrain blockPool requires a presetByRole object");
+    }
+    const presetByRole = Object.fromEntries(
+        Object.entries(obj.presetByRole).map(([role, presetId]) => {
+            if (typeof role !== "string" || !role) throw new Error("terrain blockPool role must be non-empty");
+            if (!isTerrainBlockPresetId(presetId)) {
+                throw new Error(`terrain blockPool role '${role}' references unknown preset '${presetId}'`);
+            }
+            return [role, presetId];
+        })
+    );
+    if (Object.keys(presetByRole).length === 0) throw new Error("terrain blockPool requires at least one role");
+    return Object.freeze({ fallbackPresetId: obj.fallbackPresetId, presetByRole: Object.freeze(presetByRole) });
 }
 
 function normalizeDecoration(decoration, atlases) {

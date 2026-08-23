@@ -14,12 +14,18 @@ function backdropAtlasIds(definition, authoredAreaEnvironmentDefinitions) {
     );
 }
 
-function terrainAtlasIds(definition) {
-    return Object.values(definition.terrain.materials).flatMap(({ fill, edge }) => [fill.atlasId, edge.atlasId]);
+function terrainAtlasIds(definition, authoredAreaEnvironmentDefinitions) {
+    return [definition, ...Object.values(authoredAreaEnvironmentDefinitions)].flatMap((environmentDefinition) =>
+        Object.values(environmentDefinition.terrain.materials).flatMap(({ fill, edge }) => [fill.atlasId, edge.atlasId])
+    );
 }
 
-function decorationAtlasIds(definition) {
-    return Object.values(definition.decoration.groups).flatMap(({ items }) => items.map(({ frame }) => frame.atlasId));
+function decorationAtlasIds(definition, authoredAreaEnvironmentDefinitions) {
+    return [definition, ...Object.values(authoredAreaEnvironmentDefinitions)].flatMap((environmentDefinition) =>
+        Object.values(environmentDefinition.decoration.groups).flatMap(({ items }) =>
+            items.map(({ frame }) => frame.atlasId)
+        )
+    );
 }
 
 export class EnvironmentRendererComposer {
@@ -41,17 +47,17 @@ export class EnvironmentRendererComposer {
         });
         const terrain = new EnvironmentComponentRenderer({
             id: "terrain",
-            atlasIds: terrainAtlasIds(definition),
+            atlasIds: terrainAtlasIds(definition, authoredAreaEnvironmentDefinitions),
             assets,
-            renderer: new PixelTerrainRenderer({ definition, assets }),
+            renderer: new PixelTerrainRenderer({ definition, assets, authoredAreaEnvironmentDefinitions }),
             fallbackRenderer: polygonTerrain ?? new EmptyEnvironmentRenderer(),
             warn
         });
         const decoration = new EnvironmentComponentRenderer({
             id: "decoration",
-            atlasIds: decorationAtlasIds(definition),
+            atlasIds: decorationAtlasIds(definition, authoredAreaEnvironmentDefinitions),
             assets,
-            renderer: new PixelDecorationRenderer({ definition, assets }),
+            renderer: new PixelDecorationRenderer({ definition, assets, authoredAreaEnvironmentDefinitions }),
             fallbackRenderer: new EmptyEnvironmentRenderer(),
             warn
         });

@@ -100,7 +100,11 @@ function normalizeTerrain(raw) {
                     oneWayColor: spec.oneWayColor
                 }
             ])
-        )
+        ),
+        blockPool: {
+            fallbackPresetId: raw.blockPool?.fallbackPresetId,
+            presetByRole: { ...(raw.blockPool?.presetByRole ?? {}) }
+        }
     };
 }
 

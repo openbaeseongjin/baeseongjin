@@ -1,28 +1,51 @@
 import { paintSpriteFrame } from "../../sprites/SpriteCanvasPainter.js";
 import { boundsForVertices, centeredBounds, isVisible } from "../../RenderViewport.js";
-import { currentAuthoredArea, sceneEnvironmentZone } from "../AltitudeZoneResolver.js";
+import { authoredAreaEnvironmentDefinitionFor } from "../AuthoredAreaEnvironmentCatalog.js";
+import { authoredEnvironmentZone, currentAuthoredArea } from "../AltitudeZoneResolver.js";
+
+function authoredSurfaceForArea(surface, area) {
+    if (!area) return true;
+    return (
+        surface.landmarkId === area.id ||
+        surface.areaId === area.id ||
+        (area.areaId !== undefined && surface.areaId === area.areaId)
+    );
+}
+
+function stableHash(value) {
+    let hash = 2166136261;
+    for (const character of value) {
+        hash ^= character.codePointAt(0);
+        hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0) / 4294967296;
+}
 
 export class PixelDecorationRenderer {
-    constructor({ definition, assets }) {
+    constructor({ definition, assets, authoredAreaEnvironmentDefinitions = Object.freeze({}) }) {
         this.definition = definition;
         this.assets = assets;
+        this.authoredAreaEnvironmentDefinitions = authoredAreaEnvironmentDefinitions;
         this.status = assets ? "ready" : "pending";
         this.cachedWorld = null;
-        this.cachedGroup = null;
+        this.cachedAreaId = null;
+        this.cachedGroupId = null;
         this.cachedPlacements = Object.freeze([]);
     }
 
     draw({ context, scene, viewport, renderStats }) {
-        if (currentAuthoredArea(scene)) {
-            renderStats?.recordCollection("decorations", 0, 0);
-            return;
-        }
-
-        const zone = sceneEnvironmentZone(this.definition, scene);
-        const group = this.definition.decorationGroupFor(zone);
-
+        const area = currentAuthoredArea(scene);
+        const definition = authoredAreaEnvironmentDefinitionFor(
+            this.authoredAreaEnvironmentDefinitions,
+            area,
+            this.definition
+        );
+        const altitude = -(scene.player?.position?.y ?? 0);
+        const zone = authoredEnvironmentZone(definition, area, altitude);
+        const groupId = zone.decorationGroup;
+        const group = definition.decorationGroupFor(zone);
         if (!group || !this.assets) return;
-        const placements = this.placementsFor(scene.world, group);
+        const placements = this.placementsFor(scene.world, area, groupId, group);
         let drawn = 0;
         for (const placement of placements) {
             if (!isVisible(viewport, placement.bounds)) continue;
@@ -44,22 +67,25 @@ export class PixelDecorationRenderer {
         renderStats?.recordCollection("decorations", placements.length, drawn);
     }
 
-    placementsFor(world, group) {
-        if (this.cachedWorld === world && this.cachedGroup === group) return this.cachedPlacements;
+    placementsFor(world, area, groupId, group) {
+        const areaId = area?.areaId ?? area?.id ?? null;
+        if (this.cachedWorld === world && this.cachedAreaId === areaId && this.cachedGroupId === groupId) {
+            return this.cachedPlacements;
+        }
         this.cachedWorld = world;
-        this.cachedGroup = group;
-        const surfaces = (world.surfaces ?? []).filter(({ renderable }) => renderable !== false);
+        this.cachedAreaId = areaId;
+        this.cachedGroupId = groupId;
+        const surfaces = (world.surfaces ?? []).filter(
+            (surface) => surface.renderable !== false && authoredSurfaceForArea(surface, area)
+        );
         const surfaceBounds = surfaces.map((surface) => boundsForVertices(surface.vertices)).filter(Boolean);
         const placements = [];
 
-        for (let i = 0; i < surfaces.length; i += 1) {
-            const surface = surfaces[i];
-            const seed = (world.seed ?? 0) + i * 31 + (surface.level ?? 0) * 7;
-            const bounds = surfaceBounds[i];
+        for (const [surfaceIndex, surface] of surfaces.entries()) {
+            const bounds = surfaceBounds[surfaceIndex];
             if (!bounds) continue;
-
-            for (const item of group.items) {
-                const hash = this.hashFor(seed + item.frame.x + item.frame.y);
+            for (const [itemIndex, item] of group.items.entries()) {
+                const hash = stableHash(`${world.seed ?? 0}:${surface.id}:${groupId}:${itemIndex}`);
                 if (hash > 0.55) continue;
                 const position = this.safePosition(bounds, surfaceBounds, item, hash);
                 if (!position) continue;
@@ -114,12 +140,5 @@ export class PixelDecorationRenderer {
             candidate.maxY < surface.minY - margin ||
             candidate.minY > surface.maxY + margin
         );
-    }
-
-    hashFor(value) {
-        let h = (value >>> 0) * 2654435761;
-        h = Math.imul(h ^ (h >>> 16), 2246822507);
-        h = Math.imul(h ^ (h >>> 13), 3266489909);
-        return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
     }
 }
