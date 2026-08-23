@@ -112,13 +112,13 @@ and never:
 | 01 | 1-8 CONTAINMENT GATE | checkpoint 이후 sealed transfer vestibule | Foundation + Sentry + Wind first synthesis |
 | 02 | 2-8 EVACUATION PLATFORM | final safe deck 이후 evacuation control boundary | Patrol / route-pressure boss |
 | 03 | 3-8 UPPER MARKET GATE | final control boundary | Access-state / route-read boss |
-| 04 | 4-8 TRANSIT CONTROL TRUNK | trunk terminal boundary | Cutter / Wake / recovery boss |
+| 04 | 4-8 PROTECTED ASCENT GATEHOUSE | protected ascent boundary | persistent Guard A/B + Central Security Hub boss |
 | 05 | 5-8 CONTINUITY CONTROL SPINE | control boundary | sparse hardpoint / commitment boss |
 | 06 | 6-8 ROOFTOP PAD 03 | access denial 뒤 | Final Security boss |
 
 Only Sector01 and Sector06 are detailed in this package.
 
-Sector02~05 names/mechanics remain later contracts.
+Sector02~03 names/mechanics remain later contracts. Boss04와 Boss05의 authored handoff는 각각 `docs/boss/04/README.md`, `docs/boss/05/README.md`가 소유하며 Runtime·전환 계약은 별도다.
 
 ---
 
