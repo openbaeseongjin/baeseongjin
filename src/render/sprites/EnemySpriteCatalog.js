@@ -6,6 +6,10 @@ export const ENEMY_SPRITE_SELECTION_BY_SECTOR_ID = Object.freeze({
     [DEFAULT_ENEMY_SPRITE_SECTOR_ID]: Object.freeze({
         packageId: "sector-01-enemies",
         manifestUrl: runtimeAssetUrl("characters", "sector-01-enemies", "enemy-sprite-manifest.json")
+    }),
+    "sector-02": Object.freeze({
+        packageId: "sector-02-enemies",
+        manifestUrl: runtimeAssetUrl("characters", "sector-02-enemies", "enemy-sprite-manifest.json")
     })
 });
 export const DEFAULT_ENEMY_SPRITE_MANIFEST_URL =
