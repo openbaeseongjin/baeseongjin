@@ -21,7 +21,8 @@ export class KinematicPhysicsBody extends withRopeAttachable(withSurfacePhysics(
         collider,
         collisionRestitution = DEFAULT_COLLISION_RESTITUTION,
         canGroundActors = false,
-        ropeAttachment = false
+        ropeAttachment = false,
+        ropeable = ropeAttachment !== false
     }) {
         super();
         if (typeof id !== "string" || !id) throw new TypeError("KinematicPhysicsBody requires id");
@@ -41,7 +42,8 @@ export class KinematicPhysicsBody extends withRopeAttachable(withSurfacePhysics(
         this.initializeSurfacePhysics({
             position: new Vector2(finitePosition(position, "KinematicPhysicsBody position").x, position.y),
             collider: assertCollider(collider),
-            motionType: SURFACE_MOTION_TYPE.KINEMATIC
+            motionType: SURFACE_MOTION_TYPE.KINEMATIC,
+            ropeable
         });
         this.initializeRopeAttachable(ropeAttachment);
     }

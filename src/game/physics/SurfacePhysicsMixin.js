@@ -1,20 +1,23 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { requireFinitePhysicsVector, withPhysics } from "./PhysicsMixin.js";
+import { withRopeableSurface } from "../rope/RopeableSurfaceMixin.js";
 import { SURFACE_MOTION_TYPE, SURFACE_PHYSICS, VALID_SURFACE_MOTION_TYPE } from "./SurfacePhysicsDefinition.js";
 import { assertCollider, colliderSnapshotBoundingRadius } from "./colliders/Collider.js";
 
 export function withSurfacePhysics(Base) {
-    return class extends withPhysics(Base) {
+    return class extends withRopeableSurface(withPhysics(Base)) {
         initializeSurfacePhysics({
             position,
             velocity = new Vector2(),
             acceleration = new Vector2(),
             collider,
             mass = null,
-            motionType = SURFACE_MOTION_TYPE.DYNAMIC
+            motionType = SURFACE_MOTION_TYPE.DYNAMIC,
+            ropeable = false
         }) {
             this.initializePhysics({ position, velocity, acceleration });
             this.collider = assertCollider(collider);
+            this.initializeRopeableSurface({ ropeable, collider: this.collider });
             const colliderRadius = colliderSnapshotBoundingRadius(this.collider.snapshot());
             this.mass =
                 Number.isFinite(mass) && mass > SURFACE_PHYSICS.MINIMUM_EXPLICIT_MASS

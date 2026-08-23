@@ -21,7 +21,6 @@ import { enemyDisplayName } from "../../src/game/combat/EnemyArchetypeCatalog.js
 import { AUTHORED_COORDINATE_ANCHORS } from "../../src/game/world/AuthoredCoordinateAnchor.js";
 import { WIND_MODE } from "../../src/game/world/WindPhase.js";
 import {
-    BOSS_ANCHOR_ROLE,
     BOSS_MECHANIC_TYPE,
     BOSS_TRANSITION_TRIGGER,
     BOSS_VICTORY_PRESENTATION_ID,
@@ -53,7 +52,6 @@ const BOSS_EDITABLE_GROUPS = Object.freeze([
     ["entry", "시작 지점", null, "실게임 요소"],
     ["exit", "출구", null, "실게임 요소"],
     ["surfaces", "Arena 표면", "boss-surface", "실게임 요소"],
-    ["combatAnchors", "공격 Rope Anchor", "boss-strike-anchor", "실게임 요소"],
     ["boss", "Boss Actor", null, "실게임 요소"],
     ["mechanics", "Mechanic", null, "실게임 요소"],
     ["arena", "Arena 경계", null, "표시형 오브젝트"],
@@ -70,7 +68,7 @@ const DOMAIN_LABELS = Object.freeze({
     exit: "출구",
     surfaces: "지형 표면",
     anchors: "앵커",
-    combatAnchors: "공격 Rope Anchor",
+    combatAnchors: "Rope 표면 참조",
     recoveryRoute: "복구 / 경로",
     enemySlots: "적 슬롯",
     wind: "바람",
@@ -153,6 +151,7 @@ const state = {
     derivedPreview: null,
     runtimePromotion: null,
     previewAvailable: false,
+    mapReferenceAvailable: false,
     view: { x: 0, y: 0, zoom: 1 },
     message: { kind: "", text: "스테이지를 불러오는 중입니다.", issues: [] },
     pointer: null,
@@ -289,7 +288,8 @@ function entityAnnotation(entity, spec) {
         if (entity.domain === "exit") return { name: "열린 Gate", effect: "승리 뒤 Sector 02 진입" };
         if (entity.domain === "boss") return { name: spec.name, effect: "Rail 위 중립 Boss Actor" };
         if (entity.domain === "surfaces") return { name: `Arena · ${id}`, effect: "충돌 / Rope 이동 표면" };
-        if (entity.domain === "combatAnchors") return { name: `공격 Rope · ${id}`, effect: "Rope 부착 / 스윙 반격" };
+        if (entity.domain === "combatAnchors")
+            return { name: `Rope 표면 참조 · ${id}`, effect: "연결된 collision surface" };
         if (entity.domain === "recovery") return { name: `복구 · ${id}`, effect: "실패 후 지역 복귀" };
         if (entity.domain === "mechanics") return { name: `Mechanic · ${id}`, effect: kindLabel(entity.kind) };
         if (entity.domain === "phases") return { name: `Phase · ${id}`, effect: "HP floor / 약점 공략" };
@@ -354,10 +354,7 @@ function stageEndpoint(stageId, suffix = "") {
 }
 
 function scenarioReferenceUrl(stageId) {
-    if (/^boss-\d+$/.test(stageId ?? "")) return null;
-    const match = /^(\d+)-(\d+)$/.exec(stageId ?? "");
-    if (!match) return null;
-    return stageEndpoint(stageId, "/reference");
+    return state.mapReferenceAvailable ? stageEndpoint(stageId, "/reference") : null;
 }
 
 function renderScenarioReference() {
@@ -537,19 +534,6 @@ function addPreset(kind) {
             }
         });
         state.draft.select({ domain: "surfaces", id, kind: "surface" });
-        return render();
-    }
-    if (kind === "boss-strike-anchor") {
-        const id = nextStableId("strike-anchor");
-        applyMutation({
-            domain: "combatAnchors",
-            label: "Boss 공격 Rope Anchor 추가",
-            apply: (spec) => {
-                spec.arena.anchors.push({ id, x: point.x, y: point.y, role: BOSS_ANCHOR_ROLE.SWING_ATTACK });
-                return true;
-            }
-        });
-        state.draft.select({ domain: "combatAnchors", id, kind: "swing-anchor" });
         return render();
     }
     if (kind === "boss-recovery") {
@@ -1899,11 +1883,6 @@ function drawBossCanvas(rect, spec) {
     drawMarker(spec.boss.position, "#ff796a", "square", isSelected("boss", spec.boss.actorId));
     drawMarker(spec.arena.entry, "#e6f2f5", "triangle", isSelected("entry", spec.arena.entry.id));
     drawMarker(spec.arena.exit, "#66e6ff", "diamond", isSelected("exit", spec.arena.exit.id));
-    for (const anchor of spec.arena.anchors) {
-        if (anchor.role === BOSS_ANCHOR_ROLE.SWING_ATTACK) {
-            drawMarker(anchor, "#67e8f9", "diamond", isSelected("combatAnchors", anchor.id));
-        }
-    }
     for (const point of spec.arena.recoveryPoints)
         drawMarker(point, "#86c99d", "square", isSelected("recovery", point.id));
     context.fillStyle = "rgba(230,242,245,0.7)";
@@ -2051,6 +2030,7 @@ async function loadStage(stageId, { fit = true } = {}) {
         state.authoringMode = payload.authoringMode;
         state.runtimePromotion = payload.runtimePromotion;
         state.previewAvailable = payload.previewAvailable;
+        state.mapReferenceAvailable = payload.mapReferenceAvailable === true;
         state.derivedPreview = payload.derivedPreview ?? null;
         state.draft =
             state.specType === "boss-stage"

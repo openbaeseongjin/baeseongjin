@@ -13,6 +13,7 @@
 7. **임시 완성을 금지한다.** 실행되지 않는 placeholder, 생략 부호, 설명 없는 TODO를 결과물로 남기지 않는다.
 8. **반복 수정은 구조 검증 신호다.** 같은 기능에서 유사 수정이 계속되거나 한 수정 뒤 연관 버그가 이어지면 추가 증상 패치를 멈추고 정체성·상태 소유권·capability·권한 경계를 검증한다.
 9. **이동 가능성은 합성 충돌로 검증한다.** 개별 발판이 맞아 보여도 Stage 경계의 source/target deck, seam, city wing을 모두 합친 수평 구간이 전체 폭을 막을 수 있다. 같은 Sector 안의 양방향 이동 계약은 경계마다 Player가 통과할 수 있는 하강 개구부를 수치로 검사한다. 렌더되는 단단한 수평 플랫폼은 별도 차단 장치로 명시·표현되지 않는 한 Rope 부착 가능해야 하며 `oneWay`와 `grappleable`을 서로 독립적인 우연 값으로 두지 않는다.
+10. **Ropeable은 collision capability다.** `grappleable: true` surface는 실제 collision geometry를 가져야 하며 Rope는 그 surface boundary의 최근접 점에만 부착한다. route marker·중심점 Actor·비충돌 helper는 Rope target을 만들지 않는다. 움직이는 Ropeable body는 같은 collider snapshot을 collision·Rope·renderer에 공유한다.
 
 ## 2. 작업 시작과 종료
 

@@ -3,6 +3,7 @@ import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { evaluateSwingDrag, getSwingDragThreshold } from "../rope/SwingDrag.js";
 import { releaseRopeFromBody, ropeAttachmentPoint, ropeLaunchHandPoint } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
+import { isRopeableCollisionSurface } from "../rope/RopeableSurfaceMixin.js";
 import { createInputCapabilityMixin } from "./InputCapability.js";
 
 export function findRopeAttachment({
@@ -21,7 +22,7 @@ export function findRopeAttachment({
     let best = null;
     let bestScore = Number.POSITIVE_INFINITY;
     for (const surface of surfaces) {
-        if (surface.grappleable === false) continue;
+        if (!isRopeableCollisionSurface(surface)) continue;
         if (canAttachToSurface && canAttachToSurface(surface) === false) continue;
         const point = closestPointOnSurface(aimPoint, surface);
         const launchDistance = Math.hypot(point.x - origin.x, point.y - origin.y);

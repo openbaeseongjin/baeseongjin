@@ -435,14 +435,18 @@ class SecurityGuardRenderer extends BossPolygonObjectRenderer {
         context.fillStyle = this.elevated ? "#334155" : "#1e3a4a";
         context.strokeStyle = active ? COLOR.HAZARD : warning ? COLOR.WARNING : recovery ? COLOR.EXPOSED : COLOR.EDGE;
         context.lineWidth = warning || active || recovery ? 5 : 3;
-        context.beginPath();
-        context.moveTo(-width * 0.5, 0);
-        context.lineTo(-width * 0.24, -height * 0.48);
-        context.lineTo(width * 0.3, -height * 0.42);
-        context.lineTo(width * 0.5, 0);
-        context.lineTo(width * 0.22, height * 0.48);
-        context.lineTo(-width * 0.32, height * 0.42);
-        context.closePath();
+        const vertices = object.geometry?.type === "polygon" ? object.geometry.vertices : null;
+        if (vertices) polygon(context, vertices);
+        else {
+            context.beginPath();
+            context.moveTo(-width * 0.5, 0);
+            context.lineTo(-width * 0.24, -height * 0.48);
+            context.lineTo(width * 0.3, -height * 0.42);
+            context.lineTo(width * 0.5, 0);
+            context.lineTo(width * 0.22, height * 0.48);
+            context.lineTo(-width * 0.32, height * 0.42);
+            context.closePath();
+        }
         context.fill();
         context.stroke();
         context.fillStyle = recovery ? COLOR.EXPOSED : COLOR.DARK;

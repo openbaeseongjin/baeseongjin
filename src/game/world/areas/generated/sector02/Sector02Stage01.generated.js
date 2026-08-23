@@ -691,7 +691,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-01:grip-b-surface",
@@ -701,7 +701,7 @@ const SPEC = {
           "x": -96,
           "y": -256
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": -108,
@@ -722,7 +722,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-01:grip-d-surface",
@@ -732,7 +732,7 @@ const SPEC = {
           "x": 160,
           "y": -464
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 148,
@@ -753,7 +753,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-01:grip-f-surface",
@@ -763,7 +763,7 @@ const SPEC = {
           "x": 416,
           "y": -640
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 404,

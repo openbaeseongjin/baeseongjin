@@ -139,6 +139,13 @@ function validateArena(spec, issues, file) {
             issue(issues, file, "arena-anchor-role-invalid", { id: anchor.id ?? null });
         }
     }
+    const surfaceIds = new Set((arena?.surfaces ?? []).map(({ id }) => id));
+    for (const anchor of arena?.anchors ?? []) {
+        if (anchor.role !== BOSS_ANCHOR_ROLE.SWING_ATTACK) continue;
+        if (typeof anchor.surfaceId !== "string" || !surfaceIds.has(anchor.surfaceId)) {
+            issue(issues, file, "arena-anchor-surface-reference-invalid", { id: anchor.id ?? null });
+        }
+    }
     if (!positive(arena?.baseHookReach)) issue(issues, file, "arena-hook-reach-invalid");
     if (arena?.routeEdges !== undefined) {
         if (!Array.isArray(arena.routeEdges)) {

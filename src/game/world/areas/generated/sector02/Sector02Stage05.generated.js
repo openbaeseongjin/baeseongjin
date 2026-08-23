@@ -749,7 +749,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-05:g1-surface",
@@ -759,7 +759,7 @@ const SPEC = {
           "x": -560,
           "y": -224
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": -572,
@@ -780,7 +780,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-05:g2-surface",
@@ -790,7 +790,7 @@ const SPEC = {
           "x": -192,
           "y": -320
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": -204,
@@ -811,7 +811,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-05:g3-surface",
@@ -821,7 +821,7 @@ const SPEC = {
           "x": 160,
           "y": -384
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 148,
@@ -842,7 +842,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-05:g4-surface",
@@ -852,7 +852,7 @@ const SPEC = {
           "x": 512,
           "y": -448
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 500,
@@ -873,7 +873,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-05:g5-surface",
@@ -883,7 +883,7 @@ const SPEC = {
           "x": 464,
           "y": -336
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 452,
@@ -904,7 +904,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-05:access-anchor-surface",
@@ -914,7 +914,7 @@ const SPEC = {
           "x": 320,
           "y": -320
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 308,
@@ -935,7 +935,7 @@ const SPEC = {
         ]
       },
       {
-        "collision": false,
+        "collision": true,
         "coordinateAnchor": "center",
         "grappleable": true,
         "id": "sector-02-05:g6-surface",
@@ -945,7 +945,7 @@ const SPEC = {
           "x": 96,
           "y": -96
         },
-        "renderable": false,
+        "renderable": true,
         "vertices": [
           {
             "x": 84,

@@ -144,7 +144,7 @@ function validateUniqueIds(area, collection, label, issues, globalIds) {
 }
 
 function validateGrappleLandmarks(area, issues) {
-    const grappleTargets = area.surfaces.filter(({ kind }) => kind === "grapple-target");
+    const grappleTargets = area.surfaces.filter(({ kind }) => kind === "ropeable-surface");
     const grappleLandmarks = area.objects.filter(({ kind }) => kind === "grapple-landmark");
 
     for (const surface of grappleTargets) {

@@ -6,6 +6,29 @@ export const BOSS_ANCHOR_ROLE = Object.freeze({
     SWING_ATTACK: "swing-attack"
 });
 
+export const BOSS05_CONTROL_ROLE = Object.freeze({
+    AUX_A: "aux-a",
+    AUX_B: "aux-b",
+    MAIN: "main",
+    CORE: "core"
+});
+
+export const BOSS05_PULSE_REGION = Object.freeze({
+    INNER: "inner",
+    OUTER: "outer",
+    LEFT: "left",
+    RIGHT: "right",
+    UPPER: "upper",
+    LOWER: "lower"
+});
+
+export const BOSS05_RECOVERY_ROLE = Object.freeze({
+    ENTRY: "entry",
+    MAIN: "main",
+    MAIN_LEFT: "main-left",
+    MAIN_RIGHT: "main-right"
+});
+
 export const BOSS_MECHANIC_TYPE = Object.freeze({
     FULL_CROSSBEAM_SWEEP: "full-crossbeam-sweep",
     DIRECTIONAL_BROKEN_BEAM_SWEEP: "directional-broken-beam-sweep",

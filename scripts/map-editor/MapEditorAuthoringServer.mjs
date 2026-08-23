@@ -209,11 +209,12 @@ function requestRoute(url) {
     return match ? { stageId: decodeURIComponent(match[1]), action: match[2] ?? "read" } : null;
 }
 
-function scenarioMapPreviewPath(stageId, specType = "area") {
-    if (specType === "boss-stage") {
+function scenarioMapPreviewPath(entry) {
+    if (typeof entry?.mapReferencePath === "string" && entry.mapReferencePath) return entry.mapReferencePath;
+    if (entry?.specType === "boss-stage") {
         throw error("scenario-map-preview-unavailable", "Boss Stage legacy map previews are not active references.");
     }
-    const match = /^(\d+)-(\d+)$/.exec(stageId ?? "");
+    const match = /^(\d+)-(\d+)$/.exec(entry?.stageId ?? "");
     if (!match) throw error("stage-identity-invalid", "Map editor stage identity is invalid.");
     return `docs/bsh/scenario/${match[1]}/${stageId}/MAP-PREVIEW.html`;
 }
@@ -415,6 +416,8 @@ export async function createMapEditorAuthoringServer({
             memoryStored: Boolean(stage.memorySpec),
             memoryRevision: stage.memoryRevision,
             previewAvailable: previewAvailable(stage),
+            mapReferenceAvailable:
+                stage.entry.specType !== "boss-stage" || typeof stage.entry.mapReferencePath === "string",
             ...(stage.entry.specType === "boss-stage" ? { derivedPreview: bossStageDerivedPreview(activeSpec) } : {}),
             ...(stage.outputPath
                 ? {
@@ -521,7 +524,7 @@ export async function createMapEditorAuthoringServer({
         async readScenarioMapPreview(stageId) {
             const stage = currentStage(stageId);
             const source = await readText(
-                safeProjectPath(root, scenarioMapPreviewPath(stage.entry.stageId, stage.entry.specType)),
+                safeProjectPath(root, scenarioMapPreviewPath(stage.entry)),
                 "scenario-map-preview-missing",
                 "Map editor scenario map preview could not be read."
             );

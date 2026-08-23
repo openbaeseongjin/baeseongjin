@@ -413,8 +413,8 @@
         "kind": "structural-grapple-target",
         "oneWay": false,
         "grappleable": true,
-        "collision": false,
-        "renderable": false,
+        "collision": true,
+        "renderable": true,
         "coordinateAnchor": "center",
         "position": {
           "x": 80,
@@ -444,8 +444,8 @@
         "kind": "structural-grapple-target",
         "oneWay": false,
         "grappleable": true,
-        "collision": false,
-        "renderable": false,
+        "collision": true,
+        "renderable": true,
         "coordinateAnchor": "center",
         "position": {
           "x": 416,
