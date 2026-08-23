@@ -10,7 +10,8 @@ import {
 const AUTHORED_SECTOR_CROSSFADE_WORLD_SPAN = 1024;
 const AUTHORED_SECTOR_CROSSFADE_PAIRS = Object.freeze([
     Object.freeze(["sector-01", "sector-02"]),
-    Object.freeze(["sector-02", "sector-03"])
+    Object.freeze(["sector-02", "sector-03"]),
+    Object.freeze(["sector-03", "sector-04"])
 ]);
 
 export class PixelBackdropRenderer {
