@@ -31,11 +31,11 @@
     "subtitle": "LIFT BYPASS",
     "surfaces": [
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-02:p0",
         "kind": "platform",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 416,
           "y": 0
@@ -60,11 +60,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-02:p1",
         "kind": "recovery",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -416,
           "y": -320
@@ -89,11 +89,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-02:r2",
         "kind": "recovery",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 64,
           "y": -656
@@ -118,11 +118,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-02:p2",
         "kind": "platform",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 64,
           "y": -704
@@ -147,11 +147,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-02:p3",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -160,
           "y": -768
@@ -176,11 +176,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-02:dead-lift-cage",
         "kind": "dead-lift-cage",
         "oneWay": false,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 128,
           "y": -608
@@ -205,40 +205,40 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": false,
         "id": "sector-01-02:counterweight-tower",
         "kind": "counterweight-tower",
         "oneWay": false,
-        "grappleable": false,
-        "coordinateAnchor": "top-center",
         "position": {
-          "x": -544,
-          "y": -704
+          "x": -595,
+          "y": -705
         },
         "vertices": [
           {
-            "x": -592,
-            "y": -704
+            "x": -643,
+            "y": -705
           },
           {
-            "x": -496,
-            "y": -704
+            "x": -547,
+            "y": -705
           },
           {
-            "x": -496,
-            "y": -256
+            "x": -547,
+            "y": -257
           },
           {
-            "x": -592,
-            "y": -256
+            "x": -643,
+            "y": -257
           }
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": false,
         "id": "sector-01-02:hoist-casing-left",
         "kind": "hoist-casing",
         "oneWay": false,
-        "grappleable": false,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -816,
           "y": -960
@@ -263,11 +263,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": false,
         "id": "sector-01-02:hoist-casing-right",
         "kind": "hoist-casing",
         "oneWay": false,
-        "grappleable": false,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 816,
           "y": -960
@@ -292,11 +292,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-01-02:exit-deck",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -352,
           "y": -832
@@ -329,9 +329,9 @@
       },
       {
         "id": "sector-01-02:route-a",
+        "landmark": "A",
         "x": 224,
-        "y": -192,
-        "landmark": "A"
+        "y": -192
       },
       {
         "id": "sector-01-02:route-airborne-c-window",
@@ -340,9 +340,9 @@
       },
       {
         "id": "sector-01-02:route-c",
+        "landmark": "C",
         "x": -320,
-        "y": -560,
-        "landmark": "C"
+        "y": -560
       },
       {
         "id": "sector-01-02:route-p2",
@@ -375,56 +375,56 @@
     "checkpoints": [],
     "objects": [
       {
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-01-02:lift-offline"
+        ],
+        "gameplay": false,
         "id": "sector-01-02:maintenance-lift",
         "kind": "background-prop",
-        "presentationId": "world-object:background-prop",
         "position": {
           "x": 128,
           "y": -448
         },
-        "gameplay": false,
-        "cueIds": [
-          "sector-01-02:lift-offline"
-        ],
-        "coordinateAnchor": "center"
+        "presentationId": "world-object:background-prop"
       },
       {
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-01-02:counterweight-stalled"
+        ],
+        "gameplay": false,
         "id": "sector-01-02:counterweight-visual",
         "kind": "background-prop",
-        "presentationId": "world-object:background-prop",
         "position": {
           "x": -544,
           "y": -480
         },
-        "gameplay": false,
-        "cueIds": [
-          "sector-01-02:counterweight-stalled"
-        ],
-        "coordinateAnchor": "center"
+        "presentationId": "world-object:background-prop"
       },
       {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-02:gate",
         "id": "sector-01-02:exit-gate",
         "kind": "gate",
-        "presentationId": "world-object:gate",
         "position": {
           "x": -192,
           "y": -832
         },
-        "coordinateAnchor": "bottom-center",
-        "gateId": "sector-01-02:gate"
+        "presentationId": "world-object:gate"
       },
       {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-02:gate",
         "id": "sector-01-02:exit-panel",
+        "interactionRadius": 72,
         "kind": "gate-panel",
-        "presentationId": "world-object:gate-panel",
+        "objectiveId": "sector-01-02:exit-panel-engaged",
         "position": {
           "x": -304,
           "y": -832
         },
-        "coordinateAnchor": "bottom-center",
-        "interactionRadius": 72,
-        "objectiveId": "sector-01-02:exit-panel-engaged",
-        "gateId": "sector-01-02:gate",
+        "presentationId": "world-object:gate-panel",
         "requiredObjectiveIds": [
           "sector-01-02:final-deck-reached"
         ]
@@ -432,22 +432,22 @@
     ],
     "objectives": [
       {
-        "id": "sector-01-02:final-deck-reached",
-        "type": "reach",
         "bounds": {
-          "x": -512,
-          "y": -864,
+          "height": 96,
           "width": 320,
-          "height": 96
-        }
+          "x": -512,
+          "y": -864
+        },
+        "id": "sector-01-02:final-deck-reached",
+        "type": "reach"
       },
       {
         "id": "sector-01-02:exit-panel-engaged",
-        "type": "interact",
-        "sourceObjectId": "sector-01-02:exit-panel",
         "requiredObjectiveIds": [
           "sector-01-02:final-deck-reached"
-        ]
+        ],
+        "sourceObjectId": "sector-01-02:exit-panel",
+        "type": "interact"
       }
     ],
     "windZones": [],
@@ -460,40 +460,40 @@
     ],
     "cameraZones": [
       {
-        "id": "lift-failure",
-        "minY": -224,
-        "maxY": 0,
         "desktopZoom": 1.15,
-        "mobileZoom": 0.79,
-        "horizontalPlayerRatio": 0.75
+        "horizontalPlayerRatio": 0.75,
+        "id": "lift-failure",
+        "maxY": 0,
+        "minY": -224,
+        "mobileZoom": 0.79
       },
       {
-        "id": "left-cross",
-        "minY": -448,
-        "maxY": -224,
         "desktopZoom": 0.94,
-        "mobileZoom": 0.7,
-        "horizontalPlayerRatio": 0.68
+        "horizontalPlayerRatio": 0.68,
+        "id": "left-cross",
+        "maxY": -223,
+        "minY": -447,
+        "mobileZoom": 0.7
       },
       {
-        "id": "airborne-reattach",
-        "minY": -640,
-        "maxY": -448,
         "desktopZoom": 0.9,
+        "id": "airborne-reattach",
+        "maxY": -449,
+        "minY": -641,
         "mobileZoom": 0.68
       },
       {
-        "id": "roof-wrap",
-        "minY": -800,
-        "maxY": -640,
         "desktopZoom": 0.96,
+        "id": "roof-wrap",
+        "maxY": -640,
+        "minY": -800,
         "mobileZoom": 0.71
       },
       {
-        "id": "exit",
-        "minY": -960,
-        "maxY": -800,
         "desktopZoom": 1.1,
+        "id": "exit",
+        "maxY": -800,
+        "minY": -960,
         "mobileZoom": 0.76
       }
     ],
@@ -538,43 +538,43 @@
   },
   "anchors": [
     {
-      "surfaceIndex": 10,
-      "objectIndex": 2,
-      "target": {
-        "id": "sector-01-02:anchor-a-surface",
-        "x": 224,
-        "y": -192,
-        "properties": {}
-      },
       "landmark": {
         "id": "sector-01-02:anchor-a",
-        "x": 224,
-        "y": -192,
         "properties": {
-          "presentationId": "world-object:grapple-landmark",
+          "coordinateAnchor": "center",
           "label": "A",
-          "coordinateAnchor": "center"
-        }
+          "presentationId": "world-object:grapple-landmark"
+        },
+        "x": 224,
+        "y": -192
+      },
+      "objectIndex": 2,
+      "surfaceIndex": 10,
+      "target": {
+        "id": "sector-01-02:anchor-a-surface",
+        "properties": {},
+        "x": 224,
+        "y": -192
       }
     },
     {
-      "surfaceIndex": 11,
-      "objectIndex": 3,
-      "target": {
-        "id": "sector-01-02:anchor-c-surface",
-        "x": -320,
-        "y": -560,
-        "properties": {}
-      },
       "landmark": {
         "id": "sector-01-02:anchor-c",
-        "x": -320,
-        "y": -560,
         "properties": {
-          "presentationId": "world-object:grapple-landmark",
+          "coordinateAnchor": "center",
           "label": "C",
-          "coordinateAnchor": "center"
-        }
+          "presentationId": "world-object:grapple-landmark"
+        },
+        "x": -320,
+        "y": -560
+      },
+      "objectIndex": 3,
+      "surfaceIndex": 11,
+      "target": {
+        "id": "sector-01-02:anchor-c-surface",
+        "properties": {},
+        "x": -320,
+        "y": -560
       }
     }
   ],

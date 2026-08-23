@@ -42,8 +42,8 @@ const SPEC = {
       {
         "desktopZoom": 1.12,
         "id": "exit",
-        "maxY": -672,
-        "minY": -832,
+        "maxY": -670,
+        "minY": -830,
         "mobileZoom": 0.77,
         "verticalPlayerRatio": 0.68
       }
@@ -467,35 +467,6 @@ const SPEC = {
           {
             "x": -384,
             "y": -624
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-04:exit-transfer",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -256,
-          "y": -704
-        },
-        "vertices": [
-          {
-            "x": -416,
-            "y": -704
-          },
-          {
-            "x": -96,
-            "y": -704
-          },
-          {
-            "x": -96,
-            "y": -680
-          },
-          {
-            "x": -416,
-            "y": -680
           }
         ]
       },
