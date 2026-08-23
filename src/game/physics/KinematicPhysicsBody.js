@@ -81,6 +81,7 @@ export class KinematicPhysicsBody extends withRopeAttachable(withSurfacePhysics(
             collisionRestitution: this.collisionRestitution,
             canGroundActors: this.canGroundActors,
             ropeAttachment: this.ropeAttachmentSnapshot(translated),
+            ropeableSurface: this.ropeableSurfaceSnapshot(translated),
             lifeState: "active"
         });
     }

@@ -466,6 +466,7 @@ function bossStageSurface(surface, dx, dy, stageId) {
         oneWay: surface.oneWay === true,
         oneWayEdgeEnd: surface.oneWay === true ? 1 : undefined,
         grappleable: surface.grappleable !== false,
+        ...(surface.losOccluder === true ? { losOccluder: true } : {}),
         x: bounds.x,
         y: bounds.y,
         width: bounds.width,

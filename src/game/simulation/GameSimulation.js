@@ -921,6 +921,14 @@ export class GameSimulation {
     #ropeAttachmentActors() {
         const byOwnerId = Object.create(null);
         const add = (entry) => {
+            if (entry?.ropeableSurface && entry?.id && entry?.position) {
+                byOwnerId[entry.id] = Object.freeze({
+                    id: entry.id,
+                    position: Object.freeze({ ...entry.position }),
+                    ropeableSurface: entry.ropeableSurface
+                });
+                return;
+            }
             const attachment = entry?.ropeAttachment;
             if (!attachment?.ownerId || !attachment.position) return;
             byOwnerId[attachment.ownerId] = Object.freeze({
@@ -956,7 +964,10 @@ export class GameSimulation {
                 });
                 continue;
             }
-            rope.updateAnchor(owner.position);
+            rope.updateAnchor({
+                x: owner.position.x + (rope.anchorLocalOffset?.x ?? 0),
+                y: owner.position.y + (rope.anchorLocalOffset?.y ?? 0)
+            });
         }
     }
 

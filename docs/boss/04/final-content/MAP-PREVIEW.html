@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Boss04 공간 기준 맵</title>
+        <style>
+            :root { --bg: #050d12; --line: #344b55; --text: #eef5f6; --surface: #324851; --safe: #2f5c48; --hub: #553367; }
+            * { box-sizing: border-box; }
+            body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 ui-monospace, Consolas, monospace; }
+            header { padding: 14px 18px; border-bottom: 1px solid var(--line); }
+            h1 { margin: 0; font-size: 20px; }
+            .sub { color: #9dafb7; margin-top: 3px; }
+            main { padding: 12px; }
+            svg { width: 100%; height: 88vh; min-height: 860px; background: #02080c; border: 1px solid var(--line); border-radius: 8px; }
+            text { fill: var(--text); paint-order: stroke; stroke: #041018; stroke-width: 5px; }
+            .label { font-size: 17px; font-weight: 700; }
+            .tiny { font-size: 10px; fill: #d2dde1; }
+            .building { fill: #1b2a31; stroke: #5d747e; stroke-width: 4px; }
+            .garden { fill: #234131; stroke: #5d9c6d; stroke-width: 3px; }
+            .surface { fill: var(--surface); stroke: #97abb3; stroke-width: 3px; }
+            .safe { fill: var(--safe); stroke: #73d39b; stroke-width: 4px; }
+            .void { fill: #061016; stroke: #213943; stroke-width: 3px; stroke-dasharray: 12 10; }
+            .hub { fill: var(--hub); stroke: #d675ff; stroke-width: 5px; }
+            .gate { fill: #62b8d322; stroke: #6db8d2; stroke-width: 3px; }
+            .route { fill: none; stroke: #ffe06b; stroke-width: 5px; stroke-dasharray: 12 8; }
+            .anchor { fill: #65e8ff; stroke: white; stroke-width: 2px; }
+            .guard-a { fill: #7d3048; stroke: #ff8fa3; stroke-width: 4px; }
+            .guard-b { fill: #7c4b26; stroke: #ffb26f; stroke-width: 4px; }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>BOSS 04 · PROTECTED UPPER RESIDENCE · 공간 기준 맵</h1>
+            <div class="sub">Guard A / Guard B / Central Security Hub · MAP HTML은 공간·발판·Rope surface 기준이며 폐기된 전투 규칙은 포함하지 않음</div>
+        </header>
+        <main>
+            <svg viewBox="0 0 5400 2500" aria-label="Boss04 공간 기준 지도">
+                <rect class="building" x="80" y="100" width="5240" height="2280" rx="30" />
+                <text class="label" x="160" y="180">UPPER RESIDENTIAL / AMENITY · PRIVILEGE IS PROTECTED</text>
+                <rect class="garden" x="180" y="1380" width="1850" height="840" rx="28" />
+                <rect class="void" x="980" y="1560" width="700" height="450" rx="30" />
+                <rect class="surface" x="250" y="2010" width="520" height="42" />
+                <rect class="surface" x="430" y="1740" width="420" height="38" />
+                <rect class="surface" x="700" y="1470" width="350" height="32" />
+                <rect class="surface" x="1330" y="1360" width="360" height="32" />
+                <rect class="surface" x="1670" y="1450" width="300" height="38" />
+                <text class="label" x="260" y="1340">P1 · PRIVATE SKY GARDEN</text>
+                <rect class="safe" x="2070" y="970" width="420" height="120" rx="20" />
+                <text class="label" x="2100" y="940">REFUGE LANDING · FULL SAFE</text>
+                <rect class="surface" x="2480" y="1210" width="1480" height="50" rx="12" />
+                <rect class="surface" x="2670" y="820" width="1320" height="50" rx="12" />
+                <rect class="surface" x="3220" y="1040" width="360" height="55" />
+                <rect class="surface" x="3440" y="1240" width="430" height="55" />
+                <text class="label" x="2560" y="760">P2 · UPPER / LOWER SKYBRIDGE</text>
+                <rect class="surface" x="3480" y="250" width="520" height="105" rx="18" />
+                <rect class="surface" x="4300" y="250" width="520" height="105" rx="18" />
+                <rect class="surface" x="3600" y="135" width="1080" height="48" rx="12" />
+                <rect class="void" x="3820" y="500" width="720" height="500" rx="40" />
+                <text class="label" x="3600" y="105">P3 · REFUGE TERRACES + HIGH SKYBRIDGE</text>
+                <rect class="hub" x="3970" y="220" width="260" height="160" rx="50" />
+                <circle class="anchor" cx="4100" cy="300" r="34" />
+                <text class="label" x="3860" y="430">CENTRAL SECURITY HUB</text>
+                <rect class="gate" x="4860" y="180" width="360" height="560" rx="15" />
+                <text class="label" x="4780" y="145">PROTECTED GATE</text>
+                <ellipse class="guard-a" cx="1130" cy="1280" rx="78" ry="42" />
+                <ellipse class="guard-b" cx="3250" cy="740" rx="82" ry="45" />
+                <ellipse class="guard-a" cx="3660" cy="205" rx="72" ry="40" />
+                <ellipse class="guard-b" cx="4540" cy="205" rx="72" ry="40" />
+                <path class="route" d="M260 2210 L560 2050 L880 1910 L1180 1730 L1450 1510 L1740 1310 L2030 1170 L2290 1040 L2570 1160 L2870 1030 L3170 900 L3370 1140 L3500 1260 L3850 1260 L3850 910 L3650 630 L3750 300 M3850 1260 L4200 1260 L4450 1010 L4650 720 L4500 430 L4450 300" />
+                <g class="tiny">
+                    <circle class="anchor" cx="260" cy="2210" r="14" /><text x="278" y="2196">ENTRY</text>
+                    <circle class="anchor" cx="2290" cy="1040" r="14" /><text x="2308" y="1026">SAFE</text>
+                    <circle class="anchor" cx="3850" cy="1260" r="14" /><text x="3868" y="1246">B-EXIT</text>
+                    <circle class="anchor" cx="3750" cy="300" r="14" /><text x="3768" y="286">L2</text>
+                    <circle class="anchor" cx="4450" cy="300" r="14" /><text x="4468" y="286">R4</text>
+                </g>
+            </svg>
+        </main>
+    </body>
+</html>
