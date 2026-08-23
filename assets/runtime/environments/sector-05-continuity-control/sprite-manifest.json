@@ -1,0 +1,201 @@
+{
+  "$schema": "../sprite-manifest.schema.json",
+  "formatVersion": 1,
+  "id": "environment-sector-05-continuity-control",
+  "generator": {
+    "tool": "openai-imagegen-manual-far-mid-near",
+    "exportVersion": null,
+    "sourceExport": "assets/artwork/environments/sector-05-continuity-control-vertical-master/export/layer-split-dense-city-transition"
+  },
+  "atlases": {
+    "sector-05-continuity-control-backdrop-far": {
+      "image": "backdrop-far.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-05-continuity-control-backdrop-mid": {
+      "image": "backdrop-mid.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-05-continuity-control-backdrop-near": {
+      "image": "backdrop-near.png",
+      "size": { "width": 1024, "height": 1536 },
+      "frameSize": { "width": 1024, "height": 1536 }
+    },
+    "sector-05-continuity-control-terrain-fill": {
+      "image": "terrain-fill.png",
+      "size": { "width": 48, "height": 48 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "sector-05-continuity-control-terrain-edge": {
+      "image": "terrain-edge.png",
+      "size": { "width": 48, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    },
+    "sector-05-continuity-control-decoration": {
+      "image": "decoration.png",
+      "size": { "width": 96, "height": 24 },
+      "frameSize": { "width": 24, "height": 24 }
+    }
+  },
+  "zones": [
+    {
+      "id": "waste",
+      "label": "Sector 05 하부 Continuity Reception",
+      "minAltitude": 0,
+      "palette": {
+        "skyTop": "#17182f",
+        "skyBottom": "#090b19",
+        "silhouetteFar": "#292c50",
+        "silhouetteMid": "#343850",
+        "silhouetteNear": "#0b0e1b",
+        "terrainFill": "#30313d",
+        "terrainEdge": "#686a82",
+        "oneWayEdge": "#86d7ee",
+        "accent": "#879cff"
+      },
+      "backdropVariant": "sector-05-reception",
+      "terrainMaterial": "sector-05-corporate",
+      "decorationGroup": "sector-05-corporate"
+    },
+    {
+      "id": "industrial-maintenance",
+      "label": "Sector 05 Control Atrium",
+      "minAltitude": 1800,
+      "palette": {
+        "skyTop": "#1b1c37",
+        "skyBottom": "#0b0d1d",
+        "silhouetteFar": "#2e3258",
+        "silhouetteMid": "#3a3e59",
+        "silhouetteNear": "#0d1020",
+        "terrainFill": "#343541",
+        "terrainEdge": "#6f7189",
+        "oneWayEdge": "#8edcf1",
+        "accent": "#8da4ff"
+      },
+      "backdropVariant": "sector-05-atrium",
+      "terrainMaterial": "sector-05-corporate",
+      "decorationGroup": "sector-05-corporate"
+    },
+    {
+      "id": "residential-commercial",
+      "label": "Sector 05 Archive Control",
+      "minAltitude": 3600,
+      "palette": {
+        "skyTop": "#20203f",
+        "skyBottom": "#0d1022",
+        "silhouetteFar": "#343960",
+        "silhouetteMid": "#414562",
+        "silhouetteNear": "#0f1224",
+        "terrainFill": "#383946",
+        "terrainEdge": "#777991",
+        "oneWayEdge": "#96e1f4",
+        "accent": "#9a8cff"
+      },
+      "backdropVariant": "sector-05-archive",
+      "terrainMaterial": "sector-05-corporate",
+      "decorationGroup": "sector-05-corporate"
+    },
+    {
+      "id": "corporate-security",
+      "label": "Sector 05 Continuity Core",
+      "minAltitude": 5400,
+      "palette": {
+        "skyTop": "#252448",
+        "skyBottom": "#101326",
+        "silhouetteFar": "#3b4069",
+        "silhouetteMid": "#494d6c",
+        "silhouetteNear": "#111529",
+        "terrainFill": "#3d3e4b",
+        "terrainEdge": "#7f8199",
+        "oneWayEdge": "#9ee6f7",
+        "accent": "#a894ff"
+      },
+      "backdropVariant": "sector-05-core",
+      "terrainMaterial": "sector-05-corporate",
+      "decorationGroup": "sector-05-corporate"
+    },
+    {
+      "id": "landing-pad",
+      "label": "Sector 05 Command Spine",
+      "minAltitude": 7200,
+      "palette": {
+        "skyTop": "#2b2951",
+        "skyBottom": "#13162b",
+        "silhouetteFar": "#424871",
+        "silhouetteMid": "#515577",
+        "silhouetteNear": "#14182e",
+        "terrainFill": "#424350",
+        "terrainEdge": "#888aa2",
+        "oneWayEdge": "#a7eafa",
+        "accent": "#b29cff"
+      },
+      "backdropVariant": "sector-05-command",
+      "terrainMaterial": "sector-05-corporate",
+      "decorationGroup": "sector-05-corporate"
+    }
+  ],
+  "backdrop": {
+    "layers": [
+      {
+        "id": "far-background",
+        "depth": 0,
+        "parallaxX": 0.015,
+        "parallaxY": 0.025,
+        "frames": [
+          { "atlas": "sector-05-continuity-control-backdrop-far", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      },
+      {
+        "id": "mid-structure",
+        "depth": 1,
+        "parallaxX": 0.045,
+        "parallaxY": 0.055,
+        "frames": [
+          { "atlas": "sector-05-continuity-control-backdrop-mid", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      },
+      {
+        "id": "near-frame",
+        "depth": 2,
+        "parallaxX": 0.075,
+        "parallaxY": 0.09,
+        "frames": [
+          { "atlas": "sector-05-continuity-control-backdrop-near", "cell": { "column": 0, "row": 0 } }
+        ],
+        "tileWidth": 1024,
+        "baselineRatio": 1,
+        "peakHeight": 1536
+      }
+    ]
+  },
+  "terrain": {
+    "materials": {
+      "sector-05-corporate": {
+        "fill": { "atlas": "sector-05-continuity-control-terrain-fill", "cell": { "column": 1, "row": 0 } },
+        "edge": { "atlas": "sector-05-continuity-control-terrain-edge", "cell": { "column": 0, "row": 0 } },
+        "oneWayColor": "#9ee6f7"
+      }
+    }
+  },
+  "decoration": {
+    "groups": {
+      "sector-05-corporate": {
+        "items": [
+          {
+            "frame": { "atlas": "sector-05-continuity-control-decoration", "cell": { "column": 2, "row": 0 } },
+            "placement": { "depth": "mid", "surfaceLevelOffset": 0, "avoidPlayPath": true },
+            "size": { "width": 14, "height": 14 }
+          }
+        ]
+      }
+    }
+  }
+}

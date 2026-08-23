@@ -63,7 +63,7 @@ depth map과 추출 threshold·component 최소 크기·재현 스크립트는 `
 
 backdrop은 1~6개 layer를 허용한다. 각 layer `id`는 package 안에서 유일한 kebab-case 안정 ID이며 합성 순서는 배열 위치가 아니라 숫자 `depth`가 소유한다. `far/mid/near`는 default mock의 최소 예제일 뿐 필수 ID 집합이 아니다.
 
-현재 authored package의 Sector 01→02, Sector 02→03, Sector 03→04 경계는 `PixelBackdropRenderer`가 Player world Y에서 파생한 단일 smoothstep 비율로 양쪽 package 전체와 sky를 교차 합성한다. 한 package의 far/mid/near는 항상 같은 alpha를 사용해 경계에서 레이어별 잔상이나 건물 분리를 만들지 않는다. Boss Stage 환경 Area는 Stage status가 `active`일 때만 현재 Area를 override한다. 이 표현 전환은 content boundary 사이의 collision, Gate, Camera, gameplay connector 또는 network state를 새로 만들지 않는다.
+현재 authored package의 Sector 01→02, Sector 02→03, Sector 03→04, Sector 04→05 경계는 `PixelBackdropRenderer`가 Player world Y에서 파생한 단일 smoothstep 비율로 양쪽 package 전체와 sky를 교차 합성한다. 한 package의 far/mid/near는 항상 같은 alpha를 사용해 경계에서 레이어별 잔상이나 건물 분리를 만들지 않는다. Boss Stage 환경 Area는 Stage status가 `active`일 때만 현재 Area를 override한다. 이 표현 전환은 content boundary 사이의 collision, Gate, Camera, gameplay connector 또는 network state를 새로 만들지 않는다.
 
 ## manifest 구조
 
