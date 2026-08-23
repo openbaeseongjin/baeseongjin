@@ -61,3 +61,5 @@ Do not invent:
 - corporate continuity reveal
 
 The final control is a **content boundary** until downstream planning is separately approved.
+
+Boss04의 최종 Guard A/B·Central Security Hub 인계는 [`../../../../boss/04/README.md`](../../../../boss/04/README.md)가 소유한다. 이는 authored content이며 Boss Runtime·전환·Timer를 구현하거나 `4-8` 경계를 연결하지 않는다.
