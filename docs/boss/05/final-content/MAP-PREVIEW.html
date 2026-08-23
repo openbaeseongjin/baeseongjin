@@ -1,208 +1,148 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BOSS 05 FINAL MAP PREVIEW</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Boss05 최종 QA 맵 프리뷰</title>
 <style>
-:root{--bg:#050c11;--panel:#09151b;--line:#324a55;--txt:#eef5f6;--muted:#9fb2ba;--cyan:#63e8ff;--yellow:#ffe26a;--green:#73d59a;--red:#ff7c88;--violet:#bd8bff;--amber:#ffb66a}
+:root{--bg:#05090d;--panel:#0a141b;--line:#3a5662;--txt:#eff6f7;--muted:#9db1ba;--anchor:#6cecff;--special:#ffe37b;--plat:#364a53;--top:#a8bbc2;--recovery:#254a3c;--core:#654474;--wall:#aab7bc;--haz:#ff6678;--warn:#ffba72;--void:#010508;--exit:#86d5a1;--slot:#151d22;--shutter:#637780;--protect:#62db9f}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.45 ui-monospace,Consolas,monospace}
-header{padding:13px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:20px}.sub{color:var(--muted);margin-top:3px}
-.layout{display:grid;grid-template-columns:460px 1fr;min-height:calc(100vh - 70px)}aside{padding:12px;background:var(--panel);border-right:1px solid var(--line);overflow:auto}main{padding:10px}
-.card{padding:10px;border:1px solid var(--line);border-radius:8px;background:#071117;margin-bottom:8px}.card b{color:var(--cyan)}.small{font-size:12px;color:var(--muted)}
-button{background:#12252e;color:var(--txt);border:1px solid #4d6975;border-radius:6px;padding:7px 9px;margin:3px;cursor:pointer}button.active{outline:2px solid var(--cyan)}
-label{display:block;margin:6px 0}svg{width:100%;height:89vh;min-height:880px;border:1px solid var(--line);background:#02080c;border-radius:8px}
-text{fill:var(--txt);paint-order:stroke;stroke:#041018;stroke-width:5}.micro{font-size:10px;fill:#d4dfe3}.phase{font-size:18px;font-weight:700}.boss{font-size:21px;font-weight:800}
-.chamber{fill:#101e24;stroke:#5e7681;stroke-width:5}.floor{fill:#283d46;stroke:#879ca5;stroke-width:3}.glass{fill:#31576455;stroke:#6698aa;stroke-width:3}.void{fill:#02070a;stroke:#243943;stroke-width:3;stroke-dasharray:13 9}
-.hp{fill:var(--cyan);stroke:white;stroke-width:2}.route{stroke:var(--yellow);stroke-width:5;stroke-dasharray:13 8}.reach{fill:none;stroke:var(--cyan);stroke-width:2;opacity:.07}
-.coreOuter{fill:#4c355b;stroke:var(--violet);stroke-width:7}.coreInner{fill:#ffb770;stroke:white;stroke-width:4}.shell{fill:#744e86;stroke:#d2aaff;stroke-width:4}
-.actuator{fill:#344a54;stroke:#d4e0e5;stroke-width:5}.rail{stroke:#80959e;stroke-width:22}.coupling{fill:#6c3b1d;stroke:var(--amber);stroke-width:5}.couplingHot{fill:#8d4625;stroke:#ffd19b;stroke-width:7}
-.partition{fill:#a9bcc5;stroke:#e0edf2;stroke-width:5}.pulse{fill:#ff53631b;stroke:var(--red);stroke-width:4;stroke-dasharray:12 8}.safe{fill:#27523e;stroke:var(--green);stroke-width:4}
-.controlLine{stroke:var(--violet);stroke-width:7;stroke-dasharray:12 9}.final{stroke:var(--yellow);stroke-width:9;fill:none;stroke-dasharray:14 9}.note{fill:#071219dd;stroke:#48616c;stroke-width:2}.hidden{display:none}
-@media(max-width:1050px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid var(--line)}}
-</style></head>
+header{padding:12px 16px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px}.sub{margin-top:4px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:500px 1fr;min-height:calc(100vh - 66px)}aside{padding:11px;background:var(--panel);border-right:1px solid var(--line);overflow:auto;max-height:calc(100vh - 66px)}main{padding:8px}
+.card{border:1px solid var(--line);border-radius:8px;padding:9px;margin-bottom:8px;background:#071018}.card b{color:var(--anchor)}.small{font-size:11px;color:var(--muted)}
+button{background:#10222b;color:var(--txt);border:1px solid #4c6a76;border-radius:6px;padding:6px 8px;margin:2px;cursor:pointer}button.active{outline:2px solid var(--anchor)}
+label{display:inline-block;margin-right:9px;margin-top:5px}
+svg{width:100%;height:91vh;min-height:900px;background:#02070a;border:1px solid var(--line);border-radius:8px}
+text{fill:var(--txt);paint-order:stroke;stroke:#02080c;stroke-width:5;stroke-linejoin:round}.tiny{font-size:9px}.micro{font-size:11px}.label{font-size:15px;font-weight:700}.big{font-size:20px;font-weight:800}
+.room{fill:#0d1a21;stroke:#5f7882;stroke-width:5}.void{fill:var(--void);stroke:#324952;stroke-width:3;stroke-dasharray:14 9}.platform{fill:var(--plat);stroke:var(--top);stroke-width:4}.platform.recovery{fill:var(--recovery)}.edge{stroke:#dce8eb;stroke-width:5}
+.core{fill:var(--core);stroke:#c497e0;stroke-width:7}.recess{fill:#02070a;stroke:#b99bd0;stroke-width:3}.inner{fill:#ffae65;stroke:white;stroke-width:4}.act{fill:#354b55;stroke:#d8e4e8;stroke-width:5}.coupling{fill:#773f1e;stroke:#ffb46b;stroke-width:5}.hot{fill:#bd5d2d;stroke:#fff0dd;stroke-width:8}
+.anchor{fill:var(--anchor);stroke:white;stroke-width:3}.special{fill:var(--special);stroke:white;stroke-width:4}.recAnchor{fill:var(--protect);stroke:white;stroke-width:4}
+.route{fill:none;stroke:var(--special);stroke-width:5;stroke-dasharray:12 8}.base{fill:none;stroke:#78909a;stroke-width:3;stroke-dasharray:8 8;opacity:.42}.recRoute{fill:none;stroke:var(--protect);stroke-width:6;stroke-dasharray:8 7}
+.wall{fill:var(--wall);stroke:#f0f6f7;stroke-width:4}.tele{fill:#ffba7218;stroke:var(--warn);stroke-width:5;stroke-dasharray:15 9}.move{stroke:var(--warn);stroke-width:4;stroke-dasharray:11 9}
+.pulseWarn{fill:#ffba7218;stroke:var(--warn);stroke-width:5;stroke-dasharray:15 9}.pulseActive{fill:#ff66782d;stroke:var(--haz);stroke-width:6}.aperture{fill:#02070a;stroke:#ffe2bd;stroke-width:8}.exit{fill:#1e4936;stroke:var(--exit);stroke-width:5}.slot{fill:var(--slot);stroke:#d1e0e5;stroke-width:3;stroke-dasharray:7 5}.shutter{fill:var(--shutter);stroke:#d8e6ea;stroke-width:3}.tag{fill:#102834;stroke:#64dff2;stroke-width:3}.hidden{display:none}
+@media(max-width:1150px){.layout{grid-template-columns:1fr}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
 <body>
-<header><h1>BOSS 05 · SUSPENDED CONTROL CORE · FINAL MAP PREVIEW</h1>
-<div class="sub">AUTHORING SNAPSHOT e827ead2ef88a4a04b0291952b9c3a2e04ce4441 · AUTHORED FINAL CONTENT / RUNTIME NOT IMPLEMENTED</div></header>
-<div class="layout">
-<aside>
-<div class="card"><b>Boss</b><br>중앙 Void 위 <b>Suspended Rectangular Control Core</b>가 실제 본체. Partition은 Core가 Actuator로 조종하는 공간 통제 장치.</div>
-<div class="card"><b>P1</b><br>AUX A → Partition 01 → FULL CLOSE → LOCK → A Coupling → Rope Impact.</div>
-<div class="card"><b>P2</b><br>AUX B → Partition 02 + Control Pulse → LOCK → B Coupling → Rope Impact.</div>
-<div class="card"><b>P3</b><br>MAIN ACTUATOR → 가장 큰 Authority Partition → MAIN LOCK → Main Coupling → 모든 통제 정지.</div>
-<div class="card"><b>FINAL</b><br>Partition/Pulse 모두 OFF → Core FULL OPEN → 중앙 접근 → Final Rope Impact → Rooftop Service Access.</div>
-<div class="card"><b>QA</b><br>Base Reach 400px<br>Relations 20<br>Max <b>360.56px</b><br>Non-edge ≤400: <b>0</b></div>
-<div class="card">
-<button id="b1" class="active" onclick="showPhase(1)">P1</button>
-<button id="b2" onclick="showPhase(2)">P2</button>
-<button id="b3" onclick="showPhase(3)">P3</button>
-<button id="bf" onclick="showPhase(4)">FINAL</button>
-<label><input id="routeT" type="checkbox" checked> Service Route</label>
-<label><input id="linksT" type="checkbox" checked> Core→Actuator Links</label>
-<label><input id="reachT" type="checkbox"> 400px Reach</label>
-</div>
-</aside>
-<main><svg viewBox="0 0 5200 2800">
-<rect class="chamber" x="170" y="100" width="4860" height="2550" rx="34"/>
-<text class="phase" x="280" y="205">FINAL CONTINUITY CONTROL CHAMBER</text>
-<rect class="floor" x="520" y="2460" width="4160" height="70"/>
-<rect class="safe" x="2240" y="2395" width="720" height="70" rx="15"/>
-<text class="micro" x="2350" y="2370">ENTRY FROM 5-8 AUTHORITY DECK</text>
-<rect class="glass" x="500" y="450" width="520" height="1770" rx="18"/>
-<rect class="glass" x="4180" y="450" width="520" height="1770" rx="18"/>
-<rect class="floor" x="1080" y="1280" width="650" height="48"/>
-<rect class="floor" x="3470" y="1280" width="650" height="48"/>
-<rect class="floor" x="1500" y="760" width="650" height="48"/>
-<rect class="floor" x="3050" y="760" width="650" height="48"/>
-<rect class="void" x="1760" y="990" width="1680" height="1110" rx="40"/>
-<text class="micro" x="2250" y="1550">CENTRAL CONTROL VOID</text>
+<header><h1>보스05 · 최종 QA 맵 미리보기</h1><div class="sub">브래킷 없음 · Wall Slot/Shutter · Core Recess · 전투 구역 전체 Pulse · Void 복귀 · 개인 복귀 · 최종 탈출</div></header>
+<div class="layout"><aside>
+<div class="card"><b>공간 원칙</b><br>거대한 Side Frame/Bracket 없음. 실제 발판, Rope hardpoint, Central Void, 3개 Partition Wall, 중앙 Core만 핵심 구조.</div>
+<div class="card"><b>Wall 작동</b><br>Wall 180px / Slot 220px.<br>Warning → Shutter Open → Wall Move.<br>Wall은 Hook/Projectile을 차폐하고, 움직이며 Rope 선분과 실제 교차하면 Cut.</div>
+<div class="card"><b>Void / 복귀</b><br>Void에 영구 catcher floor 없음. 추락 피해 후 생존 Player만 개인 Recovery Route 활성. Phase는 계속 진행.</div>
+<div class="card"><b>멀티플레이</b><br>생존 Player 1명이 다음 준비구역에 도착하면 다음 Phase 시작. 뒤처진 Player는 Recovery Route로 합류.</div>
+<div class="card"><b>복귀 중 보호</b><br>Recovery 중 Boss05 hazard damage만 보호. Wall/Platform collision과 Rope physics는 유지.</div>
+<div class="card" id="info"></div>
+<div class="card"><b>전투 단계</b><br><button id="p1b" onclick="setPhase('p1')">P1</button><button id="p2b" onclick="setPhase('p2')">P2</button><button id="p3ab" onclick="setPhase('p3a')">P3-A</button><button id="p3bb" onclick="setPhase('p3b')">P3-B</button><button id="fb" onclick="setPhase('final')">FINAL</button></div>
+<div class="card"><b>상태</b><br><button id="prepb" onclick="setState('prep')">준비</button><button id="attackb" onclick="setState('attack')">벽/Pulse</button><button id="lockb" onclick="setState('lock')">LOCK/약점</button></div>
+<div class="card"><label><input id="recT" type="checkbox"> 개인 복귀 경로 표시</label></div>
+<div class="card small"><b>피해 대상 제한</b><br>closedBodyDamageMultiplier=0<br>weakFixedPercent=0<br>weakNormalDamageMultiplier=1</div>
+</aside><main>
+<svg viewBox="0 0 5200 2800">
+<rect class="room" x="170" y="100" width="4860" height="2550" rx="34"/>
+<rect x="450" y="115" width="4300" height="115" rx="18" fill="#182a32" stroke="#46616d" stroke-width="4"/>
+<rect class="exit" id="roof" x="2420" y="120" width="360" height="100" rx="18" opacity=".25"/><text class="micro" x="2460" y="180">옥상 정비 통로</text>
 
-<rect class="coreOuter" x="2100" y="260" width="1000" height="380" rx="34"/>
-<rect class="shell" x="2140" y="300" width="270" height="300" rx="22"/>
-<rect class="shell" x="2790" y="300" width="270" height="300" rx="22"/>
-<rect class="coreInner" x="2480" y="345" width="240" height="210" rx="30"/>
-<text class="boss" x="2210" y="225">SUSPENDED CONTINUITY CONTROL CORE</text>
+<!-- Void -->
+<path class="void" d="M1780 1040 H3420 V2460 H3320 V2390 H2800 V2460 H2400 V2390 H1880 V2460 H1780 Z"/>
+<text class="label" x="2250" y="1840">중앙 통제 Void · 바닥 없음</text>
 
-<line class="rail" x1="2200" y1="610" x2="1750" y2="930"/>
-<rect class="actuator" x="1590" y="865" width="300" height="130" rx="24"/>
-<circle class="coupling" cx="1740" cy="930" r="42"/>
-<text class="micro" x="1450" y="840">AUX ACTUATOR A</text>
+<!-- Entry recovery pads -->
+<rect class="platform recovery" x="1880" y="2390" width="520" height="80" rx="14"/><line class="edge" x1="1880" y1="2390" x2="2400" y2="2390"/>
+<rect class="platform recovery" x="2800" y="2390" width="520" height="80" rx="14"/><line class="edge" x1="2800" y1="2390" x2="3320" y2="2390"/>
+<text class="micro" x="1900" y="2360">좌측 복귀 지점</text><text class="micro" x="2820" y="2360">우측 복귀 지점</text>
+<g id="arrival"><rect class="platform recovery" x="2460" y="2390" width="280" height="80" rx="14"/><line class="edge" x1="2460" y1="2390" x2="2740" y2="2390"/><text class="tiny" x="2490" y="2360">진입 발판 · 전투 시작 후 수납</text></g>
 
-<line class="rail" x1="3000" y1="610" x2="3470" y2="930"/>
-<rect class="actuator" x="3320" y="865" width="300" height="130" rx="24"/>
-<circle class="coupling" cx="3470" cy="930" r="42"/>
-<text class="micro" x="3340" y="840">AUX ACTUATOR B</text>
+<!-- left/right platforms -->
+<rect class="platform" x="1180" y="2200" width="820" height="70" rx="12"/><line class="edge" x1="1180" y1="2200" x2="2000" y2="2200"/>
+<rect class="platform" x="2220" y="2200" width="280" height="70" rx="12"/><line class="edge" x1="2220" y1="2200" x2="2500" y2="2200"/>
+<rect class="platform" x="1030" y="1725" width="640" height="70" rx="12"/><line class="edge" x1="1030" y1="1725" x2="1670" y2="1725"/>
+<rect class="platform" x="1260" y="1275" width="740" height="70" rx="12"/><line class="edge" x1="1260" y1="1275" x2="2000" y2="1275"/>
+<rect class="platform" x="2220" y="1275" width="170" height="70" rx="12"/><line class="edge" x1="2220" y1="1275" x2="2390" y2="1275"/>
+<rect class="platform" x="1720" y="1015" width="280" height="65" rx="12"/><line class="edge" x1="1720" y1="1015" x2="2000" y2="1015"/>
+<rect class="platform" x="2220" y="1015" width="170" height="65" rx="12"/><line class="edge" x1="2220" y1="1015" x2="2390" y2="1015"/>
+<rect class="platform" x="2110" y="760" width="380" height="60" rx="12"/><line class="edge" x1="2110" y1="760" x2="2490" y2="760"/>
 
-<line class="rail" x1="2600" y1="640" x2="2600" y2="1030"/>
-<rect class="actuator" x="2400" y="930" width="400" height="180" rx="30"/>
-<circle class="coupling" cx="2600" cy="1020" r="55"/>
-<text class="phase" x="2820" y="1010">MAIN ACTUATOR</text>
+<rect class="platform" x="2700" y="2200" width="350" height="70" rx="12"/><line class="edge" x1="2700" y1="2200" x2="3050" y2="2200"/>
+<rect class="platform" x="3270" y="2200" width="750" height="70" rx="12"/><line class="edge" x1="3270" y1="2200" x2="4020" y2="2200"/>
+<rect class="platform" x="3530" y="1725" width="640" height="70" rx="12"/><line class="edge" x1="3530" y1="1725" x2="4170" y2="1725"/>
+<rect class="platform" x="2810" y="1275" width="240" height="70" rx="12"/><line class="edge" x1="2810" y1="1275" x2="3050" y2="1275"/>
+<rect class="platform" x="3270" y="1275" width="670" height="70" rx="12"/><line class="edge" x1="3270" y1="1275" x2="3940" y2="1275"/>
+<rect class="platform" x="2810" y="1015" width="240" height="65" rx="12"/><line class="edge" x1="2810" y1="1015" x2="3050" y2="1015"/>
+<rect class="platform" x="3270" y="1015" width="210" height="65" rx="12"/><line class="edge" x1="3270" y1="1015" x2="3480" y2="1015"/>
+<rect class="platform" x="2710" y="760" width="380" height="60" rx="12"/><line class="edge" x1="2710" y1="760" x2="3090" y2="760"/>
+<rect class="platform" x="2290" y="1080" width="180" height="50" rx="8"/><rect class="platform" x="2730" y="1080" width="180" height="50" rx="8"/>
 
-<g id="links">
-<line class="controlLine" x1="2300" y1="600" x2="1740" y2="930"/>
-<line class="controlLine" x1="2900" y1="600" x2="3470" y2="930"/>
-<line class="controlLine" x1="2600" y1="630" x2="2600" y2="1020"/>
+<!-- Slots -->
+<g><rect class="slot" x="2000" y="2188" width="220" height="94"/><rect class="slot" x="2000" y="1263" width="220" height="94"/><rect class="slot" x="2000" y="1003" width="220" height="89"/>
+<rect class="slot" x="2490" y="2188" width="220" height="94"/><rect class="slot" x="2490" y="748" width="220" height="84"/>
+<rect class="slot" x="3050" y="2188" width="220" height="94"/><rect class="slot" x="3050" y="1263" width="220" height="94"/><rect class="slot" x="3050" y="1003" width="220" height="89"/></g>
+<g id="shutters"></g>
+
+<!-- Core with recess -->
+<path class="core" d="M2100 300 H3100 V670 H2940 V610 H2740 V670 H2460 V610 H2260 V670 H2100 Z"/>
+<rect class="recess" x="2260" y="610" width="200" height="90" rx="18"/><rect class="recess" x="2740" y="610" width="200" height="90" rx="18"/>
+<rect class="inner" x="2480" y="385" width="240" height="200" rx="30"/><text class="big" x="2150" y="270">SUSPENDED CONTINUITY CONTROL CORE</text>
+
+<!-- actuators -->
+<rect class="act" x="1580" y="860" width="320" height="135" rx="22"/><circle class="coupling" cx="1740" cy="930" r="42"/>
+<rect class="act" x="3310" y="860" width="320" height="135" rx="22"/><circle class="coupling" cx="3470" cy="930" r="42"/>
+<rect class="act" x="2510" y="890" width="180" height="180" rx="24"/><circle class="coupling" cx="2600" cy="980" r="46"/><text class="tiny" x="2705" y="970">MAIN 구동 모듈</text>
+
+<!-- anchors -->
+<g id="anchors">
+<circle class="anchor" cx="2600" cy="2520" r="13"/><text class="tiny" x="2618" y="2510">ENTRY</text><circle class="anchor" cx="2280" cy="2410" r="13"/><text class="tiny" x="2298" y="2400">L0</text><circle class="anchor" cx="1940" cy="2320" r="13"/><text class="tiny" x="1958" y="2310">L1</text><circle class="anchor" cx="1620" cy="2190" r="13"/><text class="tiny" x="1638" y="2180">L2</text><circle class="anchor" cx="1360" cy="1980" r="13"/><text class="tiny" x="1378" y="1970">L3</text><circle class="anchor" cx="1220" cy="1680" r="13"/><text class="tiny" x="1238" y="1670">L4</text><circle class="anchor" cx="1340" cy="1370" r="13"/><text class="tiny" x="1358" y="1360">L5</text><circle class="anchor" cx="1570" cy="1110" r="13"/><text class="tiny" x="1588" y="1100">L6</text><circle class="anchor" cx="1870" cy="910" r="13"/><text class="tiny" x="1888" y="900">L7</text><circle class="anchor" cx="2210" cy="800" r="13"/><text class="tiny" x="2228" y="790">L8</text><circle class="anchor" cx="2380" cy="650" r="13"/><text class="tiny" x="2398" y="640">TOPL</text><circle class="anchor" cx="2920" cy="2410" r="13"/><text class="tiny" x="2938" y="2400">R0</text><circle class="anchor" cx="3260" cy="2320" r="13"/><text class="tiny" x="3278" y="2310">R1</text><circle class="anchor" cx="3580" cy="2190" r="13"/><text class="tiny" x="3598" y="2180">R2</text><circle class="anchor" cx="3840" cy="1980" r="13"/><text class="tiny" x="3858" y="1970">R3</text><circle class="anchor" cx="3980" cy="1680" r="13"/><text class="tiny" x="3998" y="1670">R4</text><circle class="anchor" cx="3860" cy="1370" r="13"/><text class="tiny" x="3878" y="1360">R5</text><circle class="anchor" cx="3630" cy="1110" r="13"/><text class="tiny" x="3648" y="1100">R6</text><circle class="anchor" cx="3330" cy="910" r="13"/><text class="tiny" x="3348" y="900">R7</text><circle class="anchor" cx="2990" cy="800" r="13"/><text class="tiny" x="3008" y="790">R8</text><circle class="anchor" cx="2820" cy="650" r="13"/><text class="tiny" x="2838" y="640">TOPR</text>
+<g id="special"></g></g>
+
+<!-- base route -->
+<path class="base" d="M2600 2520 L2280 2410 L1940 2320 L1620 2190 L1360 1980 L1220 1680 L1340 1370 L1570 1110 L1870 910 L2210 800 L2380 650"/>
+<path class="base" d="M2600 2520 L2920 2410 L3260 2320 L3580 2190 L3840 1980 L3980 1680 L3860 1370 L3630 1110 L3330 910 L2990 800 L2820 650"/>
+
+<g id="route"></g><g id="walls"></g><g id="pulse"></g><g id="weak"></g>
+
+<g id="recovery" class="hidden">
+<circle class="recAnchor" cx="2240" cy="2325" r="18"/><circle class="recAnchor" cx="2350" cy="2050" r="18"/><circle class="recAnchor" cx="2450" cy="1780" r="18"/>
+<path class="recRoute" d="M2240 2325 L2350 2050 L2450 1780"/>
+<circle class="recAnchor" cx="2960" cy="2325" r="18"/><circle class="recAnchor" cx="2850" cy="2050" r="18"/><circle class="recAnchor" cx="2750" cy="1780" r="18"/>
+<path class="recRoute" d="M2960 2325 L2850 2050 L2750 1780"/>
+<text class="label" x="2050" y="1680">개인 전용 복귀 경로</text>
 </g>
-<g id="routeGroup"><line class="route" x1="2600" y1="2520" x2="2280" y2="2410"/>
-<line class="route" x1="2280" y1="2410" x2="1940" y2="2320"/>
-<line class="route" x1="1940" y1="2320" x2="1620" y2="2190"/>
-<line class="route" x1="1620" y1="2190" x2="1360" y2="1980"/>
-<line class="route" x1="1360" y1="1980" x2="1220" y2="1680"/>
-<line class="route" x1="1220" y1="1680" x2="1340" y2="1370"/>
-<line class="route" x1="1340" y1="1370" x2="1570" y2="1110"/>
-<line class="route" x1="1570" y1="1110" x2="1870" y2="910"/>
-<line class="route" x1="1870" y1="910" x2="2210" y2="800"/>
-<line class="route" x1="2210" y1="800" x2="2380" y2="650"/>
-<line class="route" x1="2600" y1="2520" x2="2920" y2="2410"/>
-<line class="route" x1="2920" y1="2410" x2="3260" y2="2320"/>
-<line class="route" x1="3260" y1="2320" x2="3580" y2="2190"/>
-<line class="route" x1="3580" y1="2190" x2="3840" y2="1980"/>
-<line class="route" x1="3840" y1="1980" x2="3980" y2="1680"/>
-<line class="route" x1="3980" y1="1680" x2="3860" y2="1370"/>
-<line class="route" x1="3860" y1="1370" x2="3630" y2="1110"/>
-<line class="route" x1="3630" y1="1110" x2="3330" y2="910"/>
-<line class="route" x1="3330" y1="910" x2="2990" y2="800"/>
-<line class="route" x1="2990" y1="800" x2="2820" y2="650"/><circle class="hp" cx="2600" cy="2520" r="14"/><text class="micro" x="2618" y="2506">ENTRY</text>
-<circle class="hp" cx="2280" cy="2410" r="14"/><text class="micro" x="2298" y="2396">L0</text>
-<circle class="hp" cx="1940" cy="2320" r="14"/><text class="micro" x="1958" y="2306">L1</text>
-<circle class="hp" cx="1620" cy="2190" r="14"/><text class="micro" x="1638" y="2176">L2</text>
-<circle class="hp" cx="1360" cy="1980" r="14"/><text class="micro" x="1378" y="1966">L3</text>
-<circle class="hp" cx="1220" cy="1680" r="14"/><text class="micro" x="1238" y="1666">L4</text>
-<circle class="hp" cx="1340" cy="1370" r="14"/><text class="micro" x="1358" y="1356">L5</text>
-<circle class="hp" cx="1570" cy="1110" r="14"/><text class="micro" x="1588" y="1096">L6</text>
-<circle class="hp" cx="1870" cy="910" r="14"/><text class="micro" x="1888" y="896">L7</text>
-<circle class="hp" cx="2210" cy="800" r="14"/><text class="micro" x="2228" y="786">L8</text>
-<circle class="hp" cx="2920" cy="2410" r="14"/><text class="micro" x="2938" y="2396">R0</text>
-<circle class="hp" cx="3260" cy="2320" r="14"/><text class="micro" x="3278" y="2306">R1</text>
-<circle class="hp" cx="3580" cy="2190" r="14"/><text class="micro" x="3598" y="2176">R2</text>
-<circle class="hp" cx="3840" cy="1980" r="14"/><text class="micro" x="3858" y="1966">R3</text>
-<circle class="hp" cx="3980" cy="1680" r="14"/><text class="micro" x="3998" y="1666">R4</text>
-<circle class="hp" cx="3860" cy="1370" r="14"/><text class="micro" x="3878" y="1356">R5</text>
-<circle class="hp" cx="3630" cy="1110" r="14"/><text class="micro" x="3648" y="1096">R6</text>
-<circle class="hp" cx="3330" cy="910" r="14"/><text class="micro" x="3348" y="896">R7</text>
-<circle class="hp" cx="2990" cy="800" r="14"/><text class="micro" x="3008" y="786">R8</text>
-<circle class="hp" cx="2380" cy="650" r="14"/><text class="micro" x="2398" y="636">TOPL</text>
-<circle class="hp" cx="2820" cy="650" r="14"/><text class="micro" x="2838" y="636">TOPR</text></g>
-<g id="reachGroup" class="hidden"><circle class="reach" cx="2600" cy="2520" r="400"/>
-<circle class="reach" cx="2280" cy="2410" r="400"/>
-<circle class="reach" cx="1940" cy="2320" r="400"/>
-<circle class="reach" cx="1620" cy="2190" r="400"/>
-<circle class="reach" cx="1360" cy="1980" r="400"/>
-<circle class="reach" cx="1220" cy="1680" r="400"/>
-<circle class="reach" cx="1340" cy="1370" r="400"/>
-<circle class="reach" cx="1570" cy="1110" r="400"/>
-<circle class="reach" cx="1870" cy="910" r="400"/>
-<circle class="reach" cx="2210" cy="800" r="400"/>
-<circle class="reach" cx="2920" cy="2410" r="400"/>
-<circle class="reach" cx="3260" cy="2320" r="400"/>
-<circle class="reach" cx="3580" cy="2190" r="400"/>
-<circle class="reach" cx="3840" cy="1980" r="400"/>
-<circle class="reach" cx="3980" cy="1680" r="400"/>
-<circle class="reach" cx="3860" cy="1370" r="400"/>
-<circle class="reach" cx="3630" cy="1110" r="400"/>
-<circle class="reach" cx="3330" cy="910" r="400"/>
-<circle class="reach" cx="2990" cy="800" r="400"/>
-<circle class="reach" cx="2380" cy="650" r="400"/>
-<circle class="reach" cx="2820" cy="650" r="400"/></g>
-
-<g id="p1">
-<text class="phase" x="300" y="300">P1 · AUX A / CENTRAL SPLIT</text>
-<rect class="partition" x="2460" y="1310" width="280" height="1020" rx="12"/>
-<circle class="couplingHot" cx="1740" cy="930" r="52"/>
-<text class="phase" x="1180" y="1050">A LOCK → COUPLING EXPOSED</text>
-<rect class="note" x="650" y="1930" width="1400" height="270" rx="18"/>
-<text class="micro" x="720" y="2010">CORE → AUX A → PARTITION CLOSE</text>
-<text class="micro" x="720" y="2060">FULL CLOSE → LOCK → COUPLING EXPOSED</text>
-<text class="micro" x="720" y="2110">SERVICE ROUTE → ROPE IMPACT</text>
-</g>
-
-<g id="p2" class="hidden">
-<text class="phase" x="300" y="300">P2 · AUX B / SPLIT + CONTROL PULSE</text>
-<rect class="partition" x="3080" y="1250" width="280" height="1080" rx="12"/>
-<rect class="pulse" x="3400" y="1340" width="1140" height="900" rx="32"/>
-<text class="phase" x="3520" y="1450">CONTROL PULSE</text>
-<text class="micro" x="3520" y="1500">warning → short knockback + small damage</text>
-<circle class="couplingHot" cx="3470" cy="930" r="52"/>
-<text class="phase" x="3660" y="980">B LOCK → COUPLING EXPOSED</text>
-<path d="M2140 300 L2260 180 L2420 300" fill="#744e8610" stroke="#d2aaff" stroke-width="4"/>
-<text class="micro" x="2140" y="690">A CHANNEL LOST · SHELL OPEN 1/3</text>
-</g>
-
-<g id="p3" class="hidden">
-<text class="phase" x="300" y="300">P3 · MAIN AUTHORITY PARTITION</text>
-<rect class="partition" x="2320" y="1170" width="560" height="1190" rx="18"/>
-<rect class="pulse" x="650" y="1390" width="1500" height="830" rx="32"/>
-<rect class="pulse" x="3050" y="1390" width="1500" height="830" rx="32"/>
-<circle class="couplingHot" cx="2600" cy="1020" r="70"/>
-<text class="phase" x="1760" y="1080">MAIN LOCK → CENTRAL COUPLING</text>
-<path d="M2140 300 L2250 150 L2410 300" fill="#744e8608" stroke="#d2aaff" stroke-width="4"/>
-<path d="M3060 300 L2950 150 L2790 300" fill="#744e8608" stroke="#d2aaff" stroke-width="4"/>
-<text class="micro" x="2250" y="690">A/B CHANNELS LOST · SHELL OPEN 2/3</text>
-</g>
-
-<g id="pf" class="hidden">
-<text class="phase" x="300" y="300">FINAL · CHAMBER CONTROL LOST</text>
-<rect x="2460" y="1250" width="280" height="1050" fill="#a9bcc510" stroke="#73d59a" stroke-width="4" stroke-dasharray="14 10"/>
-<rect class="coreInner" x="2410" y="300" width="380" height="300" rx="40"/>
-<circle cx="2600" cy="450" r="70" fill="#ff8d62" stroke="white" stroke-width="5"/>
-<text class="boss" x="2260" y="700">CENTRAL CORE · FULL EXPOSURE</text>
-<path class="final" d="M2600,2390 Q2580,1580 2600,760"/>
-<text class="phase" x="2860" y="1700">OPEN CENTRAL APPROACH</text>
-<text class="micro" x="2860" y="1750">FINAL ROPE IMPACT</text>
-<rect class="glass" x="4530" y="260" width="380" height="620" rx="20"/>
-<text class="phase" x="4350" y="225">ROOFTOP SERVICE ACCESS</text>
-</g>
-</svg></main>
-</div>
+<rect class="tag" x="300" y="330" width="920" height="70" rx="15"/><text id="title" class="label" x="335" y="375"></text>
+</svg>
+</main></div>
 <script>
-function showPhase(n){
- ['p1','p2','p3','pf'].forEach(id=>document.getElementById(id).classList.add('hidden'));
- ['b1','b2','b3','bf'].forEach(id=>document.getElementById(id).classList.remove('active'));
- const id=n===1?'p1':n===2?'p2':n===3?'p3':'pf';
- const bid=n===1?'b1':n===2?'b2':n===3?'b3':'bf';
- document.getElementById(id).classList.remove('hidden'); document.getElementById(bid).classList.add('active');
+let phase='p1',state='prep';
+const info={
+p1:'<b>P1 · AUX A</b><br>A Wall이 닫히기 전에 왼쪽 Cell로 넘어가고 LOCK 뒤 A Coupling을 공격.',
+p2:'<b>P2 · AUX B</b><br>Player 1명만 R8 준비구역에 도착해도 시작. 오른쪽 Cell 전체 높이 INNER/OUTER Pulse.',
+p3a:'<b>P3-A</b><br>A/B Wall 동시 재활성. 중앙 Cell 전체 높이 LEFT/RIGHT Pulse. Bridge는 양쪽 모두 위험.',
+p3b:'<b>P3-B</b><br>Main Wall 분할 + UPPER/LOWER Pulse. 추락 시 직전 Cell에 맞는 Entry Recovery로 복귀.',
+final:'<b>FINAL</b><br>Core를 쓰러뜨린 뒤 EXIT-1 / EXIT-2가 전개되고 Rooftop Access가 열린다.'
+};
+function wall(x,mode,name){
+ if(mode==='prep')return `<rect class="tele" x="${x}" y="100" width="180" height="260"/><line class="move" x1="${x+90}" y1="360" x2="${x+90}" y2="2460"/><text class="tiny" x="${x-25}" y="390">${name} WARNING</text>`;
+ if(mode==='attack')return `<rect class="wall" x="${x}" y="100" width="180" height="1500"/><line class="move" x1="${x+90}" y1="1600" x2="${x+90}" y2="2460"/><text class="tiny" x="${x-25}" y="1640">${name} MOVING · ROPE CUT IF INTERSECTS</text>`;
+ return `<rect class="wall" x="${x}" y="100" width="180" height="2360"/><text class="tiny" x="${x-25}" y="2430">${name} LOCKED</text>`;
 }
-document.getElementById('routeT').addEventListener('change',e=>document.getElementById('routeGroup').classList.toggle('hidden',!e.target.checked));
-document.getElementById('linksT').addEventListener('change',e=>document.getElementById('links').classList.toggle('hidden',!e.target.checked));
-document.getElementById('reachT').addEventListener('change',e=>document.getElementById('reachGroup').classList.toggle('hidden',!e.target.checked));
+function pRect(x,y,w,h,on,label){return `<rect class="${on?'pulseActive':'pulseWarn'}" x="${x}" y="${y}" width="${w}" height="${h}" rx="22"/><text class="label" x="${x+25}" y="${y+45}">${label}</text>`}
+function setPhase(p){phase=p;state='prep';render()}function setState(s){state=s;render()}
+function sh(active){
+ const a=[['A',2000,2188,220,94],['A',2000,1263,220,94],['A',2000,1003,220,89],['M',2490,2188,220,94],['M',2490,748,220,84],['B',3050,2188,220,94],['B',3050,1263,220,94],['B',3050,1003,220,89]];
+ return a.map(v=>(active.includes(v[0])&&state!=='prep')?'':`<rect class="shutter" x="${v[1]}" y="${v[2]}" width="${v[3]}" height="${v[4]}" rx="6"/>`).join('');
+}
+function render(){
+ ['p1b','p2b','p3ab','p3bb','fb','prepb','attackb','lockb'].forEach(id=>document.getElementById(id).classList.remove('active'));
+ document.getElementById(phase==='p1'?'p1b':phase==='p2'?'p2b':phase==='p3a'?'p3ab':phase==='p3b'?'p3bb':'fb').classList.add('active');
+ document.getElementById(state==='prep'?'prepb':state==='attack'?'attackb':'lockb').classList.add('active');
+ document.getElementById('info').innerHTML=info[phase];
+ document.getElementById('title').textContent=phase==='p1'?'P1 · AUX A':phase==='p2'?'P2 · AUX B':phase==='p3a'?'P3-A · 보조 Wall 비상 재가동':phase==='p3b'?'P3-B · MAIN 통제':'최종 · 통제 상실';
+ let W='',P='',Q='',R='',S='',active='';
+ if(phase==='p1'){active='A';W=wall(2020,state,'A WALL');S='<circle class="special" cx="1500" cy="1230" r="18"/><text class="micro" x="1330" y="1200">A-STRIKE</text>';R='<path class="route" d="M2600 2520 L2280 2410 L1940 2320 L1620 2190 L1360 1980 L1220 1680 L1340 1370 L1500 1230 L1570 1110 L1870 910"/>';if(state==='lock')Q='<circle class="hot" cx="1740" cy="930" r="58"/><text class="label" x="1190" y="1030">A COUPLING · 공격 가능</text>'}
+ if(phase==='p2'){active='B';W=wall(3070,state,'B WALL');S='<circle class="special" cx="2600" cy="760" r="18"/><text class="tiny" x="2500" y="730">CROSS</text><circle class="special" cx="3700" cy="1230" r="18"/><text class="micro" x="3725" y="1210">B-STRIKE</text>';R='<path class="route" d="M2210 800 L2600 760 L2990 800 L3330 910"/>';if(state==='attack')P=pRect(3250,100,500,2360,true,'내부 활성 · 전체 높이')+pRect(3750,100,1050,2360,false,'외부 경고 · 전체 높이');if(state==='lock')Q='<circle class="hot" cx="3470" cy="930" r="58"/><text class="label" x="3540" y="1030">B COUPLING · 공격 가능</text>'}
+ if(phase==='p3a'){active='AB';W=wall(2020,state,'A WALL')+wall(3070,state,'B WALL');S='<circle class="special" cx="2600" cy="900" r="18"/><text class="tiny" x="2470" y="875">P3-BRIDGE</text><circle class="special" cx="2380" cy="1030" r="18"/><circle class="special" cx="2820" cy="1030" r="18"/>';R='<path class="route" d="M2380 650 L2600 900 L2820 650"/>';if(state==='attack')P=pRect(2200,100,400,2360,true,'좌측 활성 · 전체 높이')+pRect(2600,100,470,2360,false,'우측 경고 · 전체 높이')+'<circle class="pulseActive" cx="2600" cy="900" r="78"/><text class="tiny" x="2690" y="900">BRIDGE = 양쪽 모두 위험</text>';if(state==='lock')Q='<text class="label" x="2240" y="1190">A/B LOCK → MAIN</text>'}
+ if(phase==='p3b'){active='ABM';W=wall(2020,'lock','A WALL')+wall(3070,'lock','B WALL')+wall(2510,state,'MAIN WALL');S='<circle class="special" cx="2380" cy="1030" r="18"/><text class="tiny" x="2210" y="1065">P3-LOW-L</text><circle class="special" cx="2820" cy="1030" r="18"/><text class="tiny" x="2840" y="1065">P3-LOW-R</text>';R='<path class="route" d="M2380 650 L2380 1030"/><path class="route" d="M2820 650 L2820 1030"/>';if(state==='attack')P=pRect(2200,100,870,740,false,'상부 경고')+pRect(2200,840,870,1620,true,'하부 활성');if(state==='lock')Q='<circle class="aperture" cx="2600" cy="980" r="108"/><circle class="hot" cx="2600" cy="980" r="53"/><text class="label" x="2740" y="980">MAIN COUPLING · 하나의 체력</text>'}
+ if(phase==='final'){if(state==='lock')Q='<circle class="hot" cx="2600" cy="450" r="78"/><text class="label" x="2710" y="455">최종 CORE</text>';if(state==='attack'){Q='<circle class="special" cx="2600" cy="400" r="18"/><circle class="special" cx="2600" cy="180" r="18"/><path class="route" d="M2380 650 L2600 400 L2600 180"/><text class="label" x="2700" y="405">EXIT-1</text><text class="label" x="2700" y="185">EXIT-2</text>';document.getElementById('roof').style.opacity='1'}else document.getElementById('roof').style.opacity='.25'}
+ document.getElementById('walls').innerHTML=W;document.getElementById('pulse').innerHTML=P;document.getElementById('weak').innerHTML=Q;document.getElementById('route').innerHTML=R;document.getElementById('special').innerHTML=S;document.getElementById('shutters').innerHTML=sh(active);document.getElementById('arrival').style.opacity=(phase==='p1'&&state==='prep')?'1':'0';
+}
+document.getElementById('recT').addEventListener('change',e=>document.getElementById('recovery').classList.toggle('hidden',!e.target.checked));render();
 </script>
 </body></html>
