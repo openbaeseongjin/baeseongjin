@@ -1,472 +1,301 @@
 import { freezeBossStageValue } from "../BossStageSpec.js";
 
 export const BOSS_02_STAGE_SPEC = freezeBossStageValue({
-    schemaVersion: "boss-stage-spec-v2",
-    specType: "boss-stage",
-    id: "boss-02",
-    name: "RESIDENTIAL SECURITY PURSUER",
-    subtitle: "WORKER RESIDENTIAL DISTRICT / ROOFTOP BLOCKADE",
-    sourceAreaId: "sector-02-08",
-    nextAreaId: "sector-03-01",
     arena: {
-        bounds: {
-            x: 0,
-            y: -2800,
-            width: 5600,
-            height: 2800
-        },
-        baseHookReach: 400,
-        entry: {
-            id: "boss-02:entry",
-            x: 240,
-            y: -360
-        },
-        exit: {
-            id: "boss-02:exit",
-            x: 5400,
-            y: -2460
-        },
-        phaseZones: [
-            {
-                id: "boss-02:zone-alley",
-                phaseId: "boss-02:phase-1",
-                bounds: {
-                    x: 120,
-                    y: -1220,
-                    width: 1600,
-                    height: 1080
-                }
-            },
-            {
-                id: "boss-02:zone-courtyard",
-                phaseId: "boss-02:phase-2",
-                bounds: {
-                    x: 1740,
-                    y: -1940,
-                    width: 1900,
-                    height: 1460
-                }
-            },
-            {
-                id: "boss-02:zone-rooftop",
-                phaseId: "boss-02:phase-3",
-                bounds: {
-                    x: 3820,
-                    y: -2700,
-                    width: 1660,
-                    height: 1160
-                }
-            }
-        ],
-        surfaces: [
-            {
-                id: "boss-02:alley-floor",
-                kind: "platform",
-                bounds: {
-                    x: 100,
-                    y: -300,
-                    width: 1620,
-                    height: 120
-                },
-                oneWay: false,
-                grappleable: true
-            },
-            {
-                id: "boss-02:alley-upper-balcony",
-                kind: "platform",
-                bounds: {
-                    x: 460,
-                    y: -820,
-                    width: 980,
-                    height: 70
-                },
-                oneWay: true,
-                grappleable: true
-            },
-            {
-                id: "boss-02:wall-a",
-                kind: "architecture",
-                bounds: {
-                    x: 140,
-                    y: -1120,
-                    width: 120,
-                    height: 820
-                },
-                oneWay: false,
-                grappleable: true,
-                validArchitecture: true
-            },
-            {
-                id: "boss-02:stairwell-wall-b",
-                kind: "architecture",
-                bounds: {
-                    x: 1540,
-                    y: -1220,
-                    width: 140,
-                    height: 920
-                },
-                oneWay: false,
-                grappleable: true,
-                validArchitecture: true
-            },
-            {
-                id: "boss-02:fire-escape-a",
-                kind: "platform",
-                bounds: {
-                    x: 1540,
-                    y: -1180,
-                    width: 260,
-                    height: 55
-                },
-                oneWay: true,
-                grappleable: true
-            },
-            {
-                id: "boss-02:fire-escape-b",
-                kind: "platform",
-                bounds: {
-                    x: 1710,
-                    y: -1460,
-                    width: 260,
-                    height: 55
-                },
-                oneWay: true,
-                grappleable: true
-            },
-            {
-                id: "boss-02:courtyard-left-ring",
-                kind: "platform",
-                bounds: {
-                    x: 1800,
-                    y: -1720,
-                    width: 500,
-                    height: 70
-                },
-                oneWay: true,
-                grappleable: true
-            },
-            {
-                id: "boss-02:courtyard-lower-ring",
-                kind: "platform",
-                bounds: {
-                    x: 2140,
-                    y: -660,
-                    width: 1120,
-                    height: 80
-                },
-                oneWay: false,
-                grappleable: true
-            },
-            {
-                id: "boss-02:courtyard-right-ring",
-                kind: "platform",
-                bounds: {
-                    x: 3200,
-                    y: -1720,
-                    width: 420,
-                    height: 70
-                },
-                oneWay: true,
-                grappleable: true
-            },
-            {
-                id: "boss-02:central-service-slab",
-                kind: "architecture",
-                bounds: {
-                    x: 2530,
-                    y: -1390,
-                    width: 360,
-                    height: 160
-                },
-                oneWay: false,
-                grappleable: true,
-                validArchitecture: true
-            },
-            {
-                id: "boss-02:spiral-c",
-                kind: "platform",
-                bounds: {
-                    x: 3500,
-                    y: -1900,
-                    width: 340,
-                    height: 60
-                },
-                oneWay: true,
-                grappleable: true
-            },
-            {
-                id: "boss-02:roof-a",
-                kind: "platform",
-                bounds: {
-                    x: 3820,
-                    y: -2020,
-                    width: 620,
-                    height: 90
-                },
-                oneWay: false,
-                grappleable: true
-            },
-            {
-                id: "boss-02:roof-b",
-                kind: "platform",
-                bounds: {
-                    x: 4440,
-                    y: -2190,
-                    width: 500,
-                    height: 90
-                },
-                oneWay: false,
-                grappleable: true
-            },
-            {
-                id: "boss-02:roof-c",
-                kind: "platform",
-                bounds: {
-                    x: 4930,
-                    y: -2370,
-                    width: 550,
-                    height: 90
-                },
-                oneWay: false,
-                grappleable: true
-            },
-            {
-                id: "boss-02:water-tank",
-                kind: "architecture",
-                bounds: {
-                    x: 4040,
-                    y: -2390,
-                    width: 260,
-                    height: 370
-                },
-                oneWay: false,
-                grappleable: true,
-                validArchitecture: true
-            },
-            {
-                id: "boss-02:stairwell-head",
-                kind: "architecture",
-                bounds: {
-                    x: 4540,
-                    y: -2560,
-                    width: 280,
-                    height: 370
-                },
-                oneWay: false,
-                grappleable: true,
-                validArchitecture: true
-            },
-            {
-                id: "boss-02:heavy-vent-housing",
-                kind: "architecture",
-                bounds: {
-                    x: 5050,
-                    y: -2650,
-                    width: 300,
-                    height: 280
-                },
-                oneWay: false,
-                grappleable: true,
-                validArchitecture: true
-            }
-        ],
         anchors: [
             {
-                id: "boss-02:route-01",
-                x: 300,
-                y: -450
+                id: "boss-02:p1-a0",
+                x: 260,
+                y: -300
             },
             {
-                id: "boss-02:route-02",
-                x: 600,
-                y: -500
+                id: "boss-02:p1-a1",
+                x: 520,
+                y: -430
             },
             {
-                id: "boss-02:route-03",
-                x: 900,
-                y: -650
+                id: "boss-02:p1-a2",
+                x: 820,
+                y: -570
             },
             {
-                id: "boss-02:route-04",
-                x: 1200,
+                id: "boss-02:p1-a3",
+                x: 1120,
+                y: -720
+            },
+            {
+                id: "boss-02:p1-a4",
+                x: 1420,
+                y: -850
+            },
+            {
+                id: "boss-02:p1-a5",
+                x: 1720,
+                y: -720
+            },
+            {
+                id: "boss-02:p1-a6",
+                x: 1950,
                 y: -800
             },
             {
-                id: "boss-02:route-05",
-                x: 1500,
-                y: -950
+                id: "boss-02:p1-l-bait",
+                x: 620,
+                y: -900
             },
             {
-                id: "boss-02:route-06",
-                x: 1650,
+                id: "boss-02:p1-l-evade",
+                x: 500,
+                y: -1190
+            },
+            {
+                id: "boss-02:p1-l-counter",
+                x: 840,
+                y: -1040
+            },
+            {
+                id: "boss-02:p1-l-return",
+                x: 1160,
+                y: -980
+            },
+            {
+                id: "boss-02:p1-r-bait",
+                x: 1800,
+                y: -930
+            },
+            {
+                id: "boss-02:p1-r-evade",
+                x: 1960,
+                y: -1190
+            },
+            {
+                id: "boss-02:p1-r-counter",
+                x: 1600,
+                y: -1050
+            },
+            {
+                id: "boss-02:t12-0",
+                x: 1980,
+                y: -1050
+            },
+            {
+                id: "boss-02:t12-1",
+                x: 2080,
+                y: -1270
+            },
+            {
+                id: "boss-02:t12-2",
+                x: 2400,
+                y: -1270
+            },
+            {
+                id: "boss-02:p2-b1",
+                x: 2600,
+                y: -1000
+            },
+            {
+                id: "boss-02:p2-b2",
+                x: 2860,
+                y: -1080
+            },
+            {
+                id: "boss-02:p2-b3",
+                x: 3060,
+                y: -1390
+            },
+            {
+                id: "boss-02:p2-b4",
+                x: 3300,
+                y: -1690
+            },
+            {
+                id: "boss-02:p2-b5",
+                x: 3600,
+                y: -1880
+            },
+            {
+                id: "boss-02:p2-b6",
+                x: 3940,
+                y: -1840
+            },
+            {
+                id: "boss-02:p2-b7",
+                x: 4210,
+                y: -1620
+            },
+            {
+                id: "boss-02:p2-b8",
+                x: 4440,
+                y: -1330
+            },
+            {
+                id: "boss-02:p2-b9",
+                x: 4660,
+                y: -1040
+            },
+            {
+                id: "boss-02:p2-b10",
+                x: 4900,
+                y: -820
+            },
+            {
+                id: "boss-02:p2-c1",
+                x: 3400,
                 y: -1250
             },
             {
-                id: "boss-02:route-07",
-                x: 1800,
-                y: -1530
+                id: "boss-02:p2-c2",
+                x: 3650,
+                y: -1050
             },
             {
-                id: "boss-02:route-08",
-                x: 2050,
-                y: -1600
+                id: "boss-02:p2-c3",
+                x: 3950,
+                y: -1250
             },
             {
-                id: "boss-02:route-09",
-                x: 2350,
-                y: -1500
+                id: "boss-02:p2-c4",
+                x: 3850,
+                y: -1570
             },
             {
-                id: "boss-02:route-10",
-                x: 2650,
-                y: -1350
+                id: "boss-02:t23-0",
+                x: 5000,
+                y: -1050
             },
             {
-                id: "boss-02:route-11",
-                x: 2950,
-                y: -1500
+                id: "boss-02:t23-1",
+                x: 5060,
+                y: -1250
             },
             {
-                id: "boss-02:route-12",
-                x: 3250,
-                y: -1650
+                id: "boss-02:t23-2",
+                x: 5300,
+                y: -1250
             },
             {
-                id: "boss-02:route-13",
-                x: 3500,
-                y: -1450
+                id: "boss-02:t23-3",
+                x: 5420,
+                y: -1580
             },
             {
-                id: "boss-02:route-14",
-                x: 3700,
-                y: -1750
+                id: "boss-02:p3-a0",
+                x: 5500,
+                y: -1900
             },
             {
-                id: "boss-02:route-15",
-                x: 3900,
-                y: -2050
+                id: "boss-02:p3-a1",
+                x: 5700,
+                y: -2200
             },
             {
-                id: "boss-02:route-16",
-                x: 4200,
-                y: -2150
+                id: "boss-02:p3-t-bait",
+                x: 5750,
+                y: -2460
             },
             {
-                id: "boss-02:route-17",
-                x: 4500,
-                y: -2300
+                id: "boss-02:p3-t-evade",
+                x: 5950,
+                y: -2750
             },
             {
-                id: "boss-02:route-18",
-                x: 4800,
-                y: -2150
+                id: "boss-02:p3-t-counter",
+                x: 6200,
+                y: -2500
             },
             {
-                id: "boss-02:route-19",
-                x: 5100,
-                y: -2300
+                id: "boss-02:p3-s-pre",
+                x: 6450,
+                y: -2550
             },
             {
-                id: "boss-02:route-20",
-                x: 5350,
-                y: -2450
+                id: "boss-02:p3-s-bait",
+                x: 6500,
+                y: -2850
+            },
+            {
+                id: "boss-02:p3-s-evade",
+                x: 6700,
+                y: -3180
+            },
+            {
+                id: "boss-02:p3-s-counter",
+                x: 7000,
+                y: -3000
+            },
+            {
+                id: "boss-02:p3-v-pre",
+                x: 7250,
+                y: -3000
+            },
+            {
+                id: "boss-02:p3-v-bait",
+                x: 7400,
+                y: -3200
+            },
+            {
+                id: "boss-02:p3-v-evade",
+                x: 7650,
+                y: -3500
+            },
+            {
+                id: "boss-02:p3-v-counter",
+                x: 7900,
+                y: -3250
+            },
+            {
+                id: "boss-02:p3-exit",
+                x: 8200,
+                y: -3250
             }
         ],
-        routeEdges: [
+        baseHookReach: 400,
+        bounds: {
+            height: 3700,
+            width: 8600,
+            x: 0,
+            y: -3700
+        },
+        entry: {
+            id: "boss-02:entry",
+            x: 240,
+            y: -356
+        },
+        exit: {
+            id: "boss-02:exit",
+            x: 8320,
+            y: -3250
+        },
+        phaseZones: [
             {
-                id: "boss-02:edge-01",
-                from: "boss-02:route-01",
-                to: "boss-02:route-02"
+                bounds: {
+                    height: 1500,
+                    width: 2200,
+                    x: 120,
+                    y: -1600
+                },
+                id: "boss-02:zone-alley",
+                phaseId: "boss-02:phase-1"
             },
             {
-                id: "boss-02:edge-02",
-                from: "boss-02:route-02",
-                to: "boss-02:route-03"
+                bounds: {
+                    height: 2100,
+                    width: 2700,
+                    x: 2500,
+                    y: -2500
+                },
+                id: "boss-02:zone-courtyard",
+                phaseId: "boss-02:phase-2"
             },
             {
-                id: "boss-02:edge-03",
-                from: "boss-02:route-03",
-                to: "boss-02:route-04"
-            },
-            {
-                id: "boss-02:edge-04",
-                from: "boss-02:route-04",
-                to: "boss-02:route-05"
-            },
-            {
-                id: "boss-02:edge-05",
-                from: "boss-02:route-05",
-                to: "boss-02:route-06"
-            },
-            {
-                id: "boss-02:edge-06",
-                from: "boss-02:route-06",
-                to: "boss-02:route-07"
-            },
-            {
-                id: "boss-02:edge-07",
-                from: "boss-02:route-07",
-                to: "boss-02:route-08"
-            },
-            {
-                id: "boss-02:edge-08",
-                from: "boss-02:route-08",
-                to: "boss-02:route-09"
-            },
-            {
-                id: "boss-02:edge-09",
-                from: "boss-02:route-09",
-                to: "boss-02:route-10"
-            },
-            {
-                id: "boss-02:edge-10",
-                from: "boss-02:route-10",
-                to: "boss-02:route-11"
-            },
-            {
-                id: "boss-02:edge-11",
-                from: "boss-02:route-11",
-                to: "boss-02:route-12"
-            },
-            {
-                id: "boss-02:edge-12",
-                from: "boss-02:route-12",
-                to: "boss-02:route-13"
-            },
-            {
-                id: "boss-02:edge-13",
-                from: "boss-02:route-13",
-                to: "boss-02:route-14"
-            },
-            {
-                id: "boss-02:edge-14",
-                from: "boss-02:route-14",
-                to: "boss-02:route-15"
-            },
-            {
-                id: "boss-02:edge-15",
-                from: "boss-02:route-15",
-                to: "boss-02:route-16"
-            },
-            {
-                id: "boss-02:edge-16",
-                from: "boss-02:route-16",
-                to: "boss-02:route-17"
-            },
-            {
-                id: "boss-02:edge-17",
-                from: "boss-02:route-17",
-                to: "boss-02:route-18"
-            },
-            {
-                id: "boss-02:edge-18",
-                from: "boss-02:route-18",
-                to: "boss-02:route-19"
-            },
-            {
-                id: "boss-02:edge-19",
-                from: "boss-02:route-19",
-                to: "boss-02:route-20"
+                bounds: {
+                    height: 2400,
+                    width: 3100,
+                    x: 5350,
+                    y: -3550
+                },
+                id: "boss-02:zone-rooftop",
+                phaseId: "boss-02:phase-3"
             }
         ],
         recoveryPoints: [
@@ -477,258 +306,873 @@ export const BOSS_02_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 id: "boss-02:recovery-alley-b",
-                x: 1420,
+                x: 1900,
                 y: -390
             },
             {
                 id: "boss-02:recovery-courtyard-a",
-                x: 2050,
-                y: -760
+                x: 2800,
+                y: -700
             },
             {
                 id: "boss-02:recovery-courtyard-b",
-                x: 3350,
-                y: -760
+                x: 4800,
+                y: -700
             },
             {
                 id: "boss-02:recovery-rooftop-a",
-                x: 4000,
-                y: -2100
+                x: 5550,
+                y: -2140
             },
             {
                 id: "boss-02:recovery-rooftop-b",
-                x: 5260,
-                y: -2450
+                x: 8100,
+                y: -2940
+            }
+        ],
+        routeEdges: [
+            {
+                from: "boss-02:p1-a0",
+                id: "boss-02:rev3-edge-01",
+                to: "boss-02:p1-a1"
+            },
+            {
+                from: "boss-02:p1-a1",
+                id: "boss-02:rev3-edge-02",
+                to: "boss-02:p1-a2"
+            },
+            {
+                from: "boss-02:p1-a2",
+                id: "boss-02:rev3-edge-03",
+                to: "boss-02:p1-a3"
+            },
+            {
+                from: "boss-02:p1-a3",
+                id: "boss-02:rev3-edge-04",
+                to: "boss-02:p1-a4"
+            },
+            {
+                from: "boss-02:p1-a4",
+                id: "boss-02:rev3-edge-05",
+                to: "boss-02:p1-a5"
+            },
+            {
+                from: "boss-02:p1-a5",
+                id: "boss-02:rev3-edge-06",
+                to: "boss-02:p1-a6"
+            },
+            {
+                from: "boss-02:p1-a2",
+                id: "boss-02:rev3-edge-07",
+                to: "boss-02:p1-l-bait"
+            },
+            {
+                from: "boss-02:p1-l-bait",
+                id: "boss-02:rev3-edge-08",
+                to: "boss-02:p1-l-evade"
+            },
+            {
+                from: "boss-02:p1-l-evade",
+                id: "boss-02:rev3-edge-09",
+                to: "boss-02:p1-l-counter"
+            },
+            {
+                from: "boss-02:p1-l-counter",
+                id: "boss-02:rev3-edge-10",
+                to: "boss-02:p1-l-return"
+            },
+            {
+                from: "boss-02:p1-l-return",
+                id: "boss-02:rev3-edge-11",
+                to: "boss-02:p1-a4"
+            },
+            {
+                from: "boss-02:p1-a5",
+                id: "boss-02:rev3-edge-12",
+                to: "boss-02:p1-r-bait"
+            },
+            {
+                from: "boss-02:p1-r-bait",
+                id: "boss-02:rev3-edge-13",
+                to: "boss-02:p1-r-evade"
+            },
+            {
+                from: "boss-02:p1-r-evade",
+                id: "boss-02:rev3-edge-14",
+                to: "boss-02:p1-r-counter"
+            },
+            {
+                from: "boss-02:p1-r-counter",
+                id: "boss-02:rev3-edge-15",
+                to: "boss-02:p1-a4"
+            },
+            {
+                from: "boss-02:p1-a6",
+                id: "boss-02:rev3-edge-16",
+                to: "boss-02:t12-0"
+            },
+            {
+                from: "boss-02:t12-0",
+                id: "boss-02:rev3-edge-17",
+                to: "boss-02:t12-1"
+            },
+            {
+                from: "boss-02:t12-1",
+                id: "boss-02:rev3-edge-18",
+                to: "boss-02:t12-2"
+            },
+            {
+                from: "boss-02:t12-2",
+                id: "boss-02:rev3-edge-19",
+                to: "boss-02:p2-b1"
+            },
+            {
+                from: "boss-02:p2-b1",
+                id: "boss-02:rev3-edge-20",
+                to: "boss-02:p2-b2"
+            },
+            {
+                from: "boss-02:p2-b2",
+                id: "boss-02:rev3-edge-21",
+                to: "boss-02:p2-b3"
+            },
+            {
+                from: "boss-02:p2-b3",
+                id: "boss-02:rev3-edge-22",
+                to: "boss-02:p2-b4"
+            },
+            {
+                from: "boss-02:p2-b4",
+                id: "boss-02:rev3-edge-23",
+                to: "boss-02:p2-b5"
+            },
+            {
+                from: "boss-02:p2-b5",
+                id: "boss-02:rev3-edge-24",
+                to: "boss-02:p2-b6"
+            },
+            {
+                from: "boss-02:p2-b6",
+                id: "boss-02:rev3-edge-25",
+                to: "boss-02:p2-b7"
+            },
+            {
+                from: "boss-02:p2-b7",
+                id: "boss-02:rev3-edge-26",
+                to: "boss-02:p2-b8"
+            },
+            {
+                from: "boss-02:p2-b8",
+                id: "boss-02:rev3-edge-27",
+                to: "boss-02:p2-b9"
+            },
+            {
+                from: "boss-02:p2-b9",
+                id: "boss-02:rev3-edge-28",
+                to: "boss-02:p2-b10"
+            },
+            {
+                from: "boss-02:p2-b3",
+                id: "boss-02:rev3-edge-29",
+                to: "boss-02:p2-c1"
+            },
+            {
+                from: "boss-02:p2-c1",
+                id: "boss-02:rev3-edge-30",
+                to: "boss-02:p2-c2"
+            },
+            {
+                from: "boss-02:p2-c2",
+                id: "boss-02:rev3-edge-31",
+                to: "boss-02:p2-c3"
+            },
+            {
+                from: "boss-02:p2-c3",
+                id: "boss-02:rev3-edge-32",
+                to: "boss-02:p2-c4"
+            },
+            {
+                from: "boss-02:p2-c4",
+                id: "boss-02:rev3-edge-33",
+                to: "boss-02:p2-b5"
+            },
+            {
+                from: "boss-02:p2-b10",
+                id: "boss-02:rev3-edge-34",
+                to: "boss-02:t23-0"
+            },
+            {
+                from: "boss-02:t23-0",
+                id: "boss-02:rev3-edge-35",
+                to: "boss-02:t23-1"
+            },
+            {
+                from: "boss-02:t23-1",
+                id: "boss-02:rev3-edge-36",
+                to: "boss-02:t23-2"
+            },
+            {
+                from: "boss-02:t23-2",
+                id: "boss-02:rev3-edge-37",
+                to: "boss-02:t23-3"
+            },
+            {
+                from: "boss-02:t23-3",
+                id: "boss-02:rev3-edge-38",
+                to: "boss-02:p3-a0"
+            },
+            {
+                from: "boss-02:p3-a0",
+                id: "boss-02:rev3-edge-39",
+                to: "boss-02:p3-a1"
+            },
+            {
+                from: "boss-02:p3-a1",
+                id: "boss-02:rev3-edge-40",
+                to: "boss-02:p3-t-bait"
+            },
+            {
+                from: "boss-02:p3-t-bait",
+                id: "boss-02:rev3-edge-41",
+                to: "boss-02:p3-t-evade"
+            },
+            {
+                from: "boss-02:p3-t-evade",
+                id: "boss-02:rev3-edge-42",
+                to: "boss-02:p3-t-counter"
+            },
+            {
+                from: "boss-02:p3-t-counter",
+                id: "boss-02:rev3-edge-43",
+                to: "boss-02:p3-s-pre"
+            },
+            {
+                from: "boss-02:p3-s-pre",
+                id: "boss-02:rev3-edge-44",
+                to: "boss-02:p3-s-bait"
+            },
+            {
+                from: "boss-02:p3-s-bait",
+                id: "boss-02:rev3-edge-45",
+                to: "boss-02:p3-s-evade"
+            },
+            {
+                from: "boss-02:p3-s-evade",
+                id: "boss-02:rev3-edge-46",
+                to: "boss-02:p3-s-counter"
+            },
+            {
+                from: "boss-02:p3-s-counter",
+                id: "boss-02:rev3-edge-47",
+                to: "boss-02:p3-v-pre"
+            },
+            {
+                from: "boss-02:p3-v-pre",
+                id: "boss-02:rev3-edge-48",
+                to: "boss-02:p3-v-bait"
+            },
+            {
+                from: "boss-02:p3-v-bait",
+                id: "boss-02:rev3-edge-49",
+                to: "boss-02:p3-v-evade"
+            },
+            {
+                from: "boss-02:p3-v-evade",
+                id: "boss-02:rev3-edge-50",
+                to: "boss-02:p3-v-counter"
+            },
+            {
+                from: "boss-02:p3-v-counter",
+                id: "boss-02:rev3-edge-51",
+                to: "boss-02:p3-exit"
+            }
+        ],
+        surfaces: [
+            {
+                bounds: {
+                    height: 120,
+                    width: 2200,
+                    x: 120,
+                    y: -260
+                },
+                grappleable: true,
+                id: "boss-02:alley-floor",
+                kind: "platform",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 450,
+                    width: 120,
+                    x: 120,
+                    y: -1600
+                },
+                grappleable: true,
+                id: "boss-02:wall-a-upper",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: false
+            },
+            {
+                bounds: {
+                    height: 500,
+                    width: 120,
+                    x: 120,
+                    y: -1150
+                },
+                grappleable: true,
+                id: "boss-02:wall-a",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: true
+            },
+            {
+                bounds: {
+                    height: 390,
+                    width: 120,
+                    x: 120,
+                    y: -650
+                },
+                grappleable: true,
+                id: "boss-02:wall-a-lower",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: false
+            },
+            {
+                bounds: {
+                    height: 250,
+                    width: 120,
+                    x: 2200,
+                    y: -1600
+                },
+                grappleable: true,
+                id: "boss-02:stairwell-wall-b-upper",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: false
+            },
+            {
+                bounds: {
+                    height: 500,
+                    width: 120,
+                    x: 2200,
+                    y: -1150
+                },
+                grappleable: true,
+                id: "boss-02:stairwell-wall-b",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: true
+            },
+            {
+                bounds: {
+                    height: 390,
+                    width: 120,
+                    x: 2200,
+                    y: -650
+                },
+                grappleable: true,
+                id: "boss-02:stairwell-wall-b-lower",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: false
+            },
+            {
+                bounds: {
+                    height: 55,
+                    width: 560,
+                    x: 340,
+                    y: -880
+                },
+                grappleable: true,
+                id: "boss-02:alley-upper-balcony",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 55,
+                    width: 560,
+                    x: 1420,
+                    y: -900
+                },
+                grappleable: true,
+                id: "boss-02:fire-escape-a",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 45,
+                    width: 360,
+                    x: 1660,
+                    y: -1260
+                },
+                grappleable: true,
+                id: "boss-02:fire-escape-b",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 1980,
+                    width: 120,
+                    x: 2500,
+                    y: -2500
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-left-wall",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: false
+            },
+            {
+                bounds: {
+                    height: 120,
+                    width: 2460,
+                    x: 2620,
+                    y: -2500
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-back-wall",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: false
+            },
+            {
+                bounds: {
+                    height: 1000,
+                    width: 120,
+                    x: 5080,
+                    y: -2500
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-right-wall-upper",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: false
+            },
+            {
+                bounds: {
+                    height: 630,
+                    width: 120,
+                    x: 5080,
+                    y: -1150
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-right-wall-lower",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: false
+            },
+            {
+                bounds: {
+                    height: 120,
+                    width: 2460,
+                    x: 2620,
+                    y: -520
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-lower-ring",
+                kind: "platform",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 55,
+                    width: 620,
+                    x: 2720,
+                    y: -1510
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-left-ring",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 55,
+                    width: 720,
+                    x: 2980,
+                    y: -1900
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-upper-left-ring",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 55,
+                    width: 760,
+                    x: 3850,
+                    y: -1900
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-upper-right-ring",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 55,
+                    width: 620,
+                    x: 4380,
+                    y: -1510
+                },
+                grappleable: true,
+                id: "boss-02:courtyard-right-ring",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 50,
+                    width: 330,
+                    x: 4720,
+                    y: -1080
+                },
+                grappleable: true,
+                id: "boss-02:spiral-c",
+                kind: "platform",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 520,
+                    width: 320,
+                    x: 3500,
+                    y: -1660
+                },
+                grappleable: true,
+                id: "boss-02:central-service-slab",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: true
+            },
+            {
+                bounds: {
+                    height: 100,
+                    width: 950,
+                    x: 5450,
+                    y: -2200
+                },
+                grappleable: true,
+                id: "boss-02:roof-a",
+                kind: "platform",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 320,
+                    width: 260,
+                    x: 5900,
+                    y: -2520
+                },
+                grappleable: true,
+                id: "boss-02:water-tank",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: true
+            },
+            {
+                bounds: {
+                    height: 100,
+                    width: 1100,
+                    x: 6350,
+                    y: -2700
+                },
+                grappleable: true,
+                id: "boss-02:roof-b",
+                kind: "platform",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 370,
+                    width: 300,
+                    x: 6650,
+                    y: -3070
+                },
+                grappleable: true,
+                id: "boss-02:stairwell-head",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: true
+            },
+            {
+                bounds: {
+                    height: 100,
+                    width: 1000,
+                    x: 7350,
+                    y: -3000
+                },
+                grappleable: true,
+                id: "boss-02:roof-c",
+                kind: "platform",
+                oneWay: false
+            },
+            {
+                bounds: {
+                    height: 340,
+                    width: 320,
+                    x: 7550,
+                    y: -3340
+                },
+                grappleable: true,
+                id: "boss-02:heavy-vent-housing",
+                kind: "architecture",
+                oneWay: false,
+                validArchitecture: true
             }
         ]
     },
     boss: {
         actorId: "boss-02:residential-security-pursuer",
+        collider: {
+            height: 220,
+            width: 420,
+            x: 690,
+            y: -630
+        },
         mechanicId: "residential-security-pursuit",
-        visualPresetId: "residential-security-pursuer",
         position: {
-            x: 900,
+            x: 1180,
             y: -520
         },
-        collider: {
-            x: 690,
-            y: -630,
-            width: 420,
-            height: 220
-        }
+        visualPresetId: "residential-security-pursuer"
     },
     combat: {
         additionalPlayerMultiplier: 0.5,
-        closedBodyDamageMultiplier: 0.25,
-        weakNormalDamageMultiplier: 1,
-        weakFixedPercent: 0.25,
         architectureImpactBossDamage: 0,
+        closedBodyDamageMultiplier: 0.25,
         generalDamageMode: "standard-combat",
-        participantCountSnapshot: "boss-stage-start",
         lateJoinPolicy: "join-current-attempt-without-rescale",
-        phaseOverflowPolicy: "discard-at-floor"
+        participantCountSnapshot: "boss-stage-start",
+        phaseOverflowPolicy: "discard-at-floor",
+        weakFixedPercent: 0.25,
+        weakNormalDamageMultiplier: 1
     },
+    hud: {
+        healthBar: {
+            phaseMarkerCount: 3,
+            showNumbers: true,
+            showPhaseBreaks: true,
+            style: "current-phase-progress"
+        },
+        objectivePlacement: "below-health",
+        showVulnerabilityCountdown: true,
+        title: "RESIDENTIAL SECURITY PURSUER"
+    },
+    id: "boss-02",
     mechanics: [
         {
-            id: "boss-02:simple-lock-charge",
-            type: "simple-lock-charge",
-            position: {
-                x: 900,
-                y: -520
-            },
             bounds: {
-                x: 160,
-                y: -1120,
-                width: 1500,
-                height: 900
+                height: 1500,
+                width: 2200,
+                x: 120,
+                y: -1600
             },
+            id: "boss-02:simple-lock-charge",
             parameters: {
-                telegraphSeconds: 0.8,
-                directionLockSeconds: 0.2,
-                travelSpeed: 440,
                 attackDistance: 2200,
                 damage: 20,
+                directionLockSeconds: 0.2,
+                impactParticlePresetId: "boss-architecture-dust-spark",
                 missRecoverySeconds: 0.8,
-                validArchitectureSurfaceIds: ["boss-02:wall-a", "boss-02:stairwell-wall-b"],
-                impactParticlePresetId: "boss-architecture-dust-spark"
-            }
+                telegraphSeconds: 0.8,
+                travelSpeed: 440,
+                validArchitectureSurfaceIds: ["boss-02:wall-a", "boss-02:stairwell-wall-b"]
+            },
+            position: {
+                x: 1180,
+                y: -520
+            },
+            type: "simple-lock-charge"
         },
         {
             id: "boss-02:reposition-courtyard",
-            type: "phase-reposition",
-            position: {
-                x: 2050,
-                y: -1150
-            },
             parameters: {
-                targetZoneId: "boss-02:zone-courtyard",
                 attacksEnabled: false,
-                contactDamageEnabled: false
-            }
+                contactDamageEnabled: false,
+                repositionTarget: {
+                    x: 3800,
+                    y: -900
+                },
+                targetZoneId: "boss-02:zone-courtyard"
+            },
+            position: {
+                x: 3800,
+                y: -900
+            },
+            type: "phase-reposition"
         },
         {
-            id: "boss-02:rotating-ground-slam",
-            type: "rotating-ground-slam",
-            position: {
-                x: 2710,
-                y: -1060
-            },
             bounds: {
-                x: 1820,
-                y: -1780,
-                width: 1740,
-                height: 1160
+                height: 2100,
+                width: 2700,
+                x: 2500,
+                y: -2500
             },
+            id: "boss-02:rotating-ground-slam",
             parameters: {
-                telegraphSeconds: 0.9,
-                directionLockSeconds: 0.25,
-                rotationSpeed: 2.5,
-                slamSpeed: 520,
                 attackDistance: 1600,
                 damage: 25,
+                directionLockSeconds: 0.25,
+                impactParticlePresetId: "boss-architecture-dust-spark",
                 missRecoverySeconds: 0.7,
-                validArchitectureSurfaceIds: ["boss-02:central-service-slab"],
-                impactParticlePresetId: "boss-architecture-dust-spark"
-            }
+                rotationSpeed: 2.5,
+                slamSpeed: 520,
+                telegraphSeconds: 0.9,
+                validArchitectureSurfaceIds: ["boss-02:central-service-slab"]
+            },
+            position: {
+                x: 3800,
+                y: -900
+            },
+            type: "rotating-ground-slam"
         },
         {
             id: "boss-02:reposition-rooftop",
-            type: "phase-reposition",
-            position: {
-                x: 4200,
-                y: -2100
-            },
             parameters: {
-                targetZoneId: "boss-02:zone-rooftop",
                 attacksEnabled: false,
-                contactDamageEnabled: false
-            }
+                contactDamageEnabled: false,
+                repositionTarget: {
+                    x: 6200,
+                    y: -1900
+                },
+                targetZoneId: "boss-02:zone-rooftop"
+            },
+            position: {
+                x: 6200,
+                y: -1900
+            },
+            type: "phase-reposition"
         },
         {
-            id: "boss-02:diagonal-dive",
-            type: "diagonal-dive",
-            position: {
-                x: 4680,
-                y: -2280
-            },
             bounds: {
-                x: 3850,
-                y: -2680,
-                width: 1600,
-                height: 1050
+                height: 2400,
+                width: 3100,
+                x: 5350,
+                y: -3550
             },
+            id: "boss-02:diagonal-dive",
             parameters: {
-                riseSeconds: 0.35,
-                riseDistance: 280,
-                trackSeconds: 0.75,
-                confirmSeconds: 0.25,
-                diveSpeed: 620,
                 attackDistance: 2100,
+                confirmSeconds: 0.25,
                 damage: 30,
+                diveSpeed: 620,
+                impactParticlePresetId: "boss-architecture-dust-spark",
                 missRecoverySeconds: 0.6,
+                riseDistance: 280,
+                riseSeconds: 0.35,
+                trackSeconds: 0.75,
                 validArchitectureSurfaceIds: [
                     "boss-02:water-tank",
                     "boss-02:stairwell-head",
                     "boss-02:heavy-vent-housing"
-                ],
-                impactParticlePresetId: "boss-architecture-dust-spark"
-            }
+                ]
+            },
+            position: {
+                x: 6200,
+                y: -1900
+            },
+            type: "diagonal-dive"
         }
     ],
+    name: "RESIDENTIAL SECURITY PURSUER",
+    nextAreaId: "sector-03-01",
     phases: [
         {
-            id: "boss-02:phase-1",
-            name: "LOWER ALLEY PURSUIT",
-            order: 1,
             basePhaseHealth: 1000,
-            startPosition: {
-                x: 900,
-                y: -520
-            },
-            mechanicIds: ["boss-02:simple-lock-charge", "boss-02:reposition-courtyard"],
-            vulnerability: {
-                targetId: "boss-02:rear-thruster",
-                trigger: "valid-architecture-impact",
-                durationSeconds: 6,
-                offset: {
-                    x: -150,
-                    y: 0
-                },
-                radius: 45,
-                visualPresetId: "rear-thruster"
-            },
             hud: {
                 objective: "돌진을 벽으로 유도한 뒤 후방 추진기를 공격"
+            },
+            id: "boss-02:phase-1",
+            mechanicIds: ["boss-02:simple-lock-charge", "boss-02:reposition-courtyard"],
+            name: "LOWER ALLEY PURSUIT",
+            order: 1,
+            startPosition: {
+                x: 1180,
+                y: -520
+            },
+            vulnerability: {
+                durationSeconds: 6,
+                offset: {
+                    x: -280,
+                    y: 0
+                },
+                radius: 50,
+                targetId: "boss-02:rear-thruster",
+                trigger: "valid-architecture-impact",
+                validSurfaceIds: ["boss-02:wall-a", "boss-02:stairwell-wall-b"],
+                visualPresetId: "rear-thruster"
             }
         },
         {
+            basePhaseHealth: 1000,
+            hud: {
+                objective: "회전 강타를 중앙 구조물로 유도한 뒤 하부 안정화 장치를 공격"
+            },
             id: "boss-02:phase-2",
+            mechanicIds: ["boss-02:rotating-ground-slam", "boss-02:reposition-rooftop"],
             name: "CENTRAL COURTYARD",
             order: 2,
-            basePhaseHealth: 1000,
             startPosition: {
-                x: 2710,
-                y: -1060
+                x: 3800,
+                y: -900
             },
-            mechanicIds: ["boss-02:rotating-ground-slam", "boss-02:reposition-rooftop"],
             vulnerability: {
-                targetId: "boss-02:lower-stabilizer",
-                trigger: "valid-architecture-impact",
                 durationSeconds: 5,
                 offset: {
                     x: 0,
-                    y: 150
+                    y: 180
                 },
-                radius: 45,
+                radius: 50,
+                targetId: "boss-02:lower-stabilizer",
+                trigger: "valid-architecture-impact",
+                validSurfaceIds: ["boss-02:central-service-slab"],
                 visualPresetId: "lower-stabilizer"
-            },
-            hud: {
-                objective: "회전 강타를 중앙 구조물로 유도한 뒤 하부 안정화 장치를 공격"
             }
         },
         {
+            basePhaseHealth: 1000,
+            hud: {
+                objective: "급강하를 옥상 구조물로 유도한 뒤 중앙 센서를 공격"
+            },
             id: "boss-02:phase-3",
+            mechanicIds: ["boss-02:diagonal-dive"],
             name: "ROOFTOP BLOCKADE",
             order: 3,
-            basePhaseHealth: 1000,
             startPosition: {
-                x: 4680,
-                y: -2280
+                x: 6200,
+                y: -1900
             },
-            mechanicIds: ["boss-02:diagonal-dive"],
             vulnerability: {
-                targetId: "boss-02:central-sensor",
-                trigger: "valid-architecture-impact",
                 durationSeconds: 4,
                 offset: {
                     x: 0,
-                    y: -40
+                    y: -180
                 },
-                radius: 45,
+                radius: 50,
+                targetId: "boss-02:central-sensor",
+                trigger: "valid-architecture-impact",
+                validSurfaceIds: ["boss-02:water-tank", "boss-02:stairwell-head", "boss-02:heavy-vent-housing"],
                 visualPresetId: "central-sensor"
-            },
-            hud: {
-                objective: "급강하를 옥상 구조물로 유도한 뒤 중앙 센서를 공격"
             }
         }
     ],
-    hud: {
-        title: "RESIDENTIAL SECURITY PURSUER",
-        healthBar: {
-            style: "current-phase-progress",
-            showNumbers: true,
-            showPhaseBreaks: true,
-            phaseMarkerCount: 3
-        },
-        objectivePlacement: "below-health",
-        showVulnerabilityCountdown: true
-    },
+    schemaVersion: "boss-stage-spec-v2",
+    sourceAreaId: "sector-02-08",
+    specType: "boss-stage",
+    subtitle: "WORKER RESIDENTIAL DISTRICT / ROOFTOP BLOCKADE",
     transition: {
-        sourceAreaId: "sector-02-08",
-        nextAreaId: "sector-03-01",
         entryTrigger: "checkpoint-complete",
-        victoryTrigger: "all-phases-depleted",
+        nextAreaId: "sector-03-01",
+        retainPlayerControl: true,
+        sourceAreaId: "sector-02-08",
         victoryPresentationId: "boss-02:pursuer-shutdown",
-        retainPlayerControl: true
+        victoryTrigger: "all-phases-depleted"
     }
 });

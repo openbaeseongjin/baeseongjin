@@ -330,21 +330,64 @@ export class ResidentialSecurityPursuitRuntime {
         );
     }
 
-    #playerReachedPhase(context) {
+    #bodyFitsInsidePhase(position, angle = this.body.angle, scale = 1) {
         const bounds = this.#phaseZone();
         if (!bounds) return true;
+        return bodyVertices(this.bodySize, angle, scale).every(
+            (vertex) =>
+                vertex.x + position.x >= bounds.x &&
+                vertex.x + position.x <= bounds.x + bounds.width &&
+                vertex.y + position.y >= bounds.y &&
+                vertex.y + position.y <= bounds.y + bounds.height
+        );
+    }
+
+    #maxTravelFractionInsidePhase(delta, angle = this.body.angle, scale = 1) {
+        if (
+            !this.#phaseZone() ||
+            this.#bodyFitsInsidePhase(
+                { x: this.body.position.x + delta.x, y: this.body.position.y + delta.y },
+                angle,
+                scale
+            )
+        ) {
+            return 1;
+        }
+        if (!this.#bodyFitsInsidePhase(this.body.position, angle, scale)) return 0;
+        let low = 0;
+        let high = 1;
+        for (let index = 0; index < 16; index += 1) {
+            const fraction = (low + high) * 0.5;
+            const candidate = {
+                x: this.body.position.x + delta.x * fraction,
+                y: this.body.position.y + delta.y * fraction
+            };
+            if (this.#bodyFitsInsidePhase(candidate, angle, scale)) low = fraction;
+            else high = fraction;
+        }
+        return low;
+    }
+
+    #phaseEligiblePlayers(context) {
+        const bounds = this.#phaseZone();
         const offset = context.worldOffset ?? ZERO;
-        return (context.players ?? []).some((player) => {
-            if (!activePlayer(player)) return false;
-            const position = worldPosition(player);
-            return (
-                position &&
-                position.x >= bounds.x + offset.x &&
-                position.x <= bounds.x + bounds.width + offset.x &&
-                position.y >= bounds.y + offset.y &&
-                position.y <= bounds.y + bounds.height + offset.y
-            );
+        return (context.players ?? []).flatMap((player) => {
+            if (!activePlayer(player)) return [];
+            const world = worldPosition(player);
+            if (!world) return [];
+            const position = { x: world.x - offset.x, y: world.y - offset.y };
+            const inside =
+                !bounds ||
+                (position.x >= bounds.x &&
+                    position.x <= bounds.x + bounds.width &&
+                    position.y >= bounds.y &&
+                    position.y <= bounds.y + bounds.height);
+            return inside ? [{ id: player.id ?? player.playerId ?? null, position }] : [];
         });
+    }
+
+    #playerReachedPhase(context) {
+        return this.#phaseEligiblePlayers(context).length > 0;
     }
 
     #surfaceBounds(surface, offset) {
@@ -416,7 +459,7 @@ export class ResidentialSecurityPursuitRuntime {
 
     #advanceChase(dt, context) {
         const offset = context.worldOffset ?? ZERO;
-        const target = nearestPlayer(context.players, this.body.position, offset);
+        const target = nearestPlayer(this.#phaseEligiblePlayers(context), this.body.position, ZERO);
         if (!target) {
             this.#holdBodies();
             return;
@@ -436,7 +479,8 @@ export class ResidentialSecurityPursuitRuntime {
         const delta = { x: direction.x * distance, y: direction.y * distance };
         const worldStart = { x: this.body.position.x + offset.x, y: this.body.position.y + offset.y };
         const hit = this.body.collider.firstSolidContactAlong(worldStart, delta, context.surfaces ?? []);
-        const amount = hit ? Math.max(0, hit.amount - COLLISION_SAFE_RATIO) : 1;
+        const phaseAmount = this.#maxTravelFractionInsidePhase(delta);
+        const amount = Math.min(hit ? Math.max(0, hit.amount - COLLISION_SAFE_RATIO) : 1, phaseAmount);
         this.direction = direction;
         this.#setPosition(
             { x: this.body.position.x + delta.x * amount, y: this.body.position.y + delta.y * amount },
@@ -445,15 +489,10 @@ export class ResidentialSecurityPursuitRuntime {
     }
 
     #targetForAttack(context, { retainSelection = false } = {}) {
-        const worldOffset = context.worldOffset ?? ZERO;
-        const selected = retainSelection
-            ? (context.players ?? []).find(({ id, playerId }) => (id ?? playerId) === this.targetPlayerId)
-            : null;
-        const selectedWorld = worldPosition(selected);
-        if (selectedWorld) {
-            return { x: selectedWorld.x - worldOffset.x, y: selectedWorld.y - worldOffset.y };
-        }
-        const nearest = retainSelection ? null : nearestPlayer(context.players, this.body.position, worldOffset);
+        const eligible = this.#phaseEligiblePlayers(context);
+        const selected = retainSelection ? eligible.find(({ id }) => id === this.targetPlayerId) : null;
+        if (selected) return { ...selected.position };
+        const nearest = retainSelection ? null : nearestPlayer(eligible, this.body.position, ZERO);
         if (nearest) this.targetPlayerId = nearest.id;
         return (
             nearest?.position ?? {
@@ -582,8 +621,13 @@ export class ResidentialSecurityPursuitRuntime {
     #advanceAttack(dt, context) {
         const config = this.#config();
         if (config.attackKind === ATTACK_KIND.SLAM) {
+            const previousAngle = this.body.angle;
             this.body.integrateAngularPhysics(dt);
-            this.#syncColliders();
+            if (!this.#bodyFitsInsidePhase(this.body.position, this.body.angle, HAZARD_SCALE)) {
+                this.#setAngle(previousAngle);
+            } else {
+                this.#syncColliders();
+            }
         }
         const remainingDistance = Math.max(
             0,
@@ -595,7 +639,8 @@ export class ResidentialSecurityPursuitRuntime {
         const worldOffset = context.worldOffset ?? ZERO;
         const worldStart = { x: this.body.position.x + worldOffset.x, y: this.body.position.y + worldOffset.y };
         const hit = this.body.collider.firstSolidContactAlong(worldStart, delta, context.surfaces ?? []);
-        if (hit) {
+        const phaseAmount = this.#maxTravelFractionInsidePhase(delta, this.body.angle, HAZARD_SCALE);
+        if (hit && hit.amount <= phaseAmount + COLLISION_SAFE_RATIO) {
             const amount = Math.max(0, hit.amount - COLLISION_SAFE_RATIO);
             const localPosition = {
                 x: this.body.position.x + delta.x * amount,
@@ -607,6 +652,14 @@ export class ResidentialSecurityPursuitRuntime {
             return valid
                 ? freeze({ changed: true, eventType: this.#beginExposure(hit.surface.id, impactPosition) })
                 : freeze({ changed: true, eventType: this.#beginRecovery(hit.surface.id, impactPosition) });
+        }
+        if (phaseAmount < 1) {
+            const boundaryPosition = {
+                x: this.body.position.x + delta.x * phaseAmount,
+                y: this.body.position.y + delta.y * phaseAmount
+            };
+            this.#setPosition(boundaryPosition, dt);
+            return freeze({ changed: true, eventType: this.#beginRecovery(null, boundaryPosition) });
         }
         const next = { x: this.body.position.x + delta.x, y: this.body.position.y + delta.y };
         this.#setPosition(next, dt);
@@ -638,10 +691,23 @@ export class ResidentialSecurityPursuitRuntime {
         }
         const direction = normalized(delta);
         this.direction = direction;
+        const travel = Math.min(distance, REPOSITION_SPEED * dt);
+        const step = { x: direction.x * travel, y: direction.y * travel };
+        const offset = context.worldOffset ?? ZERO;
+        const hit = this.body.collider.firstSolidContactAlong(
+            { x: this.body.position.x + offset.x, y: this.body.position.y + offset.y },
+            step,
+            context.surfaces ?? []
+        );
+        if (hit?.amount <= COLLISION_SAFE_RATIO) {
+            this.#holdBodies();
+            return freeze({ changed: false, eventType: null });
+        }
+        const amount = hit ? Math.max(0, hit.amount - COLLISION_SAFE_RATIO) : 1;
         this.#setPosition(
             {
-                x: this.body.position.x + direction.x * REPOSITION_SPEED * dt,
-                y: this.body.position.y + direction.y * REPOSITION_SPEED * dt
+                x: this.body.position.x + step.x * amount,
+                y: this.body.position.y + step.y * amount
             },
             dt
         );
@@ -707,10 +773,12 @@ export class ResidentialSecurityPursuitRuntime {
                     (this.#config().riseDistance / this.#config().riseSeconds) * dt
                 );
                 const riseDirection = normalized(riseDelta, { x: 0, y: -1 });
+                const riseStepDelta = { x: riseDirection.x * riseStep, y: riseDirection.y * riseStep };
+                const phaseAmount = this.#maxTravelFractionInsidePhase(riseStepDelta);
                 this.#setPosition(
                     {
-                        x: this.body.position.x + riseDirection.x * riseStep,
-                        y: this.body.position.y + riseDirection.y * riseStep
+                        x: this.body.position.x + riseStepDelta.x * phaseAmount,
+                        y: this.body.position.y + riseStepDelta.y * phaseAmount
                     },
                     dt
                 );
