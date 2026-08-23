@@ -31,7 +31,8 @@ export const withPlayerRenderSnapshot = createRenderSnapshotCapabilityMixin({
                 ...this.foundation.snapshot(),
                 combat: this.augmentCombat.snapshot()
             }),
-            actionState: this.augmentCombat.actionState?.snapshot() ?? null
+            actionState: this.augmentCombat.actionState?.snapshot() ?? null,
+            statusEffects: this.statusEffects.snapshot()
         };
     }
 });

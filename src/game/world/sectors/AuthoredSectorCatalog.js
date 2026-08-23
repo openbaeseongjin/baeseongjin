@@ -83,7 +83,6 @@ function importEncounters(area, landmarkId, stageId) {
                     fixedEnemyType: object.enemyType ?? object.kind
                 },
                 accessModuleId: object.accessModuleId,
-                jammer: object.jammer,
                 stageId
             });
         });

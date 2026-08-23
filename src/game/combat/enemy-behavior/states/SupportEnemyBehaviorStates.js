@@ -87,7 +87,11 @@ function advanceTreatment(behavior, enemy, target, players, dt) {
 export class SupportIdleState {
     advance(behavior, enemy, { enemies, targets, dt }) {
         const target = treatmentTarget(behavior, enemy, enemies);
-        if (!target) return null;
+        if (!target) {
+            const player = nearestTarget(enemy, targets, behavior.recognitionRange, { respectActivation: false });
+            behavior.mobility.advance(enemy, { focusPosition: player?.physics.position ?? null, dt });
+            return null;
+        }
         behavior.transition(SUPPORT_BEHAVIOR_STATE.LINK);
         return advanceTreatment(behavior, enemy, target, targets, dt);
     }

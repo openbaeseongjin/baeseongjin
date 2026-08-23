@@ -20,7 +20,9 @@
 - 시드 기반 48단계 수직 월드와 카메라 추적 프로토타입
 - 기본 자동 공격은 비활성화하고 성공한 로프 스윙 뒤 부착 또는 해제 carry 안의 고속 몸체 충돌을 기본 공격으로 사용한다. `AutomaticWeaponObject`는 후속 기능용으로 보존한다.
 - authored activation·Cover LOS를 유지한 체력 100·인식 760px·탄속 520px/s·재사격 1.0초 Sentry
-- 적 투사체의 본체 피해·무적 시간과 `cutter-fire` opt-in 로프 절단. 적 위치 넉백은 직접 추격·돌진형만 허용하고 Turret·고정 Patrol 경로형은 피해만 받는다.
+- 적 투사체의 본체 피해·무적 시간과 `cutter-fire` opt-in 로프 절단. Cutter는 별도 몹이 아니라 일반 발사형 Enemy에 붙는 투사체 capability다. 적 위치 넉백은 직접 추격·돌진형만 허용하고 자기 이동 경로를 가진 다른 Enemy는 피해만 받는다.
+- 고정 `sentry` Turret만 정지하고 Patrol·Pursuit·Shield·Artillery·Hardpoint Jammer·Support·Swarm은 authored Patrol, 직접 추격 또는 공용 Roaming 상태를 각 Behavior에서 조합해 이동한다.
+- [0.66.0] Hardpoint Jammer는 맵별 전용 후보 Anchor 없이 일반 ropeable surface를 Hook reach 공간 질의로 자동 선택한다. Active Jam 표면 부착은 owner-first `jammer-shock` 하나로 Rope를 즉시 절단하고, 공용 감전 상태가 0.05초마다 2.5씩 0.5초 동안 총 25 피해를 적용한다. 재적용은 stack 없이 남은 시간만 초기화하며 pulse별 네트워크 사건은 보내지 않는다.
 - 체력, 사망·낙사와 플레이어별 활성 체크포인트 즉시 부활
 - 전투 HUD, 피해 숫자, 충격파, 파편과 화면 흔들림
 - 공용 명령·시뮬레이션 경계, PWA 설치와 자동 최신 배포 적용
@@ -76,7 +78,7 @@ TO BE → Sector 01·02·04·05는 마지막 일반 Stage에서 다음 Sector로
 
 `2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
 
-Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합한다. 맵은 결정적인 corridor/route·activation band만 제공하고 공격 acquire·track·lock·fire·cooldown과 투사체 규칙은 재사용한다. Patrol 자료가 없는 Sentry는 정지 동작을 유지한다. 각 Drone은 자기 band 안에서만 이동·획득하고 공격 cycle 중 target을 유지해 다른 band 플레이어 때문에 재조준하거나 지속 crossfire를 만들지 않는다.
+Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합한다. 맵은 결정적인 corridor/route·activation band를 제공하며, 디버그 더미처럼 authored Patrol이 없으면 짧은 기본 왕복 경로를 사용한다. acquire·track·cooldown 중에는 이동하고 lock·fire 동안만 정지한다. Patrol 자료가 없는 Sentry는 정지 동작을 유지한다. 각 Drone은 자기 band 안에서 target을 유지해 다른 band 플레이어 때문에 재조준하거나 지속 crossfire를 만들지 않는다.
 
 월드 선택도 실행 방식별로 나누지 않는다. 로컬 실행과 네트워크 서버·예측은 하나의 `GameSimulationFactory`와 현재 authored catalog를 공유한다. 네트워크는 같은 world revision과 진행 상태를 복제할 뿐 별도 맵을 생성하지 않는다. 맵 definition은 stable object/state/event/presentation/cue ID만 소유하고 이미지·atlas·음원 경로는 소유하지 않는다. 현재 표현은 environment/audio runtime catalog와 world-object mock presentation catalog를 통해 연결하며 정식 package가 준비되면 같은 ID의 표현만 교체한다.
 
@@ -158,7 +160,7 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 
 1. [완료] Stage ID에 의존하지 않는 stable enemy slot의 `고정 계열/type` 또는 `허용 pool` 선택과 `slotId + run seed + world revision` 결정성을 pure resolver로 구현한다.
 2. [완료] 기존 `경계 포탑`·`순찰 드론`과 분리된 신규 기본형 `추격 드론`·`방패 드론`·`포격 드론`·`지원 드론`·`군집 드론`을 Has-A behavior와 공용 `enemy-behavior` capability로 조립한다.
-3. [완료 #829, #844] 순찰·포격·지원·군집을 확정 TO-BE로 정렬했다. #844는 Player 기본 피격 shake, Artillery impact particle/hit cue, Shield 1440 사거리와 느린 angular acceleration, Swarm HP 10 기본 10기·Editor 추가 정보 2~20을 같은 behavior/presentation 계약에 연결한다.
+3. [완료 #829, #844, 현행 Enemy 이동 정렬] 순찰·포격·지원·군집을 확정 TO-BE로 정렬했다. Shield·Artillery·Support·Jammer는 snapshot 가능한 공용 Roaming 상태를 각 구체 Behavior가 조합하고, 발사형 Enemy·Shield·Artillery의 교전 획득 거리는 화면 밖 장거리 선제 공격을 줄이기 위해 760px 기준을 공유한다. Swarm은 HP 10 기본 10기·Editor 추가 정보 2~20 계약을 유지한다.
 4. [완료 #623] `SectorDefinition`의 `encounterId/slotId/position/activation/enemySelection/stageId` 계약을 selector에 연결하고, Area 별칭이나 `areaId` 없이 Sector 01~03 encounter 전체를 결정적으로 resolve한다.
 5. [완료 #625] City Phase 3 wide Runtime compiler가 canonical encounter를 실제 world spawn 입력으로 공급하고 기존 Patrol route·Cutter rules를 새 schema에 보존한다.
 6. [후속] 신규 기본형 단독 조정 뒤 계열별 확장형과 Sector 누적 해금·허용/금지 조합을 추가한다. 현재 roster 목록·가중치·수치·배치·표시 색은 테스트에 고정하지 않는다.

@@ -240,7 +240,7 @@
     ]
   },
   "progression": {
-    "nextBoundary": "POST-SECTOR05 BOSS / TRANSITION TBD",
+    "nextBoundary": "SECTOR06 6-1 AUTHORED GATE PORTAL",
     "directSector06Wiring": false,
     "notes": "Do not wire directly to sector-06-01."
   },

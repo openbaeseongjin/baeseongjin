@@ -27,7 +27,7 @@ The Player physically traverses the control infrastructure behind the lock.
 
 ## Security
 
-- Jammer: denies one next flank candidate.
+- Jammer: automatically marks one likely next flank; attaching there shocks and cuts the new Rope.
 - AEGIS: denies frontal attack angle.
 - At least one Base-clear flank remains.
 - Kill optional.

@@ -5,6 +5,8 @@ import {
     ACTION_SIGNATURE_ID,
     BASE_ACTION_ID
 } from "../augments/actions/ActionAugmentDefinition.js";
+import { ELECTRIFIED_STATUS_ID } from "../status-effects/ElectrifiedStatusEffect.js";
+import { PLAYER_IMPACT_TYPE } from "../network/PlayerImpactClaim.js";
 
 export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PLAYER_RESPAWNED: "player-respawned",
@@ -28,9 +30,10 @@ export const CLIENT_FEEDBACK_RESOLUTION = Object.freeze({
     BOSS_HIT: "boss-hit",
     BOSS_PHASE_COMPLETED: "boss-phase-completed",
     BOSS_DEFEATED: "boss-defeated",
-    PLAYER_HIT: "player-hit",
-    ROPE_CUT: "rope-cut",
-    FALL_DAMAGE: "fall-damage",
+    PLAYER_HIT: PLAYER_IMPACT_TYPE.PLAYER_HIT,
+    ROPE_CUT: PLAYER_IMPACT_TYPE.ROPE_CUT,
+    JAMMER_SHOCK: PLAYER_IMPACT_TYPE.JAMMER_SHOCK,
+    FALL_DAMAGE: PLAYER_IMPACT_TYPE.FALL_DAMAGE,
     SHIELD_BLOCKED: ACTION_PREDICTED_RESOLUTION.SHIELD_BLOCKED,
     TARGET_ALREADY_DEAD: "target-already-dead"
 });
@@ -42,7 +45,8 @@ export const CLIENT_FEEDBACK_SOURCE_KIND = Object.freeze({
 
 export const CLIENT_FEEDBACK_EFFECT_ID = Object.freeze({
     DAMAGE_REFLECT: ACTION_SIGNATURE_ID.DAMAGE_REFLECT,
-    ELECTRIFIED_ROPE: "electrified-rope"
+    ELECTRIFIED_ROPE: "electrified-rope",
+    ELECTRIFIED_STATUS: ELECTRIFIED_STATUS_ID
 });
 
 export const CLIENT_FEEDBACK_OBJECT_TYPE = Object.freeze({
@@ -124,6 +128,7 @@ const COMBAT_RESOLUTIONS = Object.freeze([
     CLIENT_FEEDBACK_RESOLUTION.BOSS_DEFEATED,
     CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT,
     CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT,
+    CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK,
     CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE
 ]);
 
@@ -137,6 +142,7 @@ const ACTION_PRESET = Object.freeze({
 
 const IMPACT_STATE = Object.freeze({
     [CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT]: Object.freeze({ lifetime: 0.24, strength: 9 }),
+    [CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK]: Object.freeze({ lifetime: 0.24, strength: 9 }),
     [CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE]: Object.freeze({ lifetime: 0.24, strength: 9 }),
     [CLIENT_FEEDBACK_RESOLUTION.ENEMY_DEFEATED]: Object.freeze({ lifetime: 0.2, strength: 6 }),
     [CLIENT_FEEDBACK_RESOLUTION.BOSS_DEFEATED]: Object.freeze({ lifetime: 0.2, strength: 6 }),
@@ -205,6 +211,7 @@ export function createClientFeedbackEvent(event, resolution, index = 0) {
     const personalViewerId = [
         CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT,
         CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT,
+        CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK,
         CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE
     ].includes(resolution)
         ? targetId
@@ -231,7 +238,8 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
     }),
     ROPE_CUT_DETACH_SUPPRESSION: new ClientFeedbackEventDefinition({
         predicate: (event) =>
-            EVENT_GROUP.RESOLVE.includes(event.eventType) && event.resolution === CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT,
+            EVENT_GROUP.RESOLVE.includes(event.eventType) &&
+            [CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT, CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK].includes(event.resolution),
         present: (event, context) =>
             context.suppressDetach(event.targetId ?? event.playerId ?? event.parameters?.targetId)
     }),
@@ -300,6 +308,10 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
         predicate: (event) => eventEffectId(event) === CLIENT_FEEDBACK_EFFECT_ID.ELECTRIFIED_ROPE,
         present: (event, context) => context.appendParticle(event, { presetId: CLIENT_FEEDBACK_PRESET_ID.ROPE_CONTACT })
     }),
+    ELECTRIFIED_STATUS_PARTICLE: new ClientFeedbackEventDefinition({
+        predicate: (event) => eventEffectId(event) === CLIENT_FEEDBACK_EFFECT_ID.ELECTRIFIED_STATUS,
+        present: (event, context) => context.appendParticle(event, { presetId: CLIENT_FEEDBACK_PRESET_ID.ROPE_CONTACT })
+    }),
     ARTILLERY_HIT_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) =>
             event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.ENEMY_BEHAVIOR_PLAYER_HIT &&
@@ -329,7 +341,8 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
         present: (event, context) => context.setImpact(impactState(event.type))
     }),
     PERSONAL_ROPE_CUT: new ClientFeedbackEventDefinition({
-        predicate: (event) => event.type === CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT,
+        predicate: (event) =>
+            [CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT, CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK].includes(event.type),
         present: (event, context) => context.setRopeCut(event)
     })
 });

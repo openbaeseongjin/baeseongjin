@@ -24,7 +24,8 @@ AEGIS:
 current shield-drone behavior.
 
 Jammer:
-Sector05 V1 attachment-eligibility contract.
+automatic normal Rope-surface targeting;
+Active attachment starts one owner-first shock, cuts the new Rope, and applies the non-stacking 0.5-second Electrified status.
 
 Cutter:
 current Sentry projectile with `cutter-fire`;
@@ -37,5 +38,4 @@ All kills optional.
 
 ## Integration
 
-Do not directly wire to sector-06-01.
-Use Post-Sector05 Boss / Transition TBD boundary.
+After the authored 5-8 objective completes, use the existing Gate portal directly to `sector-06-01` Entry. No post-Sector05 Boss Stage remains.

@@ -23,6 +23,14 @@
 - 대체: Boss는 Sector 03·06 끝의 두 개만 유지한다. Boss01·02·04·05와 전용 문서는 제거하고 네 Sector 경계는 기존 Gate portal로 직접 연결한다. Boss03은 이동형 보스몹으로 재기획하되 새 기획 전까지 기존 Runtime만 임시 유지하고, Boss06과 terminal Boarding은 유지한다.
 - 검증 상태: Issue #933에서 two-Boss catalog·직접 전환·Map Editor·문서·world revision을 함께 정렬한다.
 
+## [L1] 2026-08-23 — 맵 지정형 Jam 차단을 자동 선택·감전 상태로 대체한다
+
+- 맥락: 재머마다 `eligibleSurfaceIds`를 나열하면 모든 Stage가 전용 Anchor 퍼즐로 결합되고, 움직이는 범용 Enemy가 현재 위치와 무관한 고정 발판을 잠그게 됐다. 단순 부착 거부만으로는 재밍 피드백도 약했다.
+- 결정: `hardpoint-jammer-v1` Enemy 슬롯에서 field group을 자동 파생하고 일반 ropeable surface를 Hook reach·이동 정렬·거리로 선택한다. Active target 부착은 Rope를 절단하고 단일 Electrified 상태를 시작한다. 상태는 0.05초마다 2.5씩 0.5초 동안 총 25 피해를 적용하며 재적용은 시간만 갱신한다.
+- 영향: 감전 시작 claim은 한 번만 전송하고 pulse별 사건은 만들지 않는다. WorldSnapshot v15·owner-motion v9·player-impact v13이 target surface, attachment 세대와 감전 상태를 수렴시키고 공용 renderer가 같은 상태를 표현한다.
+- 대체: `맵이 지정한 후보 중 하나의 새 부착을 canAttachToSurface=false로 막고, 기존 Rope·Player HP에는 영향을 주지 않는다`.
+- 검증 상태: 현재 계약은 `docs/architecture.md`, `docs/multiplayer-synchronization.md`, Sector 05 Master와 각 Stage Production Alignment가 소유한다.
+
 ## [L2] 2026-08-23 — Sector 05 기본 배경과 Sector 04→05 표현 전환을 Runtime에 연결한다
 
 - 맥락: 승인된 Sector 05 수직 도시 master와 Far/Mid/Near 분리본을 실제 게임에서 사용하고, Sector 04 상층 주거지 표현이 다음 Sector 진입에서 갑자기 교체되지 않게 해야 했다.

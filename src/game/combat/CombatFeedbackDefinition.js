@@ -79,6 +79,14 @@ const COMBAT_FEEDBACK_BY_RESOLUTION = Object.freeze({
         textSign: 1,
         showText: false,
         emphasis: false
+    }),
+    [CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK]: Object.freeze({
+        color: "#d946ef",
+        presetId: CLIENT_FEEDBACK_PRESET_ID.ROPE_CUT,
+        strength: 1.15,
+        textSign: -1,
+        showText: false,
+        emphasis: true
     })
 });
 

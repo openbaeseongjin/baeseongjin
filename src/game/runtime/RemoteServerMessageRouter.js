@@ -4,7 +4,11 @@ import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { MULTIPLAYER_ERROR_CODE, MULTIPLAYER_MESSAGE_TYPE } from "../network/MultiplayerMessageDefinition.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
-import { createPlayerImpactReceipt, createPlayerImpactStateDigest } from "../network/PlayerImpactClaim.js";
+import {
+    createPlayerImpactReceipt,
+    createPlayerImpactStateDigest,
+    PLAYER_IMPACT_SOURCE_KIND
+} from "../network/PlayerImpactClaim.js";
 import { createPlayerProjectileSpawnReceipt } from "../network/PlayerProjectileSpawnClaim.js";
 import { createProjectileHitReceipt } from "../network/ProjectileHitClaim.js";
 import { createRopeImpactReceipt } from "../network/RopeImpactClaim.js";
@@ -70,6 +74,9 @@ const SERVER_MESSAGE_HANDLER = Object.freeze({
             return;
         }
         a.pendingImpactClaims.delete(receipt.impactId);
+        if (!receipt.accepted && pending?.event.parameters?.sourceKind === PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER) {
+            a.locallyPredictedJammerImpactIds.delete(receipt.impactId);
+        }
         a.impactClaimReceipts.push(receipt);
         a.ownerRuntime?.recordImpactReceipt(receipt, a.latestSnapshot);
     },

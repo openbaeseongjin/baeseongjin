@@ -12,7 +12,7 @@ import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
 import { isAuthoredRuntimeContentBoundary } from "../area-authoring-v2/AreaRuntimePromotion.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "./SectorDefinition.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-continuous-stage-runtime-v16-two-boss-stage";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-continuous-stage-runtime-v17-two-boss-dynamic-jammer-stage";
 
 const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_01_AREA_CATALOG,
@@ -387,7 +387,6 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                     accessModuleId: encounter.accessModuleId,
                     patrol: source.patrol ? shiftPatrol(source.patrol, dx, dy) : null,
                     rules: source.rules ?? Object.freeze([]),
-                    jammer: source.jammer ?? null,
                     level: landmarks.length
                 });
             });
@@ -451,9 +450,6 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                         landmarkEnemySpawns[
                             sourceEnemySpawns.findIndex(({ objectId }) => objectId === group.sourceObjectId)
                         ]?.objectId ?? group.sourceObjectId,
-                    eligibleSurfaceIds: group.eligibleSurfaceIds.map((surfaceId) =>
-                        surfaceId.startsWith(`${area.id}:`) ? surfaceId : `${area.id}:${surfaceId}`
-                    ),
                     landmarkId: landmarkDefinition.id,
                     stageId: landmarkDefinition.stageId
                 })

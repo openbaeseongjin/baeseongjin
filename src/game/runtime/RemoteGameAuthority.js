@@ -11,6 +11,7 @@ import { createProjectileHitClaim, serializeProjectileHitClaim } from "../networ
 import {
     createPlayerImpactClaim,
     createPlayerImpactStateDigest,
+    PLAYER_IMPACT_SOURCE_KIND,
     serializePlayerImpactClaim
 } from "../network/PlayerImpactClaim.js";
 import {
@@ -65,6 +66,8 @@ export class RemoteGameAuthority {
         this.hitClaimReceipts = [];
         this.projectileSpawnClaimReceipts = [];
         this.impactClaimReceipts = [];
+        this.locallyPredictedJammerImpactIds = new Set();
+        this.locallyPredictedJammerImpactOrder = [];
         this.ropeImpactReceipts = [];
         this.augmentImpactReceipts = [];
         this.pendingAugmentImpactClaims = new Map();
@@ -214,12 +217,13 @@ export class RemoteGameAuthority {
         return this.sendOwnerMotion(motion);
     }
 
-    ownerMotionState() {
+    ownerMotionState(predictedState = null, clientTick = null) {
         if (!this.ownerRuntime) return null;
-        const predicted = this.ownerRuntime.state();
+        const predicted = predictedState ?? this.ownerRuntime.state();
+        const tick = clientTick ?? predicted.tick;
         return createOwnerMotionState({
-            clientTick: predicted.tick,
-            authorityTick: this.tickProjection.project(predicted.tick),
+            clientTick: tick,
+            authorityTick: this.tickProjection.project(tick),
             position: predicted.position,
             velocity: predicted.velocity,
             angle: predicted.angle,
@@ -290,6 +294,24 @@ export class RemoteGameAuthority {
             digest: createPlayerImpactStateDigest(state, { impactType: event.resolution, respawned })
         };
         this.pendingImpactClaims.set(event.projectileId, { event, outcome });
+        return this.submitImpactClaim(event, outcome);
+    }
+
+    submitPredictedJammerImpact(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        const before = this.ownerRuntime.pendingImpactBefore(event.impactId);
+        if (!before || !this.sendOwnerMotion(this.ownerMotionState(before.state, before.tick))) return false;
+        const state = this.ownerRuntime.impactClaimState();
+        const outcome = {
+            respawned: false,
+            digest: createPlayerImpactStateDigest(state, { impactType: event.resolution, respawned: false })
+        };
+        this.pendingImpactClaims.set(event.impactId, { event, outcome });
+        this.locallyPredictedJammerImpactIds.add(event.impactId);
+        this.locallyPredictedJammerImpactOrder.push(event.impactId);
+        while (this.locallyPredictedJammerImpactOrder.length > MAX_TRACKED_COMMANDS) {
+            this.locallyPredictedJammerImpactIds.delete(this.locallyPredictedJammerImpactOrder.shift());
+        }
         return this.submitImpactClaim(event, outcome);
     }
 
@@ -371,9 +393,9 @@ export class RemoteGameAuthority {
             velocity: event.velocity,
             damage: event.damage ?? event.parameters?.damage ?? 0,
             sourceKind: event.parameters?.sourceKind ?? null,
-            sourceId: event.parameters?.bossStageId ?? null,
-            sourceType: event.parameters?.hazardKind ?? null,
-            sourceSequence: event.parameters?.hazardSequence ?? null,
+            sourceId: event.parameters?.sourceId ?? event.parameters?.bossStageId ?? null,
+            sourceType: event.parameters?.sourceType ?? event.parameters?.hazardKind ?? null,
+            sourceSequence: event.parameters?.sourceSequence ?? event.parameters?.hazardSequence ?? null,
             outcome
         });
         this.socket.send(
@@ -663,6 +685,12 @@ export class RemoteGameAuthority {
                     event.eventType === "player-fall-damaged" &&
                     event.impactId &&
                     this.locallyPredictedFallImpactIds.delete(event.impactId)
+                ) {
+                    return false;
+                }
+                if (
+                    event.parameters?.sourceKind === PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER &&
+                    this.locallyPredictedJammerImpactIds.delete(event.objectId)
                 ) {
                     return false;
                 }

@@ -2,6 +2,10 @@ import { ENEMY_ATTACK_STATE, ENEMY_WEAPON_CONFIG } from "../EnemyWeaponDefinitio
 import { EnemyWeaponAttackState, enemyWeaponStepResult } from "./EnemyWeaponAttackState.js";
 
 export class TrackEnemyWeaponState extends EnemyWeaponAttackState {
+    get canAdvancePatrol() {
+        return true;
+    }
+
     advance(weapon, { enemy, target, config, remainingDt }) {
         if (!weapon.aimAt(enemy, target)) {
             return enemyWeaponStepResult(remainingDt, { continueState: false });

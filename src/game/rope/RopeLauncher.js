@@ -34,9 +34,15 @@ function attachmentTarget(value) {
 function launchTarget(target) {
     if (!target) return null;
     finiteVector(target, "launch target");
+    if (target.surfaceId !== null && target.surfaceId !== undefined) {
+        if (typeof target.surfaceId !== "string" || target.surfaceId.length === 0) {
+            throw new Error("launch target surfaceId must be null or a non-empty string");
+        }
+    }
     return Object.freeze({
         x: target.x,
         y: target.y,
+        surfaceId: target.surfaceId ?? null,
         anchorVelocity: Object.freeze({
             ...finiteVector(target.anchorVelocity ?? ZERO_VECTOR, "launch target anchorVelocity")
         }),
@@ -144,6 +150,7 @@ export class RopeLauncher {
         this.shot.target = Object.freeze({
             x: anchor.position.x,
             y: anchor.position.y,
+            surfaceId: this.shot.target.surfaceId,
             anchorVelocity: anchor.velocity,
             ropeAttachment: this.shot.target.ropeAttachment
         });

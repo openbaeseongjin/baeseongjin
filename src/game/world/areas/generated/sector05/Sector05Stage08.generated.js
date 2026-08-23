@@ -444,16 +444,7 @@ const SPEC = {
       }
     },
     "id": "sector-05-08",
-    "jammerGroups": [
-      {
-        "eligibleSurfaceIds": [
-          "h04-surface",
-          "h07-surface"
-        ],
-        "id": "sector-05-08:jammer-a:field",
-        "sourceObjectId": "sector-05-08:jammer-a"
-      }
-    ],
+    "jammerGroups": [],
     "name": "CONTINUITY COMMAND SPINE",
     "nextAreaId": null,
     "objectives": [
@@ -519,9 +510,6 @@ const SPEC = {
         "coordinateAnchor": "center",
         "enemyType": "hardpoint-jammer-v1",
         "id": "sector-05-08:jammer-a",
-        "jammer": {
-          "groupId": "sector-05-08:jammer-a:field"
-        },
         "kind": "sentry",
         "position": {
           "x": 100,
