@@ -450,6 +450,32 @@ export function createPlayerImpactClaim({
     });
 }
 
+const EMPTY_PLAYER_IMPACT_EVENT_PARAMETERS = Object.freeze({});
+
+export function createPlayerImpactClaimFromEvent({ event, authorityTick, outcome }) {
+    if (!event || Array.isArray(event) || typeof event !== "object") {
+        throw new Error("player impact event must be an object");
+    }
+    const parameters = event.parameters ?? EMPTY_PLAYER_IMPACT_EVENT_PARAMETERS;
+    if (Array.isArray(parameters) || typeof parameters !== "object") {
+        throw new Error("player impact event parameters must be an object when provided");
+    }
+    return createPlayerImpactClaim({
+        impactId: event.impactId ?? event.projectileId,
+        clientTick: event.clientTick,
+        authorityTick,
+        impactType: event.resolution,
+        position: event.position,
+        velocity: event.velocity,
+        damage: event.damage ?? parameters.damage ?? 0,
+        sourceKind: parameters.sourceKind ?? null,
+        sourceId: parameters.sourceId ?? null,
+        sourceType: parameters.sourceType ?? null,
+        sourceSequence: parameters.sourceSequence ?? null,
+        outcome
+    });
+}
+
 export function serializePlayerImpactClaim(claim) {
     return JSON.stringify(claim);
 }

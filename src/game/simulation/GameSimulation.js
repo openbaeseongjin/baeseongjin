@@ -1271,10 +1271,10 @@ export class GameSimulation {
                     resolution: "player-hit",
                     respawned: defeated && player.lifeState === "active",
                     parameters: Object.freeze({
-                        sourceKind: "boss-hazard",
-                        bossStageId: stage.id,
-                        hazardKind: hazard.kind,
-                        hazardSequence: hazard.sequence,
+                        sourceKind: PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD,
+                        sourceId: stage.id,
+                        sourceType: hazard.kind,
+                        sourceSequence: hazard.sequence,
                         damage: contact.damage
                     })
                 });
