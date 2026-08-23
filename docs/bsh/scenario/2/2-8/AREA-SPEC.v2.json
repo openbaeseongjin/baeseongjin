@@ -237,7 +237,7 @@
         "id": "sector-02-08:ring-divider",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": 704,

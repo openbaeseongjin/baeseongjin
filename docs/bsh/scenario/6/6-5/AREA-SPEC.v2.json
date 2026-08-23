@@ -54,7 +54,7 @@
         "id": "recovery-r1",
         "kind": "recovery",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -240,
@@ -116,13 +116,13 @@
         ]
       },
       { "id": "array-entry", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 390, "y": -115 }, "vertices": [{ "x": 390, "y": -115 }, { "x": 630, "y": -115 }, { "x": 630, "y": -85 }, { "x": 390, "y": -85 }] },
-      { "id": "preview-terrace", "kind": "access-terrace", "oneWay": true, "grappleable": false, "coordinateAnchor": "top-left", "position": { "x": 270, "y": -250 }, "vertices": [{ "x": 270, "y": -250 }, { "x": 530, "y": -250 }, { "x": 530, "y": -222 }, { "x": 270, "y": -222 }] },
+      { "id": "preview-terrace", "kind": "access-terrace", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 270, "y": -250 }, "vertices": [{ "x": 270, "y": -250 }, { "x": 530, "y": -250 }, { "x": 530, "y": -222 }, { "x": 270, "y": -222 }] },
       { "id": "safe-preview", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 300, "y": -390 }, "vertices": [{ "x": 300, "y": -390 }, { "x": 560, "y": -390 }, { "x": 560, "y": -360 }, { "x": 300, "y": -360 }] },
-      { "id": "terrace-c1", "kind": "access-terrace", "oneWay": true, "grappleable": false, "coordinateAnchor": "top-left", "position": { "x": -30, "y": -540 }, "vertices": [{ "x": -30, "y": -540 }, { "x": 300, "y": -540 }, { "x": 300, "y": -510 }, { "x": -30, "y": -510 }] },
-      { "id": "terrace-c2", "kind": "access-terrace", "oneWay": true, "grappleable": false, "coordinateAnchor": "top-left", "position": { "x": -320, "y": -760 }, "vertices": [{ "x": -320, "y": -760 }, { "x": 10, "y": -760 }, { "x": 10, "y": -730 }, { "x": -320, "y": -730 }] },
-      { "id": "terrace-c3", "kind": "access-terrace", "oneWay": true, "grappleable": false, "coordinateAnchor": "top-left", "position": { "x": 0, "y": -980 }, "vertices": [{ "x": 0, "y": -980 }, { "x": 330, "y": -980 }, { "x": 330, "y": -950 }, { "x": 0, "y": -950 }] },
+      { "id": "terrace-c1", "kind": "access-terrace", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -30, "y": -540 }, "vertices": [{ "x": -30, "y": -540 }, { "x": 300, "y": -540 }, { "x": 300, "y": -510 }, { "x": -30, "y": -510 }] },
+      { "id": "terrace-c2", "kind": "access-terrace", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -320, "y": -760 }, "vertices": [{ "x": -320, "y": -760 }, { "x": 10, "y": -760 }, { "x": 10, "y": -730 }, { "x": -320, "y": -730 }] },
+      { "id": "terrace-c3", "kind": "access-terrace", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 0, "y": -980 }, "vertices": [{ "x": 0, "y": -980 }, { "x": 330, "y": -980 }, { "x": 330, "y": -950 }, { "x": 0, "y": -950 }] },
       { "id": "array-full-safe", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -300, "y": -1190 }, "vertices": [{ "x": -300, "y": -1190 }, { "x": 0, "y": -1190 }, { "x": 0, "y": -1160 }, { "x": -300, "y": -1160 }] },
-      { "id": "upper-terrace", "kind": "access-terrace", "oneWay": true, "grappleable": false, "coordinateAnchor": "top-left", "position": { "x": -40, "y": -1410 }, "vertices": [{ "x": -40, "y": -1410 }, { "x": 210, "y": -1410 }, { "x": 210, "y": -1382 }, { "x": -40, "y": -1382 }] },
+      { "id": "upper-terrace", "kind": "access-terrace", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -40, "y": -1410 }, "vertices": [{ "x": -40, "y": -1410 }, { "x": 210, "y": -1410 }, { "x": 210, "y": -1382 }, { "x": -40, "y": -1382 }] },
       { "id": "array-exit-deck", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -240, "y": -1590 }, "vertices": [{ "x": -240, "y": -1590 }, { "x": 60, "y": -1590 }, { "x": 60, "y": -1560 }, { "x": -240, "y": -1560 }] }
     ],
     "routePoints": [

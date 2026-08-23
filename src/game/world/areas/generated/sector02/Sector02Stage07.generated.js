@@ -597,7 +597,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-02-07:shelter-core-wall",
         "kind": "solid",
         "oneWay": false,

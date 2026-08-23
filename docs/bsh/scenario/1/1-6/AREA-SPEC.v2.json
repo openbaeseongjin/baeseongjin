@@ -121,7 +121,7 @@
         "id": "sector-01-06:wind-baffle",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "windOcclusion": true,
         "coordinateAnchor": "bottom-center",
         "position": {

@@ -476,7 +476,7 @@ export const BOSS_04_STAGE_SPEC = freezeBossStageValue({
                     x: 4860,
                     y: -2320
                 },
-                grappleable: false,
+                grappleable: true,
                 id: "boss-04:protected-gate",
                 kind: "architecture",
                 oneWay: false

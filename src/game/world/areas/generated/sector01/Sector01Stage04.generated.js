@@ -356,7 +356,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-04:service-baffle",
         "kind": "solid",
         "oneWay": false,
@@ -472,7 +472,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-04:room-casing-left",
         "kind": "room-casing",
         "oneWay": false,
@@ -501,7 +501,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-04:room-casing-right",
         "kind": "room-casing",
         "oneWay": false,

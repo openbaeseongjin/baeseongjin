@@ -179,7 +179,7 @@
         "id": "sector-01-07:pressure-baffle",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "windOcclusion": true,
         "coordinateAnchor": "bottom-center",
         "position": {
@@ -238,7 +238,7 @@
         "id": "sector-01-07:bypass-panel-body",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": 960,

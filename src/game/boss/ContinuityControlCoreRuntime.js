@@ -689,7 +689,7 @@ export class ContinuityControlCoreRuntime extends CompositeBossEncounterRuntime 
                         { x: bounds.x, y: bounds.y + bounds.height }
                     ],
                     oneWay: false,
-                    grappleable: false,
+                    grappleable: true,
                     ropeOccluder: true,
                     projectileOccluder: true,
                     state: state.state

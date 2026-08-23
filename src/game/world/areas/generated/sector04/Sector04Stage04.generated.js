@@ -634,7 +634,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "door-a",
         "kind": "scenario-surface",
         "oneWay": false,
@@ -694,7 +694,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "door-b",
         "kind": "scenario-surface",
         "oneWay": false,

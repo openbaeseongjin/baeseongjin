@@ -731,7 +731,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-07:pressure-baffle",
         "kind": "solid",
         "oneWay": false,
@@ -790,7 +790,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-07:bypass-panel-body",
         "kind": "solid",
         "oneWay": false,

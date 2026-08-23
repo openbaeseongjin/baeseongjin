@@ -609,7 +609,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-05:low-cover",
         "kind": "cover",
         "oneWay": false,
@@ -667,7 +667,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-05:upper-cover",
         "kind": "cover",
         "oneWay": false,

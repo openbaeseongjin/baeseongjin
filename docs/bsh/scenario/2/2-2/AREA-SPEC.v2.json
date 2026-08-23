@@ -324,7 +324,7 @@
         "id": "sector-02-02:cover-a",
         "kind": "cover",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "losBlocker": true,
         "coordinateAnchor": "bottom-center",
         "position": {
@@ -354,7 +354,7 @@
         "id": "sector-02-02:cover-b",
         "kind": "cover",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "losBlocker": true,
         "coordinateAnchor": "bottom-center",
         "position": {

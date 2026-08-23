@@ -295,7 +295,7 @@
         "id": "sector-02-05:drop1-divider",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": 532,
@@ -382,7 +382,7 @@
         "id": "sector-02-05:drop2-divider",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": 244,
@@ -864,7 +864,7 @@
         },
         "coordinateAnchor": "center",
         "narrativeLock": true,
-        "grappleable": false,
+        "grappleable": true,
         "opensInStage": false,
         "cueIds": [
           "upper-transit-restricted",

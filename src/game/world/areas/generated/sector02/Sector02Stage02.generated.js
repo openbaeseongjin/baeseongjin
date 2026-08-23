@@ -654,7 +654,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-02-02:cover-a",
         "kind": "cover",
         "losBlocker": true,
@@ -684,7 +684,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-02-02:cover-b",
         "kind": "cover",
         "losBlocker": true,

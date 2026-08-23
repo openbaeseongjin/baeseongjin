@@ -568,7 +568,7 @@
         "id": "sector-04-08:quorum-interlock-barrier",
         "kind": "sector-transit-barrier",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "blockedByObjectiveId": "sector-04-08:quorum-read",
         "coordinateAnchor": "top-left",
         "position": { "x": -720, "y": -800 },

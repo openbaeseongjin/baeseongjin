@@ -976,7 +976,7 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "damage": false,
-        "grappleable": false,
+        "grappleable": true,
         "id": "double-skin-divider",
         "kind": "solid-architectural-blocker",
         "oneWay": true,

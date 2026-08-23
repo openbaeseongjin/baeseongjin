@@ -189,7 +189,7 @@ const SPEC = {
           "upper-transit-restricted",
           "transfer-authorization-pending"
         ],
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-02-05:upper-transit-gate",
         "kind": "gate",
         "narrativeLock": true,
@@ -605,7 +605,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-02-05:drop1-divider",
         "kind": "solid",
         "oneWay": false,
@@ -692,7 +692,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-02-05:drop2-divider",
         "kind": "solid",
         "oneWay": false,

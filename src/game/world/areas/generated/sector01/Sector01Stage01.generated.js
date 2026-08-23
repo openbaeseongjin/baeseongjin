@@ -506,7 +506,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-01:shaft-shell-left",
         "kind": "shaft-shell",
         "oneWay": false,
@@ -535,7 +535,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-01:shaft-shell-right",
         "kind": "shaft-shell",
         "oneWay": false,

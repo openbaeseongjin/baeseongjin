@@ -126,6 +126,9 @@ function validateArena(spec, issues, file) {
         else if (validBounds(arena.bounds) && !boundsInside(arena.bounds, surface.bounds)) {
             issue(issues, file, "arena-surface-out-of-bounds", { id: surface.id });
         }
+        if (surface.collision !== false && surface.grappleable !== true) {
+            issue(issues, file, "arena-collision-surface-not-grappleable", { id: surface.id ?? null });
+        }
     }
     if (finitePoint(arena?.entry) && !hasEntrySupport(arena.entry, arena?.surfaces)) {
         issue(issues, file, "arena-entry-support-missing");

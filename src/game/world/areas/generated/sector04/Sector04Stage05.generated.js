@@ -939,7 +939,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "west-upper-garden-balcony",
         "kind": "garden-balcony",
         "oneWay": true,
@@ -969,7 +969,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "upper-garden-recovery",
         "kind": "amenity-recovery",
         "oneWay": true,

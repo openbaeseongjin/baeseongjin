@@ -572,7 +572,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-03:upper-cover",
         "kind": "cover",
         "oneWay": false,
@@ -746,7 +746,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-03:annex-cover-security-console",
         "kind": "cover",
         "oneWay": false,
@@ -775,7 +775,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "bottom-center",
-        "grappleable": false,
+        "grappleable": true,
         "id": "sector-01-03:annex-cover-power-rack",
         "kind": "cover",
         "oneWay": false,

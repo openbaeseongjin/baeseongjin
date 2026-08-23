@@ -114,7 +114,7 @@
         "id": "authorized-ascent-front-lock",
         "kind": "scenario-surface",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": 360,
@@ -144,7 +144,7 @@
         "id": "priority-routing-matrix",
         "kind": "scenario-surface",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -1020,

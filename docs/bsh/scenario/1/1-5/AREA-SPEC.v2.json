@@ -179,7 +179,7 @@
         "id": "sector-01-05:low-cover",
         "kind": "cover",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": 608,
@@ -237,7 +237,7 @@
         "id": "sector-01-05:upper-cover",
         "kind": "cover",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": -224,

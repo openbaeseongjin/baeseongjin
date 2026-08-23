@@ -384,7 +384,7 @@
         "id": "double-skin-divider",
         "kind": "solid-architectural-blocker",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": 80,

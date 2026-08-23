@@ -295,7 +295,7 @@
         "id": "sector-02-07:shelter-core-wall",
         "kind": "solid",
         "oneWay": false,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "bottom-center",
         "position": {
           "x": 376,

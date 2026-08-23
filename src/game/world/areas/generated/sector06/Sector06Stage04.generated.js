@@ -498,7 +498,7 @@ const SPEC = {
       },
       {
         "coordinateAnchor": "top-left",
-        "grappleable": false,
+        "grappleable": true,
         "id": "R1",
         "kind": "recovery",
         "maxRetrySeconds": 5,

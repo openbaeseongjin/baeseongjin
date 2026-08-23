@@ -204,7 +204,7 @@
         "id": "west-upper-garden-balcony",
         "kind": "garden-balcony",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -1750,
@@ -234,7 +234,7 @@
         "id": "upper-garden-recovery",
         "kind": "amenity-recovery",
         "oneWay": true,
-        "grappleable": false,
+        "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -1525,

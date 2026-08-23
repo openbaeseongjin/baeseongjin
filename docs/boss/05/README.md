@@ -29,7 +29,7 @@ MAP-PREVIEW는 설계 기준 프리뷰다.
 
 실제 브라우저/멀티플레이 검증 전에는 `PLAYTEST VERIFIED`로 표시하지 않는다.
 
-0.61.0 Rope capability 정렬에서 Core shell과 이동 Wall은 기획 문서의 `grappleable=false`를 따르며 renderer도 Ropeable 표식을 표시하지 않는다. 이동용 Rope target은 authored grappleable surface와 Phase-gated Hardpoint가 소유한다.
+최신 Ropeability 계약에서 Core shell·이동 Wall·Shutter·Roof·Gate처럼 collision을 가진 정적 또는 platform 성격의 surface는 모두 `grappleable=true`다. Hardpoint는 추가 선택지가 될 수 있으나, 넓은 surface를 제외해 Rope 경로를 강제하지 않는다. Boss 본체·hazard actor는 플랫폼이 아니므로 별도 capability를 따른다.
 
 ## v15 추가 확정
 
