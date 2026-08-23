@@ -79,6 +79,7 @@ export const withRopePointerInput = createInputCapabilityMixin({
             owner,
             ropeConfig,
             surfaces,
+            surfaceCandidates = () => surfaces,
             getRopeInputModifiers = () => ({
                 attachBufferSeconds: ropeConfig.attachBufferSeconds,
                 aimTolerance: 90,
@@ -104,7 +105,12 @@ export const withRopePointerInput = createInputCapabilityMixin({
                 ? findRopeAttachment({
                       aimPoint: this.aimWorld,
                       origin: launchOrigin,
-                      surfaces,
+                      surfaces: surfaceCandidates({
+                          origin: launchOrigin,
+                          aimPoint: this.aimWorld,
+                          maxAttachDistance: reach,
+                          aimTolerance: inputModifiers.aimTolerance
+                      }),
                       maxAttachDistance: reach,
                       aimTolerance: inputModifiers.aimTolerance,
                       canAttachToSurface

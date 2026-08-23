@@ -8,7 +8,7 @@ import { HomingProjectileObject } from "./ProjectileObject.js";
 const withAutomaticWeaponSimulation = createSimulationCapabilityMixin({
     id: "automatic-weapon",
     order: 10,
-    apply({ owner, enemies, projectiles, registry, config, dt, allowFire = true }) {
+    apply({ owner, enemies, registerProjectile, registry, config, dt, allowFire = true }) {
         this.cooldown = Math.max(0, this.cooldown - dt);
         if (!this.isEnabled || owner.lifeState !== "active" || !allowFire || this.cooldown > 0) return null;
         const target = selectNearestEnemy(owner.physics.position, enemies, this.range);
@@ -24,7 +24,7 @@ const withAutomaticWeaponSimulation = createSimulationCapabilityMixin({
             damage: this.damage,
             radius: this.projectileRadius
         });
-        projectiles.push(projectile);
+        registerProjectile(projectile);
         this.cooldown = this.fireInterval;
         return projectile;
     }

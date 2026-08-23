@@ -109,7 +109,7 @@ export class EnemyWeaponState {
         return Object.freeze({ spawnedProjectile, shouldAdvancePatrol: false });
     }
 
-    spawnProjectile({ enemy, target, config, projectiles, registry }) {
+    spawnProjectile({ enemy, target, config, registerProjectile, registry }) {
         const velocity = enemy.position.clone();
         velocity.set(
             this.aimDirection.x * config.enemyProjectileSpeed,
@@ -125,7 +125,7 @@ export class EnemyWeaponState {
             damage: config.enemyProjectileDamage,
             canCutRope: enemy.rules.includes(ENEMY_RULE.CUTTER_FIRE)
         });
-        projectiles.push(projectile);
+        registerProjectile(projectile);
         return projectile;
     }
 

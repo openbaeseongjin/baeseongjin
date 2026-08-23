@@ -35,6 +35,7 @@
 | 문서 | 역할 |
 | --- | --- |
 | [`architecture.md`](./architecture.md) | 모듈 구조와 책임 경계 |
+| [`performance-architecture.md`](./performance-architecture.md) | fixed step·공간 index·활성 객체·snapshot·render hot-path 성능 계약 |
 | [`superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md`](./superpowers/specs/2026-08-19-map-editor-v2-foundation-design.md) | 맵 에디터 v2 저작·생성·Stage cutover 기반 설계 |
 | [`development-rules.md`](./development-rules.md) | 공통 개발·검증·Git 규칙 |
 | [`documentation-rules.md`](./documentation-rules.md) | 문서 작성과 관리 규칙 |

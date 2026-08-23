@@ -7,11 +7,11 @@ import { visibleEnemyTargets } from "./EnemyWeaponTargeting.js";
 const withWeaponCapability = createSimulationCapabilityMixin({
     id: ENEMY_SIMULATION_CAPABILITY.WEAPON,
     order: ENEMY_WEAPON_CONFIG.WEAPON_ORDER,
-    apply({ targets, projectiles, registry, config, surfaces = [], dt }) {
+    apply({ targets, registerProjectile, registry, config, surfaces = [], dt }) {
         const result = this.weaponState.advance(this, {
             visibleTargets: visibleEnemyTargets(this, targets, surfaces),
             range: this.weaponRange ?? config.enemyAttackRange,
-            projectiles,
+            registerProjectile,
             registry,
             config,
             dt

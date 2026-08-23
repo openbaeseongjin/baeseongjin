@@ -13,11 +13,11 @@ function advanceSimulationObject(object, capabilityId, context) {
     return outcomes[0].result;
 }
 
-export function updateAutomaticWeapon({ owner, enemies, projectiles, registry, config, dt, allowFire = true }) {
+export function updateAutomaticWeapon({ owner, enemies, registerProjectile, registry, config, dt, allowFire = true }) {
     return advanceSimulationObject(owner.weapon, "automatic-weapon", {
         owner,
         enemies,
-        projectiles,
+        registerProjectile,
         registry,
         config,
         dt,
@@ -90,8 +90,7 @@ export function updatePlayerProjectiles({
         }
         survivors.push(projectile);
     }
-    projectiles.splice(0, projectiles.length, ...survivors);
-    return Object.freeze({ hits, resolutions: Object.freeze(resolutions) });
+    return Object.freeze({ survivors: Object.freeze(survivors), hits, resolutions: Object.freeze(resolutions) });
 }
 
 export function updateEnemyPresentationAim({ enemies, targets, range, surfaces = [] }) {
@@ -103,7 +102,7 @@ export function updateEnemyPresentationAim({ enemies, targets, range, surfaces =
 export function updateEnemyWeapons({
     enemies,
     targets,
-    projectiles,
+    registerProjectile,
     registry,
     config,
     surfaces = [],
@@ -118,7 +117,7 @@ export function updateEnemyWeapons({
                 const spawnedProjectile = enemy.hasSimulationCapability(ENEMY_SIMULATION_CAPABILITY.WEAPON)
                     ? advanceSimulationObject(enemy, ENEMY_SIMULATION_CAPABILITY.WEAPON, {
                           targets,
-                          projectiles,
+                          registerProjectile,
                           registry,
                           config,
                           surfaces,
@@ -157,6 +156,5 @@ export function advanceEnemyProjectiles({ projectiles, dt, maxLifetimeSeconds = 
         if (projectile.ageSeconds >= maxLifetimeSeconds) expired.push(projectile);
         else survivors.push(projectile);
     }
-    projectiles.splice(0, projectiles.length, ...survivors);
-    return Object.freeze({ expired: Object.freeze(expired) });
+    return Object.freeze({ survivors: Object.freeze(survivors), expired: Object.freeze(expired) });
 }
