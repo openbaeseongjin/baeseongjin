@@ -6,8 +6,8 @@
 > Authoring snapshot: `4551798860193a16e53814aae5c3a42022b4e1cf`
 > 4-1 handoff: **UPPER RESIDENTIAL ARRIVAL — DESIGN LOCKED**
 > Legacy current Runtime 4-2: **CUTTER LINE — SUPERSEDED FOR NEW AUTHORING**
-> New 4-2 Runtime: **NOT IMPLEMENTED**
-> Resident Security Override 2-of-3: **DESIGN LOCKED / RUNTIME NOT IMPLEMENTED**
+> New 4-2 Runtime: **GENERATED / PLAYABLE**
+> Resident Security Override 2-of-3: **RUNTIME IMPLEMENTED**
 
 ---
 
@@ -59,7 +59,7 @@ This is legacy Transit Sector04 and is **SUPERSEDED**.
 Current `pursuit-drone-t1`:
 - direct-player pursuit
 - default moveSpeed `160`
-- acquireRange `640`
+- acquireRange `960`
 - triggerDistance `96`
 - windup `0.25s`
 - dashSpeed `640`

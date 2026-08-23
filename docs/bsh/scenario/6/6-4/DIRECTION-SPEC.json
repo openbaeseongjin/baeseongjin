@@ -1,7 +1,7 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
-  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
   "stage": {
     "sector": 6,
     "stage": 4,
@@ -9,10 +9,14 @@
     "name": "ROOFTOP SERVICE SHELTER",
     "id": "6-4"
   },
-  "languagePolicy": {
-    "playerDialogue": "ko",
-    "directionNotes": "ko-first",
-    "diegeticSystemText": "en-allowed"
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
   },
   "beats": [
     {
@@ -34,7 +38,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-4:pressure-release"
     },
     {
       "beatId": "roof-signal",
@@ -56,7 +64,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-4:roof-signal"
     },
     {
       "beatId": "observation-reveal",
@@ -83,7 +95,11 @@
             "text": "…저기 있다."
           }
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-4:observation-reveal"
     },
     {
       "beatId": "upper-exit",
@@ -105,15 +121,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-4:upper-exit"
     }
-  ],
-  "validation": [
-    "Route remains short and low-pressure.",
-    "No enemies or threat systems.",
-    "Upward continuity remains visible.",
-    "Pad direct view is occluded at entry and revealed later.",
-    "Observation Lip is the first direct Pad03 + Shuttle co-visibility point.",
-    "No ACCESS DENIED or CONTAINMENT VIOLATION at this stage."
   ]
 }

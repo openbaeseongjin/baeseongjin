@@ -1,5 +1,7 @@
 # 6-3 PRODUCTION ALIGNMENT REV3.0
 
+Runtime: generated source with one optional Standard Sentry and no Cutter behavior; browser tuning pending.
+
 Latest checked main:
 `8b344f0f7a2309bfb316655668ed180718db7781`
 

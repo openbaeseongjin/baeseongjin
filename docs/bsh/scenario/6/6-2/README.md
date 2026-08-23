@@ -1,6 +1,6 @@
 # SECTOR 06-2 — CROSSWIND MASTS REV3.1
 
-> **DESIGN LOCKED · NOT IMPLEMENTED**<br>
+> **DESIGN LOCKED · MOCK INTEGRATED**<br>
 > Authoring snapshot: `8b344f0f7a2309bfb316655668ed180718db7781`<br>
 > Max Rope relation: **345.4px < 400px**
 

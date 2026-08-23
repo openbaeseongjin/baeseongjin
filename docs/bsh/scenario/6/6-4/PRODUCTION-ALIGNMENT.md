@@ -1,5 +1,7 @@
 # 6-4 PRODUCTION ALIGNMENT REV2.1
 
+Runtime: generated threat-free rest Stage; no Stage-local Timer reset or new Timer UI; browser tuning pending.
+
 Latest checked main:
 `8b344f0f7a2309bfb316655668ed180718db7781`
 

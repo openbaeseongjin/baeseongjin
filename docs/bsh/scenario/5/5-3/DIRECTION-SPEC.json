@@ -38,7 +38,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-3:s0-entry"
     },
     {
       "beatId": "s1-bay-a",
@@ -57,7 +58,8 @@
           "type": "systemText",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-3:s1-bay-a"
     },
     {
       "beatId": "s2-transfer",
@@ -76,7 +78,8 @@
           "type": "systemText",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-3:s2-transfer"
     },
     {
       "beatId": "s3-bay-b",
@@ -95,7 +98,8 @@
           "type": "systemText",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-3:s3-bay-b"
     },
     {
       "beatId": "s4-archive-fact",
@@ -127,7 +131,8 @@
             "minDelaySeconds": 2
           }
         }
-      ]
+      ],
+      "dedupeToken": "5-3:s4-archive-fact"
     },
     {
       "beatId": "s5-exit",
@@ -149,7 +154,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-3:s5-exit"
     }
   ],
   "validation": [

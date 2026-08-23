@@ -46,5 +46,11 @@ export function composeSectorCatalog({ manifest, generatedAreas, expectedStageId
         if (!selected) throw new AreaCatalogCompositionError("generated-area-missing", { areaId: entry.areaId });
         return selected;
     });
-    return defineAreaCatalog({ id: manifest.catalogId, revision: manifest.catalogRevision, areas });
+    return defineAreaCatalog({
+        id: manifest.catalogId,
+        revision: manifest.catalogRevision,
+        accessModuleRequirement: manifest.accessModuleRequirement,
+        contentBoundaryStageId: manifest.contentBoundaryStageId ?? null,
+        areas
+    });
 }

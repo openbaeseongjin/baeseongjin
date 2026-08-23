@@ -1,172 +1,60 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
-  "directionStatus": "DESIGN LOCKED",
-  "runtimeStatus": "MAPPING REQUIRED — NEW RESIDENTIAL SECTOR04 NOT IMPLEMENTED",
-  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
-  "stage": {
-    "sector": 4,
-    "stage": 5,
-    "sourceAreaId": "sector-04-05",
-    "name": "AMENITY ATRIUM",
-    "id": "4-5"
-  },
-  "globalControl": {
-    "worldPause": false,
-    "playerControl": "ON",
-    "forcedCinematicCamera": false
-  },
-  "dialoguePolicy": {
-    "system": "facts only",
-    "player": "short human reaction only",
-    "coreBarkCount": 1,
-    "forbidDuring": [
-      "rope-attached active control",
-      "Patrol acquire/track/lock/fire",
-      "Pursuit seek/windup/dash/recover",
-      "Override decision/interaction if threat remains"
-    ]
-  },
+  "directionStatus": "RUNTIME VERIFIED",
+  "stage": { "sector": 4, "stage": 5, "sourceAreaId": "sector-04-05", "name": "AMENITY ATRIUM", "id": "4-5" },
+  "globalControl": { "worldPause": false, "movement": true, "aim": true, "rope": true, "action": true, "interaction": true },
   "beats": [
     {
       "beatId": "s0-atrium-entry",
-      "trigger": {
-        "type": "position-zone",
-        "intent": "west lower entry"
-      },
-      "tracks": [
-        {
-          "type": "systemText",
-          "title": "PRIVATE AMENITY ATRIUM",
-          "detail": "ENVIRONMENTAL SERVICE / NORMAL",
-          "durationSeconds": 1.2
-        }
-      ],
-      "dialogue": null
+      "purpose": "유지 중인 대형 Amenity 공간을 먼저 읽힌다.",
+      "trigger": { "type": "area-enter" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-5:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "atrium-lower-sweep", "forcedPan": false },
+      "tracks": [{ "type": "systemText", "content": { "title": "PRIVATE AMENITY ATRIUM", "detail": "ENVIRONMENTAL SERVICE NORMAL" }, "timing": { "durationSeconds": 1.3 } }]
     },
     {
-      "beatId": "s1-lower-sweep",
-      "trigger": {
-        "type": "position-zone",
-        "intent": "lower service sweep"
-      },
-      "tracks": [],
-      "dialogue": null
-    },
-    {
-      "beatId": "s2-wellness-read",
-      "trigger": {
-        "type": "stable-position-zone",
-        "intent": "East Mid Safe Read",
-        "stableSeconds": 0.5,
-        "delayIf": [
-          "rope-attached",
-          "enemy-acquired"
-        ]
-      },
+      "beatId": "s1-wellness-read",
+      "purpose": "정상 작동 중인 Wellness 계통에 짧게 반응한다.",
+      "trigger": { "type": "camera-zone", "zoneId": "east-wellness-read" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-5:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "east-wellness-read", "forcedPan": false },
       "tracks": [
-        {
-          "type": "systemText",
-          "title": "PRIVATE AMENITY SERVICE",
-          "detail": "CLIMATE / NORMAL",
-          "durationSeconds": 1
-        },
-        {
-          "type": "systemText",
-          "title": "WELLNESS WATER SYSTEM",
-          "detail": "NORMAL",
-          "durationSeconds": 1
-        },
-        {
-          "type": "playerBark",
-          "text": "…이런 데까지.",
-          "scope": "local-player",
-          "replay": "once-per-stage-attempt",
-          "runtimeMapping": "REQUIRED / DO NOT SUBSTITUTE SYSTEM TOAST"
-        }
+        { "type": "systemText", "content": { "title": "WELLNESS WATER SYSTEM", "detail": "NORMAL" }, "timing": { "durationSeconds": 1.2 } },
+        { "type": "dialogue", "content": { "text": "…이런 데까지." }, "timing": { "minDelaySeconds": 0.6, "durationSeconds": 1.8 } }
       ]
     },
     {
-      "beatId": "s3-patrol-read",
-      "trigger": {
-        "type": "position-or-enemy-zone",
-        "intent": "Wellness Balcony Patrol read"
-      },
-      "tracks": [
-        {
-          "type": "systemText",
-          "title": "AMENITY SECURITY",
-          "detail": "PATROL / ACTIVE",
-          "durationSeconds": 1
-        }
-      ],
-      "dialogue": null
+      "beatId": "s2-override-b",
+      "purpose": "선택 가능한 Override B source를 실제 objective 완료와 연결한다.",
+      "trigger": { "type": "objective-completed", "objectiveId": "sector-04-05:override-b-acquired" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-5:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "security-overlook", "forcedPan": false },
+      "tracks": [{ "type": "systemText", "content": { "title": "RESIDENT SECURITY OVERRIDE B", "detail": "ACQUIRED" }, "timing": { "durationSeconds": 1.2 } }]
     },
     {
-      "beatId": "s4-upper-pursuit",
-      "trigger": {
-        "type": "runtime-enemy-state",
-        "intent": "Pursuit acquires player after Patrol band"
-      },
-      "tracks": [
-        {
-          "type": "systemText",
-          "title": "AMENITY SECURITY",
-          "detail": "INTRUSION RESPONSE / ACTIVE",
-          "durationSeconds": 1
-        }
-      ],
-      "dialogue": null,
-      "silenceMandatory": true
-    },
-    {
-      "beatId": "s5-override-overlook",
-      "trigger": {
-        "type": "visibility-zone",
-        "intent": "Security Overlook Pod visible"
-      },
-      "tracks": [
-        {
-          "type": "systemText",
-          "title": "RESIDENT SECURITY OVERRIDE B",
-          "detail": "OPTIONAL / SERVICE CONTROL",
-          "durationSeconds": 1.1
-        }
-      ],
-      "dialogue": null,
-      "runtimeMapping": "Override B source itself NOT IMPLEMENTED"
-    },
-    {
-      "beatId": "s6-refuge-handoff",
-      "trigger": {
-        "type": "position-zone",
-        "intent": "East High safe exit"
-      },
-      "tracks": [
-        {
-          "type": "systemText",
-          "title": "RESIDENT REFUGE ROUTE",
-          "detail": "ACTIVE",
-          "durationSeconds": 1
-        },
-        {
-          "type": "systemText",
-          "title": "NEXT",
-          "detail": "REFUGE ACCESS GALLERY",
-          "durationSeconds": 0.9
-        }
-      ],
-      "dialogue": null
+      "beatId": "s3-refuge-handoff",
+      "purpose": "Refuge Route가 계속 활성 상태임을 알린다.",
+      "trigger": { "type": "camera-zone", "zoneId": "refuge-access-handoff" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-5:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "refuge-access-handoff", "forcedPan": false },
+      "tracks": [{ "type": "systemText", "content": { "title": "RESIDENT REFUGE ROUTE", "detail": "ACTIVE" }, "timing": { "durationSeconds": 1.2 } }]
     }
-  ],
-  "rules": [
-    "No world pause",
-    "No player-control lock",
-    "No Bark at entry",
-    "Exactly one core Bark at S2",
-    "Silence during Patrol/Pursuit/Rope commit",
-    "Override B collection is not narrated by Player",
-    "System text must reflect actual state",
-    "No Sector05 causal explanation",
-    "Pursuit is direct-player pursuit; do not stage pathfinding fiction"
   ]
 }

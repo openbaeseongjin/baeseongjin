@@ -135,6 +135,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
     const windZones = [];
     const objectives = [];
     const scannerGroups = [];
+    const jammerGroups = [];
     const scannerGroupIds = new Set();
     let originY = floorY;
 
@@ -160,6 +161,10 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
             areaScannerGroups.push(translated);
             scannerGroups.push(translated);
         }
+        const areaJammerGroups = (definition.jammerGroups ?? []).map((group) =>
+            Object.freeze({ ...group, areaId: definition.id })
+        );
+        jammerGroups.push(...areaJammerGroups);
         const areaSurfaces = definition.surfaces.map((surface) => {
             const translated = translateSurface(definition.id, surface, originY);
             const groupId = groupBySurfaceId.get(surface.id);
@@ -268,6 +273,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
                     ...definition.checkpoints.map(({ id }) => id)
                 ]),
                 scannerGroupIds: Object.freeze(areaScannerGroups.map(({ id }) => id)),
+                jammerGroupIds: Object.freeze(areaJammerGroups.map(({ id }) => id)),
                 routes: definition.routes,
                 cameraZones: definition.cameraZones,
                 cueIds: definition.cueIds
@@ -298,6 +304,7 @@ export function assembleAuthoredWorld(catalog, { seed, floorY, checkpointRadius 
         objectives: Object.freeze(objectives),
         gates: Object.freeze(gates),
         windZones: Object.freeze(windZones),
-        scannerGroups: Object.freeze(scannerGroups)
+        scannerGroups: Object.freeze(scannerGroups),
+        jammerGroups: Object.freeze(jammerGroups)
     });
 }

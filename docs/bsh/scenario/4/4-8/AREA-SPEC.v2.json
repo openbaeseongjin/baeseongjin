@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "4-8",
     "sector": 4,
@@ -43,14 +43,14 @@
       "y": -160
     },
     "exit": {
-      "id": "sector-04-08:scenario-exit",
-      "x": -1360,
-      "y": -700
+      "id": "sector-04-08:exit",
+      "x": -650,
+      "y": -2650
     },
     "nextAreaId": null,
     "surfaces": [
       {
-        "id": "entry-deck",
+        "id": "quorum-entry-deck",
         "kind": "safe-deck",
         "oneWay": true,
         "grappleable": true,
@@ -562,6 +562,21 @@
             "y": -96
           }
         ]
+      },
+      {
+        "id": "sector-04-08:quorum-interlock-barrier",
+        "kind": "sector-transit-barrier",
+        "oneWay": false,
+        "grappleable": false,
+        "blockedByObjectiveId": "sector-04-08:quorum-read",
+        "coordinateAnchor": "top-left",
+        "position": { "x": -720, "y": -800 },
+        "vertices": [
+          { "x": -720, "y": -800 },
+          { "x": -680, "y": -800 },
+          { "x": -680, "y": -288 },
+          { "x": -720, "y": -288 }
+        ]
       }
     ],
     "routePoints": [
@@ -662,12 +677,6 @@
         "sourceId": "route-4-success-16-16"
       },
       {
-        "id": "sector-04-08:route-route-4-successLinkDistancesPx-17",
-        "x": 322.02,
-        "y": 362.35,
-        "sourceId": "route-4-successLinkDistancesPx-17"
-      },
-      {
         "id": "sector-04-08:route-route-4-underQuorumReturn-from-33",
         "x": -860,
         "y": -350,
@@ -686,9 +695,25 @@
         "sourceId": "route-4-underQuorumReturn-via-2-35"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      { "id": "sector-04-08:under-quorum-return-1", "x": -1120, "y": -520, "maxRetrySeconds": 5 },
+      { "id": "sector-04-08:under-quorum-return-2", "x": -1360, "y": -700, "maxRetrySeconds": 5 },
+      { "id": "sector-04-08:mid-interlock", "x": -430, "y": -1530, "maxRetrySeconds": 5 },
+      { "id": "sector-04-08:final-control", "x": -650, "y": -2650, "maxRetrySeconds": 5 }
+    ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-04-08:quorum-panel",
+        "kind": "access-transit-lock",
+        "presentationId": "world-object:access-transit-lock",
+        "position": { "x": -880, "y": -320 },
+        "coordinateAnchor": "center",
+        "objectiveId": "sector-04-08:quorum-read",
+        "requiredAccessModuleCount": 2,
+        "requiredObjectiveIds": []
+      }
+    ],
     "objectives": [
       {
         "id": "sector-04-08:quorum-read",
@@ -698,11 +723,13 @@
           "sector-04:resident-security-override:b",
           "sector-04:resident-security-override:c"
         ],
-        "requiredCount": 2
+        "requiredCount": 2,
+        "bounds": { "x": -1440, "y": -640, "width": 800, "height": 576 }
       },
       {
         "id": "sector-04-08:final-ascent-control-reached",
         "type": "reach",
+        "requiredObjectiveIds": ["sector-04-08:quorum-read"],
         "bounds": {
           "x": -820,
           "y": -2720,
@@ -715,30 +742,26 @@
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
-    "cameraZones": [],
-    "cueIds": []
+    "cameraZones": [
+      { "id": "quorum-landing", "minY": -704, "maxY": 0, "desktopZoom": 0.94, "mobileZoom": 0.7 },
+      { "id": "lower-gallery-switchback", "minY": -1408, "maxY": -704, "desktopZoom": 0.88, "mobileZoom": 0.66 },
+      { "id": "mid-interlock", "minY": -1920, "maxY": -1408, "desktopZoom": 0.92, "mobileZoom": 0.68 },
+      { "id": "upper-gallery-switchback", "minY": -2432, "maxY": -1920, "desktopZoom": 0.88, "mobileZoom": 0.66 },
+      { "id": "final-ascent-control", "minY": -2976, "maxY": -2432, "desktopZoom": 0.96, "mobileZoom": 0.72 }
+    ],
+    "cueIds": [],
+    "gate": {
+      "id": "sector-04-08:gate",
+      "nextAreaId": null,
+      "completionMode": "content-boundary",
+      "requiredObjectiveIds": [
+        "sector-04-08:quorum-read",
+        "sector-04-08:final-ascent-control-reached"
+      ],
+      "trigger": { "x": -698, "y": -2778, "width": 96, "height": 128 }
+    }
   },
   "anchors": [
-    {
-      "target": {
-        "id": "P0-surface",
-        "x": -1120,
-        "y": -160,
-        "properties": {
-          "sourceId": "P0"
-        }
-      },
-      "landmark": {
-        "id": "P0",
-        "x": -1120,
-        "y": -160,
-        "properties": {
-          "label": "P0",
-          "coordinateAnchor": "center",
-          "sourceId": "P0"
-        }
-      }
-    },
     {
       "target": {
         "id": "P1-surface",
@@ -1042,7 +1065,7 @@
   ],
   "behaviorRefs": [],
   "scenario": {
-    "status": "scenario-only",
+    "status": "runtime-generated",
     "boundsProvenance": "expanded-for-authored-points"
   }
 }

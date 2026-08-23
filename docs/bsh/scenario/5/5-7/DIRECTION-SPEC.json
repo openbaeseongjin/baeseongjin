@@ -1,4 +1,5 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
   "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
@@ -37,7 +38,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-7:entry"
     },
     {
       "beatId": "artillery",
@@ -52,7 +54,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-7:artillery"
     },
     {
       "beatId": "archive-index",
@@ -74,7 +77,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-7:archive-index"
     },
     {
       "beatId": "cutter",
@@ -89,7 +93,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-7:cutter"
     },
     {
       "beatId": "evidence-a",
@@ -111,7 +116,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-7:evidence-a"
     },
     {
       "beatId": "evidence-b",
@@ -137,7 +143,8 @@
             "text": "…승인한 대로, 실제 대피까지 멈췄어."
           }
         }
-      ]
+      ],
+      "dedupeToken": "5-7:evidence-b"
     },
     {
       "beatId": "exit",
@@ -159,7 +166,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-7:exit"
     }
   ],
   "validation": [

@@ -1,6 +1,6 @@
 # SECTOR 05-6 — INCIDENT AUTHORIZATION ANNEX REV1.1
 
-> **DESIGN LOCKED · NOT IMPLEMENTED**<br>
+> **RUNTIME GENERATED · PLAYTEST PENDING**<br>
 > Authoring snapshot: `1009af0ef14ec9f64af891833156e6af8a1abdc1`<br>
 > Max Rope relation: **371.62px < 400px**
 

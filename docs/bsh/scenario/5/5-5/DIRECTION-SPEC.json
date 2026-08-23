@@ -39,7 +39,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-5:s0-hub-visible-lock"
     },
     {
       "beatId": "s1-control-arc-read",
@@ -58,7 +59,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-5:s1-control-arc-read"
     },
     {
       "beatId": "s2-combined-flank",
@@ -77,7 +79,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-5:s2-combined-flank"
     },
     {
       "beatId": "s3-priority-directive",
@@ -109,7 +112,8 @@
             "minDelaySeconds": 2.3
           }
         }
-      ]
+      ],
+      "dedupeToken": "5-5:s3-priority-directive"
     },
     {
       "beatId": "s4-backside-crossing",
@@ -128,7 +132,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-5:s4-backside-crossing"
     },
     {
       "beatId": "s5-right-ascent",
@@ -147,7 +152,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-5:s5-right-ascent"
     },
     {
       "beatId": "s6-5-6-handoff",
@@ -169,7 +175,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-5:s6-5-6-handoff"
     }
   ],
   "validation": [

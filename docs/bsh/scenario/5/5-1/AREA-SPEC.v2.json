@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "5-1",
     "sector": 5,
@@ -43,14 +43,14 @@
       "y": -96
     },
     "exit": {
-      "id": "sector-05-01:scenario-exit",
-      "x": 800,
-      "y": -1840
+      "id": "sector-05-01:exit",
+      "x": 1448,
+      "y": -2252
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-05-02",
     "surfaces": [
       {
-        "id": "entry-deck",
+        "id": "authored-entry-deck",
         "kind": "scenario-surface",
         "oneWay": true,
         "grappleable": true,
@@ -408,6 +408,35 @@
           }
         ],
         "sourceId": "sealed-core-d"
+      },
+      {
+        "id": "sector-05-01:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -1900,
+          "y": -64
+        },
+        "vertices": [
+          {
+            "x": -1996,
+            "y": -64
+          },
+          {
+            "x": -1804,
+            "y": -64
+          },
+          {
+            "x": -1804,
+            "y": -32
+          },
+          {
+            "x": -1996,
+            "y": -32
+          }
+        ]
       }
     ],
     "routePoints": [
@@ -554,21 +583,82 @@
         "x": 800,
         "y": -1840,
         "sourceId": "h4-flow-e"
+      },
+      {
+        "id": "sector-05-01:route-exit",
+        "x": 1448,
+        "y": -2252,
+        "sourceId": "exit"
+      },
+      {
+        "id": "sector-05-01:route-final-exit",
+        "x": 1448,
+        "y": -2252,
+        "sourceId": "final-exit"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      {
+        "id": "sector-05-01:recovery-1",
+        "x": -1720,
+        "y": -524,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-01:recovery-2",
+        "x": 210,
+        "y": -1194,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-01:recovery-3",
+        "x": -250,
+        "y": -1834,
+        "maxRetrySeconds": 5
+      }
+    ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-05-01:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 1336,
+          "y": -2220
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-05-01:gate"
+      },
+      {
+        "id": "sector-05-01:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 1448,
+          "y": -2220
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-01:gate"
+      }
+    ],
     "objectives": [
       {
         "id": "final-deck-reached",
         "type": "reach",
-        "preset": "reach-deck"
+        "bounds": {
+          "x": 1070,
+          "y": -2400,
+          "width": 420,
+          "height": 180
+        }
       },
       {
         "id": "exit-panel-engaged",
         "type": "interact",
-        "preset": "exit-panel",
+        "sourceObjectId": "sector-05-01:exit-panel",
         "requiredObjectiveIds": [
           "final-deck-reached"
         ]
@@ -621,7 +711,21 @@
         "mobileZoom": 0.62
       }
     ],
-    "cueIds": []
+    "cueIds": [],
+    "jammerGroups": [],
+    "gate": {
+      "id": "sector-05-01:gate",
+      "nextAreaId": "sector-05-02",
+      "requiredObjectiveIds": [
+        "exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 1400,
+        "y": -2348,
+        "width": 96,
+        "height": 160
+      }
+    }
   },
   "anchors": [
     {
@@ -1085,9 +1189,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "expanded-for-authored-points"
-  }
+  "behaviorRefs": []
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "4-4",
     "sector": 4,
@@ -43,11 +43,11 @@
       "y": -288
     },
     "exit": {
-      "id": "sector-04-04:scenario-exit",
+      "id": "sector-04-04:exit",
       "x": 2144,
       "y": -1888
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-04-05",
     "surfaces": [
       {
         "id": "entry-deck",
@@ -112,8 +112,8 @@
       {
         "id": "door-a",
         "kind": "scenario-surface",
-        "oneWay": true,
-        "grappleable": true,
+        "oneWay": false,
+        "grappleable": false,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -992,
@@ -130,11 +130,11 @@
           },
           {
             "x": -944,
-            "y": 388
+            "y": 0
           },
           {
             "x": -1040,
-            "y": 388
+            "y": 0
           }
         ],
         "sourceId": "door-a"
@@ -172,8 +172,8 @@
       {
         "id": "door-b",
         "kind": "scenario-surface",
-        "oneWay": true,
-        "grappleable": true,
+        "oneWay": false,
+        "grappleable": false,
         "coordinateAnchor": "top-center",
         "position": {
           "x": 760,
@@ -442,19 +442,64 @@
         "sourceId": "t11"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      { "id": "sector-04-04:recover-a", "x": -1740, "y": -286, "maxRetrySeconds": 5 },
+      { "id": "sector-04-04:recover-b", "x": -114, "y": -766, "maxRetrySeconds": 5 },
+      { "id": "sector-04-04:recover-c", "x": 1582, "y": -1278, "maxRetrySeconds": 5 }
+    ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-04-04:patrol-a",
+        "kind": "patrol-drone",
+        "enemyType": "patrol-drone-t1",
+        "position": { "x": -1880, "y": -405 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -2240, "y": -650, "width": 1050, "height": 390 },
+        "patrol": {
+          "mode": "pingpong",
+          "speed": 48,
+          "waitSeconds": 0.4,
+          "points": [{ "x": -2040, "y": -388 }, { "x": -1280, "y": -388 }]
+        }
+      },
+      {
+        "id": "sector-04-04:patrol-b",
+        "kind": "patrol-drone",
+        "enemyType": "patrol-drone-t1",
+        "position": { "x": -320, "y": -874 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -620, "y": -1110, "width": 1080, "height": 370 },
+        "patrol": {
+          "mode": "pingpong",
+          "speed": 48,
+          "waitSeconds": 0.4,
+          "points": [{ "x": -500, "y": -858 }, { "x": 330, "y": -858 }]
+        }
+      },
+      {
+        "id": "sector-04-04:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 2032, "y": -1856 },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-04-04:gate"
+      }
+    ],
     "objectives": [
       {
         "id": "final-deck-reached",
         "type": "reach",
-        "preset": "reach-deck"
+        "preset": "reach-deck",
+        "bounds": { "x": 1920, "y": -1984, "width": 320, "height": 128 }
       },
       {
         "id": "exit-panel-engaged",
         "type": "interact",
         "preset": "exit-panel",
+        "sourceObjectId": "sector-04-04:exit-panel",
         "requiredObjectiveIds": [
           "final-deck-reached"
         ]
@@ -494,7 +539,13 @@
         "mobileZoom": 0.72
       }
     ],
-    "cueIds": []
+    "cueIds": [],
+    "gate": {
+      "id": "sector-04-04:gate",
+      "nextAreaId": "sector-04-05",
+      "requiredObjectiveIds": ["exit-panel-engaged"],
+      "trigger": { "x": 2096, "y": -1984, "width": 96, "height": 128 }
+    }
   },
   "anchors": [
     {
@@ -780,7 +831,7 @@
   ],
   "behaviorRefs": [],
   "scenario": {
-    "status": "scenario-only",
+    "status": "runtime-generated",
     "boundsProvenance": "expanded-for-authored-points"
   }
 }

@@ -122,11 +122,17 @@ const LEGACY_DISPLAY_NAMES = Object.freeze({
     [ENEMY_TYPE.SENTRY]: "경계 포탑",
     [ENEMY_TYPE.SENTRY_T1]: "경계 포탑",
     [ENEMY_TYPE.PATROL_DRONE]: "순찰 드론",
-    [ENEMY_TYPE.PATROL_DRONE_T1]: "순찰 드론"
+    [ENEMY_TYPE.PATROL_DRONE_T1]: "순찰 드론",
+    [ENEMY_TYPE.HARDPOINT_JAMMER_V1]: "하드포인트 재머"
 });
 
 export const ENEMY_ARCHETYPE_IDS = Object.freeze(DEFINITIONS.map(({ id }) => id));
-export const ENEMY_TYPE_IDS = Object.freeze([ENEMY_TYPE.SENTRY_T1, ENEMY_TYPE.PATROL_DRONE_T1, ...ENEMY_ARCHETYPE_IDS]);
+export const ENEMY_TYPE_IDS = Object.freeze([
+    ENEMY_TYPE.SENTRY_T1,
+    ENEMY_TYPE.PATROL_DRONE_T1,
+    ENEMY_TYPE.HARDPOINT_JAMMER_V1,
+    ...ENEMY_ARCHETYPE_IDS
+]);
 
 export function isCanonicalEnemyType(enemyType) {
     return ENEMY_TYPE_IDS.includes(enemyType);

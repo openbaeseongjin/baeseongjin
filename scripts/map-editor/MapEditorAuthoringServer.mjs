@@ -8,6 +8,7 @@ import {
     createAreaDefinitionFromV2
 } from "../../src/game/world/area-authoring-v2/AreaSpecV2.js";
 import { collectGeneratedOutputs } from "../../src/game/world/area-authoring-v2/AreaSpecV2Generator.js";
+import { authoredRuntimePromotionBlockers } from "../../src/game/world/area-authoring-v2/AreaRuntimePromotion.js";
 import {
     validateAreaSpecEditorMutation,
     validateAreaSpecV2
@@ -116,17 +117,7 @@ function runtimePromotionReadiness(entry, spec) {
         return Object.freeze({ status: "live", blockers: Object.freeze([]) });
     }
 
-    const definition = spec.definition ?? {};
-    const blockers = [];
-    if (!definition.gate || typeof definition.gate !== "object" || Array.isArray(definition.gate)) {
-        blockers.push("gate-not-authored");
-    }
-    if (typeof definition.nextAreaId !== "string" || definition.nextAreaId.length === 0) {
-        blockers.push("next-area-not-authored");
-    }
-    if (!Array.isArray(definition.surfaces) || definition.surfaces.length === 0) {
-        blockers.push("terrain-not-authored");
-    }
+    const blockers = [...authoredRuntimePromotionBlockers(spec)];
 
     const runtimeCandidate = { ...spec, authoringMode: "runtime" };
     const validation = validateAreaSpecV2(runtimeCandidate, { file: entry.sourcePath });
@@ -138,8 +129,8 @@ function runtimePromotionReadiness(entry, spec) {
     }
 
     return Object.freeze({
-        status: validation.valid ? "ready" : "blocked",
-        blockers: Object.freeze([...new Set(blockers)])
+        status: validation.valid && blockers.length === 0 ? "ready" : "blocked",
+        blockers: Object.freeze(Object.keys(Object.fromEntries(blockers.map((blocker) => [blocker, true]))))
     });
 }
 

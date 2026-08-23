@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "4-7",
     "sector": 4,
@@ -43,11 +43,11 @@
       "y": -182
     },
     "exit": {
-      "id": "sector-04-07:scenario-exit",
-      "x": 266.83,
-      "y": 322.49
+      "id": "sector-04-07:exit",
+      "x": -1120,
+      "y": -2760
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-04-08",
     "surfaces": [
       {
         "id": "entry-refuge-terrace",
@@ -843,18 +843,6 @@
         "x": 160,
         "y": -2180,
         "sourceId": "route-4-overrideCSpur-5-21"
-      },
-      {
-        "id": "sector-04-07:route-route-4-mainLinkDistancesPx-22",
-        "x": 367.15,
-        "y": 349.86,
-        "sourceId": "route-4-mainLinkDistancesPx-22"
-      },
-      {
-        "id": "sector-04-07:route-route-4-overrideCLinkDistancesPx-23",
-        "x": 266.83,
-        "y": 322.49,
-        "sourceId": "route-4-overrideCLinkDistancesPx-23"
       }
     ],
     "recoveryPoints": [
@@ -862,47 +850,71 @@
         "id": "sector-04-07:recovery-R1",
         "x": -1550,
         "y": -942,
-        "sourceId": "R1"
+        "sourceId": "R1",
+        "maxRetrySeconds": 5
       },
       {
         "id": "sector-04-07:recovery-R2",
         "x": -770,
         "y": -1552,
-        "sourceId": "R2"
+        "sourceId": "R2",
+        "maxRetrySeconds": 5
       },
       {
         "id": "sector-04-07:recovery-R3",
         "x": -680,
         "y": -2312,
-        "sourceId": "R3"
-      },
-      {
-        "id": "sector-04-07:recovery-recovery-r1",
-        "x": -1550,
-        "y": -920,
-        "sourceId": "recovery-r1"
-      },
-      {
-        "id": "sector-04-07:recovery-recovery-r2",
-        "x": -770,
-        "y": -1530,
-        "sourceId": "recovery-r2"
-      },
-      {
-        "id": "sector-04-07:recovery-recovery-r3",
-        "x": -680,
-        "y": -2290,
-        "sourceId": "recovery-r3"
+        "sourceId": "R3",
+        "maxRetrySeconds": 5
       }
     ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-04-07:persistent-pursuit-01",
+        "kind": "patrol-drone",
+        "enemyType": "pursuit-drone-t1",
+        "position": { "x": -1510, "y": -690 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -1780, "y": -1460, "width": 1540, "height": 850 },
+        "rules": ["no-rope-cut"]
+      },
+      {
+        "id": "sector-04-07:inner-spur-security-01",
+        "kind": "sentry",
+        "enemyType": "sentry-t1",
+        "position": { "x": -230, "y": -1845 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -360, "y": -1900, "width": 360, "height": 300 },
+        "rules": ["no-rope-cut"]
+      },
+      {
+        "id": "sector-04-07:override-c-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": -500, "y": -2050 },
+        "coordinateAnchor": "center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-04-07:override-c-acquired"
+      },
+      {
+        "id": "sector-04-07:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": -1210, "y": -2760 },
+        "coordinateAnchor": "center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-04-07:exit-panel-engaged",
+        "gateId": "sector-04-07:gate"
+      }
+    ],
     "objectives": [
       {
         "id": "sector-04-07:override-c-acquired",
         "type": "interact",
         "sourceObjectId": "sector-04-07:override-c-panel",
-        "requiredForLocalExit": false
+        "requiredForLocalExit": false,
+        "accessModuleId": "sector-04:resident-security-override:c"
       },
       {
         "id": "sector-04-07:final-refuge-control-reached",
@@ -927,8 +939,19 @@
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
-    "cameraZones": [],
-    "cueIds": []
+    "cameraZones": [
+      { "id": "lower-refuge-pursuit", "minY": -1280, "maxY": 0, "desktopZoom": 0.84, "mobileZoom": 0.64 },
+      { "id": "refuge-airlock", "minY": -1728, "maxY": -1280, "desktopZoom": 0.92, "mobileZoom": 0.68 },
+      { "id": "override-c-choice", "minY": -2240, "maxY": -1728, "desktopZoom": 0.88, "mobileZoom": 0.66 },
+      { "id": "final-refuge-control", "minY": -3072, "maxY": -2240, "desktopZoom": 0.94, "mobileZoom": 0.7 }
+    ],
+    "cueIds": [],
+    "gate": {
+      "id": "sector-04-07:gate",
+      "nextAreaId": "sector-04-08",
+      "requiredObjectiveIds": ["sector-04-07:exit-panel-engaged"],
+      "trigger": { "x": -1168, "y": -2888, "width": 96, "height": 128 }
+    }
   },
   "anchors": [
     {
@@ -1314,7 +1337,7 @@
   ],
   "behaviorRefs": [],
   "scenario": {
-    "status": "scenario-only",
+    "status": "runtime-generated",
     "boundsProvenance": "expanded-for-authored-points"
   }
 }

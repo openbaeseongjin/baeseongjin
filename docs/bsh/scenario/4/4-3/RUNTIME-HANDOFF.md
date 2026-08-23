@@ -45,7 +45,7 @@ Re-audit before implementation. If Runtime changes, recalculate; do not silently
 Exactly one `pursuit-drone-t1`.
 Use existing behavior. Do not add pathfinding fiction.
 Current defaults verified at baseline:
-160 move / 640 acquire / 96 trigger / .25 windup / 640 dash / .2 dash / .5 recovery.
+160 move / 960 acquire / 96 trigger / .25 windup / 640 dash / .2 dash / .5 recovery.
 
 Pursuit is pressure only.
 No kill gate.

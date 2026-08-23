@@ -1,4 +1,5 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
   "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
@@ -43,7 +44,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s0-entry"
     },
     {
       "beatId": "s1-aegis",
@@ -58,7 +60,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s1-aegis"
     },
     {
       "beatId": "s2-jammer",
@@ -73,7 +76,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s2-jammer"
     },
     {
       "beatId": "s3-cutter",
@@ -88,7 +92,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s3-cutter"
     },
     {
       "beatId": "s4-cross2",
@@ -110,7 +115,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s4-cross2"
     },
     {
       "beatId": "s5-artillery",
@@ -125,7 +131,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s5-artillery"
     },
     {
       "beatId": "s6-authority",
@@ -147,13 +154,14 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s6-authority"
     },
     {
       "beatId": "s7-full-chain",
       "trigger": {
         "type": "objective-completed",
-        "objectiveId": "authority-record-read"
+          "objectiveId": "authority-record-reached"
       },
       "worldPause": false,
       "playerControl": "ON",
@@ -174,13 +182,14 @@
             "text": "…무엇을 계속 돌릴지 정했고, 그 선택 때문에 아래 대피가 멈춘 거네."
           }
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s7-full-chain"
     },
     {
       "beatId": "s8-escape-goal",
       "trigger": {
         "type": "objective-completed",
-        "objectiveId": "escape-record-read"
+          "objectiveId": "authority-record-reached"
       },
       "worldPause": false,
       "playerControl": "ON",
@@ -196,7 +205,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-8:s8-escape-goal"
     }
   ],
   "validation": [

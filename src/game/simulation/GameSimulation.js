@@ -76,7 +76,7 @@ import {
     createDeterministicFoundationRewardSelection,
     createFoundationRewardSelection
 } from "../rewards/FoundationRewardSelection.js";
-import { generateWorld, WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
+import { closestPointOnSurface, generateWorld, WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
 import { resolveEnemyEncounter } from "../world/EnemyEncounterSelection.js";
 import { advanceSectorProgress } from "../world/SectorProgressController.js";
@@ -91,6 +91,7 @@ import {
 } from "../world/WorldForceField.js";
 import { accessScanStateMap, isSurfaceAccessAllowed, snapshotAccessScanStates } from "../world/AccessScanField.js";
 import { authoredRegionForPosition } from "../world/AuthoredLandmarkResolver.js";
+import { HARDPOINT_JAMMER_AUTHORITY, HardpointJammerField } from "../world/HardpointJammerField.js";
 import { advanceWorldProgress, completeWorldProgressObjective } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
 import { EntityRegistry } from "./EntityRegistry.js";
@@ -265,13 +266,18 @@ export class GameSimulation {
         debugAugmentIds = [],
         bossDefinition = null,
         bossDefinitions = null,
-        victimImpactAuthority = VICTIM_IMPACT_AUTHORITY.LOCAL
+        victimImpactAuthority = VICTIM_IMPACT_AUTHORITY.LOCAL,
+        hardpointJammerAuthority = HARDPOINT_JAMMER_AUTHORITY.AUTHORITATIVE
     } = {}) {
         if (!Array.isArray(debugAugmentIds)) throw new Error("debugAugmentIds must be an array");
         if (!Object.values(VICTIM_IMPACT_AUTHORITY).includes(victimImpactAuthority)) {
             throw new Error("victimImpactAuthority must be local or claim");
         }
+        if (!Object.values(HARDPOINT_JAMMER_AUTHORITY).includes(hardpointJammerAuthority)) {
+            throw new Error("Hardpoint Jammer authority is invalid");
+        }
         this.victimImpactAuthority = victimImpactAuthority;
+        this.hardpointJammerAuthority = hardpointJammerAuthority;
         this.ropeConfig = resolveEffectiveRopeConfig(ropeConfig);
         this.ropeDisabledSeconds = resolveEffectiveRopeDisabledSeconds({ ropeDisabledSeconds });
         this.worldCatalog = worldCatalog;
@@ -346,6 +352,7 @@ export class GameSimulation {
         this.enemyRuntimeReconciliations = 0;
         this.debugTrainingDummy = new DebugEnemyTrainingDummy();
         this.enemies = this.createEnemies();
+        this.hardpointJammers = new HardpointJammerField(this.world.jammerGroups ?? []);
         this.enemyImpactTombstones = new Map();
         this.projectiles = [];
         this.enemyProjectiles = [];
@@ -1334,6 +1341,7 @@ export class GameSimulation {
                 if (module.sectorId === source.sectorId) this.worldProgress.collectAccessModule(module.id);
             }
         }
+        this.worldProgress.resetContentBoundary();
         this.#setActiveCollisionSurfaces(
             this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
         );
@@ -1544,6 +1552,15 @@ export class GameSimulation {
                 : collisionSurfacesForProgress(this.world, this.worldProgress)
         );
         return this.worldProgress.snapshot();
+    }
+
+    restoreHardpointJammers(snapshot) {
+        return this.hardpointJammers.restore(snapshot ?? []);
+    }
+
+    useHardpointJammerSnapshotAuthority() {
+        this.hardpointJammerAuthority = HARDPOINT_JAMMER_AUTHORITY.SNAPSHOT;
+        return this.hardpointJammerAuthority;
     }
 
     rebaseElapsedSeconds(tick, serverTick, worldElapsedSeconds, fixedDt = 1 / 120) {
@@ -1902,6 +1919,7 @@ export class GameSimulation {
             this.metrics.recordProgressTime(progressId, dt);
         }
         this.elapsedSeconds += dt;
+        this.#advanceHardpointJammers(dt);
         this.#prepareCollisionFrame();
         for (const player of this.players) {
             const playerCommand = this.commandForPlayer(player, gameplayCommands);
@@ -2676,9 +2694,30 @@ export class GameSimulation {
     }
 
     #accessScanPredicate() {
-        if (!this.world.scannerGroups?.length) return null;
-        const stateMap = accessScanStateMap(this.world.scannerGroups, this.elapsedSeconds);
-        return (surface) => isSurfaceAccessAllowed(surface, stateMap);
+        const scannerGroups = this.world.scannerGroups ?? [];
+        const hasJammers = (this.world.jammerGroups ?? []).length > 0;
+        if (scannerGroups.length === 0 && !hasJammers) return null;
+        const stateMap = accessScanStateMap(scannerGroups, this.elapsedSeconds);
+        return (surface) =>
+            isSurfaceAccessAllowed(surface, stateMap) && this.hardpointJammers.canAttachToSurface(surface);
+    }
+
+    #advanceHardpointJammers(dt) {
+        if ((this.world.jammerGroups ?? []).length === 0) return;
+        if (this.hardpointJammerAuthority === HARDPOINT_JAMMER_AUTHORITY.SNAPSHOT) return;
+        const activeSourceObjectIds = new Set(
+            this.enemies.filter(({ health, awakened }) => health > 0 && awakened).map(({ objectId }) => objectId)
+        );
+        const attachedSurfaceIds = new Set();
+        for (const player of this.players) {
+            const anchor = player.ropeObject.rope.anchor;
+            if (!anchor) continue;
+            for (const surface of this.activeCollisionSurfaces) {
+                const point = closestPointOnSurface(anchor, surface);
+                if (Math.hypot(point.x - anchor.x, point.y - anchor.y) <= 0.5) attachedSurfaceIds.add(surface.id);
+            }
+        }
+        this.hardpointJammers.advance(dt, { activeSourceObjectIds, attachedSurfaceIds });
     }
 
     #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0, resolveInteractChoice = true } = {}) {
@@ -2723,6 +2762,17 @@ export class GameSimulation {
                     )
                 );
             }
+            if (
+                type === "objective-completed" &&
+                this.world.surfaces.some(({ blockedByObjectiveId }) => blockedByObjectiveId === event.objectiveId)
+            ) {
+                this.#setActiveCollisionSurfaces(
+                    this.#bossFilteredCollisionSurfaces(
+                        collisionSurfacesForSectorProgress(this.world, this.worldProgress)
+                    )
+                );
+            }
+            if (type === "content-boundary-reached") this.contentBoundaryAnnounced = true;
             if (type === "gate-crossed" && event.nextAreaId) {
                 this.metrics.recordAreaClear(event.areaId);
                 const checkpoint = this.world.checkpoints.find(({ areaId }) => areaId === event.nextAreaId);
@@ -2747,8 +2797,10 @@ export class GameSimulation {
                 this.eventFlash = { type: "stage-saved", age: 0, ...payload };
             }
             if (this.worldProgress.snapshot().contentBoundaryReached && !this.contentBoundaryAnnounced) {
+                const progressSnapshot = this.worldProgress.snapshot();
                 const region = authoredRegionForPosition(this.world, this.#primaryPlayer()?.physics.position);
                 const payload = Object.freeze({
+                    contentBoundaryId: progressSnapshot.contentBoundaryId,
                     sectorId: region?.sectorId ?? null,
                     landmarkId: region?.id ?? null,
                     playerId: events.at(-1)?.playerId ?? this.#primaryPlayerId
@@ -3338,41 +3390,38 @@ export class GameSimulation {
         if (this.isSeamlessSectorWorld) {
             for (const enemy of this.enemies) {
                 if (enemy.health > 0 || !enemy.objectId) continue;
-                this.worldProgress.resolveEncounter(enemy.objectId);
-                const accessModule = this.world.accessModules?.find(
-                    ({ encounterId }) => encounterId === enemy.objectId
-                );
-                if (!accessModule) continue;
-                const collection = this.worldProgress.collectAccessModule(accessModule.id);
-                if (!collection.changed) continue;
-                this.recordReplicationEvent("access-module-collected", {
-                    accessModuleId: accessModule.id,
-                    encounterId: enemy.objectId,
-                    sectorId: accessModule.sectorId,
-                    collectedCount: collection.access.collectedModuleIds.length,
-                    requiredCount: collection.access.requiredCount
-                });
-                for (const routeId of collection.unlockedRouteIds ?? []) {
-                    this.recordReplicationEvent("route-unlocked", {
-                        routeId,
-                        landmarkId: accessModule.landmarkId,
-                        position: vectorState(enemy.position)
+                const resolution = this.worldProgress.resolveEncounter(enemy.objectId);
+                for (const collection of resolution.accessCollections ?? []) {
+                    const accessModule = collection.module;
+                    this.recordReplicationEvent("access-module-collected", {
+                        accessModuleId: accessModule.id,
+                        encounterId: enemy.objectId,
+                        sectorId: accessModule.sectorId,
+                        collectedCount: collection.access.collectedModuleIds.length,
+                        requiredCount: collection.access.requiredCount
                     });
-                }
-                this.eventFlash = {
-                    type: "access-module-collected",
-                    age: 0,
-                    accessModuleId: accessModule.id,
-                    position: enemy.position.clone(),
-                    collectedCount: collection.access.collectedModuleIds.length,
-                    requiredCount: collection.access.requiredCount
-                };
-                if (collection.routeChanged) {
-                    this.#setActiveCollisionSurfaces(
-                        this.#bossFilteredCollisionSurfaces(
-                            collisionSurfacesForSectorProgress(this.world, this.worldProgress)
-                        )
-                    );
+                    for (const routeId of collection.unlockedRouteIds ?? []) {
+                        this.recordReplicationEvent("route-unlocked", {
+                            routeId,
+                            landmarkId: accessModule.landmarkId,
+                            position: vectorState(enemy.position)
+                        });
+                    }
+                    this.eventFlash = {
+                        type: "access-module-collected",
+                        age: 0,
+                        accessModuleId: accessModule.id,
+                        position: enemy.position.clone(),
+                        collectedCount: collection.access.collectedModuleIds.length,
+                        requiredCount: collection.access.requiredCount
+                    };
+                    if (collection.routeChanged) {
+                        this.#setActiveCollisionSurfaces(
+                            this.#bossFilteredCollisionSurfaces(
+                                collisionSurfacesForSectorProgress(this.world, this.worldProgress)
+                            )
+                        );
+                    }
                 }
             }
         }
@@ -3859,6 +3908,7 @@ export class GameSimulation {
             accessScanStates: this.world.scannerGroups
                 ? snapshotAccessScanStates(this.world.scannerGroups, this.elapsedSeconds)
                 : Object.freeze([]),
+            hardpointJammerStates: this.hardpointJammers.snapshot(),
             resets: this.resets,
             maxAttachDistance: hookReach(player.foundation.effectiveRopeConfig(this.ropeConfig))
         };

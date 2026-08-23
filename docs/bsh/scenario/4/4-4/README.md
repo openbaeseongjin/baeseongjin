@@ -1,6 +1,6 @@
 # SECTOR 04 — 4-4 RESIDENT REFUGE HALL
 
-Status: **DESIGN LOCKED / RUNTIME NOT IMPLEMENTED**<br>
+Status: **RUNTIME GENERATED / PLAYABLE**<br>
 Package baseline: `3c9f661bba58af6f7351e00754c12aef86575a12`<br>
 Approved gameplay preview: **MAP REV2**<br>
 Approved story/dialogue preview: **STORY REV3**

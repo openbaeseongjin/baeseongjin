@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "5-6",
     "sector": 5,
@@ -43,11 +43,11 @@
       "y": -100
     },
     "exit": {
-      "id": "sector-05-06:scenario-exit",
+      "id": "sector-05-06:exit",
       "x": -520,
       "y": -2200
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-05-07",
     "surfaces": [
       {
         "id": "sector-05-06:entry-deck",
@@ -75,6 +75,151 @@
           {
             "x": 624,
             "y": -36
+          }
+        ]
+      },
+      {
+        "id": "sector-05-06:runtime-deck-1",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 720,
+          "y": -980
+        },
+        "vertices": [
+          {
+            "x": 540,
+            "y": -980
+          },
+          {
+            "x": 900,
+            "y": -980
+          },
+          {
+            "x": 900,
+            "y": -956
+          },
+          {
+            "x": 540,
+            "y": -956
+          }
+        ]
+      },
+      {
+        "id": "sector-05-06:runtime-deck-2",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -120,
+          "y": -420
+        },
+        "vertices": [
+          {
+            "x": -330,
+            "y": -420
+          },
+          {
+            "x": 90,
+            "y": -420
+          },
+          {
+            "x": 90,
+            "y": -396
+          },
+          {
+            "x": -330,
+            "y": -396
+          }
+        ]
+      },
+      {
+        "id": "sector-05-06:runtime-deck-3",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 800,
+          "y": -1320
+        },
+        "vertices": [
+          {
+            "x": 640,
+            "y": -1320
+          },
+          {
+            "x": 960,
+            "y": -1320
+          },
+          {
+            "x": 960,
+            "y": -1296
+          },
+          {
+            "x": 640,
+            "y": -1296
+          }
+        ]
+      },
+      {
+        "id": "sector-05-06:runtime-deck-4",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 0,
+          "y": -1700
+        },
+        "vertices": [
+          {
+            "x": -180,
+            "y": -1700
+          },
+          {
+            "x": 180,
+            "y": -1700
+          },
+          {
+            "x": 180,
+            "y": -1676
+          },
+          {
+            "x": -180,
+            "y": -1676
+          }
+        ]
+      },
+      {
+        "id": "sector-05-06:runtime-deck-5",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -520,
+          "y": -2168
+        },
+        "vertices": [
+          {
+            "x": -680,
+            "y": -2168
+          },
+          {
+            "x": -360,
+            "y": -2168
+          },
+          {
+            "x": -360,
+            "y": -2144
+          },
+          {
+            "x": -680,
+            "y": -2144
           }
         ]
       }
@@ -213,16 +358,190 @@
         "sourceId": "exit"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      {
+        "id": "sector-05-06:recovery-1",
+        "x": -120,
+        "y": -500,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-06:recovery-2",
+        "x": 500,
+        "y": -820,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-06:recovery-3",
+        "x": 520,
+        "y": -1540,
+        "maxRetrySeconds": 5
+      }
+    ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-05-06:jammer-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "hardpoint-jammer-v1",
+        "position": {
+          "x": 650,
+          "y": -1120
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": 175,
+          "y": -1320,
+          "width": 780,
+          "height": 420
+        },
+        "rules": [
+          "no-projectile-attack"
+        ],
+        "jammer": {
+          "groupId": "sector-05-06:jammer-a:field"
+        }
+      },
+      {
+        "id": "sector-05-06:cutter-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "sentry-t1",
+        "position": {
+          "x": 430,
+          "y": -420
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -220,
+          "y": -820,
+          "width": 1150,
+          "height": 520
+        },
+        "rules": [
+          "cutter-fire"
+        ]
+      },
+      {
+        "id": "sector-05-06:aegis-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "shield-drone-t1",
+        "position": {
+          "x": 360,
+          "y": -1540
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -100,
+          "y": -1800,
+          "width": 1000,
+          "height": 440
+        },
+        "rules": []
+      },
+      {
+        "id": "sector-05-06:routing-proof-03-of-03:terminal",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -260,
+          "y": -2080
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 84,
+        "label": "ROUTING AUTHORIZATION · 03 / 03",
+        "objectiveId": "routing-authorization"
+      },
+      {
+        "id": "sector-05-06:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": -632,
+          "y": -2168
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-05-06:gate"
+      },
+      {
+        "id": "sector-05-06:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": -520,
+          "y": -2168
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-06:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "routing-authorization",
+        "type": "interact",
+        "sourceObjectId": "sector-05-06:routing-proof-03-of-03:terminal",
+        "bounds": {
+          "x": -470,
+          "y": -2260,
+          "width": 420,
+          "height": 180
+        }
+      },
+      {
+        "id": "final-deck-reached",
+        "type": "reach",
+        "bounds": {
+          "x": -730,
+          "y": -2348,
+          "width": 420,
+          "height": 180
+        },
+        "requiredObjectiveIds": [
+          "routing-authorization"
+        ]
+      },
+      {
+        "id": "exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-05-06:exit-panel",
+        "requiredObjectiveIds": [
+          "final-deck-reached"
+        ]
+      }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "jammerGroups": [
+      {
+        "id": "sector-05-06:jammer-a:field",
+        "sourceObjectId": "sector-05-06:jammer-a",
+        "eligibleSurfaceIds": [
+          "jam-a1-surface",
+          "jam-b1-surface"
+        ]
+      }
+    ],
+    "gate": {
+      "id": "sector-05-06:gate",
+      "nextAreaId": "sector-05-07",
+      "requiredObjectiveIds": [
+        "exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": -568,
+        "y": -2296,
+        "width": 96,
+        "height": 160
+      }
+    }
   },
   "anchors": [
     {
@@ -666,9 +985,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "expanded-for-authored-points"
-  }
+  "behaviorRefs": []
 }

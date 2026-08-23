@@ -3,6 +3,9 @@
   "manifestPaths": [
     "docs/bsh/scenario/AREA-CATALOG.json",
     "docs/bsh/scenario/AREA-CATALOG.sector02.json",
-    "docs/bsh/scenario/AREA-CATALOG.sector03.json"
+    "docs/bsh/scenario/AREA-CATALOG.sector03.json",
+    "docs/bsh/scenario/AREA-CATALOG.sector04.json",
+    "docs/bsh/scenario/AREA-CATALOG.sector05.json",
+    "docs/bsh/scenario/AREA-CATALOG.sector06.json"
   ]
 }

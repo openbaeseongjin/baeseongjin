@@ -3,6 +3,7 @@
     "catalogId": "sector-02-authored-mock",
     "catalogRevision": "sector-02-scenarios-rev1-v2-v2-generated",
     "catalogOutputPath": "src/game/world/areas/generated/sector02/Sector02Catalog.generated.js",
+    "accessModuleRequirement": 3,
     "expectedStageIds": ["2-1", "2-2", "2-3", "2-4", "2-5", "2-6", "2-7", "2-8"],
     "stageSources": [
         {

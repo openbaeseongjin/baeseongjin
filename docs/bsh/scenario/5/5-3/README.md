@@ -1,10 +1,10 @@
 # SECTOR 05-3 — SECURITY REVIEW GALLERY REV2.0
 
-> Status: **DESIGN LOCKED · NOT IMPLEMENTED**<br>
+> Status: **RUNTIME GENERATED · PLAYTEST PENDING**<br>
 > Authoring snapshot: `3c9f661bba58af6f7351e00754c12aef86575a12`<br>
 > Source Area ID: `sector-05-03`<br>
 > Signature: **CENTRAL SPINE → DUAL BYPASS → LATERAL TRANSFER → REVERSE RETURN → FINAL CLIMB**<br>
-> Special Security: **HARDPOINT JAMMER ×2 · NEW SYSTEM**<br>
+> Special Security: **HARDPOINT JAMMER ×2 · SHARED RUNTIME FIELD**<br>
 > Max intended Rope relation: **349.86px < 400px**<br>
 > Next: **5-4 CAPACITY ALLOCATION CORE**
 

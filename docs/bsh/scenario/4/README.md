@@ -6,11 +6,26 @@
 > - Sector Identity / Theme: **DESIGN DIRECTION LOCKED**
 > - Resident Security Override 2-of-3: **DESIGN LOCKED**
 > - 4-1~4-8 Stage breakdown / names / exact topology: **AUTHORED PACKAGE MERGED — individual Runtime migration approval required**
-> - New Sector04 Runtime: **NOT IMPLEMENTED**
-> - Current legacy `TRANSIT / INFRASTRUCTURE` Sector04 docs/runtime: **SUPERSEDED FOR NEW AUTHORING**
+> - Sector04 Runtime: **GENERATED / PLAYABLE — 4-1..4-8**
+> - Runtime authority: canonical `AREA-SPEC.v2.json` + `AREA-CATALOG.sector04.json`
 > - Authoring snapshot: `cb4f690ac180a04868322e9c4cfe1384897c348b`
 > - Stage Direction Runtime v1: **VERIFIED AVAILABLE**
 > - Post-Sector03 Boss / Transition → Sector04 entry: **TBD / DO NOT DIRECT-WIRE 3-8 → 4-1**
+
+## Runtime promotion reconciliation
+
+| Stage | Runtime bounds | Result |
+|---|---:|---|
+| 4-1 | 4992×2208 | Editor geometry retained over the older 4992×2112 design bound. |
+| 4-2 | 4480×2112 | Editor and design agree. |
+| 4-3 | 5376×2432 | Editor and design agree. |
+| 4-4 | 5376×2400 | Editor geometry retained over the older 5376×2240 design bound. |
+| 4-5 | 5376×2432 | Editor and design agree. |
+| 4-6 | 5120×2656 | Editor geometry retained over the older 5120×2560 design bound. |
+| 4-7 | 5440×3072 | Editor geometry retained; duplicated distance/recovery imports were removed. |
+| 4-8 | 3328×2976 | Editor geometry retained; under-quorum return is separate from final control. |
+
+Only 4-1→…→4-8 is connected. 4-8 remains a content boundary; Sector03 and Sector05 transitions are not authored here.
 
 ---
 

@@ -2,7 +2,7 @@
 
 Baseline: `4551798860193a16e53814aae5c3a42022b4e1cf`
 
-## Current Runtime — NOT IMPLEMENTED
+## Current Runtime — GENERATED / PLAYABLE
 
 The deleted legacy standalone Sector04 implementation contained:
 
@@ -14,7 +14,7 @@ The deleted legacy standalone Sector04 implementation contained:
 
 This is **SUPERSEDED FOR NEW AUTHORING**.
 
-The new Upper Residential 4-1 is **NOT IMPLEMENTED**.
+The new Upper Residential 4-1 is generated from canonical `AREA-SPEC.v2.json`.
 
 ## Relevant Runtime capabilities — VERIFIED
 
@@ -37,5 +37,5 @@ The new Upper Residential 4-1 is **NOT IMPLEMENTED**.
 
 Do not interpret this documentation package as an already migrated Runtime.
 
-The old Transit catalog has been retired. `AREA-SPEC.v2.json` remains scenario-only until an explicit Runtime migration is approved.
+`AREA-SPEC.v2.json` is the production geometry authority and is registered through the Sector04 manifest.
 Post-Sector03 Boss/Transition remains TBD, so do not directly wire 3-8 into this Stage without the transition contract.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "4-6",
     "sector": 4,
@@ -43,14 +43,14 @@
       "y": -420
     },
     "exit": {
-      "id": "sector-04-06:scenario-exit",
+      "id": "sector-04-06:exit",
       "x": 1770,
       "y": -2180
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-04-07",
     "surfaces": [
       {
-        "id": "entry-deck",
+        "id": "lower-gallery-entry-deck",
         "kind": "scenario-surface",
         "oneWay": true,
         "grappleable": true,
@@ -405,19 +405,53 @@
         "sourceId": "a13"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      { "id": "sector-04-06:recover-lower", "x": 900, "y": -800, "maxRetrySeconds": 5 },
+      { "id": "sector-04-06:recover-shaft", "x": 40, "y": -1340, "maxRetrySeconds": 5 },
+      { "id": "sector-04-06:recover-upper", "x": 1080, "y": -2090, "maxRetrySeconds": 5 }
+    ],
     "checkpoints": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "sector-04-06:lower-pursuit",
+        "kind": "patrol-drone",
+        "enemyType": "pursuit-drone-t1",
+        "position": { "x": 1160, "y": -680 },
+        "coordinateAnchor": "center",
+        "activation": { "x": 100, "y": -1150, "width": 1900, "height": 950 }
+      },
+      {
+        "id": "sector-04-06:upper-cutter",
+        "kind": "sentry",
+        "enemyType": "sentry-t1",
+        "position": { "x": 1177, "y": -1825 },
+        "coordinateAnchor": "center",
+        "activation": { "x": 250, "y": -2400, "width": 1700, "height": 700 },
+        "rules": ["cutter-fire", "cover-ends-los"]
+      },
+      {
+        "id": "sector-04-06:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 1658, "y": -2148 },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-04-06:gate"
+      }
+    ],
     "objectives": [
       {
         "id": "final-deck-reached",
         "type": "reach",
-        "preset": "reach-deck"
+        "preset": "reach-deck",
+        "bounds": { "x": 1540, "y": -2280, "width": 360, "height": 128 }
       },
       {
         "id": "exit-panel-engaged",
         "type": "interact",
         "preset": "exit-panel",
+        "sourceObjectId": "sector-04-06:exit-panel",
         "requiredObjectiveIds": [
           "final-deck-reached"
         ]
@@ -457,7 +491,13 @@
         "mobileZoom": 0.72
       }
     ],
-    "cueIds": []
+    "cueIds": [],
+    "gate": {
+      "id": "sector-04-06:gate",
+      "nextAreaId": "sector-04-07",
+      "requiredObjectiveIds": ["exit-panel-engaged"],
+      "trigger": { "x": 1722, "y": -2276, "width": 96, "height": 128 }
+    }
   },
   "anchors": [
     {
@@ -723,7 +763,7 @@
   ],
   "behaviorRefs": [],
   "scenario": {
-    "status": "scenario-only",
+    "status": "runtime-generated",
     "boundsProvenance": "expanded-for-authored-points"
   }
 }

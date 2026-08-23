@@ -6,6 +6,7 @@ export const ENEMY_TYPE = Object.freeze({
     PURSUIT_DRONE_T1: "pursuit-drone-t1",
     SHIELD_DRONE_T1: "shield-drone-t1",
     ARTILLERY_DRONE_T1: "artillery-drone-t1",
+    HARDPOINT_JAMMER_V1: "hardpoint-jammer-v1",
     SUPPORT_DRONE_T1: "support-drone-t1",
     SWARM_DRONE_T1: "swarm-drone-t1"
 });
@@ -17,6 +18,7 @@ export const AUTHORABLE_ENEMY_TYPE_IDS = Object.freeze([
     ENEMY_TYPE.PURSUIT_DRONE_T1,
     ENEMY_TYPE.SHIELD_DRONE_T1,
     ENEMY_TYPE.ARTILLERY_DRONE_T1,
+    ENEMY_TYPE.HARDPOINT_JAMMER_V1,
     ENEMY_TYPE.SUPPORT_DRONE_T1,
     ENEMY_TYPE.SWARM_DRONE_T1
 ]);

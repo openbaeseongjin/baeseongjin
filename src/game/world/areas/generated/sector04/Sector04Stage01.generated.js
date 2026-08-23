@@ -1,0 +1,716 @@
+// GENERATED FILE - DO NOT EDIT
+// Source: 4-1 AREA-SPEC.v2.json
+import { createAreaDefinitionFromV2 } from "../../../area-authoring-v2/AreaSpecV2.js";
+
+export const GENERATED_STAGE_ID = "4-1";
+export const GENERATED_AREA_ID = "sector-04-01";
+// JSON ordering and formatting are deterministic generator output.
+// prettier-ignore
+const SPEC = {
+  "anchors": [
+    {
+      "landmark": {
+        "id": "A1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "A1",
+          "sourceId": "A1"
+        },
+        "x": -1952,
+        "y": -320
+      },
+      "target": {
+        "id": "A1-surface",
+        "properties": {
+          "sourceId": "A1"
+        },
+        "x": -1952,
+        "y": -320
+      }
+    },
+    {
+      "landmark": {
+        "id": "D1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "D1",
+          "sourceId": "D1"
+        },
+        "x": -1376,
+        "y": -160
+      },
+      "target": {
+        "id": "D1-surface",
+        "properties": {
+          "sourceId": "D1"
+        },
+        "x": -1376,
+        "y": -160
+      }
+    },
+    {
+      "landmark": {
+        "id": "B1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "B1",
+          "sourceId": "B1"
+        },
+        "x": -736,
+        "y": -128
+      },
+      "target": {
+        "id": "B1-surface",
+        "properties": {
+          "sourceId": "B1"
+        },
+        "x": -736,
+        "y": -128
+      }
+    },
+    {
+      "landmark": {
+        "id": "B2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "B2",
+          "sourceId": "B2"
+        },
+        "x": -384,
+        "y": -80
+      },
+      "target": {
+        "id": "B2-surface",
+        "properties": {
+          "sourceId": "B2"
+        },
+        "x": -384,
+        "y": -80
+      }
+    },
+    {
+      "landmark": {
+        "id": "B3",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "B3",
+          "sourceId": "B3"
+        },
+        "x": -32,
+        "y": -144
+      },
+      "target": {
+        "id": "B3-surface",
+        "properties": {
+          "sourceId": "B3"
+        },
+        "x": -32,
+        "y": -144
+      }
+    },
+    {
+      "landmark": {
+        "id": "B4",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "B4",
+          "sourceId": "B4"
+        },
+        "x": 320,
+        "y": -96
+      },
+      "target": {
+        "id": "B4-surface",
+        "properties": {
+          "sourceId": "B4"
+        },
+        "x": 320,
+        "y": -96
+      }
+    },
+    {
+      "landmark": {
+        "id": "B5",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "B5",
+          "sourceId": "B5"
+        },
+        "x": 672,
+        "y": -160
+      },
+      "target": {
+        "id": "B5-surface",
+        "properties": {
+          "sourceId": "B5"
+        },
+        "x": 672,
+        "y": -160
+      }
+    },
+    {
+      "landmark": {
+        "id": "B6",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "B6",
+          "sourceId": "B6"
+        },
+        "x": 1024,
+        "y": -224
+      },
+      "target": {
+        "id": "B6-surface",
+        "properties": {
+          "sourceId": "B6"
+        },
+        "x": 1024,
+        "y": -224
+      }
+    },
+    {
+      "landmark": {
+        "id": "A2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "A2",
+          "sourceId": "A2"
+        },
+        "x": 1440,
+        "y": -736
+      },
+      "target": {
+        "id": "A2-surface",
+        "properties": {
+          "sourceId": "A2"
+        },
+        "x": 1440,
+        "y": -736
+      }
+    },
+    {
+      "landmark": {
+        "id": "A3",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "A3",
+          "sourceId": "A3"
+        },
+        "x": 1248,
+        "y": -1024
+      },
+      "target": {
+        "id": "A3-surface",
+        "properties": {
+          "sourceId": "A3"
+        },
+        "x": 1248,
+        "y": -1024
+      }
+    },
+    {
+      "landmark": {
+        "id": "A4",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "A4",
+          "sourceId": "A4"
+        },
+        "x": 1504,
+        "y": -1280
+      },
+      "target": {
+        "id": "A4-surface",
+        "properties": {
+          "sourceId": "A4"
+        },
+        "x": 1504,
+        "y": -1280
+      }
+    },
+    {
+      "landmark": {
+        "id": "A5",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "A5",
+          "sourceId": "A5"
+        },
+        "x": 1760,
+        "y": -1536
+      },
+      "target": {
+        "id": "A5-surface",
+        "properties": {
+          "sourceId": "A5"
+        },
+        "x": 1760,
+        "y": -1536
+      }
+    },
+    {
+      "landmark": {
+        "id": "A6",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "A6",
+          "sourceId": "A6"
+        },
+        "x": 2016,
+        "y": -1760
+      },
+      "target": {
+        "id": "A6-surface",
+        "properties": {
+          "sourceId": "A6"
+        },
+        "x": 2016,
+        "y": -1760
+      }
+    }
+  ],
+  "authoringMode": "runtime",
+  "behaviorRefs": [],
+  "definition": {
+    "bounds": {
+      "height": 2208,
+      "width": 4992
+    },
+    "cameraZones": [
+      {
+        "desktopZoom": 0.82,
+        "id": "arrival-basin-reveal",
+        "maxY": 0,
+        "minY": -640,
+        "mobileZoom": 0.64
+      },
+      {
+        "desktopZoom": 0.88,
+        "id": "basin-patrol",
+        "maxY": -640,
+        "minY": -960,
+        "mobileZoom": 0.66
+      },
+      {
+        "desktopZoom": 0.9,
+        "id": "far-residential-ascent",
+        "maxY": -960,
+        "minY": -1728,
+        "mobileZoom": 0.68
+      },
+      {
+        "desktopZoom": 0.96,
+        "id": "private-lobby",
+        "maxY": -1728,
+        "minY": -2208,
+        "mobileZoom": 0.72
+      }
+    ],
+    "checkpoints": [],
+    "cueIds": [],
+    "entry": {
+      "id": "sector-04-01:entry",
+      "x": -2240,
+      "y": -480
+    },
+    "exit": {
+      "id": "sector-04-01:exit",
+      "x": 2208,
+      "y": -1952
+    },
+    "gate": {
+      "id": "sector-04-01:gate",
+      "nextAreaId": "sector-04-02",
+      "requiredObjectiveIds": [
+        "sector-04-01:exit-panel-engaged"
+      ],
+      "trigger": {
+        "height": 128,
+        "width": 96,
+        "x": 2160,
+        "y": -2048
+      }
+    },
+    "id": "sector-04-01",
+    "name": "UPPER RESIDENTIAL ARRIVAL",
+    "nextAreaId": "sector-04-02",
+    "objectives": [
+      {
+        "id": "sector-04-01:exit-panel-engaged",
+        "sourceObjectId": "sector-04-01:exit-panel",
+        "type": "interact"
+      }
+    ],
+    "objects": [
+      {
+        "activation": {
+          "height": 512,
+          "width": 1280,
+          "x": -640,
+          "y": -512
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "patrol-drone-t1",
+        "id": "sector-04-01:residential-basin-patrol",
+        "kind": "patrol-drone",
+        "patrol": {
+          "mode": "loop",
+          "points": [
+            {
+              "x": -288,
+              "y": -176
+            },
+            {
+              "x": 96,
+              "y": -256
+            },
+            {
+              "x": 480,
+              "y": -176
+            },
+            {
+              "x": 96,
+              "y": -96
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.4
+        },
+        "position": {
+          "x": -288,
+          "y": -176
+        },
+        "sourceId": "sector-04-01:residential-basin-patrol"
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-04-01:gate",
+        "id": "sector-04-01:exit-panel",
+        "interactionRadius": 72,
+        "kind": "gate-panel",
+        "objectiveId": "sector-04-01:exit-panel-engaged",
+        "position": {
+          "x": 2096,
+          "y": -1920
+        },
+        "presentationId": "world-object:gate-panel"
+      }
+    ],
+    "order": 1,
+    "recoveryPoints": [
+      {
+        "id": "sector-04-01:basin-recovery-west",
+        "maxRetrySeconds": 5,
+        "x": -1088,
+        "y": -96
+      },
+      {
+        "id": "sector-04-01:basin-recovery-east",
+        "maxRetrySeconds": 5,
+        "x": 320,
+        "y": -96
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-04-01:route-ENTRY",
+        "sourceId": "ENTRY",
+        "x": -2240,
+        "y": -448
+      },
+      {
+        "id": "sector-04-01:route-A1",
+        "sourceId": "A1",
+        "x": -1952,
+        "y": -320
+      },
+      {
+        "id": "sector-04-01:route-M0",
+        "sourceId": "M0",
+        "x": -1664,
+        "y": -256
+      },
+      {
+        "id": "sector-04-01:route-D1",
+        "sourceId": "D1",
+        "x": -1376,
+        "y": -160
+      },
+      {
+        "id": "sector-04-01:route-B0",
+        "sourceId": "B0",
+        "x": -1088,
+        "y": -96
+      },
+      {
+        "id": "sector-04-01:route-B1",
+        "sourceId": "B1",
+        "x": -736,
+        "y": -128
+      },
+      {
+        "id": "sector-04-01:route-B2",
+        "sourceId": "B2",
+        "x": -384,
+        "y": -80
+      },
+      {
+        "id": "sector-04-01:route-B3",
+        "sourceId": "B3",
+        "x": -32,
+        "y": -144
+      },
+      {
+        "id": "sector-04-01:route-B4",
+        "sourceId": "B4",
+        "x": 320,
+        "y": -96
+      },
+      {
+        "id": "sector-04-01:route-B5",
+        "sourceId": "B5",
+        "x": 672,
+        "y": -160
+      },
+      {
+        "id": "sector-04-01:route-B6",
+        "sourceId": "B6",
+        "x": 1024,
+        "y": -224
+      },
+      {
+        "id": "sector-04-01:route-R1",
+        "sourceId": "R1",
+        "x": 1280,
+        "y": -416
+      },
+      {
+        "id": "sector-04-01:route-A2",
+        "sourceId": "A2",
+        "x": 1440,
+        "y": -736
+      },
+      {
+        "id": "sector-04-01:route-A3",
+        "sourceId": "A3",
+        "x": 1248,
+        "y": -1024
+      },
+      {
+        "id": "sector-04-01:route-A4",
+        "sourceId": "A4",
+        "x": 1504,
+        "y": -1280
+      },
+      {
+        "id": "sector-04-01:route-A5",
+        "sourceId": "A5",
+        "x": 1760,
+        "y": -1536
+      },
+      {
+        "id": "sector-04-01:route-A6",
+        "sourceId": "A6",
+        "x": 2016,
+        "y": -1760
+      },
+      {
+        "id": "sector-04-01:route-EXIT",
+        "sourceId": "EXIT",
+        "x": 2208,
+        "y": -1952
+      }
+    ],
+    "routes": [],
+    "scannerGroups": [],
+    "sectorId": "sector-04",
+    "storyTriggers": [],
+    "subtitle": "SUNKEN SKY-GARDEN BASIN / CROSS-VALLEY RESIDENTIAL ASCENT",
+    "surfaces": [
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "arrival-terrace",
+        "kind": "arrival-terrace",
+        "oneWay": true,
+        "position": {
+          "x": -2220,
+          "y": -448
+        },
+        "sourceId": "arrival-terrace",
+        "vertices": [
+          {
+            "x": -2380,
+            "y": -448
+          },
+          {
+            "x": -2060,
+            "y": -448
+          },
+          {
+            "x": -2060,
+            "y": -418
+          },
+          {
+            "x": -2380,
+            "y": -418
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "story-terrace",
+        "kind": "story-terrace",
+        "oneWay": true,
+        "position": {
+          "x": -1664,
+          "y": -256
+        },
+        "sourceId": "story-terrace",
+        "vertices": [
+          {
+            "x": -1810,
+            "y": -256
+          },
+          {
+            "x": -1518,
+            "y": -256
+          },
+          {
+            "x": -1518,
+            "y": -226
+          },
+          {
+            "x": -1810,
+            "y": -226
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "basin-landing",
+        "kind": "basin-recovery",
+        "oneWay": true,
+        "position": {
+          "x": -1088,
+          "y": -96
+        },
+        "sourceId": "basin-landing",
+        "vertices": [
+          {
+            "x": -1180,
+            "y": -96
+          },
+          {
+            "x": -996,
+            "y": -96
+          },
+          {
+            "x": -996,
+            "y": -72
+          },
+          {
+            "x": -1180,
+            "y": -72
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "far-side-ascent",
+        "kind": "ascent-recovery",
+        "oneWay": true,
+        "position": {
+          "x": 1280,
+          "y": -416
+        },
+        "sourceId": "far-side-ascent",
+        "vertices": [
+          {
+            "x": 1184,
+            "y": -416
+          },
+          {
+            "x": 1376,
+            "y": -416
+          },
+          {
+            "x": 1376,
+            "y": -390
+          },
+          {
+            "x": 1184,
+            "y": -390
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "private-lobby",
+        "kind": "private-lobby",
+        "oneWay": true,
+        "position": {
+          "x": 2208,
+          "y": -1952
+        },
+        "sourceId": "private-lobby",
+        "vertices": [
+          {
+            "x": 2060,
+            "y": -1952
+          },
+          {
+            "x": 2356,
+            "y": -1952
+          },
+          {
+            "x": 2356,
+            "y": -1922
+          },
+          {
+            "x": 2060,
+            "y": -1922
+          }
+        ]
+      }
+    ],
+    "windZones": []
+  },
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "exit",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "scenario": {
+    "boundsProvenance": "expanded-for-authored-points",
+    "status": "runtime-generated"
+  },
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "id": "4-1",
+    "sector": 4,
+    "sourceAreaId": "sector-04-01",
+    "stage": 1
+  }
+};
+
+export const GENERATED_AREA = createAreaDefinitionFromV2(SPEC);

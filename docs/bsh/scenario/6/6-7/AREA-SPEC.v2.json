@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "6-7",
     "sector": 6,
@@ -34,20 +34,20 @@
     "name": "CONTAINMENT LATTICE",
     "subtitle": "RISING LATTICE / CUTTER / OFFSET RECOVERY",
     "bounds": {
-      "width": 1280,
+      "width": 1500,
       "height": 2400
     },
     "entry": {
       "id": "sector-06-07:entry",
-      "x": 0,
-      "y": -32
+      "x": -420,
+      "y": -80
     },
     "exit": {
-      "id": "sector-06-07:scenario-exit",
+      "id": "sector-06-07:exit",
       "x": 500,
       "y": -2140
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-06-08",
     "surfaces": [
       {
         "id": "R0",
@@ -155,28 +155,34 @@
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 0,
-          "y": 0
+          "x": -420,
+          "y": -48
         },
         "vertices": [
           {
-            "x": -96,
-            "y": 0
+            "x": -516,
+            "y": -48
           },
           {
-            "x": 96,
-            "y": 0
+            "x": -324,
+            "y": -48
           },
           {
-            "x": 96,
-            "y": 32
+            "x": -324,
+            "y": -16
           },
           {
-            "x": -96,
-            "y": 32
+            "x": -516,
+            "y": -16
           }
         ]
-      }
+      },
+      { "id": "lattice-entry", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -560, "y": -115 }, "vertices": [{ "x": -560, "y": -115 }, { "x": -280, "y": -115 }, { "x": -280, "y": -85 }, { "x": -560, "y": -85 }] },
+      { "id": "lattice-preview-link", "kind": "lattice", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -510, "y": -325 }, "vertices": [{ "x": -510, "y": -325 }, { "x": -330, "y": -325 }, { "x": -330, "y": -297 }, { "x": -510, "y": -297 }] },
+      { "id": "cutter-preview", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -570, "y": -535 }, "vertices": [{ "x": -570, "y": -535 }, { "x": -270, "y": -535 }, { "x": -270, "y": -505 }, { "x": -570, "y": -505 }] },
+      { "id": "lattice-full-safe", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -20, "y": -1845 }, "vertices": [{ "x": -20, "y": -1845 }, { "x": 280, "y": -1845 }, { "x": 280, "y": -1815 }, { "x": -20, "y": -1815 }] },
+      { "id": "lattice-upper-link", "kind": "lattice", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 250, "y": -2000 }, "vertices": [{ "x": 250, "y": -2000 }, { "x": 470, "y": -2000 }, { "x": 470, "y": -1972 }, { "x": 250, "y": -1972 }] },
+      { "id": "lattice-exit-deck", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 360, "y": -2175 }, "vertices": [{ "x": 360, "y": -2175 }, { "x": 660, "y": -2175 }, { "x": 660, "y": -2145 }, { "x": 360, "y": -2145 }] }
     ],
     "routePoints": [
       {
@@ -250,7 +256,8 @@
         "x": 500,
         "y": -2140,
         "sourceId": "sector-06-07:p3"
-      }
+      },
+      { "id": "sector-06-07:route-exit", "x": 436, "y": -2140, "sourceId": "exit" }
     ],
     "recoveryPoints": [
       {
@@ -273,14 +280,28 @@
       }
     ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-06-07:S1",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "sentry-t1",
+        "position": { "x": 360, "y": -1160 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -300, "y": -1680, "width": 600, "height": 1030 },
+        "rules": ["standard-projectile", "cutter-fire", "kill-optional"]
+      }
+    ],
+    "objectives": [
+      { "id": "exit-reached", "type": "reach", "bounds": { "x": 452, "y": -2220, "width": 96, "height": 160 } }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "gate": { "id": "sector-06-07:gate", "nextAreaId": "sector-06-08", "requiredObjectiveIds": ["exit-reached"], "trigger": { "x": 452, "y": -2220, "width": 96, "height": 160 } }
   },
   "anchors": [
     {
@@ -524,9 +545,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "inferred-editor-viewport"
-  }
+  "behaviorRefs": []
 }

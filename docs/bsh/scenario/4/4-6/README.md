@@ -1,6 +1,6 @@
 # ONE ROPE — SECTOR 04-6 REFUGE ACCESS GALLERY — REV1.0
 
-> Status: **DESIGN LOCKED / RUNTIME MIGRATION REQUIRED**<br>
+> Status: **RUNTIME GENERATED / PLAYABLE**<br>
 > Approved Gameplay: **REV2**<br>
 > Approved Story / Dialogue: **REV2**<br>
 > Package baseline: `3c9f661bba58af6f7351e00754c12aef86575a12`

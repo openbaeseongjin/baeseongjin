@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "6-8",
     "sector": 6,
@@ -39,11 +39,11 @@
     },
     "entry": {
       "id": "sector-06-08:entry",
-      "x": 0,
-      "y": -32
+      "x": -760,
+      "y": -100
     },
     "exit": {
-      "id": "sector-06-08:scenario-exit",
+      "id": "sector-06-08:exit",
       "x": 1750,
       "y": -1670
     },
@@ -155,28 +155,33 @@
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 0,
-          "y": 0
+          "x": -760,
+          "y": -68
         },
         "vertices": [
           {
-            "x": -96,
-            "y": 0
+            "x": -856,
+            "y": -68
           },
           {
-            "x": 96,
-            "y": 0
+            "x": -664,
+            "y": -68
           },
           {
-            "x": 96,
-            "y": 32
+            "x": -664,
+            "y": -36
           },
           {
-            "x": -96,
-            "y": 32
+            "x": -856,
+            "y": -36
           }
         ]
-      }
+      },
+      { "id": "pad-entry", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -805, "y": -130 }, "vertices": [{ "x": -805, "y": -130 }, { "x": -575, "y": -130 }, { "x": -575, "y": -100 }, { "x": -805, "y": -100 }] },
+      { "id": "lighting-bridge", "kind": "bridge", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 60, "y": -805 }, "vertices": [{ "x": 60, "y": -805 }, { "x": 450, "y": -805 }, { "x": 450, "y": -771 }, { "x": 60, "y": -771 }] },
+      { "id": "service-gantry", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 790, "y": -970 }, "vertices": [{ "x": 790, "y": -970 }, { "x": 1050, "y": -970 }, { "x": 1050, "y": -938 }, { "x": 790, "y": -938 }] },
+      { "id": "pad-perimeter", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 1360, "y": -1405 }, "vertices": [{ "x": 1360, "y": -1405 }, { "x": 1620, "y": -1405 }, { "x": 1620, "y": -1373 }, { "x": 1360, "y": -1373 }] },
+      { "id": "access-spur", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 1640, "y": -1705 }, "vertices": [{ "x": 1640, "y": -1705 }, { "x": 1880, "y": -1705 }, { "x": 1880, "y": -1673 }, { "x": 1640, "y": -1673 }] }
     ],
     "routePoints": [
       {
@@ -256,7 +261,8 @@
         "x": 1750,
         "y": -1670,
         "sourceId": "sector-06-08:p3"
-      }
+      },
+      { "id": "sector-06-08:route-exit", "x": 1686, "y": -1670, "sourceId": "exit" }
     ],
     "recoveryPoints": [
       {
@@ -279,14 +285,28 @@
       }
     ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "pad-access-console",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 1750, "y": -1680 },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "pad-access-denied",
+        "gateId": "sector-06-08:gate"
+      }
+    ],
+    "objectives": [
+      { "id": "pad-access-denied", "type": "interact", "sourceObjectId": "pad-access-console" }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "gate": { "id": "sector-06-08:gate", "nextAreaId": null, "requiredObjectiveIds": ["pad-access-denied"], "trigger": { "x": 1702, "y": -1766, "width": 96, "height": 160 }, "completionMode": "content-boundary" }
   },
   "anchors": [
     {
@@ -550,9 +570,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "inferred-editor-viewport"
-  }
+  "behaviorRefs": []
 }

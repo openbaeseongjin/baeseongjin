@@ -1,5 +1,6 @@
 import { pointInsideBounds } from "./WorldForceField.js";
 import { playerOverlapsStageSavePoint } from "./StageSavePointGeometry.js";
+import { ACCESS_MODULE_SOURCE_KIND } from "./sectors/SectorDefinition.js";
 
 function activePlayers(players) {
     return players.filter(({ lifeState }) => lifeState === "active");
@@ -27,6 +28,12 @@ function completingPlayer(objective, world, progress, players, commandsByPlayerI
     }
     if (objective.type === "augment-calibration") {
         return completingCalibrationPlayer(objective, world, players);
+    }
+    if (objective.type === "state-check") {
+        if (!progress.accessSourceSummary(objective.sources, objective.requiredCount).ready) return null;
+        return (
+            activePlayers(players).find(({ physics }) => pointInsideBounds(physics.position, objective.bounds)) ?? null
+        );
     }
     if (objective.type !== "interact" && objective.type !== "interact-choice") return null;
     return interactingPlayers(objective, world, progress, players, commandsByPlayerId)[0] ?? null;
@@ -57,6 +64,36 @@ function completionEvents({ result, objective, player, beforeRoutes, afterRoutes
             position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
         })
     ];
+    for (const collection of result.accessCollections ?? []) {
+        events.push(
+            Object.freeze({
+                type: "access-module-collected",
+                accessModuleId: collection.accessModuleId,
+                objectiveId: objective.id,
+                sourceKind: ACCESS_MODULE_SOURCE_KIND.OBJECTIVE_COMPLETION,
+                sectorId: collection.module.sectorId,
+                landmarkId: collection.module.landmarkId,
+                playerId: player.id,
+                position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y }),
+                collectedCount: collection.access.collectedModuleIds.length,
+                requiredCount: collection.access.requiredCount
+            })
+        );
+    }
+    if (result.contentBoundary) {
+        events.push(
+            Object.freeze({
+                type: "content-boundary-reached",
+                contentBoundaryId: result.contentBoundary.id,
+                sectorId: result.contentBoundary.sectorId,
+                landmarkId: result.contentBoundary.landmarkId,
+                stageId: result.contentBoundary.stageId,
+                objectiveId: objective.id,
+                playerId: player.id,
+                position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
+            })
+        );
+    }
     for (const routeId of afterRoutes) {
         if (beforeRoutes.has(routeId)) continue;
         events.push(

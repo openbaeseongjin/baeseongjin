@@ -1,7 +1,7 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
-  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
   "stage": {
     "sector": 6,
     "stage": 6,
@@ -9,10 +9,14 @@
     "name": "BEACON SPAN",
     "id": "6-6"
   },
-  "languagePolicy": {
-    "playerDialogue": "ko",
-    "directionNotes": "ko-first",
-    "diegeticSystemText": "en-allowed"
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
   },
   "beats": [
     {
@@ -34,7 +38,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-6:entry"
     },
     {
       "beatId": "safe-preview",
@@ -46,14 +54,18 @@
       "playerControl": "ON",
       "tracks": [
         {
-          "type": "camera",
+          "type": "object",
           "action": "show-patrol-path-cantilever-recovery-pad-landmark"
         },
         {
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-6:safe-preview"
     },
     {
       "beatId": "commit",
@@ -65,26 +77,24 @@
       "playerControl": "ON",
       "tracks": [
         {
-          "type": "gameplay",
+          "type": "object",
           "action": "patrol-position-becomes-fixed-firing-origin"
         },
         {
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-6:commit"
     },
     {
       "beatId": "combat-span",
       "trigger": {
-        "type": "route-band",
-        "targetIds": [
-          "sector-06-06:h2",
-          "sector-06-06:h3",
-          "sector-06-06:h4",
-          "sector-06-06:h5",
-          "sector-06-06:h6"
-        ]
+        "type": "position-zone",
+        "zoneId": "sector-06-06:h2"
       },
       "worldPause": false,
       "playerControl": "ON",
@@ -93,7 +103,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-6:combat-span"
     },
     {
       "beatId": "full-safe",
@@ -115,7 +129,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-6:full-safe"
     },
     {
       "beatId": "exit",
@@ -137,16 +155,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-6:exit"
     }
-  ],
-  "validation": [
-    "P1 remains threat-free preview outside activation.",
-    "H2-H6 are all mandatory at 400px Base Reach.",
-    "Patrol position freezes when valid target is acquired.",
-    "Any Patrol path position must be clearable.",
-    "R0/R1 are local recovery only and cannot replace main progression.",
-    "Pad03 remains a distant visible goal but receives no new reveal.",
-    "No ACCESS DENIED or CONTAINMENT VIOLATION."
   ]
 }

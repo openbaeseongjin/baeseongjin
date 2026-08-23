@@ -358,6 +358,25 @@ export function validateAreaCatalog(catalog, { maxAttachDistance = GRAPPLE_LINK_
             if (objective.completionDelaySeconds !== undefined && objective.type !== "interact") {
                 issues.push(issue("objective-completion-delay-type", area.id, { objectiveId: objective.id }));
             }
+            if (objective.type === "state-check") {
+                const sources = objective.sources;
+                if (
+                    !Array.isArray(sources) ||
+                    sources.length === 0 ||
+                    sources.some((id) => typeof id !== "string" || id.length === 0) ||
+                    new Set(sources).size !== sources.length
+                ) {
+                    issues.push(issue("objective-state-check-sources", area.id, { objectiveId: objective.id }));
+                }
+                if (
+                    !Number.isSafeInteger(objective.requiredCount) ||
+                    objective.requiredCount <= 0 ||
+                    objective.requiredCount > (sources?.length ?? 0) ||
+                    !objective.bounds
+                ) {
+                    issues.push(issue("objective-state-check-requirement", area.id, { objectiveId: objective.id }));
+                }
+            }
         }
         const authoredCameraZones = area.cameraZones.filter((zone) => zone && typeof zone === "object");
         for (const zone of authoredCameraZones) {

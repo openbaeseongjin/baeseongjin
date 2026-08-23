@@ -47,6 +47,7 @@ export function buildAuthoritySnapshot({
             bossRuntime: simulation.bossStageSnapshot(),
             worldElapsedSeconds: simulation.elapsedSeconds,
             windStates: simulation.snapshot().windStates,
+            hardpointJammerStates: simulation.hardpointJammers.snapshot(),
             completed: simulation.runState === "completed"
         },
         events

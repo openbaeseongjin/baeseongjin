@@ -92,7 +92,10 @@ export function createEnemyPatrolState({ patrol = null, activation = null, origi
     const points = dedupePoints(normalizePatrolPoints(patrol, activation));
     if (points.length < 2) return null;
     const policy = patrolPolicy(enemyType);
-    const mode = policy.mode ?? (patrol.mode === "loop" ? "loop" : "pingpong");
+    let mode = policy.mode ?? "pingpong";
+    if (patrol.mode === "loop" || patrol.mode === "pingpong") mode = patrol.mode;
+    let waitSeconds = policy.waitSeconds ?? 0;
+    if (Number.isFinite(patrol.waitSeconds)) waitSeconds = Math.max(0, patrol.waitSeconds);
     const originPoint = normalizePoint(origin, activation) ?? points[0];
     let targetIndex = nearestPointIndex(points, originPoint);
     let direction = mode === "pingpong" && targetIndex === points.length - 1 ? -1 : 1;
@@ -107,7 +110,7 @@ export function createEnemyPatrolState({ patrol = null, activation = null, origi
         speed,
         mode,
         points: Object.freeze(points),
-        waitSeconds: policy.waitSeconds ?? (Number.isFinite(patrol.waitSeconds) ? Math.max(0, patrol.waitSeconds) : 0),
+        waitSeconds,
         waitRemaining: 0,
         targetIndex,
         direction

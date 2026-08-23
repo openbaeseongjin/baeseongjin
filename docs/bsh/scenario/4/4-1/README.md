@@ -6,7 +6,7 @@
 > Authoring snapshot: `4551798860193a16e53814aae5c3a42022b4e1cf`
 > Previous REV2: **SUPERSEDED — MAP SIMILARITY FAIL vs 2-6**
 > Legacy Runtime `sector-04-01 / TRANSIT INTAKE`: **SUPERSEDED FOR NEW AUTHORING**
-> New 4-1 Runtime: **NOT IMPLEMENTED**
+> New 4-1 Runtime: **GENERATED / PLAYABLE**
 > Post-Sector03 Boss / Transition → 4-1: **TBD**
 
 ---

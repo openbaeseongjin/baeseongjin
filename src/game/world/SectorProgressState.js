@@ -25,6 +25,29 @@ export class SectorProgressState {
         this.encountersById = new Map(world.enemySpawns.map((encounter) => [encounter.encounterId, encounter]));
         this.routesById = new Map(world.routeLocks.map((route) => [route.id, route]));
         this.accessModulesById = new Map((world.accessModules ?? []).map((module) => [module.id, module]));
+        this.contentBoundariesById = new Map(
+            world.landmarks
+                .filter(({ contentBoundaryId }) => typeof contentBoundaryId === "string")
+                .map((landmark) => [landmark.contentBoundaryId, landmark])
+        );
+        this.accessModuleIdsByEncounterId = new Map();
+        this.accessModuleIdsByObjectiveId = new Map();
+        for (const module of world.accessModules ?? []) {
+            for (const source of module.sources ?? []) {
+                let index;
+                let sourceId;
+                if (source.encounterId) {
+                    index = this.accessModuleIdsByEncounterId;
+                    sourceId = source.encounterId;
+                } else if (source.objectiveId) {
+                    index = this.accessModuleIdsByObjectiveId;
+                    sourceId = source.objectiveId;
+                } else {
+                    continue;
+                }
+                index.set(sourceId, Object.freeze([...(index.get(sourceId) ?? []), module.id]));
+            }
+        }
         this.idOrder = new Map();
         let order = 0;
         for (const sector of world.sectors) {
@@ -33,6 +56,7 @@ export class SectorProgressState {
                 this.idOrder.set(landmarkId, order++);
                 for (const objectiveId of landmark.objectiveIds) this.idOrder.set(objectiveId, order++);
                 for (const encounterId of landmark.encounterIds) this.idOrder.set(encounterId, order++);
+                if (landmark.contentBoundaryId) this.idOrder.set(landmark.contentBoundaryId, order++);
                 if (landmark.outboundRouteId) this.idOrder.set(landmark.outboundRouteId, order++);
             }
         }
@@ -42,7 +66,8 @@ export class SectorProgressState {
         this.collectedAccessModuleIds = new Set();
         this.unlockedRouteIds = new Set();
         this.activeObjectiveSequences = new Map();
-        this.contentBoundaryReached = false;
+        this.reachedContentBoundaryIds = new Set();
+        this.contentBoundaryId = null;
         this.#unlockSatisfiedRoutes();
         if (snapshot) this.restore(snapshot);
     }
@@ -68,6 +93,14 @@ export class SectorProgressState {
         }
     }
 
+    #collectAccessModules(moduleIds) {
+        return Object.freeze(
+            (moduleIds ?? [])
+                .map((accessModuleId) => this.collectAccessModule(accessModuleId))
+                .filter(({ changed }) => changed)
+        );
+    }
+
     completeObjective(objectiveId) {
         const objective = this.objectivesById.get(objectiveId);
         if (!objective) return freezeResult({ accepted: false, changed: false, reason: "objective-unknown" });
@@ -80,16 +113,31 @@ export class SectorProgressState {
         this.completedObjectiveIds.add(objectiveId);
         this.activeObjectiveSequences.delete(objectiveId);
         const before = this.unlockedRouteIds.size;
+        const accessCollections = this.#collectAccessModules(this.accessModuleIdsByObjectiveId.get(objectiveId));
         this.#unlockSatisfiedRoutes();
-        const finalSector = this.world.sectors.at(-1);
-        const finalLandmark = this.landmarksById.get(finalSector.exitLandmarkId);
-        if (finalLandmark.objectiveIds.every((id) => this.completedObjectiveIds.has(id))) {
-            this.contentBoundaryReached = true;
+        let contentBoundary = null;
+        for (const [contentBoundaryId, landmark] of this.contentBoundariesById) {
+            if (this.reachedContentBoundaryIds.has(contentBoundaryId)) continue;
+            if (!landmark.contentBoundaryRequiredObjectiveIds.every((id) => this.completedObjectiveIds.has(id))) {
+                continue;
+            }
+            this.reachedContentBoundaryIds.add(contentBoundaryId);
+            this.contentBoundaryId = contentBoundaryId;
+            contentBoundary = freezeResult({
+                id: contentBoundaryId,
+                landmarkId: landmark.id,
+                sectorId: landmark.sectorId,
+                stageId: landmark.stageId,
+                requiredObjectiveIds: landmark.contentBoundaryRequiredObjectiveIds
+            });
+            break;
         }
         return freezeResult({
             accepted: true,
             changed: true,
             objectiveId,
+            accessCollections,
+            contentBoundary,
             unlockedRouteIds: sortedIds(
                 [...this.unlockedRouteIds].filter((id) => !this.routesById.get(id)?.sectorTransition),
                 this.idOrder
@@ -157,7 +205,12 @@ export class SectorProgressState {
             return freezeResult({ accepted: true, changed: false, reason: "encounter-already-resolved" });
         }
         this.resolvedEncounterIds.add(encounterId);
-        return freezeResult({ accepted: true, changed: true, encounterId });
+        return freezeResult({
+            accepted: true,
+            changed: true,
+            encounterId,
+            accessCollections: this.#collectAccessModules(this.accessModuleIdsByEncounterId.get(encounterId))
+        });
     }
 
     collectAccessModule(accessModuleId) {
@@ -173,6 +226,7 @@ export class SectorProgressState {
             accepted: true,
             changed: true,
             accessModuleId,
+            module,
             unlockedRouteIds: sortedIds(
                 [...this.unlockedRouteIds].filter((id) => !beforeRoutes.has(id)),
                 this.idOrder
@@ -196,8 +250,24 @@ export class SectorProgressState {
         });
     }
 
+    accessSourceSummary(sourceIds, requiredCount) {
+        const availableSourceIds = (sourceIds ?? []).filter((id) => this.accessModulesById.has(id));
+        const collectedSourceIds = availableSourceIds.filter((id) => this.collectedAccessModuleIds.has(id));
+        return freezeResult({
+            requiredCount,
+            availableSourceIds: Object.freeze(availableSourceIds),
+            collectedSourceIds: Object.freeze(collectedSourceIds),
+            ready: collectedSourceIds.length >= requiredCount
+        });
+    }
+
     isRouteUnlocked(routeId) {
         return this.unlockedRouteIds.has(routeId);
+    }
+
+    resetContentBoundary() {
+        this.contentBoundaryId = null;
+        return this;
     }
 
     snapshot() {
@@ -211,7 +281,9 @@ export class SectorProgressState {
                     (left, right) => this.idOrder.get(left.objectiveId) - this.idOrder.get(right.objectiveId)
                 )
             ),
-            contentBoundaryReached: this.contentBoundaryReached
+            reachedContentBoundaryIds: sortedIds(this.reachedContentBoundaryIds, this.idOrder),
+            contentBoundaryId: this.contentBoundaryId,
+            contentBoundaryReached: this.contentBoundaryId !== null
         });
     }
 
@@ -229,6 +301,9 @@ export class SectorProgressState {
             requireSnapshotArray(snapshot.collectedAccessModuleIds ?? [], "collectedAccessModuleIds")
         );
         const unlockedRouteIds = new Set(requireSnapshotArray(snapshot.unlockedRouteIds, "unlockedRouteIds"));
+        const reachedContentBoundaryIds = new Set(
+            requireSnapshotArray(snapshot.reachedContentBoundaryIds ?? [], "reachedContentBoundaryIds")
+        );
         if (!Array.isArray(snapshot.activeObjectiveSequences)) {
             throw new Error("activeObjectiveSequences must be an array");
         }
@@ -238,10 +313,14 @@ export class SectorProgressState {
             throw new Error("unknown access module");
         }
         if ([...unlockedRouteIds].some((id) => !this.routesById.has(id))) throw new Error("unknown route");
+        if ([...reachedContentBoundaryIds].some((id) => !this.contentBoundariesById.has(id))) {
+            throw new Error("unknown content boundary");
+        }
         this.completedObjectiveIds = completedObjectiveIds;
         this.resolvedEncounterIds = resolvedEncounterIds;
         this.collectedAccessModuleIds = collectedAccessModuleIds;
         this.unlockedRouteIds = unlockedRouteIds;
+        this.reachedContentBoundaryIds = reachedContentBoundaryIds;
         this.activeObjectiveSequences = new Map(
             snapshot.activeObjectiveSequences.map((sequence) => {
                 if (!this.objectivesById.has(sequence?.objectiveId)) throw new Error("unknown objective sequence");
@@ -251,7 +330,13 @@ export class SectorProgressState {
                 return [sequence.objectiveId, freezeResult({ ...sequence })];
             })
         );
-        this.contentBoundaryReached = snapshot.contentBoundaryReached === true;
+        this.contentBoundaryId = null;
+        if (snapshot.contentBoundaryReached === true) {
+            this.contentBoundaryId = snapshot.contentBoundaryId ?? null;
+        }
+        if (this.contentBoundaryId !== null && !this.contentBoundariesById.has(this.contentBoundaryId)) {
+            throw new Error("unknown active content boundary");
+        }
         return this;
     }
 }

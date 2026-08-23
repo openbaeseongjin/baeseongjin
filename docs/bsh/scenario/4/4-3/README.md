@@ -6,8 +6,8 @@
 > Authoring snapshot: `3c9f661bba58af6f7351e00754c12aef86575a12`
 > Approved Gameplay Preview basis: **REV7**
 > Legacy current Runtime 4-3: **FREIGHT BYPASS / CUTTER + TRANSIT WAKE — SUPERSEDED FOR NEW AUTHORING**
-> New 4-3 Runtime: **NOT IMPLEMENTED**
-> Local Relay objective Runtime: **NOT VERIFIED / IMPLEMENTATION GAP**
+> New 4-3 Runtime: **GENERATED / PLAYABLE**
+> Local Relay objective Runtime: **IMPLEMENTED / VERIFIED**
 
 ---
 
@@ -185,7 +185,7 @@ Enemy:
 
 Current verified defaults at baseline:
 - moveSpeed `160`
-- acquireRange `640`
+- acquireRange `960`
 - triggerDistance `96`
 - windup `0.25s`
 - dashSpeed `640`

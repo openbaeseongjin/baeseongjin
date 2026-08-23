@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "5-4",
     "sector": 5,
@@ -43,11 +43,11 @@
       "y": -260
     },
     "exit": {
-      "id": "sector-05-04:scenario-exit",
-      "x": 282.84,
-      "y": 325.58
+      "id": "sector-05-04:exit",
+      "x": 258,
+      "y": -2212
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-05-05",
     "surfaces": [
       {
         "id": "island-a",
@@ -357,22 +357,168 @@
         "sourceId": "h15"
       },
       {
-        "id": "sector-05-04:route-route-3-neighborDistancesPx-17",
-        "x": 282.84,
-        "y": 325.58,
-        "sourceId": "route-3-neighborDistancesPx-17"
+        "id": "sector-05-04:route-exit",
+        "x": 258,
+        "y": -2212,
+        "sourceId": "exit"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      {
+        "id": "sector-05-04:recovery-1",
+        "x": -1260,
+        "y": -720,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-04:recovery-2",
+        "x": -550,
+        "y": -700,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-04:recovery-3",
+        "x": 160,
+        "y": -760,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-04:recovery-4",
+        "x": 610,
+        "y": -1500,
+        "maxRetrySeconds": 5
+      }
+    ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-05-04:artillery-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "artillery-drone-t1",
+        "position": {
+          "x": -900,
+          "y": -620
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -2050,
+          "y": -820,
+          "width": 2450,
+          "height": 650
+        },
+        "rules": []
+      },
+      {
+        "id": "sector-05-04:artillery-b",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "artillery-drone-t1",
+        "position": {
+          "x": 760,
+          "y": -1450
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": 500,
+          "y": -2050,
+          "width": 700,
+          "height": 1150
+        },
+        "rules": []
+      },
+      {
+        "id": "sector-05-04:capacity-proof-01-of-03:terminal",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 80,
+          "y": -2180
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 84,
+        "label": "CAPACITY ALLOCATION RECORD · 01 / 03",
+        "objectiveId": "capacity-record-deck-reached"
+      },
+      {
+        "id": "sector-05-04:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 146,
+          "y": -2180
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-05-04:gate"
+      },
+      {
+        "id": "sector-05-04:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 258,
+          "y": -2180
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-04:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "capacity-record-deck-reached",
+        "type": "interact",
+        "sourceObjectId": "sector-05-04:capacity-proof-01-of-03:terminal",
+        "bounds": {
+          "x": -130,
+          "y": -2360,
+          "width": 420,
+          "height": 180
+        }
+      },
+      {
+        "id": "final-deck-reached",
+        "type": "reach",
+        "bounds": {
+          "x": -130,
+          "y": -2360,
+          "width": 420,
+          "height": 180
+        },
+        "requiredObjectiveIds": [
+          "capacity-record-deck-reached"
+        ]
+      },
+      {
+        "id": "exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-05-04:exit-panel",
+        "requiredObjectiveIds": [
+          "final-deck-reached"
+        ]
+      }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "jammerGroups": [],
+    "gate": {
+      "id": "sector-05-04:gate",
+      "nextAreaId": "sector-05-05",
+      "requiredObjectiveIds": [
+        "exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 210,
+        "y": -2308,
+        "width": 96,
+        "height": 160
+      }
+    }
   },
   "anchors": [
     {
@@ -696,9 +842,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "expanded-for-authored-points"
-  }
+  "behaviorRefs": []
 }

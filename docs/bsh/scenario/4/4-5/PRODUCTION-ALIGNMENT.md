@@ -9,7 +9,7 @@
 | Direction | DESIGN LOCKED / MAPPING REQUIRED | system facts + silence windows + Bark timing |
 | Patrol | RUNTIME FAMILY AVAILABLE | exact 4-5 authored placement not implemented |
 | Pursuit | RUNTIME ARCHETYPE AVAILABLE | exact 4-5 authored territory not implemented |
-| Override B | DESIGN LOCKED / NOT IMPLEMENTED | optional local branch; future 2-of-3 source |
+| Override B | RUNTIME IMPLEMENTED | optional local branch; persistent 2-of-3 source |
 | 4-5 → 4-6 | DESIGN HANDOFF | actual new Sector04 connector not implemented |
 
 Baseline audit: `3c9f661bba58af6f7351e00754c12aef86575a12`.

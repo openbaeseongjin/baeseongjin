@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "5-5",
     "sector": 5,
@@ -34,7 +34,7 @@
     "name": "PRIORITY ROUTING HALL",
     "subtitle": "VISIBLE LOCKED ASCENT / LEFT CONTROL BYPASS / PRIORITY DIRECTIVE 02 OF 03",
     "bounds": {
-      "width": 2350,
+      "width": 2600,
       "height": 2688
     },
     "entry": {
@@ -43,14 +43,14 @@
       "y": -100
     },
     "exit": {
-      "id": "sector-05-05:scenario-exit",
+      "id": "sector-05-05:exit",
       "x": 400,
       "y": -2400
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-05-06",
     "surfaces": [
       {
-        "id": "entry-deck",
+        "id": "authored-entry-deck",
         "kind": "scenario-surface",
         "oneWay": true,
         "grappleable": true,
@@ -525,47 +525,122 @@
         "sourceId": "exit"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      {
+        "id": "sector-05-05:recovery-1",
+        "x": -900,
+        "y": -1180,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-05:recovery-2",
+        "x": 420,
+        "y": -1760,
+        "maxRetrySeconds": 5
+      }
+    ],
     "checkpoints": [],
     "objects": [
       {
         "id": "sector-05-05:jammer-a",
-        "kind": "scenario-enemy-slot",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
         "enemyType": "hardpoint-jammer-v1",
         "position": {
           "x": -945,
           "y": -1435
         },
         "coordinateAnchor": "center",
-        "sourceId": "sector-05-05:jammer-a"
+        "activation": {
+          "x": -980,
+          "y": -1730,
+          "width": 950,
+          "height": 680
+        },
+        "rules": [
+          "no-projectile-attack"
+        ],
+        "jammer": {
+          "groupId": "sector-05-05:jammer-a:field"
+        }
       },
       {
         "id": "sector-05-05:aegis-a",
-        "kind": "scenario-enemy-slot",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
         "enemyType": "shield-drone-t1",
         "position": {
           "x": -365,
           "y": -1460
         },
         "coordinateAnchor": "center",
-        "sourceId": "sector-05-05:aegis-a"
+        "activation": {
+          "x": -820,
+          "y": -1760,
+          "width": 900,
+          "height": 620
+        },
+        "rules": []
+      },
+      {
+        "id": "sector-05-05:priority-proof-02-of-03:terminal",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": -320,
+          "y": -1690
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 84,
+        "label": "PRIORITY ROUTING DIRECTIVE · 02 / 03",
+        "objectiveId": "priority-directive"
+      },
+      {
+        "id": "sector-05-05:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": 288,
+          "y": -2430
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-05-05:gate"
+      },
+      {
+        "id": "sector-05-05:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 400,
+          "y": -2430
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-05:gate"
       }
     ],
     "objectives": [
       {
         "id": "priority-directive",
         "type": "interact",
-        "preset": "corporate-proof-terminal-v1",
-        "location": "directive-deck",
-        "notes": [
-          "Mandatory story proof on the physically mandatory control route.",
-          "Does NOT remotely unlock authorized-ascent-front-lock."
-        ]
+        "sourceObjectId": "sector-05-05:priority-proof-02-of-03:terminal",
+        "bounds": {
+          "x": -530,
+          "y": -1870,
+          "width": 420,
+          "height": 180
+        }
       },
       {
         "id": "final-deck-reached",
         "type": "reach",
-        "preset": "reach-deck",
+        "bounds": {
+          "x": 50,
+          "y": -2610,
+          "width": 420,
+          "height": 180
+        },
         "requiredObjectiveIds": [
           "priority-directive"
         ]
@@ -573,7 +648,7 @@
       {
         "id": "exit-panel-engaged",
         "type": "interact",
-        "preset": "exit-panel",
+        "sourceObjectId": "sector-05-05:exit-panel",
         "requiredObjectiveIds": [
           "final-deck-reached"
         ]
@@ -584,7 +659,30 @@
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "jammerGroups": [
+      {
+        "id": "sector-05-05:jammer-a:field",
+        "sourceObjectId": "sector-05-05:jammer-a",
+        "eligibleSurfaceIds": [
+          "upper-1-surface",
+          "lower-1-surface"
+        ]
+      }
+    ],
+    "gate": {
+      "id": "sector-05-05:gate",
+      "nextAreaId": "sector-05-06",
+      "requiredObjectiveIds": [
+        "exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": 352,
+        "y": -2558,
+        "width": 96,
+        "height": 160
+      }
+    }
   },
   "anchors": [
     {
@@ -968,9 +1066,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "expanded-for-authored-points"
-  }
+  "behaviorRefs": []
 }

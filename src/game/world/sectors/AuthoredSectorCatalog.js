@@ -3,6 +3,10 @@ import { resolveSectorEnemyEncounters } from "../EnemyEncounterSelection.js";
 import { SECTOR_01_AREA_CATALOG } from "../areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js";
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
+import { SECTOR_04_AREA_CATALOG } from "../areas/sector04/Sector04AreaCatalog.js";
+import { SECTOR_05_AREA_CATALOG } from "../areas/sector05/Sector05AreaCatalog.js";
+import { SECTOR_06_AREA_CATALOG } from "../areas/sector06/Sector06AreaCatalog.js";
+import { AUTHORED_RUNTIME_SECTOR_RANGE, authoredStageSectorId } from "../area-authoring-v2/AreaRuntimePromotion.js";
 import {
     canonicalEncounterId,
     canonicalEncounterSlotId,
@@ -57,6 +61,9 @@ function importObjectives(area, landmarkId, stageId) {
             ),
             completionDelaySeconds: objective.completionDelaySeconds,
             sourceObjectId: objective.sourceObjectId,
+            accessModuleId: objective.accessModuleId,
+            sources: objective.sources,
+            requiredCount: objective.requiredCount,
             stageId
         })
     );
@@ -76,14 +83,18 @@ function importEncounters(area, landmarkId, stageId) {
                     fixedEnemyType: object.enemyType ?? object.kind
                 },
                 accessModuleId: object.accessModuleId,
+                jammer: object.jammer,
                 stageId
             });
         });
 }
 
-function importLandmark(area, landmarkIndex) {
+function importLandmark(area, landmarkIndex, contentBoundaryStageId) {
     const stageId = stageIdFromArea(area);
     const landmarkId = canonicalLandmarkId(area.sectorId, landmarkIndex + 1);
+    const objectives = importObjectives(area, landmarkId, stageId);
+    const objectiveIdByLocalId = Object.freeze(Object.fromEntries(objectives.map(({ id }) => [localId(id), id])));
+    const contentBoundaryId = stageId === contentBoundaryStageId ? stageId : null;
     return landmark({
         id: landmarkId,
         order: landmarkIndex + 1,
@@ -99,19 +110,37 @@ function importLandmark(area, landmarkIndex) {
         ),
         entry: area.entry,
         exit: area.exit,
-        objectives: importObjectives(area, landmarkId, stageId),
+        contentBoundaryId,
+        contentBoundaryRequiredObjectiveIds: contentBoundaryId
+            ? area.gate.requiredObjectiveIds.map((id) => objectiveIdByLocalId[localId(id)] ?? id)
+            : [],
+        objectives,
         encounters: importEncounters(area, landmarkId, stageId)
     });
 }
 
-function importPreviewSector(areaCatalog, sectorIndex) {
-    const sectorId = canonicalSectorId(sectorIndex + 1);
-    const landmarks = areaCatalog.areas.map((area, landmarkIndex) => importLandmark(area, landmarkIndex));
+function areaCatalogSectorIdentity(areaCatalog) {
+    const sectorId = authoredStageSectorId(areaCatalog.areas[0]?.stageId);
+    if (!sectorId || areaCatalog.areas.some(({ stageId }) => authoredStageSectorId(stageId) !== sectorId)) {
+        throw new Error(`authored-area-catalog-sector-identity-invalid:${areaCatalog.id}`);
+    }
+    const order = Number(sectorId.slice("sector-".length));
+    return Object.freeze({ id: canonicalSectorId(order), order });
+}
+
+function importPreviewSector(areaCatalog) {
+    const sectorIdentity = areaCatalogSectorIdentity(areaCatalog);
+    const sectorId = sectorIdentity.id;
+    const landmarks = areaCatalog.areas.map((area, landmarkIndex) =>
+        importLandmark(area, landmarkIndex, areaCatalog.contentBoundaryStageId)
+    );
     return defineSector({
         id: sectorId,
-        order: sectorIndex + 1,
+        order: sectorIdentity.order,
         width: PREVIEW_SECTOR_WIDTH,
         runtimePreview: true,
+        accessModuleRequirement: areaCatalog.accessModuleRequirement,
+        contentBoundaryStageId: areaCatalog.contentBoundaryStageId,
         sectorEntry: sectorEntry(`${sectorId}:entry`, landmarks[0].id, landmarks[0].entry, {
             stageId: landmarks[0].stageId
         }),
@@ -132,14 +161,20 @@ function previewStageIdentitiesFromSector(sector) {
     );
 }
 
-function scenarioStageIdentities() {
+function scenarioStageIdentities(runtimeStageIds) {
     const stageIdentities = [];
-    for (let sectorNumber = 4; sectorNumber <= 6; sectorNumber += 1) {
+    for (
+        let sectorNumber = AUTHORED_RUNTIME_SECTOR_RANGE.first;
+        sectorNumber <= AUTHORED_RUNTIME_SECTOR_RANGE.last;
+        sectorNumber += 1
+    ) {
         const sectorId = canonicalSectorId(sectorNumber);
         for (let stageOrder = 1; stageOrder <= 8; stageOrder += 1) {
+            const stageId = `${sectorNumber}-${stageOrder}`;
+            if (runtimeStageIds[stageId]) continue;
             stageIdentities.push(
                 stageIdentityRecord({
-                    stageId: `${sectorNumber}-${stageOrder}`,
+                    stageId,
                     sectorId,
                     landmarkId: canonicalLandmarkId(sectorId, stageOrder),
                     objectiveIds: [],
@@ -155,18 +190,24 @@ function scenarioStageIdentities() {
 const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_01_AREA_CATALOG,
     SECTOR_02_AREA_CATALOG,
-    SECTOR_03_AREA_CATALOG
+    SECTOR_03_AREA_CATALOG,
+    SECTOR_04_AREA_CATALOG,
+    SECTOR_05_AREA_CATALOG,
+    SECTOR_06_AREA_CATALOG
 ]);
 
 export function buildAuthoredSectorCatalog({ areaCatalogs = DEFAULT_AUTHORED_AREA_CATALOGS } = {}) {
-    const previewSectors = areaCatalogs.map((catalog, sectorIndex) => importPreviewSector(catalog, sectorIndex));
+    const previewSectors = areaCatalogs.map((catalog) => importPreviewSector(catalog));
+    const runtimeStageIds = Object.freeze(
+        Object.fromEntries(previewSectors.flatMap((sector) => sector.landmarks.map(({ stageId }) => [stageId, true])))
+    );
     return defineSectorCatalog({
         id: "authored-sector-catalog",
         revision: "authored-sector-catalog-v2",
         sectors: previewSectors,
         stageIdentities: [
             ...previewSectors.flatMap((sector) => previewStageIdentitiesFromSector(sector)),
-            ...scenarioStageIdentities()
+            ...scenarioStageIdentities(runtimeStageIds)
         ]
     });
 }

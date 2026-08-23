@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "5-8",
     "sector": 5,
@@ -43,7 +43,7 @@
       "y": -100
     },
     "exit": {
-      "id": "sector-05-08:scenario-exit",
+      "id": "sector-05-08:exit",
       "x": 0,
       "y": -3060
     },
@@ -75,6 +75,122 @@
           {
             "x": -96,
             "y": -36
+          }
+        ]
+      },
+      {
+        "id": "sector-05-08:runtime-deck-1",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -320,
+          "y": -850
+        },
+        "vertices": [
+          {
+            "x": -480,
+            "y": -850
+          },
+          {
+            "x": -160,
+            "y": -850
+          },
+          {
+            "x": -160,
+            "y": -826
+          },
+          {
+            "x": -480,
+            "y": -826
+          }
+        ]
+      },
+      {
+        "id": "sector-05-08:runtime-deck-2",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 320,
+          "y": -1740
+        },
+        "vertices": [
+          {
+            "x": 160,
+            "y": -1740
+          },
+          {
+            "x": 480,
+            "y": -1740
+          },
+          {
+            "x": 480,
+            "y": -1716
+          },
+          {
+            "x": 160,
+            "y": -1716
+          }
+        ]
+      },
+      {
+        "id": "sector-05-08:runtime-deck-3",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -320,
+          "y": -2280
+        },
+        "vertices": [
+          {
+            "x": -480,
+            "y": -2280
+          },
+          {
+            "x": -160,
+            "y": -2280
+          },
+          {
+            "x": -160,
+            "y": -2256
+          },
+          {
+            "x": -480,
+            "y": -2256
+          }
+        ]
+      },
+      {
+        "id": "sector-05-08:runtime-deck-4",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 0,
+          "y": -3028
+        },
+        "vertices": [
+          {
+            "x": -160,
+            "y": -3028
+          },
+          {
+            "x": 160,
+            "y": -3028
+          },
+          {
+            "x": 160,
+            "y": -3004
+          },
+          {
+            "x": -160,
+            "y": -3004
           }
         ]
       }
@@ -199,18 +315,216 @@
         "x": 0,
         "y": -3060,
         "sourceId": "h19"
+      },
+      {
+        "id": "sector-05-08:route-exit",
+        "x": 0,
+        "y": -3060,
+        "sourceId": "exit"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      {
+        "id": "sector-05-08:recovery-1",
+        "x": -320,
+        "y": -1080,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-08:recovery-2",
+        "x": 320,
+        "y": -1950,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-08:recovery-3",
+        "x": -180,
+        "y": -2700,
+        "maxRetrySeconds": 5
+      }
+    ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-05-08:aegis-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "shield-drone-t1",
+        "position": {
+          "x": -320,
+          "y": -650
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -700,
+          "y": -900,
+          "width": 760,
+          "height": 700
+        },
+        "rules": []
+      },
+      {
+        "id": "sector-05-08:jammer-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "hardpoint-jammer-v1",
+        "position": {
+          "x": 100,
+          "y": -1120
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -220,
+          "y": -1350,
+          "width": 700,
+          "height": 400
+        },
+        "rules": [
+          "no-projectile-attack"
+        ],
+        "jammer": {
+          "groupId": "sector-05-08:jammer-a:field"
+        }
+      },
+      {
+        "id": "sector-05-08:cutter-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "sentry-t1",
+        "position": {
+          "x": 320,
+          "y": -1750
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -80,
+          "y": -2050,
+          "width": 700,
+          "height": 600
+        },
+        "rules": [
+          "cutter-fire"
+        ]
+      },
+      {
+        "id": "sector-05-08:artillery-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "artillery-drone-t1",
+        "position": {
+          "x": -180,
+          "y": -2450
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -600,
+          "y": -2800,
+          "width": 1050,
+          "height": 650
+        },
+        "rules": []
+      },
+      {
+        "id": "sector-05-08:continuity-proof-synthesis:display",
+        "kind": "story-display",
+        "presentationId": "world-object:story-display",
+        "position": {
+          "x": 0,
+          "y": -2920
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 84,
+        "label": "INCIDENT CONTINUITY CONTROL"
+      },
+      {
+        "id": "sector-05-08:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": -112,
+          "y": -3028
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-05-08:gate"
+      },
+      {
+        "id": "sector-05-08:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": 0,
+          "y": -3028
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-08:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "authority-record-reached",
+        "type": "reach",
+        "sourceObjectId": "sector-05-08:continuity-proof-synthesis:display",
+        "bounds": {
+          "x": -260,
+          "y": -3140,
+          "width": 520,
+          "height": 220
+        }
+      },
+      {
+        "id": "final-deck-reached",
+        "type": "reach",
+        "bounds": {
+          "x": -210,
+          "y": -3208,
+          "width": 420,
+          "height": 180
+        },
+        "requiredObjectiveIds": [
+          "authority-record-reached"
+        ]
+      },
+      {
+        "id": "exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-05-08:exit-panel",
+        "requiredObjectiveIds": [
+          "final-deck-reached"
+        ]
+      }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "jammerGroups": [
+      {
+        "id": "sector-05-08:jammer-a:field",
+        "sourceObjectId": "sector-05-08:jammer-a",
+        "eligibleSurfaceIds": [
+          "h04-surface",
+          "h07-surface"
+        ]
+      }
+    ],
+    "gate": {
+      "id": "sector-05-08:gate",
+      "nextAreaId": null,
+      "requiredObjectiveIds": [
+        "exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": -48,
+        "y": -3156,
+        "width": 96,
+        "height": 160
+      },
+      "completionMode": "content-boundary"
+    }
   },
   "anchors": [
     {
@@ -614,9 +928,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "expanded-for-authored-points"
-  }
+  "behaviorRefs": []
 }

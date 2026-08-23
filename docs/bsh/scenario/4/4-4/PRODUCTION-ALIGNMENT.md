@@ -16,7 +16,7 @@ Approved map max mandatory relation: **390.61px — PASS vs 400px**.
 
 ## Runtime status
 
-New 4-4 Residential Refuge Hall gameplay is **NOT IMPLEMENTED**. The current repository may still carry legacy Sector04 content. This package is implementation authority for the approved redesign, not proof that runtime already matches it.
+The 4-4 Residential Refuge Hall is generated from canonical `AREA-SPEC.v2.json`; its two authored Patrols and recovery floors are production Runtime content.
 
 ## Player Bark gap
 

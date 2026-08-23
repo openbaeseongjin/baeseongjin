@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "5-3",
     "sector": 5,
@@ -43,11 +43,11 @@
       "y": -100
     },
     "exit": {
-      "id": "sector-05-03:scenario-exit",
+      "id": "sector-05-03:exit",
       "x": -720,
       "y": -2860
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-05-04",
     "surfaces": [
       {
         "id": "sector-05-03:entry-deck",
@@ -75,6 +75,151 @@
           {
             "x": -96,
             "y": -36
+          }
+        ]
+      },
+      {
+        "id": "sector-05-03:runtime-deck-1",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 0,
+          "y": -650
+        },
+        "vertices": [
+          {
+            "x": -210,
+            "y": -650
+          },
+          {
+            "x": 210,
+            "y": -650
+          },
+          {
+            "x": 210,
+            "y": -626
+          },
+          {
+            "x": -210,
+            "y": -626
+          }
+        ]
+      },
+      {
+        "id": "sector-05-03:runtime-deck-2",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 0,
+          "y": -1400
+        },
+        "vertices": [
+          {
+            "x": -210,
+            "y": -1400
+          },
+          {
+            "x": 210,
+            "y": -1400
+          },
+          {
+            "x": 210,
+            "y": -1376
+          },
+          {
+            "x": -210,
+            "y": -1376
+          }
+        ]
+      },
+      {
+        "id": "sector-05-03:runtime-deck-3",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": 900,
+          "y": -1700
+        },
+        "vertices": [
+          {
+            "x": 720,
+            "y": -1700
+          },
+          {
+            "x": 1080,
+            "y": -1700
+          },
+          {
+            "x": 1080,
+            "y": -1676
+          },
+          {
+            "x": 720,
+            "y": -1676
+          }
+        ]
+      },
+      {
+        "id": "sector-05-03:runtime-deck-4",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -180,
+          "y": -2300
+        },
+        "vertices": [
+          {
+            "x": -390,
+            "y": -2300
+          },
+          {
+            "x": 30,
+            "y": -2300
+          },
+          {
+            "x": 30,
+            "y": -2276
+          },
+          {
+            "x": -390,
+            "y": -2276
+          }
+        ]
+      },
+      {
+        "id": "sector-05-03:runtime-deck-5",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "grappleable": true,
+        "coordinateAnchor": "top-center",
+        "position": {
+          "x": -720,
+          "y": -2828
+        },
+        "vertices": [
+          {
+            "x": -880,
+            "y": -2828
+          },
+          {
+            "x": -560,
+            "y": -2828
+          },
+          {
+            "x": -560,
+            "y": -2804
+          },
+          {
+            "x": -880,
+            "y": -2804
           }
         ]
       }
@@ -217,18 +362,158 @@
         "x": -720,
         "y": -2860,
         "sourceId": "x"
+      },
+      {
+        "id": "sector-05-03:route-exit",
+        "x": -720,
+        "y": -2860,
+        "sourceId": "exit"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      {
+        "id": "sector-05-03:recovery-1",
+        "x": 0,
+        "y": -1450,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-03:recovery-2",
+        "x": 160,
+        "y": -2320,
+        "maxRetrySeconds": 5
+      }
+    ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-05-03:jammer-a",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "hardpoint-jammer-v1",
+        "position": {
+          "x": 0,
+          "y": -1080
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -760,
+          "y": -1330,
+          "width": 1520,
+          "height": 650
+        },
+        "rules": [
+          "no-projectile-attack"
+        ],
+        "jammer": {
+          "groupId": "sector-05-03:jammer-a:field"
+        }
+      },
+      {
+        "id": "sector-05-03:jammer-b",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
+        "enemyType": "hardpoint-jammer-v1",
+        "position": {
+          "x": 450,
+          "y": -2000
+        },
+        "coordinateAnchor": "center",
+        "activation": {
+          "x": -100,
+          "y": -2250,
+          "width": 1200,
+          "height": 650
+        },
+        "rules": [
+          "no-projectile-attack"
+        ],
+        "jammer": {
+          "groupId": "sector-05-03:jammer-b:field"
+        }
+      },
+      {
+        "id": "sector-05-03:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": -832,
+          "y": -2828
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-05-03:gate"
+      },
+      {
+        "id": "sector-05-03:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": -720,
+          "y": -2828
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-03:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "final-archive-deck-reached",
+        "type": "reach",
+        "bounds": {
+          "x": -930,
+          "y": -3008,
+          "width": 420,
+          "height": 180
+        }
+      },
+      {
+        "id": "exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-05-03:exit-panel",
+        "requiredObjectiveIds": [
+          "final-archive-deck-reached"
+        ]
+      }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "jammerGroups": [
+      {
+        "id": "sector-05-03:jammer-a:field",
+        "sourceObjectId": "sector-05-03:jammer-a",
+        "eligibleSurfaceIds": [
+          "a-left-1-surface",
+          "a-right-1-surface"
+        ]
+      },
+      {
+        "id": "sector-05-03:jammer-b:field",
+        "sourceObjectId": "sector-05-03:jammer-b",
+        "eligibleSurfaceIds": [
+          "b-upper-1-surface",
+          "b-lower-1-surface"
+        ]
+      }
+    ],
+    "gate": {
+      "id": "sector-05-03:gate",
+      "nextAreaId": "sector-05-04",
+      "requiredObjectiveIds": [
+        "exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": -768,
+        "y": -2956,
+        "width": 96,
+        "height": 160
+      }
+    }
   },
   "anchors": [
     {
@@ -692,9 +977,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "expanded-for-authored-points"
-  }
+  "behaviorRefs": []
 }

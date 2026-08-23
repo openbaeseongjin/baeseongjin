@@ -1,7 +1,7 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
-  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
   "stage": {
     "sector": 6,
     "stage": 2,
@@ -9,10 +9,14 @@
     "name": "CROSSWIND MASTS",
     "id": "6-2"
   },
-  "languagePolicy": {
-    "playerDialogue": "ko",
-    "directionNotes": "ko-first",
-    "diegeticSystemText": "en-allowed"
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
   },
   "beats": [
     {
@@ -39,7 +43,11 @@
             "text": "…바람이 계속 한쪽으로 미네."
           }
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-2:entry-preview"
     },
     {
       "beatId": "wind-gantry",
@@ -54,7 +62,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-2:wind-gantry"
     },
     {
       "beatId": "lee-pocket",
@@ -69,7 +81,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-2:lee-pocket"
     },
     {
       "beatId": "hook-back",
@@ -84,7 +100,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-2:hook-back"
     },
     {
       "beatId": "exit",
@@ -106,14 +126,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-2:exit"
     }
-  ],
-  "validation": [
-    "One static continuous Wind zone only.",
-    "Lee Pocket is geometrically outside Wind zone.",
-    "Rightward hook-back remains local and short.",
-    "Macro route remains leftward while local heights vary.",
-    "No dialogue during high-input Wind traversal."
   ]
 }
