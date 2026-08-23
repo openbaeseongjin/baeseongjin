@@ -47,6 +47,7 @@ const OBJECT_KIND = Object.freeze({
     END_STOP: "boss-exchange-end-stop",
     MODULE: "boss-exchange-module"
 });
+const CAMERA_PRIORITY = Object.freeze({ BODY: 1, TARGET: 4, HAZARD: 5 });
 const PRESENTED_SURFACE_KIND = Object.freeze({
     "entry-deck": true,
     gallery: true,
@@ -403,6 +404,10 @@ export class CentralExchangeMaintenanceRuntime extends CompositeBossEncounterRun
         return compositeWorldPoint(this.definition.arena.entry, worldOffset);
     }
 
+    victoryRecoveryPosition(worldOffset = { x: 0, y: 0 }) {
+        return compositeWorldPoint(this.definition.arena.exit, worldOffset);
+    }
+
     presentationObjects(worldOffset = { x: 0, y: 0 }) {
         const exposedTarget =
             this.state === CENTRAL_EXCHANGE_MAINTENANCE_STATE.EXPOSED ? TARGET_BY_PHASE[this.phase] : null;
@@ -426,7 +431,8 @@ export class CentralExchangeMaintenanceRuntime extends CompositeBossEncounterRun
                 direction: this.railDirection,
                 physicsBody: true,
                 ropeAttachable: this.body.isRopeableSurface(),
-                active: true
+                active: true,
+                cameraPriority: CAMERA_PRIORITY.BODY
             },
             {
                 id: "boss-03:left-end-stop",
@@ -464,7 +470,8 @@ export class CentralExchangeMaintenanceRuntime extends CompositeBossEncounterRun
                 position: compositeWorldPoint(TARGET_POSITION[targetId], worldOffset),
                 size: { width: TARGET_SIZE[targetId] * 2, height: TARGET_SIZE[targetId] * 2 },
                 state: broken ? "broken" : exposedTarget === targetId ? "exposed" : "secured",
-                active: true
+                active: true,
+                ...(exposedTarget === targetId ? { cameraPriority: CAMERA_PRIORITY.TARGET } : {})
             });
         }
         for (const band of ["low", "high"]) {
@@ -491,7 +498,10 @@ export class CentralExchangeMaintenanceRuntime extends CompositeBossEncounterRun
                       : "idle",
                 damaging: active,
                 movementProgress: this.#config().sweepSeconds > 0 ? this.sweepElapsed / this.#config().sweepSeconds : 0,
-                active: visible && this.status !== "completed"
+                active: visible && this.status !== "completed",
+                ...(active || this.state === CENTRAL_EXCHANGE_MAINTENANCE_STATE.TELEGRAPH
+                    ? { cameraPriority: CAMERA_PRIORITY.HAZARD }
+                    : {})
             });
         }
         const architectureObjects = [];

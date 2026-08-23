@@ -99,6 +99,18 @@ const BATON_NEXT_STATE = Object.freeze({
     [CONTINUITY_WARDEN_STATE.BATON_2]: CONTINUITY_WARDEN_STATE.OVERHEAD_SLAM
 });
 const SECURITY_BAND = Object.freeze({ LOW: "low", HIGH: "high" });
+const MELEE_HAZARD_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_STATE.BATON_1]: true,
+    [CONTINUITY_WARDEN_STATE.BATON_2]: true,
+    [CONTINUITY_WARDEN_STATE.OVERHEAD_SLAM]: true,
+    [CONTINUITY_WARDEN_STATE.BACK_SWING]: true,
+    [CONTINUITY_WARDEN_STATE.COUNTER_BASH]: true
+});
+const MOTION_HAZARD_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_STATE.GROUND_DASH]: true,
+    [CONTINUITY_WARDEN_STATE.DIAGONAL_DASH]: true,
+    [CONTINUITY_WARDEN_STATE.CHARGE]: true
+});
 const OBJECT_KIND = Object.freeze({
     WARDEN: "boss-continuity-warden",
     EMITTER: "boss-security-emitter",
@@ -110,6 +122,7 @@ const OBJECT_KIND = Object.freeze({
     CAMERA: "boss-victory-camera",
     PAD_SURFACE: "boss-pad-surface"
 });
+const CAMERA_PRIORITY = Object.freeze({ BODY: 1, HAZARD: 5 });
 const PRESENTED_PAD_SURFACE_KIND = Object.freeze({
     "main-security-runway": true,
     "raised-ledge": true,
@@ -795,6 +808,35 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         };
     }
 
+    #motionPathHazardBounds() {
+        const halfWidth = DEFAULT.bodyWidth * 0.5;
+        const halfHeight = DEFAULT.bodyHeight * 0.5;
+        const minX = Math.min(this.motionStart.x, this.motionTarget.x) - halfWidth;
+        const minY = Math.min(this.motionStart.y, this.motionTarget.y) - halfHeight;
+        return {
+            x: minX,
+            y: minY,
+            width: Math.abs(this.motionTarget.x - this.motionStart.x) + DEFAULT.bodyWidth,
+            height: Math.abs(this.motionTarget.y - this.motionStart.y) + DEFAULT.bodyHeight
+        };
+    }
+
+    #currentHazardDefinition() {
+        if (MELEE_HAZARD_STATE[this.state] === true) {
+            return { kind: this.state, bounds: this.#meleeHazardBounds(), bodyContact: false };
+        }
+        if (MOTION_HAZARD_STATE[this.state] === true) {
+            return { kind: this.state, bounds: this.#bodyHazardBounds(), bodyContact: true };
+        }
+        if (this.state !== CONTINUITY_WARDEN_STATE.SECURITY_ACTIVE) return null;
+        const band = this.securitySequence[this.securityIndex];
+        return {
+            kind: `security-beam-${band}`,
+            bounds: band === SECURITY_BAND.HIGH ? this.config.highBeamBounds : this.config.lowBeamBounds,
+            bodyContact: false
+        };
+    }
+
     #meleeHazardBounds() {
         const behind = this.state === CONTINUITY_WARDEN_STATE.BACK_SWING;
         const sign = behind ? -this.facing : this.facing;
@@ -810,36 +852,20 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
 
     activeHazards(worldOffset = { x: 0, y: 0 }) {
         if (this.status !== "active" || this.actionPhase !== ACTION_PHASE.ACTIVE) return Object.freeze([]);
-        let kind = null;
-        let localBounds = null;
-        if (
-            this.state === CONTINUITY_WARDEN_STATE.BATON_1 ||
-            this.state === CONTINUITY_WARDEN_STATE.BATON_2 ||
-            this.state === CONTINUITY_WARDEN_STATE.OVERHEAD_SLAM ||
-            this.state === CONTINUITY_WARDEN_STATE.BACK_SWING ||
-            this.state === CONTINUITY_WARDEN_STATE.COUNTER_BASH
-        ) {
-            kind = this.state;
-            localBounds = this.#meleeHazardBounds();
-        } else if (
-            this.state === CONTINUITY_WARDEN_STATE.GROUND_DASH ||
-            this.state === CONTINUITY_WARDEN_STATE.DIAGONAL_DASH ||
-            this.state === CONTINUITY_WARDEN_STATE.CHARGE
-        ) {
-            kind = this.state;
-            localBounds = this.#bodyHazardBounds();
-        } else if (this.state === CONTINUITY_WARDEN_STATE.SECURITY_ACTIVE) {
-            const band = this.securitySequence[this.securityIndex];
-            kind = `security-beam-${band}`;
-            localBounds = band === SECURITY_BAND.HIGH ? this.config.highBeamBounds : this.config.lowBeamBounds;
-        }
-        if (!kind || !localBounds) return Object.freeze([]);
+        const hazard = this.#currentHazardDefinition();
+        if (!hazard) return Object.freeze([]);
         return Object.freeze([
             freezeComposite({
-                id: `${this.definition.id}:${kind}:${this.hazardSequence}`,
-                kind,
+                id: `${this.definition.id}:${hazard.kind}:${this.hazardSequence}`,
+                kind: hazard.kind,
                 sequence: this.hazardSequence,
-                bounds: translatedBounds(localBounds, worldOffset),
+                bounds: translatedBounds(hazard.bounds, worldOffset),
+                ...(hazard.bodyContact
+                    ? {
+                          position: compositeWorldPoint(this.bodyPosition, worldOffset),
+                          collider: this.body.collider.snapshot()
+                      }
+                    : {}),
                 damage: this.config.damage
             })
         ]);
@@ -892,6 +918,16 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         return compositeWorldPoint(this.definition.arena.entry, worldOffset);
     }
 
+    victoryRecoveryPosition(worldOffset = { x: 0, y: 0 }) {
+        return compositeWorldPoint(
+            {
+                x: this.config.bridgeBounds.x + this.config.bridgeBounds.width * 0.5,
+                y: this.definition.arena.exit.y
+            },
+            worldOffset
+        );
+    }
+
     boardingZone(worldOffset = { x: 0, y: 0 }) {
         if (this.status !== "completed" || this.victoryCameraRemaining > 0) return null;
         return translatedBounds(this.config.boardingBounds, worldOffset);
@@ -932,7 +968,9 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 direction: this.facing,
                 physicsBody: true,
                 ropeAttachable: this.body.isRopeableSurface(),
-                active: true
+                active: true,
+                targetPlayerId: this.targetPlayerId,
+                cameraPriority: CAMERA_PRIORITY.BODY
             },
             {
                 id: "boss-06:emitter-left",
@@ -989,37 +1027,72 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 active: completed
             }
         ];
-        if (this.state === CONTINUITY_WARDEN_STATE.CHARGE) {
-            const minX = Math.min(this.motionStart.x, this.motionTarget.x);
-            const width = Math.max(1, Math.abs(this.motionTarget.x - this.motionStart.x));
-            objects.push({
-                id: "boss-06:charge-path",
-                kind: OBJECT_KIND.HAZARD,
-                variant: "charge",
-                position: compositeWorldPoint({ x: minX + width * 0.5, y: this.config.groundCenterY }, worldOffset),
-                size: { width, height: 150 },
-                state: this.actionPhase,
-                direction: this.facing,
-                damaging: this.actionPhase === ACTION_PHASE.ACTIVE,
-                active: true
-            });
-        }
-        if (this.state === CONTINUITY_WARDEN_STATE.SECURITY_COMMAND || beamBand) {
+        if (
+            (MELEE_HAZARD_STATE[this.state] === true || MOTION_HAZARD_STATE[this.state] === true) &&
+            (this.actionPhase === ACTION_PHASE.TELEGRAPH || this.actionPhase === ACTION_PHASE.ACTIVE)
+        ) {
+            const hazard = this.#currentHazardDefinition();
             const localBounds =
-                beamBand === SECURITY_BAND.HIGH ? this.config.highBeamBounds : this.config.lowBeamBounds;
+                this.actionPhase === ACTION_PHASE.TELEGRAPH && MOTION_HAZARD_STATE[this.state] === true
+                    ? this.#motionPathHazardBounds()
+                    : hazard.bounds;
             objects.push({
-                id: "boss-06:security-beam",
-                kind: OBJECT_KIND.BEAM,
-                variant: beamBand ?? this.securitySequence.join("-"),
+                id: "boss-06:attack-hazard",
+                kind: OBJECT_KIND.HAZARD,
+                variant: hazard.kind,
                 position: compositeWorldPoint(
                     { x: localBounds.x + localBounds.width * 0.5, y: localBounds.y + localBounds.height * 0.5 },
                     worldOffset
                 ),
                 size: { width: localBounds.width, height: localBounds.height },
-                state: this.state === CONTINUITY_WARDEN_STATE.SECURITY_COMMAND ? "telegraph" : "active",
+                state: this.actionPhase,
+                direction: this.facing,
+                damaging: this.actionPhase === ACTION_PHASE.ACTIVE,
+                active: true,
+                targetPlayerId: this.targetPlayerId,
+                cameraPriority: CAMERA_PRIORITY.HAZARD
+            });
+        }
+        if (this.state === CONTINUITY_WARDEN_STATE.SECURITY_COMMAND) {
+            for (const [index, band] of this.securitySequence.entries()) {
+                const localBounds =
+                    band === SECURITY_BAND.HIGH ? this.config.highBeamBounds : this.config.lowBeamBounds;
+                objects.push({
+                    id: `boss-06:security-beam-warning:${index}`,
+                    kind: OBJECT_KIND.BEAM,
+                    variant: band,
+                    order: index + 1,
+                    position: compositeWorldPoint(
+                        { x: localBounds.x + localBounds.width * 0.5, y: localBounds.y + localBounds.height * 0.5 },
+                        worldOffset
+                    ),
+                    size: { width: localBounds.width, height: localBounds.height },
+                    state: "telegraph",
+                    actionState: this.actionPhase,
+                    damaging: false,
+                    active: true,
+                    targetPlayerId: this.targetPlayerId,
+                    cameraPriority: CAMERA_PRIORITY.HAZARD
+                });
+            }
+        } else if (beamBand) {
+            const localBounds =
+                beamBand === SECURITY_BAND.HIGH ? this.config.highBeamBounds : this.config.lowBeamBounds;
+            objects.push({
+                id: "boss-06:security-beam",
+                kind: OBJECT_KIND.BEAM,
+                variant: beamBand,
+                position: compositeWorldPoint(
+                    { x: localBounds.x + localBounds.width * 0.5, y: localBounds.y + localBounds.height * 0.5 },
+                    worldOffset
+                ),
+                size: { width: localBounds.width, height: localBounds.height },
+                state: "active",
                 actionState: this.actionPhase,
-                damaging: beamBand !== null && this.actionPhase === ACTION_PHASE.ACTIVE,
-                active: true
+                damaging: this.actionPhase === ACTION_PHASE.ACTIVE,
+                active: true,
+                targetPlayerId: this.targetPlayerId,
+                cameraPriority: CAMERA_PRIORITY.HAZARD
             });
         }
         if (completed && this.victoryCameraRemaining > 0) {

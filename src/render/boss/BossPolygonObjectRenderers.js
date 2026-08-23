@@ -320,6 +320,13 @@ class SecurityBeamRenderer extends BossPolygonObjectRenderer {
             const x = -width * 0.3 + index * Math.min(width * 0.22, 260);
             chevron(context, x, 0, 1, Math.min(height * 0.25, 34), context.strokeStyle);
         }
+        if (Number.isSafeInteger(object.order)) {
+            context.fillStyle = COLOR.WARNING;
+            context.font = "700 24px system-ui, sans-serif";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillText(String(object.order), 0, 0);
+        }
     }
 }
 

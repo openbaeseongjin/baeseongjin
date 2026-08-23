@@ -1,5 +1,8 @@
 const STAGE_STATUS = Object.freeze({ INACTIVE: "inactive", ACTIVE: "active", COMPLETED: "completed" });
 const PARTICIPANT_STATUS = Object.freeze({ ACTIVE: "active", SPECTATING: "spectating", DISCONNECTED: "disconnected" });
+const VALID_PARTICIPANT_STATUS = Object.freeze(
+    Object.fromEntries(Object.values(PARTICIPANT_STATUS).map((status) => [status, true]))
+);
 
 export const COMPOSITE_BOSS_STAGE_SNAPSHOT_REVISION = "composite-boss-stage-runtime-v1";
 export { STAGE_STATUS as COMPOSITE_BOSS_STAGE_STATUS, PARTICIPANT_STATUS as COMPOSITE_BOSS_PARTICIPANT_STATUS };
@@ -109,6 +112,22 @@ export class CompositeBossEncounterRuntime {
         return freezeComposite({ accepted: true, changed: true, scalingChanged: false });
     }
 
+    recoverParticipant(playerId) {
+        if (typeof playerId !== "string" || !this.participants.has(playerId)) {
+            return freezeComposite({ accepted: false, changed: false, reason: "participant-unknown" });
+        }
+        const previous = this.participants.get(playerId);
+        if (previous === PARTICIPANT_STATUS.DISCONNECTED) {
+            return freezeComposite({ accepted: false, changed: false, reason: "participant-disconnected" });
+        }
+        if (previous === PARTICIPANT_STATUS.ACTIVE) {
+            return freezeComposite({ accepted: true, changed: false, reason: "participant-already-active" });
+        }
+        this.participants.set(playerId, PARTICIPANT_STATUS.ACTIVE);
+        this.emit("boss-participant-recovered", { playerId, attempt: this.attempt });
+        return freezeComposite({ accepted: true, changed: true });
+    }
+
     applyHazardContact({ contactId, playerId, damage }) {
         if (this.status !== STAGE_STATUS.ACTIVE || this.participants.get(playerId) !== PARTICIPANT_STATUS.ACTIVE) {
             return freezeComposite({ accepted: false, changed: false, reason: "participant-not-active", damage: 0 });
@@ -119,6 +138,10 @@ export class CompositeBossEncounterRuntime {
         this.processedHazardContactIds.add(contactId);
         this.emit("boss-player-contact", { contactId, playerId, damage });
         return freezeComposite({ accepted: true, changed: true, damage });
+    }
+
+    hasHazardContact(contactId) {
+        return typeof contactId === "string" && this.processedHazardContactIds.has(contactId);
     }
 
     handlePlayerDefeat(playerId, cause = "unknown") {
@@ -186,12 +209,24 @@ export class CompositeBossEncounterRuntime {
             throw new Error("Composite Boss snapshot definition mismatch");
         }
         if (!Object.values(STAGE_STATUS).includes(snapshot.status)) throw new Error("Composite Boss status is invalid");
+        if (!Array.isArray(snapshot.participantStates))
+            throw new Error("Composite Boss participant states are invalid");
+        const participantIds = new Set();
+        for (const participant of snapshot.participantStates) {
+            if (
+                typeof participant?.playerId !== "string" ||
+                !participant.playerId ||
+                participantIds.has(participant.playerId) ||
+                VALID_PARTICIPANT_STATUS[participant.status] !== true
+            ) {
+                throw new Error("Composite Boss participant state is invalid");
+            }
+            participantIds.add(participant.playerId);
+        }
         this.status = snapshot.status;
         this.attempt = snapshot.attempt;
         this.scalingRoster = Object.freeze([...(snapshot.scalingRoster ?? [])]);
-        this.participants = new Map(
-            (snapshot.participantStates ?? []).map(({ playerId, status }) => [playerId, status])
-        );
+        this.participants = new Map(snapshot.participantStates.map(({ playerId, status }) => [playerId, status]));
         this.processedImpactIds = new Set(snapshot.processedImpactIds ?? []);
         this.processedHazardContactIds = new Set(snapshot.processedHazardContactIds ?? []);
         this.eventSequence = snapshot.eventSequence ?? 0;
