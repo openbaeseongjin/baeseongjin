@@ -33,6 +33,7 @@ const EDITABLE_ROOTS = Object.freeze([
     "transition",
     "nextAreaId"
 ]);
+const ARENA_ENTRY_MAX_SUPPORT_DROP = 96;
 
 function issue(issues, file, code, details = {}) {
     issues.push({ file, code, ...details });
@@ -74,6 +75,18 @@ function boundsInside(container, value) {
     );
 }
 
+function hasEntrySupport(entry, surfaces) {
+    return (surfaces ?? []).some(
+        (surface) =>
+            validBounds(surface?.bounds) &&
+            surface.collision !== false &&
+            entry.x >= surface.bounds.x &&
+            entry.x <= surface.bounds.x + surface.bounds.width &&
+            entry.y <= surface.bounds.y &&
+            surface.bounds.y - entry.y <= ARENA_ENTRY_MAX_SUPPORT_DROP
+    );
+}
+
 function validateIds(entries, issues, file, prefix) {
     const ids = new Set();
     for (const entry of entries ?? []) {
@@ -109,6 +122,9 @@ function validateArena(spec, issues, file) {
         else if (validBounds(arena.bounds) && !boundsInside(arena.bounds, surface.bounds)) {
             issue(issues, file, "arena-surface-out-of-bounds", { id: surface.id });
         }
+    }
+    if (finitePoint(arena?.entry) && !hasEntrySupport(arena.entry, arena?.surfaces)) {
+        issue(issues, file, "arena-entry-support-missing");
     }
     for (const entry of [...(arena?.anchors ?? []), ...(arena?.recoveryPoints ?? [])]) {
         if (!finitePoint(entry)) issue(issues, file, "arena-point-invalid", { id: entry?.id ?? null });
