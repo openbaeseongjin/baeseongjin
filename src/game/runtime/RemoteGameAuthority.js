@@ -9,7 +9,7 @@ import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { createSummitClaim, serializeSummitClaim } from "../network/SummitClaim.js";
 import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import {
-    createPlayerImpactClaim,
+    createPlayerImpactClaimFromEvent,
     createPlayerImpactStateDigest,
     PLAYER_IMPACT_SOURCE_KIND,
     serializePlayerImpactClaim
@@ -384,18 +384,9 @@ export class RemoteGameAuthority {
 
     submitImpactClaim(event, outcome) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN) return false;
-        const claim = createPlayerImpactClaim({
-            impactId: event.impactId ?? event.projectileId,
-            clientTick: event.clientTick,
+        const claim = createPlayerImpactClaimFromEvent({
+            event,
             authorityTick: this.tickProjection.project(event.clientTick),
-            impactType: event.resolution,
-            position: event.parameters.impactPosition ?? event.position,
-            velocity: event.velocity,
-            damage: event.damage ?? event.parameters?.damage ?? 0,
-            sourceKind: event.parameters?.sourceKind ?? null,
-            sourceId: event.parameters?.sourceId ?? event.parameters?.bossStageId ?? null,
-            sourceType: event.parameters?.sourceType ?? event.parameters?.hazardKind ?? null,
-            sourceSequence: event.parameters?.sourceSequence ?? event.parameters?.hazardSequence ?? null,
             outcome
         });
         this.socket.send(
