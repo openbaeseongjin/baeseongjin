@@ -11,6 +11,6 @@
 | [03](./03/README.md) | FINAL handoff                      | `3-8`은 content boundary이며 `4-1` 직접 연결 금지                                    |
 | [04](./04/README.md) | FINAL handoff, Runtime 구현        | `4-8 → Boss04 → 5-1`                                                                 |
 | [05](./05/README.md) | FINAL handoff, Runtime 구현        | `5-8 → Boss05 → 6-1`                                                                 |
-| [06](./06/README.md) | FINAL handoff                      | `6-8` 밖 Final Security; 기존 `PAD SECURITY WARDEN P-03`와 ID·Runtime mapping 미확정 |
+| [06](./06/README.md) | CONTINUITY WARDEN damage preflight | `6-8` 밖 Final Security 재설계; Runtime·terminal transition·boarding 미구현          |
 
 모든 인계의 Boss Timer와 시간 만료 Arena collapse는 초기 Post-Sector Boss 범위에서 제외한다. 정적 MAP preview는 presentation reference일 뿐 Runtime terrain·collision·asset이 아니다.

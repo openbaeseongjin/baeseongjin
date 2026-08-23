@@ -1,0 +1,88 @@
+{
+  "github_main": "20e6c22deb6e95d9a5a7e351a95874d931a0a845",
+  "constants": {
+    "rope_reach": 400.0,
+    "swing_impulse": 780.0,
+    "rope_impact_min_speed": 620.0,
+    "gravity": 1250.0,
+    "jump_speed": 440.0,
+    "player_radius": 15.0
+  },
+  "final_upper_anchors": [
+    {
+      "id": "U1",
+      "x": 1300,
+      "y": 1540
+    },
+    {
+      "id": "U2",
+      "x": 1660,
+      "y": 1510
+    },
+    {
+      "id": "U3",
+      "x": 2020,
+      "y": 1490
+    },
+    {
+      "id": "U4",
+      "x": 2380,
+      "y": 1510
+    },
+    {
+      "id": "U5",
+      "x": 2740,
+      "y": 1540
+    },
+    {
+      "id": "U6",
+      "x": 3100,
+      "y": 1510
+    },
+    {
+      "id": "U7",
+      "x": 3460,
+      "y": 1490
+    },
+    {
+      "id": "U8",
+      "x": 3820,
+      "y": 1540
+    }
+  ],
+  "adjacent_anchor_max_distance": 363.46,
+  "nonadjacent_shortcuts_le_400": 0,
+  "max_distance_from_any_legal_ground_warden_center_to_nearest_anchor": 380.43,
+  "worst_warden_x": 1048.0,
+  "rope_reach_margin_at_worst_case": 19.57,
+  "jump_apex_direct_attach_coverage": {
+    "coverage_start": 996.51,
+    "coverage_end": 4123.49,
+    "usable_main_start": 1015.0,
+    "usable_main_end": 4105.0,
+    "pass": true
+  },
+  "simplified_rope_impact_preflight": {
+    "method": "fixed-length pendulum approximation using current gravity/swing impulse/reach; start at jump apex; no extra movement input",
+    "warden_x_step": 25,
+    "minimum_start_horizontal_separation": 180,
+    "minimum_flight_time": 0.2,
+    "full_main_samples": 121,
+    "full_main_misses": 0,
+    "minimum_successful_impact_speed": 656.98,
+    "maximum_successful_impact_speed": 895.53,
+    "runtime_playtest_still_required": true
+  },
+  "guard_counter_both_side_preflight": {
+    "allowed_warden_center_x": [
+      1250.0,
+      3870.0
+    ],
+    "samples_each_side": 105,
+    "left_side_misses": 0,
+    "right_side_misses": 0,
+    "minimum_left_impact_speed": 654.52,
+    "minimum_right_impact_speed": 654.52,
+    "pass": true
+  }
+}
