@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L2] 2026-08-23 — Sector 04 기본 배경과 Sector 03→04 표현 전환을 Runtime에 연결한다
+
+- 맥락: 승인된 Sector 04 open-ascent master와 Far/Mid/Near 분리본을 실제 게임에서 사용하고, Sector 03 하단 표현이 Sector 전환에서 갑자기 교체되지 않게 해야 했다.
+- 결정: V3 master의 Far RGB·Mid/Near RGBA를 `sector-04-01`~`sector-04-08`의 기본 authored backdrop으로 사용하고 Sector 03→04 경계 중심 `1024 world px`에서 기존과 같은 package 전체 smoothstep 교차 페이드를 적용한다.
+- 영향: 세 레이어는 항상 같은 package alpha를 사용하며 비활성 Boss Stage 환경 override는 현재 Sector 배경을 가리지 않는다. Sector 03 package, collision, Gate, Camera, gameplay connector와 network state는 변경하지 않는다.
+- 대체: 없음
+- 검증 상태: 현재 계약은 `docs/environment-asset-format.md`와 Sector 04 authoring·Runtime README가 소유하며 Issue #897에서 전환·자산·브라우저 검증을 수행한다.
+
 ## [L2] 2026-08-22 — Sector 03 기본 배경에 seam-match V4 depth-islands package를 사용한다
 
 - 맥락: Sector 02→03 경계를 기존 package 단위 crossfade로 연결하면서 Sector 03 상업 Atrium에 작은 시차를 적용할 첫 승인 배경이 필요했다.

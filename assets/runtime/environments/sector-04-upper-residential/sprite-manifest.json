@@ -1,0 +1,198 @@
+{
+    "$schema": "../sprite-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "environment-sector-04-upper-residential",
+    "generator": {
+        "tool": "openai-imagegen-offline-depth-far-mid-near",
+        "exportVersion": "2026-08-23-v3-open-ascent-fmn",
+        "sourceExport": "assets/artwork/environments/sector-04-upper-residential-background/export/far-mid-near-v3-open-ascent-attached-master"
+    },
+    "atlases": {
+        "sector-04-upper-residential-backdrop-far": {
+            "image": "backdrop-far.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "sector-04-upper-residential-backdrop-mid": {
+            "image": "backdrop-mid.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "sector-04-upper-residential-backdrop-near": {
+            "image": "backdrop-near.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "sector-04-upper-residential-terrain-fill": {
+            "image": "terrain-fill.png",
+            "size": { "width": 48, "height": 48 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "sector-04-upper-residential-terrain-edge": {
+            "image": "terrain-edge.png",
+            "size": { "width": 48, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "sector-04-upper-residential-decoration": {
+            "image": "decoration.png",
+            "size": { "width": 96, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        }
+    },
+    "zones": [
+        {
+      "id": "waste",
+            "label": "Sector 04 하부 전환층",
+            "minAltitude": 0,
+            "palette": {
+                "skyTop": "#252b31",
+                "skyBottom": "#101725",
+                "silhouetteFar": "#465052",
+                "silhouetteMid": "#343e40",
+                "silhouetteNear": "#111820",
+                "terrainFill": "#303938",
+                "terrainEdge": "#69756f",
+                "oneWayEdge": "#82d7e8",
+                "accent": "#d8c18f"
+            },
+            "backdropVariant": "sector-04-transition",
+            "terrainMaterial": "sector-04-residential",
+            "decorationGroup": "sector-04-residential"
+        },
+        {
+      "id": "industrial-maintenance",
+            "label": "Sector 04 생활 편의 중정",
+            "minAltitude": 1800,
+            "palette": {
+                "skyTop": "#30363a",
+                "skyBottom": "#172027",
+                "silhouetteFar": "#59615e",
+                "silhouetteMid": "#414b48",
+                "silhouetteNear": "#151c22",
+                "terrainFill": "#3b4440",
+                "terrainEdge": "#7b867d",
+                "oneWayEdge": "#82d7e8",
+                "accent": "#dfc88f"
+            },
+            "backdropVariant": "sector-04-amenity",
+            "terrainMaterial": "sector-04-residential",
+            "decorationGroup": "sector-04-residential"
+        },
+        {
+      "id": "residential-commercial",
+            "label": "Sector 04 상층 주거 갤러리",
+            "minAltitude": 3600,
+            "palette": {
+                "skyTop": "#3a4041",
+                "skyBottom": "#1d272b",
+                "silhouetteFar": "#69716c",
+                "silhouetteMid": "#4d5751",
+                "silhouetteNear": "#182027",
+                "terrainFill": "#454e48",
+                "terrainEdge": "#89938a",
+                "oneWayEdge": "#82d7e8",
+                "accent": "#e5cd93"
+            },
+            "backdropVariant": "sector-04-residential",
+            "terrainMaterial": "sector-04-residential",
+            "decorationGroup": "sector-04-residential"
+        },
+        {
+      "id": "corporate-security",
+            "label": "Sector 04 보호 피난 코어",
+            "minAltitude": 5400,
+            "palette": {
+                "skyTop": "#454a48",
+                "skyBottom": "#242e30",
+                "silhouetteFar": "#788078",
+                "silhouetteMid": "#58625a",
+                "silhouetteNear": "#1b2429",
+                "terrainFill": "#4e574f",
+                "terrainEdge": "#969f95",
+                "oneWayEdge": "#82d7e8",
+                "accent": "#ead49b"
+            },
+            "backdropVariant": "sector-04-refuge",
+            "terrainMaterial": "sector-04-residential",
+            "decorationGroup": "sector-04-residential"
+        },
+        {
+      "id": "landing-pad",
+            "label": "Sector 04 개방형 보호 상승로",
+            "minAltitude": 7200,
+            "palette": {
+                "skyTop": "#515652",
+                "skyBottom": "#2b3535",
+                "silhouetteFar": "#858c82",
+                "silhouetteMid": "#636c62",
+                "silhouetteNear": "#1e282c",
+                "terrainFill": "#576057",
+                "terrainEdge": "#a2aa9f",
+                "oneWayEdge": "#82d7e8",
+                "accent": "#efdaa2"
+            },
+            "backdropVariant": "sector-04-ascent",
+            "terrainMaterial": "sector-04-residential",
+            "decorationGroup": "sector-04-residential"
+        }
+    ],
+    "backdrop": {
+        "layers": [
+            {
+                "id": "far-background",
+                "depth": 0,
+                "parallaxX": 0.018,
+                "parallaxY": 0.03,
+                "frames": [{ "atlas": "sector-04-upper-residential-backdrop-far", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            },
+            {
+                "id": "mid-structure",
+                "depth": 1,
+                "parallaxX": 0.05,
+                "parallaxY": 0.065,
+                "frames": [{ "atlas": "sector-04-upper-residential-backdrop-mid", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            },
+            {
+                "id": "near-frame",
+                "depth": 2,
+                "parallaxX": 0.08,
+                "parallaxY": 0.1,
+                "frames": [{ "atlas": "sector-04-upper-residential-backdrop-near", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            }
+        ]
+    },
+    "terrain": {
+        "materials": {
+            "sector-04-residential": {
+                "fill": { "atlas": "sector-04-upper-residential-terrain-fill", "cell": { "column": 1, "row": 0 } },
+                "edge": { "atlas": "sector-04-upper-residential-terrain-edge", "cell": { "column": 0, "row": 0 } },
+                "oneWayColor": "#82d7e8"
+            }
+        }
+    },
+    "decoration": {
+        "groups": {
+            "sector-04-residential": {
+                "items": [
+                    {
+                        "frame": {
+                            "atlas": "sector-04-upper-residential-decoration",
+                            "cell": { "column": 1, "row": 0 }
+                        },
+                        "placement": { "depth": "mid", "surfaceLevelOffset": 0, "avoidPlayPath": true },
+                        "size": { "width": 14, "height": 14 }
+                    }
+                ]
+            }
+        }
+    }
+}
