@@ -1,0 +1,9 @@
+# Boss05 v15 파일 Manifest
+
+- `docs/boss/05/README.md` — SHA-256 `ac828eba50835e7830b32ad7c7baec513c5052819f88a6709c19bc5af521a105`
+- `docs/boss/05/final-content/BOSS-05-BRIEF.md` — SHA-256 `c1dd37314f8403c60268b9383bd7a1a68f6ff70ad2e46d4480989fd756f50586`
+- `docs/boss/05/final-content/BOSS-05-COMPONENTS.md` — SHA-256 `fc866256f67433f16d140b3ec5aa544b14b48dfa2f563372c635b0b1efeae2c8`
+- `docs/boss/05/final-content/BOSS-05-LOCKED-DECISIONS.md` — SHA-256 `069cc15e7c267ab664870dc6a26212f532c56e25fb16f639888963b5b39da443`
+- `docs/boss/05/final-content/BOSS-05-MAIN-AUDIT-IMPLEMENTATION-PLAN.md` — SHA-256 `9adb173182a36ac62c4adcf9bd62cfe1630c8c4da410ee4bad14dc48747ba9ee`
+- `docs/boss/05/final-content/BOSS-05-MOVEMENT-ACCESSIBILITY-FIX-PLAN.md` — SHA-256 `aaa8023522e6e8a3c1a467912956a3305234e479717d253449582235c300eb16`
+- `docs/boss/05/final-content/MAP-PREVIEW.html` — SHA-256 `0337708a0a78a4f2acb39e9b33b3f9a0265e5937d6ff2e03ea897faaafbe6b71`

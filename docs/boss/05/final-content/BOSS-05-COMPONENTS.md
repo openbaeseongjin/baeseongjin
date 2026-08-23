@@ -1,10 +1,24 @@
 # BOSS 05 — 구성요소 / 런타임 구현 인계
 
-> 상태: **설계 확정 · QA 수정 반영 · 런타임 미구현**
+> 상태: **설계 확정 · 현재 main 부분 구현 · 최종 기획 정합화 필요 · 플레이테스트 미검증**
 >
-> AUTHORING SNAPSHOT: `3301269a4de30f54a71a4361c3f9fc7f665a93cb` (2026-08-23 기준). 현재 main과 Runtime 연결 상태는 `docs/scenario-development-integration.md`가 소유한다.
+> 최신 코드 점검 기준: `ea007998cef6168bfa4139d06f443eb444acfda5`
 
 ---
+
+## 현재 `main` 기준 구현 상태
+
+점검 기준: `20e6c22deb6e95d9a5a7e351a95874d931a0a845`
+
+- `ContinuityControlCoreRuntime.js`: **존재**
+- Boss05 Stage Spec / Catalog: **연결됨**
+- A/B/Main/Core 공격 대상: **연결됨**
+- Wall 동적 surface / Rope·Projectile 차폐: **기반 연결됨**
+- Recovery/snapshot/final exit: **기반은 있으나 최종 기획에 맞춘 보강 필요**
+- P3-A/P3-B, Pulse 반복, Slot collision, Main Aperture, 단계별 카메라: **수정 필요**
+
+이 문서의 기존 “새로 구현” 표현은 이제 “기반은 존재하지만 최종 설계에 맞춰 수정/보강”으로 읽는다.
+세부 수정 순서는 `BOSS-05-MAIN-AUDIT-IMPLEMENTATION-PLAN.md`를 따른다.
 
 ## 보스05 핵심 구성요소 — 구현 입력/출력 기준
 
@@ -80,7 +94,7 @@ reason
 targetCell
 ```
 
-Recovery 중에는 Boss05 hazard damage를 무시하지만 Boss target damage도 0으로 만든다.
+Recovery 중에는 Boss05 위험 공격 피해만 무시한다. 현재 유효 Coupling/Core에는 정상 피해를 줄 수 있으며 Wall 차폐와 공격선 판정은 그대로 적용한다.
 targetCell 진입 순간 `active=false`.
 
 ### Exit
@@ -138,7 +152,7 @@ defeat event 후 EXIT-1/EXIT-2를 candidate에 추가하고 Rooftop Access를 op
 
 ## 3. 현재 Factory 상태
 
-AUTHORING SNAPSHOT 기준 Factory에는:
+최신 점검 기준 Factory에는 현재:
 
 ```text
 rail-carriage
@@ -565,6 +579,129 @@ EXIT-1/EXIT-2 active
 9. 해당 Player에게만 Recovery hardpoint/protection이 유지되는지 비교
 ```
 
+
+## 이동성 보강용 Boss05 전용 구성요소
+
+### `core-access-shutter`
+
+목적:
+
+```text
+P1~P3 Core 접근 차단
+Main 파괴 후 실제 Collision 제거
+```
+
+형상:
+
+```text
+x=2420
+y=-2550
+width=360
+height=400
+grappleable=false
+```
+
+`phase < 4`일 때만 `dynamicCollisionSurfaces()`에 포함한다.
+
+### `core-shell-left / core-shell-right`
+
+기존 `core-housing` 한 덩어리를 좌우 정적 Shell로 나눈다.
+
+```text
+left  = x2100..2420
+right = x2780..3100
+```
+
+둘 다 non-grappleable.
+
+### `rooftop-gate`
+
+Roof 전체 slab와 분리된 중앙 360px Gate.
+
+Boss 완료 전 Collision ON,
+Boss 완료 후 `blockedByBossStageId="boss-05"` 경로로 제거한다.
+
+### Boss05 Hardpoint actor
+
+`arena.anchors`를 실제 `ropeAttachmentActors()`로 노출한다.
+
+Runtime이 Phase/substate에 따라 활성 Anchor만 반환한다.
+
+큰 Platform/Housing/Shutter에 Hook을 붙여 경로를 만드는 방식보다
+Visible Hardpoint를 우선한다.
+
+### Slot Occupant Eject
+
+WARNING→DESCENT 전 Slot overlap을 검사한다.
+
+안전한 좌/우 Platform center 후보를 찾아
+Player를 수평으로 배출한 후 Shutter collision을 제거한다.
+
+### `wallBounds()`
+
+Wall 렌더/Collision/Hazard가 모두 같은 형상 함수를 사용한다.
+
+```text
+top = ceilingY
+bottom = state.bottomY
+```
+
+### `phaseReadyZones / legalCombatZones`
+
+Phase 시작 위치와 Recovery 종료 위치를 분리한다.
+
+P2는 R8 쪽 Ready에서 시작한 뒤 B Wall을 넘어가는 흐름을 유지한다.
+
+### Victory Recovery
+
+Boss 승리 시 spectator는 Boss entry가 아니라
+TOP-L/TOP-R 부근 승리 복귀 지점으로 보낸다.
+
+## Wall Contact Damage Resolver — 설계 확정
+
+Boss05 Wall은 `warning`과 `stored`를 제외한 활성 물리 상태에서 Player 접촉 피해를 준다.
+
+```text
+descent  → damage + horizontal push
+locked   → damage
+rise     → damage + horizontal push
+stored   → no damage
+warning  → no damage
+```
+
+구현은 Wall의 실제 `dynamicCollisionSurfaces()` geometry와 같은 bounds를 사용한다.
+
+권장 입력:
+
+```js
+resolveWallContact({
+  player,
+  wallSurface,
+  wallState,
+  damage: 20
+})
+```
+
+판정 조건:
+
+```text
+player collider overlaps wall collider
+AND player.hitInvulnerabilityRemaining <= 0
+```
+
+성공 시:
+
+```text
+player HP -= wallDamage
+player.hitInvulnerabilityRemaining = existing combat invulnerability
+horizontal push toward nearest legal cell
+```
+
+`locked`에서는 수평 Push를 강제하지 않아도 되지만,
+Player가 Wall 내부에 끼어 있는 overlap 상태라면 nearest legal side로 분리한다.
+
+Wall contact damage는 `control-pulse`와 별도 hazard sequence/id를 사용한다.
+
 ## 20. 구현 후 점검
 
 다음 항목은 문장 설명이 아니라 실제 테스트로 확인한다.
@@ -654,7 +791,7 @@ Player B Void fall
 - [ ] one-player ready starts next Phase
 - [ ] lagging player recovery
 - [ ] one player fall does not reset Phase
-- [ ] Recovery protection only for Boss05 hazard
+- [ ] Recovery 보호는 Boss05 위험 공격 피해에만 적용
 - [ ] snapshot/restore recovery state
 
 ### Final
