@@ -20,45 +20,17 @@ import {
     localTriggerObjects,
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
-
-const BOSS_CAMERA_FOCUS_WEIGHT = 0.3;
-const BOSS_VICTORY_CAMERA_FOCUS_WEIGHT = 0.85;
-const BOSS_CAMERA_ZOOM_RATIO = 0.55;
-const BOSS_CAMERA_FOCUS_STATUS = Object.freeze({ active: true, completed: true });
-const BOSS_CAMERA_FOCUS_KIND = Object.freeze({
-    "boss-carriage": true,
-    "boss-security-hub": true,
-    "boss-continuity-core": true,
-    "boss-exchange-maintenance-body": true,
-    "boss-continuity-warden": true,
-    "boss-victory-camera": true
-});
-const BOSS_CAMERA_VICTORY_KIND = "boss-victory-camera";
-
-function bossCameraPlayer(player, bossStage) {
-    if (!BOSS_CAMERA_FOCUS_STATUS[bossStage?.status]) return player;
-    const objects = bossStage.presentation?.objects ?? [];
-    const carriage =
-        objects.find(({ kind }) => kind === BOSS_CAMERA_VICTORY_KIND) ??
-        objects.find(({ kind }) => BOSS_CAMERA_FOCUS_KIND[kind] === true);
-    if (!carriage?.position) return player;
-    const focusWeight =
-        carriage.kind === BOSS_CAMERA_VICTORY_KIND ? BOSS_VICTORY_CAMERA_FOCUS_WEIGHT : BOSS_CAMERA_FOCUS_WEIGHT;
-    const carriageFocusY = carriage.position.y - Math.max(0, carriage.suspensionHeight ?? 0) * 0.5;
-    return {
-        ...player,
-        position: {
-            x: player.position.x * (1 - focusWeight) + carriage.position.x * focusWeight,
-            y: player.position.y * (1 - focusWeight) + carriageFocusY * focusWeight
-        }
-    };
-}
 import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
 import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
 import { CalibrationPresentation } from "./presentation/CalibrationPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
+import {
+    BOSS_CAMERA_ZOOM_RATIO,
+    bossCameraFocusPlayer,
+    localBossStageSnapshot
+} from "./presentation/BossStageLocalView.js";
 import { enemyPresentationDefinition, resolveEnemyPresentationState } from "../render/EnemyPresentationState.js";
 import { isCanonicalEnemyType } from "./combat/EnemyArchetypeCatalog.js";
 
@@ -419,14 +391,15 @@ export class GameApp {
     }
 
     updateCamera(dt, player, world, bossStage = null) {
-        const focusPlayer = bossCameraPlayer(player, bossStage);
+        const localBossStage = localBossStageSnapshot(bossStage, player);
+        const focusPlayer = bossCameraFocusPlayer(player, localBossStage);
         return advanceAuthoredCamera({
             camera: this.camera,
             world,
             player: focusPlayer,
             mobileView: this.mobileView,
             defaultZoom:
-                bossStage?.status === "active"
+                localBossStage?.status === "active"
                     ? CAMERA_CONFIG.desktopZoom * BOSS_CAMERA_ZOOM_RATIO
                     : CAMERA_CONFIG.desktopZoom,
             cssWidth: this.renderer.cssWidth,
@@ -501,11 +474,10 @@ export class GameApp {
         this.queuePlayerPresentationEvents([state.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
         const bossStageSnapshot = renderState.bossStage ?? renderState.bossStageRuntime ?? renderState.bossRuntime;
+        const localBossStage = localBossStageSnapshot(bossStageSnapshot, renderState.player);
         const bossStagePresentation = createBossStagePresentation(
-            bossStageSnapshot,
-            this.bossStageSpecResolver(
-                bossStageSnapshot?.stageId ?? bossStageSnapshot?.id ?? bossStageSnapshot?.encounterId
-            )
+            localBossStage,
+            this.bossStageSpecResolver(localBossStage?.stageId ?? localBossStage?.id ?? localBossStage?.encounterId)
         );
         const renderMetrics = this.renderer.draw({
             ...renderState,

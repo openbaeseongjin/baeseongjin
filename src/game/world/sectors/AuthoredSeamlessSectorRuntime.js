@@ -12,8 +12,7 @@ import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
 import { isAuthoredRuntimeContentBoundary } from "../area-authoring-v2/AreaRuntimePromotion.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "./SectorDefinition.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-stage-portal-runtime-v14-six-boss-stage";
-export const AUTHORED_STAGE_ISOLATION_GAP = 1024;
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-continuous-stage-runtime-v15-six-boss-stage";
 
 const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_01_AREA_CATALOG,
@@ -341,9 +340,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             const localArea = localWorld.areas[0];
             const dx = 0;
             const previousSectorLandmark = sectorLandmarks.at(-1);
-            const localDy = previousSectorLandmark
-                ? previousSectorLandmark.localBounds.y - AUTHORED_STAGE_ISOLATION_GAP
-                : -localArea.entry.y;
+            const localDy = previousSectorLandmark ? previousSectorLandmark.localBounds.y : -localArea.entry.y;
             const localEntry = shiftPoint(localArea.entry, dx, localDy);
             const localExit = shiftPoint(localArea.exit, dx, localDy);
             const localCoreBounds = shiftBounds(localArea.bounds, dx, localDy);
@@ -353,11 +350,10 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             const exit = shiftPoint(localArea.exit, dx, dy);
             const coreBounds = shiftBounds(localArea.bounds, dx, dy);
             const bounds = coreBounds;
-            const nextLandmarkDefinition = isAuthoredRuntimeContentBoundary(area.stageId)
-                ? null
-                : (sectorDefinition.landmarks[landmarkIndex + 1] ??
-                  authoredSectorCatalog.sectors[sectorIndex + 1]?.landmarks[0] ??
-                  null);
+            const nextLandmarkDefinition =
+                sectorDefinition.landmarks[landmarkIndex + 1] ??
+                authoredSectorCatalog.sectors[sectorIndex + 1]?.landmarks[0] ??
+                null;
             const outboundRouteId = nextLandmarkDefinition
                 ? routeId(landmarkDefinition.id, nextLandmarkDefinition.id)
                 : null;
@@ -509,7 +505,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 outboundRouteId
             });
 
-            if (previousLandmark && !isAuthoredRuntimeContentBoundary(previousLandmark.stageId)) {
+            if (previousLandmark) {
                 const lockId = routeId(previousLandmark.id, runtimeLandmark.id);
                 const sectorTransition = previousLandmark.sectorId !== runtimeLandmark.sectorId;
                 const sourceSectorDefinition = authoredSectorCatalog.sectors.find(
@@ -604,7 +600,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         const nextSectorDefinition = authoredSectorCatalog.sectors[sectorIndex + 1];
         if (nextSectorDefinition) {
             const nextSectorFirstArea = authoredAreaCatalogs[sectorIndex + 1].areas[0];
-            sectorWorldOriginY = sectorBounds.y - AUTHORED_STAGE_ISOLATION_GAP + nextSectorFirstArea.entry.y;
+            sectorWorldOriginY = sectorBounds.y + nextSectorFirstArea.entry.y;
         }
     }
 
@@ -641,6 +637,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         checkpoints: [],
         summit: { x: finalLandmark.exit.x, y: finalLandmark.exit.y, radius: summitRadius },
         topY: Math.min(...landmarks.map(({ bounds }) => bounds.y)),
+        bottomY: Math.max(...landmarks.map(({ bounds }) => bounds.y + bounds.height)),
         areas: [],
         landmarks,
         stageIdentities: authoredSectorCatalog.stageIdentities.filter(({ runtimePreview }) => runtimePreview),

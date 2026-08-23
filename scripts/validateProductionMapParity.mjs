@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { extname, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { ROPE_CONFIG, ropeHookReach } from "../src/game/config.js";
+import { PLAYER_CONFIG, ROPE_CONFIG, ropeHookReach } from "../src/game/config.js";
 import { ENEMY_TYPE } from "../src/game/EnemyType.js";
 import { EMPTY_AREA_BEHAVIOR_REGISTRY } from "../src/game/world/area-authoring-v2/AreaBehaviorRegistry.js";
 import { AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS } from "../src/game/world/area-authoring-v2/AreaRuntimePromotion.js";
@@ -17,10 +17,7 @@ import { SECTOR_04_AREA_CATALOG } from "../src/game/world/areas/sector04/Sector0
 import { SECTOR_05_AREA_CATALOG } from "../src/game/world/areas/sector05/Sector05AreaCatalog.js";
 import { SECTOR_06_AREA_CATALOG } from "../src/game/world/areas/sector06/Sector06AreaCatalog.js";
 import { AUTHORED_SECTOR_CATALOG } from "../src/game/world/sectors/AuthoredSectorCatalog.js";
-import {
-    AUTHORED_STAGE_ISOLATION_GAP,
-    createAuthoredSeamlessSectorRuntimeWorld
-} from "../src/game/world/sectors/AuthoredSeamlessSectorRuntime.js";
+import { createAuthoredSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/AuthoredSeamlessSectorRuntime.js";
 import { SectorProgressState } from "../src/game/world/SectorProgressState.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "../src/game/world/sectors/SectorDefinition.js";
 import {
@@ -88,10 +85,8 @@ const EXPECTED_SECTOR_05_JAMMER_IDS = Object.freeze([
     "sector-05-08:jammer-a:field"
 ]);
 const SECTOR_05_PROOF_OBJECT_ID = "sector-05-08:continuity-proof-synthesis:display";
-const ALLOWED_CROSS_SECTOR_CONNECTORS = Object.freeze({
-    "1-8:2-1": true,
-    "2-8:3-1": true
-});
+const STAGE_BOUNDARY_EPSILON = 0.01;
+const MIN_STAGE_BOUNDARY_PASSAGE_WIDTH = PLAYER_CONFIG.radius * 2 + 2;
 const EXPECTED_SECTOR_06_RECALL = Object.freeze({
     windStageId: "6-2",
     standardStageId: "6-3",
@@ -488,76 +483,110 @@ function normalizedCollisionFootprint(vertices) {
     return rotations.sort((left, right) => left.localeCompare(right, "en"))[0];
 }
 
-function pointInsidePolygon(point, vertices) {
-    let inside = false;
-    for (let current = 0, previous = vertices.length - 1; current < vertices.length; previous = current++) {
-        const left = vertices[current];
-        const right = vertices[previous];
-        const crosses =
-            left.y > point.y !== right.y > point.y &&
-            point.x < ((right.x - left.x) * (point.y - left.y)) / (right.y - left.y) + left.x;
-        if (crosses) inside = !inside;
-    }
-    return inside;
+function horizontalInterval(surface, padding = 0) {
+    const bounds = surfaceBounds(surface);
+    return Object.freeze({ min: bounds.x + padding, max: bounds.x + bounds.width - padding });
 }
 
-function pointSegmentDistance(point, start, end) {
-    const dx = end.x - start.x;
-    const dy = end.y - start.y;
-    const lengthSquared = dx * dx + dy * dy;
-    const ratio =
-        lengthSquared === 0
-            ? 0
-            : Math.max(0, Math.min(1, ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared));
-    return Math.hypot(point.x - (start.x + dx * ratio), point.y - (start.y + dy * ratio));
-}
-
-function surfaceTraversalDistance(left, right) {
-    if (
-        left.vertices.some((point) => pointInsidePolygon(point, right.vertices)) ||
-        right.vertices.some((point) => pointInsidePolygon(point, left.vertices))
-    ) {
-        return 0;
-    }
-    let minimum = Number.POSITIVE_INFINITY;
-    for (const [vertices, otherVertices] of [
-        [left.vertices, right.vertices],
-        [right.vertices, left.vertices]
-    ]) {
-        for (const point of vertices) {
-            for (let index = 0; index < otherVertices.length; index += 1) {
-                minimum = Math.min(
-                    minimum,
-                    pointSegmentDistance(point, otherVertices[index], otherVertices[(index + 1) % otherVertices.length])
-                );
-            }
+function mergeIntervals(intervals) {
+    const ordered = intervals
+        .filter(({ min, max }) => max > min)
+        .sort((left, right) => left.min - right.min || left.max - right.max);
+    const merged = [];
+    for (const interval of ordered) {
+        const previous = merged.at(-1);
+        if (!previous || interval.min > previous.max + STAGE_BOUNDARY_EPSILON) {
+            merged.push({ ...interval });
+            continue;
         }
+        previous.max = Math.max(previous.max, interval.max);
     }
-    return minimum;
+    return merged;
 }
 
-function validateContentBoundaryIsolation(world, issues) {
-    for (const sourceStageId of AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS.slice(0, -1)) {
-        const source = world.landmarks.find(({ stageId }) => stageId === sourceStageId);
-        const targetStageId = `${Number(sourceStageId.split("-")[0]) + 1}-1`;
-        const target = world.landmarks.find(({ stageId }) => stageId === targetStageId);
-        const sourceSurfaces = world.surfaces.filter(
-            ({ landmarkId, grappleable }) => landmarkId === source?.id && grappleable === true
-        );
-        const targetSurfaces = world.surfaces.filter(
-            ({ landmarkId, grappleable }) => landmarkId === target?.id && grappleable === true
-        );
-        const minimumDistance = Math.min(
-            ...sourceSurfaces.flatMap((left) => targetSurfaces.map((right) => surfaceTraversalDistance(left, right)))
-        );
-        if (!source || !target || !Number.isFinite(minimumDistance) || minimumDistance <= BASE_ROPE_REACH) {
-            issue(issues, "content-boundary-physical-isolation", {
-                sourceStageId,
-                targetStageId,
-                minimumDistance,
-                requiredGreaterThan: BASE_ROPE_REACH
-            });
+function openIntervals(domain, blockers) {
+    const open = [];
+    let cursor = domain.min;
+    for (const blocker of mergeIntervals(blockers)) {
+        const min = Math.max(domain.min, blocker.min);
+        const max = Math.min(domain.max, blocker.max);
+        if (max <= domain.min || min >= domain.max) continue;
+        if (min > cursor) open.push(Object.freeze({ min: cursor, max: min }));
+        cursor = Math.max(cursor, max);
+    }
+    if (cursor < domain.max) open.push(Object.freeze({ min: cursor, max: domain.max }));
+    return open;
+}
+
+function intervalOverlapWidth(left, right) {
+    return Math.max(0, Math.min(left.max, right.max) - Math.max(left.min, right.min));
+}
+
+function intervalDistance(left, right) {
+    if (intervalOverlapWidth(left, right) > 0) return 0;
+    return left.max <= right.min ? right.min - left.max : left.min - right.max;
+}
+
+function validateAuthoredStageBoundary(world, source, target, issues) {
+    const seamY = source.bounds.y;
+    const domain = Object.freeze({
+        min: Math.max(source.bounds.x, target.bounds.x) + PLAYER_CONFIG.radius,
+        max:
+            Math.min(source.bounds.x + source.bounds.width, target.bounds.x + target.bounds.width) -
+            PLAYER_CONFIG.radius
+    });
+    const seamSurfaces = world.surfaces.filter((surface) => {
+        if (
+            (surface.landmarkId !== source.id && surface.landmarkId !== target.id) ||
+            surface.collision === false ||
+            surface.renderable === false
+        ) {
+            return false;
         }
+        const bounds = surfaceBounds(surface);
+        return surface.oneWay === true
+            ? Math.abs(surface.topY - seamY) <= STAGE_BOUNDARY_EPSILON
+            : bounds.y <= seamY + STAGE_BOUNDARY_EPSILON && bounds.y + bounds.height >= seamY - STAGE_BOUNDARY_EPSILON;
+    });
+    const blockers = seamSurfaces.map((surface) => horizontalInterval(surface, -PLAYER_CONFIG.radius));
+    const passages = openIntervals(domain, blockers).filter(
+        ({ min, max }) => max - min >= MIN_STAGE_BOUNDARY_PASSAGE_WIDTH
+    );
+    if (passages.length === 0) {
+        issue(issues, "full-width-seam-blocked", {
+            sourceStageId: source.stageId,
+            targetStageId: target.stageId,
+            seamY,
+            blockerIds: seamSurfaces.map(({ id }) => id)
+        });
+        return;
+    }
+
+    const lowerSurfaces = world.surfaces.filter(
+        ({ landmarkId, collision, renderable }) =>
+            landmarkId === source.id && collision !== false && renderable !== false
+    );
+    const landing = lowerSurfaces
+        .filter(({ topY }) => topY >= seamY - STAGE_BOUNDARY_EPSILON)
+        .sort((left, right) => left.topY - right.topY)
+        .find((surface) => {
+            const support = horizontalInterval(surface, PLAYER_CONFIG.radius);
+            return passages.some(
+                (passage) => intervalOverlapWidth(passage, support) >= MIN_STAGE_BOUNDARY_PASSAGE_WIDTH
+            );
+        });
+    if (landing) return;
+    const ropeRecovery = lowerSurfaces.find(
+        (surface) =>
+            surface.grappleable === true &&
+            passages.some((passage) => intervalDistance(passage, horizontalInterval(surface)) <= BASE_ROPE_REACH)
+    );
+    if (!ropeRecovery) {
+        issue(issues, "no-lower-recovery-surface", {
+            sourceStageId: source.stageId,
+            targetStageId: target.stageId,
+            seamY
+        });
     }
 }
 
@@ -690,7 +719,7 @@ function validateProgressGates(world, areaIndex, issues) {
 function validateStageTransitions(world, landmarkIndex, issues) {
     const transitionIndex = indexBy(world.stageTransitions, "id", issues, "stage-transition-duplicate");
     const routeLockIndex = indexBy(world.routeLocks, "id", issues, "route-lock-duplicate");
-    const expectedTransitionCount = 44;
+    const expectedTransitionCount = RUNTIME_STAGE_COUNT - 1;
     if (
         world.stageTransitions.length !== expectedTransitionCount ||
         world.routeLocks.length !== expectedTransitionCount
@@ -709,20 +738,12 @@ function validateStageTransitions(world, landmarkIndex, issues) {
             issue(issues, "stage-transition-owner-missing", { stageTransitionId: transition.id });
             continue;
         }
-        if (source && AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS.includes(source.stageId)) {
-            issue(issues, "content-boundary-outbound-stage-transition", {
+        if (target.order !== source.order + 1) {
+            issue(issues, "stage-transition-order-mismatch", {
                 stageTransitionId: transition.id,
-                stageId: source.stageId
+                sourceOrder: source.order,
+                targetOrder: target.order
             });
-        }
-        if (source && target && source.sectorId !== target.sectorId) {
-            const transitionKey = `${source.stageId}:${target.stageId}`;
-            if (!ALLOWED_CROSS_SECTOR_CONNECTORS[transitionKey]) {
-                issue(issues, "cross-sector-stage-transition-forbidden", {
-                    stageTransitionId: transition.id,
-                    transitionKey
-                });
-            }
         }
         if (
             lock.sourceLandmarkId !== transition.sourceLandmarkId ||
@@ -741,24 +762,30 @@ function validateStageTransitions(world, landmarkIndex, issues) {
             issue(issues, "stage-transition-authored-endpoint-mismatch", { stageTransitionId: transition.id });
         }
         const verticalGap = source.bounds.y - (target.bounds.y + target.bounds.height);
-        if (verticalGap < AUTHORED_STAGE_ISOLATION_GAP) {
-            issue(issues, "stage-map-isolation-gap", {
+        if (Math.abs(verticalGap) > STAGE_BOUNDARY_EPSILON) {
+            issue(issues, "stage-map-seam-gap", {
                 stageTransitionId: transition.id,
-                expectedMinimum: AUTHORED_STAGE_ISOLATION_GAP,
+                expected: 0,
                 actual: verticalGap
             });
         }
+        validateAuthoredStageBoundary(world, source, target, issues);
     }
+    const terminalBoundaryStageId = AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS.at(-1);
     for (const stageId of AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS) {
         const landmark = world.landmarks.find((entry) => entry.stageId === stageId);
-        if (!landmark || landmark.outboundRouteId != null) {
+        const expectsOutboundRoute = stageId !== terminalBoundaryStageId;
+        if (
+            !landmark ||
+            (expectsOutboundRoute ? typeof landmark.outboundRouteId !== "string" : landmark.outboundRouteId != null)
+        ) {
             issue(issues, "content-boundary-outbound-route", {
                 stageId,
+                expected: expectsOutboundRoute ? "route-id" : null,
                 outboundRouteId: landmark?.outboundRouteId ?? null
             });
         }
     }
-    validateContentBoundaryIsolation(world, issues);
 }
 
 function validateContentBoundaryProgress(world, issues) {
