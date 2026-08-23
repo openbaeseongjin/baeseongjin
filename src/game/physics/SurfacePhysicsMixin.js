@@ -176,6 +176,8 @@ export function withSurfacePhysics(Base) {
                 surfaces: candidateSurfaces,
                 previousPosition
             });
+            const actorImpactPosition = this.position.clone();
+            const actorImpactVelocity = resolvedVelocity.clone();
             const actorResolution =
                 actorId === null
                     ? Object.freeze({
@@ -208,6 +210,8 @@ export function withSurfacePhysics(Base) {
             return Object.freeze({
                 previousPosition,
                 incomingVelocity,
+                actorImpactPosition,
+                actorImpactVelocity,
                 isGrounded:
                     actorResolution.isGrounded || surfaceResolution.isGrounded || finalSurfaceResolution.isGrounded,
                 collisionNormals: Object.freeze([

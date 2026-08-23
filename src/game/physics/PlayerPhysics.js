@@ -32,6 +32,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
         this.lastSurfaceCollisionNormals = Object.freeze([]);
         this.lastSurfaceCollisionIncomingVelocity = PLAYER_PHYSICS.ZERO_VECTOR;
         this.lastActorCollisionIds = Object.freeze([]);
+        this.lastActorImpact = null;
     }
 
     reset(position = PLAYER_PHYSICS.INITIAL_POSITION) {
@@ -43,6 +44,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
         this.lastSurfaceCollisionNormals = Object.freeze([]);
         this.lastSurfaceCollisionIncomingVelocity = PLAYER_PHYSICS.ZERO_VECTOR;
         this.lastActorCollisionIds = Object.freeze([]);
+        this.lastActorImpact = null;
     }
 
     step(dt, input, surfaces, rope, collision = {}) {
@@ -101,6 +103,17 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
         this.lastSurfaceCollisionNormals = surfaceResolution.collisionNormals;
         this.lastSurfaceCollisionIncomingVelocity = Object.freeze({ x: impactVelocity.x, y: impactVelocity.y });
         this.lastActorCollisionIds = surfaceResolution.collidedActorIds;
+        this.lastActorImpact = Object.freeze({
+            position: Object.freeze({
+                x: surfaceResolution.actorImpactPosition.x,
+                y: surfaceResolution.actorImpactPosition.y
+            }),
+            velocity: Object.freeze({
+                x: surfaceResolution.actorImpactVelocity.x,
+                y: surfaceResolution.actorImpactVelocity.y
+            }),
+            collidedActorIds: surfaceResolution.collidedActorIds
+        });
         rope.apply(this, dt);
         const landed = !wasGrounded && this.isGrounded;
         return Object.freeze({
@@ -111,7 +124,8 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
                 : PLAYER_PHYSICS.MINIMUM_IMPACT_SPEED,
             impactVelocity: landed
                 ? Object.freeze({ x: impactVelocity.x, y: impactVelocity.y })
-                : PLAYER_PHYSICS.ZERO_VECTOR
+                : PLAYER_PHYSICS.ZERO_VECTOR,
+            actorImpact: this.lastActorImpact
         });
     }
 

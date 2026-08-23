@@ -226,6 +226,7 @@ export class RemoteGameAuthority {
             angularVelocity: predicted.angularVelocity,
             isGrounded: predicted.isGrounded,
             rope: predicted.rope,
+            ropeImpactState: predicted.ropeImpactState,
             launcher: predicted.launcher,
             augmentRuntimeState: predicted.augmentRuntimeState,
             respawnAnchorId: predicted.respawnAnchorId ?? null
