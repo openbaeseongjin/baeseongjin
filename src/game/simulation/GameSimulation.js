@@ -41,7 +41,6 @@ import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js
 import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
 import { ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { IMPACT_TARGET_KIND, ImpactTarget } from "../combat/ImpactTarget.js";
-import { ImpactTargetRegistry } from "../combat/ImpactTargetRegistry.js";
 import { HomingProjectileObject } from "../combat/ProjectileObject.js";
 import {
     COMBAT_CONFIG,
@@ -58,6 +57,7 @@ import {
 } from "../config.js";
 import { InputDispatcher } from "../input/InputDispatcher.js";
 import { DebugEnemyTrainingDummy } from "../debug/DebugEnemyTrainingDummy.js";
+import { GameObjectManager } from "../objects/managers/GameObjectManager.js";
 import { findRopeAttachment, launchHandPosition } from "../input/RopePointerInput.js";
 import { RunMetrics } from "../metrics/RunMetrics.js";
 import { createPlayerImpactStateDigest, PLAYER_IMPACT_SOURCE_KIND } from "../network/PlayerImpactClaim.js";
@@ -94,7 +94,6 @@ import { authoredRegionForPosition } from "../world/AuthoredLandmarkResolver.js"
 import { HARDPOINT_JAMMER_AUTHORITY, HardpointJammerField } from "../world/HardpointJammerField.js";
 import { advanceWorldProgress, completeWorldProgressObjective } from "../world/WorldProgressController.js";
 import { WorldProgressState } from "../world/WorldProgressState.js";
-import { EntityRegistry } from "./EntityRegistry.js";
 
 function segmentBoundsEntryPoint(start, end, bounds) {
     if (pointInsideBounds(start, bounds)) return Object.freeze({ x: start.x, y: start.y });
@@ -299,8 +298,6 @@ export class GameSimulation {
         this.completedBossStageIds = new Set();
         this.bossHazardRecords = new Map();
         this.bossRuntime = this.isSeamlessSectorWorld ? new BossEncounterRuntime(this.bossDefinitions[0]) : null;
-        this.impactTargetRegistry = new ImpactTargetRegistry();
-        this.#registerBossImpactTargets();
         this.worldProgress = this.isSeamlessSectorWorld
             ? new SectorProgressState(this.world)
             : worldCatalog
@@ -309,18 +306,16 @@ export class GameSimulation {
         this.activeCollisionSurfaces = this.isSeamlessSectorWorld
             ? this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
             : collisionSurfacesForProgress(this.world, this.worldProgress);
-        this.collisionBroadPhase = new CollisionBroadPhase(collisionBroadPhaseConfig);
-        this.collisionBroadPhase.setSurfaces(this.activeCollisionSurfaces);
-        this.activeSimulationEnemies = Object.freeze([]);
+        const collisionBroadPhase = new CollisionBroadPhase(collisionBroadPhaseConfig);
+        collisionBroadPhase.setSurfaces(this.activeCollisionSurfaces);
+        this.objects = new GameObjectManager({ world: this.world, collisionBroadPhase });
+        this.#registerBossImpactTargets();
         this.windOccluders = windOccludingSurfaces(this.world.surfaces);
         this.elapsedSeconds = 0;
         this.metrics = new RunMetrics({ progressKind: this.isSeamlessSectorWorld ? "sector" : "area" });
-        this.registry = new EntityRegistry();
         this.#inputDispatcher = new InputDispatcher();
-        this.#inputDrivenObjectsByOwner = new Map();
         this.portalTransitions = new Map();
         this.lastAcceptedPlayerProjectileSpawnTick = new Map();
-        this.players = [];
         const startArea = this.world.areas?.find(({ id }) => id === startAreaId) ?? this.world.areas?.[0];
         const startLandmark = this.isSeamlessSectorWorld
             ? (this.world.landmarks.find(
@@ -351,11 +346,8 @@ export class GameSimulation {
         this.enemyRuntimeCreations = 0;
         this.enemyRuntimeReconciliations = 0;
         this.debugTrainingDummy = new DebugEnemyTrainingDummy();
-        this.enemies = this.createEnemies();
+        this.objects.enemies.replace(this.createEnemies());
         this.hardpointJammers = new HardpointJammerField(this.world.jammerGroups ?? []);
-        this.enemyImpactTombstones = new Map();
-        this.projectiles = [];
-        this.enemyProjectiles = [];
         this.eventFlash = { type: "ready", age: 10 };
         this.resets = 0;
         this.runState = "playing";
@@ -370,6 +362,42 @@ export class GameSimulation {
         this.foundationRewards = new Map();
         this.tick = 0;
         this.replicationEvents = [];
+    }
+
+    get registry() {
+        return this.objects.identifiers;
+    }
+
+    get collisionBroadPhase() {
+        return this.objects.spatial;
+    }
+
+    get impactTargetRegistry() {
+        return this.objects.impactTargets;
+    }
+
+    get players() {
+        return this.objects.players.all;
+    }
+
+    get enemies() {
+        return this.objects.enemies.all;
+    }
+
+    get activeSimulationEnemies() {
+        return this.objects.enemies.active;
+    }
+
+    get enemyImpactTombstones() {
+        return this.objects.enemies.tombstones;
+    }
+
+    get projectiles() {
+        return this.objects.playerProjectiles.all;
+    }
+
+    get enemyProjectiles() {
+        return this.objects.enemyProjectiles.all;
     }
 
     addPlayer(spawn, playerId = null, respawnAnchorId = null) {
@@ -397,19 +425,16 @@ export class GameSimulation {
             respawnAnchorId: initialRespawnAnchorId
         });
         runtime.entity.augmentCombat.syncLoadout(runtime.entity.foundation, runtime.entity.maxHealth);
-        this.players.push(runtime.entity);
+        this.objects.addPlayerRuntime(runtime);
         if (this.bossRuntime?.status === "active") this.bossRuntime.addParticipant(runtime.entity.id);
-        this.#inputDrivenObjectsByOwner.set(runtime.entity.id, runtime.inputDrivenObjects);
         this.collisionBroadPhase.invalidateFrame();
         return runtime;
     }
 
     removePlayer(playerId) {
-        const index = this.players.findIndex(({ id }) => id === playerId);
-        if (index < 0) return false;
-        const [removed] = this.players.splice(index, 1);
+        const removed = this.objects.removePlayer(playerId);
+        if (!removed) return false;
         if (this.bossRuntime?.status === "active") this.bossRuntime.removeParticipant(playerId);
-        this.#inputDrivenObjectsByOwner.delete(playerId);
         this.portalTransitions.delete(playerId);
         this.foundationRewards.delete(playerId);
         if (removed.id === this.#primaryPlayerId) this.#primaryPlayerId = this.players[0]?.id ?? null;
@@ -424,11 +449,11 @@ export class GameSimulation {
     }
 
     hasPlayer(playerId) {
-        return this.players.some(({ id }) => id === playerId);
+        return this.objects.players.find(playerId) !== null;
     }
 
     playerIds() {
-        return this.players.map(({ id }) => id);
+        return this.objects.players.ids();
     }
 
     #commitBossEvents() {
@@ -658,19 +683,21 @@ export class GameSimulation {
     #registerBossImpactTargets() {
         for (const definition of this.bossDefinitions) {
             const bodyId = definition.arena.boss?.actorId ?? `${definition.id}:body`;
-            this.impactTargetRegistry.register(
+            this.impactTargetRegistry.add(
                 new ImpactTarget({
                     id: bodyId,
                     kind: IMPACT_TARGET_KIND.BOSS,
+                    isActive: () => this.#bossImpactTargetActive(definition.id, bodyId, false),
                     snapshot: () => this.#bossImpactSnapshot(definition.id, bodyId, false),
                     applyImpact: (impact) => this.#applyRegisteredBossImpact(definition.id, bodyId, impact)
                 })
             );
             for (const phase of definition.phases) {
-                this.impactTargetRegistry.register(
+                this.impactTargetRegistry.add(
                     new ImpactTarget({
                         id: phase.weakTargetId,
                         kind: IMPACT_TARGET_KIND.BOSS,
+                        isActive: () => this.#bossImpactTargetActive(definition.id, phase.weakTargetId, true),
                         snapshot: () => this.#bossImpactSnapshot(definition.id, phase.weakTargetId, true),
                         applyImpact: (impact) =>
                             this.#applyRegisteredBossImpact(definition.id, phase.weakTargetId, impact)
@@ -678,6 +705,15 @@ export class GameSimulation {
                 );
             }
         }
+    }
+
+    #bossImpactTargetActive(stageId, targetId, weakpoint) {
+        return (
+            this.bossRuntime?.definition.id === stageId &&
+            this.bossRuntime.status === "active" &&
+            this.bossRuntime.mechanism.isCombatActive?.() !== false &&
+            (!weakpoint || this.bossRuntime.mechanism.isWeakpointActive(targetId))
+        );
     }
 
     #bossImpactSnapshot(stageId, targetId, weakpoint) {
@@ -1036,7 +1072,7 @@ export class GameSimulation {
     }
 
     inputDrivenObjects(ownerId) {
-        return this.#inputDrivenObjectsByOwner.get(ownerId) ?? Object.freeze([]);
+        return this.objects.players.inputDrivenFor(ownerId);
     }
 
     playerState(playerId) {
@@ -1105,7 +1141,7 @@ export class GameSimulation {
     }
 
     enemyStates() {
-        return this.enemies.map((enemy) => enemy.renderSnapshot());
+        return this.objects.enemies.renderSnapshots();
     }
 
     debugTrainingDummySnapshot() {
@@ -1182,7 +1218,7 @@ export class GameSimulation {
             maxHealth: health,
             fireCooldown: COMBAT_CONFIG.enemyFireInterval
         });
-        this.enemies.push(enemy);
+        this.objects.enemies.add(enemy);
         this.debugTrainingDummy.assign(enemy);
         this.collisionBroadPhase.invalidateFrame();
         return Object.freeze({ created: true, enemy: enemy.renderSnapshot() });
@@ -1195,21 +1231,18 @@ export class GameSimulation {
     removeDebugTrainingDummy() {
         const enemyId = this.debugTrainingDummy.clear();
         if (!enemyId) return false;
-        this.enemies = this.enemies.filter(({ id }) => id !== enemyId);
-        this.enemyProjectiles = this.enemyProjectiles.filter(({ ownerId }) => ownerId !== enemyId);
+        this.objects.enemies.remove(enemyId);
+        this.objects.enemyProjectiles.removeOwnedBy(enemyId);
         this.enemyImpactTombstones.delete(enemyId);
         this.collisionBroadPhase.invalidateFrame();
         return true;
     }
 
     enemyNetworkStates() {
-        const authoredObjectIds = new Set(
-            this.world.enemySpawns.map(({ objectId, encounterId, slotId }) => objectId ?? encounterId ?? slotId)
-        );
         return this.enemyStates()
             .filter((enemy) => !this.debugTrainingDummy.matches(enemy))
             .map((enemy) => {
-                if (!enemy.objectId || !authoredObjectIds.has(enemy.objectId)) return enemy;
+                if (!enemy.objectId || !this.objects.enemies.isAuthoredObjectId(enemy.objectId)) return enemy;
                 return {
                     id: enemy.id,
                     objectId: enemy.objectId,
@@ -1232,22 +1265,15 @@ export class GameSimulation {
     }
 
     hydrateEnemyNetworkStates(states) {
-        const spawnsByObjectId = (this.enemySpawnsByObjectId ??= new Map(
-            this.world.enemySpawns.map((spawn) => [spawn.objectId ?? spawn.encounterId ?? spawn.slotId, spawn])
-        ));
-        const staticStateByObjectId = (this.enemyStaticStateByObjectId ??= new Map());
         return states.map((state) => {
             if (state.enemyType) return state;
-            const spawn = spawnsByObjectId.get(state.objectId);
-            if (!spawn) throw new Error(`unknown enemy network objectId: ${state.objectId}`);
-            let definition = staticStateByObjectId.get(state.objectId);
-            if (!definition) {
-                definition = resolveEnemySpawnDefinition(spawn, {
+            const definition = this.objects.enemies.staticStateFor(state.objectId, (spawn) =>
+                resolveEnemySpawnDefinition(spawn, {
                     runSeed: this.world.seed,
                     worldRevision: this.world.definitionRevision ?? WORLD_GENERATION_REVISION
-                });
-                staticStateByObjectId.set(state.objectId, definition);
-            }
+                })
+            );
+            if (!definition) throw new Error(`unknown enemy network objectId: ${state.objectId}`);
             const collider = state.collider ?? definition.collider ?? null;
             return {
                 ...definition,
@@ -1280,20 +1306,11 @@ export class GameSimulation {
     }
 
     #prepareCollisionFrame() {
-        this.activeSimulationEnemies = this.collisionBroadPhase.beginFrame({
+        return this.objects.beginSimulationFrame({
             tick: this.tick,
             surfaces: this.activeCollisionSurfaces,
-            players: this.players,
-            enemies: this.enemies,
             neutralActors: this.#bossCollisionActors()
         });
-        for (const enemy of this.activeSimulationEnemies) enemy.observeActivation(this.players);
-        const activeEnemyIds = new Set(this.activeSimulationEnemies.map(({ id }) => id));
-        for (const enemy of this.enemies) {
-            if (activeEnemyIds.has(enemy.id)) continue;
-            enemy.suspendSurfacePhysics();
-        }
-        return this.activeSimulationEnemies;
     }
 
     collisionBroadPhaseSnapshot() {
@@ -1514,22 +1531,24 @@ export class GameSimulation {
         }
         const existingById = new Map(this.enemies.map((enemy) => [enemy.id, enemy]));
         const seenIds = new Set();
-        this.enemies = enemies.map((enemy) => {
-            if (seenIds.has(enemy.id)) throw new Error(`duplicate predicted enemy id: ${enemy.id}`);
-            seenIds.add(enemy.id);
-            const existing = existingById.get(enemy.id);
-            if (existing?.restoreNetworkState(enemy)) {
-                this.enemyRuntimeReconciliations += 1;
-                return existing;
-            }
-            this.enemyRuntimeCreations += 1;
-            return createEnemyRuntime({
-                ...enemy,
-                position: new Vector2(enemy.position.x, enemy.position.y)
-            });
-        });
-        this.projectiles = [];
-        this.enemyProjectiles = [];
+        this.objects.enemies.replace(
+            enemies.map((enemy) => {
+                if (seenIds.has(enemy.id)) throw new Error(`duplicate predicted enemy id: ${enemy.id}`);
+                seenIds.add(enemy.id);
+                const existing = existingById.get(enemy.id);
+                if (existing?.restoreNetworkState(enemy)) {
+                    this.enemyRuntimeReconciliations += 1;
+                    return existing;
+                }
+                this.enemyRuntimeCreations += 1;
+                return createEnemyRuntime({
+                    ...enemy,
+                    position: new Vector2(enemy.position.x, enemy.position.y)
+                });
+            })
+        );
+        this.objects.playerProjectiles.clear();
+        this.objects.enemyProjectiles.clear();
         this.collisionBroadPhase.invalidateFrame();
     }
 
@@ -1664,7 +1683,7 @@ export class GameSimulation {
         this.#commitAugmentImpactEvents(augmentImpactEvents, { replicate: false });
         const stageSavepointEvent = this.updatePlayerStageSavepoint(ownerId);
         const projectile = this.#advanceAutomaticWeapon(player, dt, allowFire);
-        this.projectiles.length = 0;
+        this.objects.playerProjectiles.clear();
         return Object.freeze({
             projectile,
             foundationEvents: inputOutcome.foundationEvents,
@@ -1715,7 +1734,7 @@ export class GameSimulation {
         });
         player.health = Math.max(0, player.health - protection.appliedDamage);
         for (const reflected of protection.events) {
-            const attacker = this.enemies.find(({ id }) => id === reflected.attackerId);
+            const attacker = this.objects.enemies.find(reflected.attackerId);
             if (attacker) {
                 player.augmentCombat.queueDamageReflection({
                     player,
@@ -1765,7 +1784,7 @@ export class GameSimulation {
     }
 
     #findPlayer(playerId) {
-        return this.players.find(({ id }) => id === playerId) ?? null;
+        return this.objects.players.find(playerId);
     }
 
     #requirePlayer(playerId) {
@@ -1827,12 +1846,19 @@ export class GameSimulation {
             player.ropeObject.launcher.restore(state.launcher);
         }
         const launchOrigin = launchHandPosition(player, effectiveRopeConfig, player.ropeObject.aimWorld);
+        const maxAttachDistance = hookReach(effectiveRopeConfig);
+        const aimTolerance = player.foundation.ropeInputModifiers(this.ropeConfig).aimTolerance;
         player.ropeObject.attachmentCandidate = findRopeAttachment({
             aimPoint: player.ropeObject.aimWorld,
             origin: launchOrigin,
-            surfaces: this.world.surfaces,
-            maxAttachDistance: hookReach(effectiveRopeConfig),
-            aimTolerance: player.foundation.ropeInputModifiers(this.ropeConfig).aimTolerance,
+            surfaces: this.objects.ropeAttachmentSurfaces({
+                aimPoint: player.ropeObject.aimWorld,
+                origin: launchOrigin,
+                maxAttachDistance,
+                aimTolerance
+            }),
+            maxAttachDistance,
+            aimTolerance,
             canAttachToSurface: this.#accessScanPredicate()
         });
     }
@@ -1963,16 +1989,16 @@ export class GameSimulation {
             ...this.enemies,
             ...this.#activeBossImpactSnapshots().map((target) => ({ ...target }))
         ];
-        const playerProjectileEvents = this.#resolveBossProjectileEvents(
-            updatePlayerProjectiles({
-                projectiles: this.projectiles,
-                enemies: projectileTargets,
-                config: COMBAT_CONFIG,
-                dt,
-                resolveHits: resolvePlayerProjectileHits,
-                maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds
-            })
-        );
+        const playerProjectileUpdate = updatePlayerProjectiles({
+            projectiles: this.projectiles,
+            enemies: projectileTargets,
+            config: COMBAT_CONFIG,
+            dt,
+            resolveHits: resolvePlayerProjectileHits,
+            maxLifetimeSeconds: COMBAT_CONFIG.playerProjectileLifetimeSeconds
+        });
+        this.objects.playerProjectiles.commitLifecycle(playerProjectileUpdate);
+        const playerProjectileEvents = this.#resolveBossProjectileEvents(playerProjectileUpdate);
         updateEnemyPresentationAim({
             enemies: this.activeSimulationEnemies.filter(
                 (enemy) => enemy.awakened && this.debugTrainingDummy.canSimulate(enemy)
@@ -1986,7 +2012,7 @@ export class GameSimulation {
                 (enemy) => enemy.awakened && !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
             ),
             targets: this.players,
-            projectiles: this.enemyProjectiles,
+            registerProjectile: (projectile) => this.objects.enemyProjectiles.add(projectile),
             registry: this.registry,
             config: COMBAT_CONFIG,
             surfaces: this.activeCollisionSurfaces,
@@ -1999,6 +2025,7 @@ export class GameSimulation {
             dt,
             maxLifetimeSeconds: COMBAT_CONFIG.enemyProjectileLifetimeSeconds
         });
+        this.objects.enemyProjectiles.commitLifecycle(enemyProjectileLifecycle);
         for (const projectile of enemyProjectileLifecycle.expired) {
             this.recordProjectileResolution({
                 projectileId: projectile.id,
@@ -2015,7 +2042,7 @@ export class GameSimulation {
             ...playerProjectileEvents,
             hits: playerProjectileEvents.hits.filter(
                 (event) =>
-                    this.enemies.some(({ id }) => id === event.targetId) &&
+                    this.objects.enemies.find(event.targetId) !== null &&
                     !this.debugTrainingDummy.matches(event.targetId)
             )
         });
@@ -2115,6 +2142,7 @@ export class GameSimulation {
                 owner: player,
                 ropeConfig: effectiveRopeConfig,
                 surfaces: this.activeCollisionSurfaces,
+                surfaceCandidates: (query) => this.objects.ropeAttachmentSurfaces(query),
                 collisionActors: collisionEnemies,
                 collisionBroadPhase: this.collisionBroadPhase,
                 canAttachToSurface: this.#accessScanPredicate(),
@@ -2299,7 +2327,7 @@ export class GameSimulation {
             };
             return result;
         }
-        const target = this.enemies.find(({ id, health }) => id === event.targetId && health > 0);
+        const target = this.objects.enemies.findAlive(event.targetId);
         const source = this.#findPlayer(event.sourcePlayerId);
         const impactSpeed = Math.hypot(event.velocity.x, event.velocity.y);
         if (impactSpeed < ROPE_IMPACT_CONFIG.minimumSpeed) {
@@ -2438,7 +2466,7 @@ export class GameSimulation {
         player.health = Math.max(0, player.health - damage);
         player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
         for (const reflected of protection.events) {
-            const attacker = this.enemies.find(({ id }) => id === reflected.attackerId);
+            const attacker = this.objects.enemies.find(reflected.attackerId);
             if (!attacker) continue;
             player.augmentCombat.queueDamageReflection({
                 player,
@@ -2504,7 +2532,7 @@ export class GameSimulation {
                 velocity: claim.velocity
             });
         }
-        const target = this.enemies.find(({ id, health }) => id === claim.targetId && health > 0);
+        const target = this.objects.enemies.findAlive(claim.targetId);
         if (!target && this.enemyImpactTombstones.has(claim.targetId)) {
             return Object.freeze({
                 accepted: true,
@@ -2571,7 +2599,7 @@ export class GameSimulation {
             };
             return result;
         }
-        const target = this.enemies.find(({ id, health }) => id === claim.targetId && health > 0) ?? null;
+        const target = this.objects.enemies.findAlive(claim.targetId);
         const isTombstoned = this.enemyImpactTombstones.has(claim.targetId);
         if (!target && !isTombstoned) return Object.freeze({ accepted: false, reason: "target-missing" });
         if (!validateAugmentImpactFormula(player, claim, target, { positionTolerance }).valid) {
@@ -2817,7 +2845,7 @@ export class GameSimulation {
 
     #consumeDebugAugmentSource({ playerId, sourceObjectId }) {
         const player = this.#findPlayer(playerId);
-        const source = this.world.objects?.find(({ id }) => id === sourceObjectId);
+        const source = this.objects.worldObjects.find(sourceObjectId);
         if (!player || source?.kind !== "augment-node") return false;
         if (!player.foundation.consumedSourceIds.includes(source.id)) {
             player.foundation.restore(player.foundation.selectedId, {
@@ -2837,7 +2865,7 @@ export class GameSimulation {
 
     beginFoundationReward(playerId, sourceId, objectiveId = null) {
         const player = this.#findPlayer(playerId);
-        const source = this.world.objects?.find(({ id }) => id === sourceId);
+        const source = this.objects.worldObjects.find(sourceId);
         if (
             !player ||
             player.foundation.selectedAugmentIds.length >= 6 ||
@@ -2906,7 +2934,7 @@ export class GameSimulation {
         return updateAutomaticWeapon({
             owner: player,
             enemies,
-            projectiles: this.projectiles,
+            registerProjectile: (projectile) => this.objects.playerProjectiles.add(projectile),
             registry: this.registry,
             config: COMBAT_CONFIG,
             dt,
@@ -3036,7 +3064,7 @@ export class GameSimulation {
         if (!player || player.lifeState !== "active") {
             return Object.freeze({ accepted: false, reason: "player-ineligible" });
         }
-        const source = this.world.objects?.find(({ id }) => id === sourceId);
+        const source = this.objects.worldObjects.find(sourceId);
         if (source?.kind !== "augment-node") {
             return Object.freeze({ accepted: false, reason: "source-unavailable" });
         }
@@ -3168,7 +3196,7 @@ export class GameSimulation {
     // CALIBRATION-PROFILES.json profile's exact distance/timing window (all marked NOT_IMPLEMENTED in
     // that package) - see docs/bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md for the flagged gap.
     #advanceCalibrationVerification() {
-        const sources = this.world.objects?.filter(({ kind }) => kind === "calibration-frame") ?? [];
+        const sources = this.objects.worldObjects.ofKind("calibration-frame");
         if (sources.length === 0) return;
         for (const player of this.players) {
             if (player.lifeState !== "active" || player.foundation.selectedAugmentIds.length === 0) continue;
@@ -3190,7 +3218,7 @@ export class GameSimulation {
 
     #completeEligibleAugmentObjectivesForCurrentRoster() {
         if (!this.worldProgress || this.players.length === 0) return;
-        for (const source of this.world.objects?.filter(({ kind }) => kind === "augment-node") ?? []) {
+        for (const source of this.objects.worldObjects.ofKind("augment-node")) {
             const objectiveId = source.objectiveId;
             if (!objectiveId || this.worldProgress.isObjectiveComplete(objectiveId)) continue;
             const player = this.players.find(({ foundation }) => foundation.consumedSourceIds.includes(source.id));
@@ -3204,7 +3232,7 @@ export class GameSimulation {
         if (foundationId) player.foundation.deselect(foundationId, { sourceId });
         player.augmentCombat.syncLoadout(player.foundation, player.maxHealth);
         if (sourceId) {
-            const source = this.world.objects?.find(({ id }) => id === sourceId);
+            const source = this.objects.worldObjects.find(sourceId);
             if (source) this.beginFoundationReward(playerId, sourceId, source.objectiveId);
         }
         return this.playerState(playerId);
@@ -3318,7 +3346,7 @@ export class GameSimulation {
             radius: COMBAT_CONFIG.projectileRadius,
             predictionId: claim.predictionId
         });
-        this.projectiles.push(projectile);
+        this.objects.playerProjectiles.add(projectile);
         this.recordProjectileSpawn(projectile);
         this.lastAcceptedPlayerProjectileSpawnTick.set(authenticatedPlayerId, claim.clientTick);
         player.weapon.cooldown = COMBAT_CONFIG.fireInterval;
@@ -3326,7 +3354,7 @@ export class GameSimulation {
     }
 
     resolvePlayerProjectileClaim(authenticatedPlayerId, claim) {
-        const projectile = this.projectiles.find(({ predictionId }) => predictionId === claim.predictionId) ?? null;
+        const projectile = this.objects.playerProjectiles.findByPredictionId(claim.predictionId);
         if (projectile && projectile.ownerId !== authenticatedPlayerId) {
             return Object.freeze({ accepted: false, reason: "projectile-ownership" });
         }
@@ -3336,7 +3364,7 @@ export class GameSimulation {
         const bossTarget = this.impactTargetRegistry.find(claim.targetId);
         if (bossTarget?.kind === IMPACT_TARGET_KIND.BOSS) {
             const damage = projectile?.damage ?? COMBAT_CONFIG.weaponDamage;
-            if (projectile) this.projectiles = this.projectiles.filter(({ id }) => id !== projectile.id);
+            if (projectile) this.objects.playerProjectiles.remove(projectile.id);
             const targetState = bossTarget.snapshot();
             const result = bossTarget.resolve({
                 sourcePlayerId: authenticatedPlayerId,
@@ -3356,13 +3384,13 @@ export class GameSimulation {
             );
             return Object.freeze({ accepted: true, resolution: result.resolution, damage: result.damage });
         }
-        const target = this.enemies.find((enemy) => enemy.id === claim.targetId && enemy.health > 0);
+        const target = this.objects.enemies.findAlive(claim.targetId);
         if (!target && this.enemyImpactTombstones.has(claim.targetId)) {
             return Object.freeze({ accepted: true, resolution: "target-already-dead", damage: 0 });
         }
         if (!target) return Object.freeze({ accepted: false, reason: "target-missing" });
         const damage = projectile?.damage ?? COMBAT_CONFIG.weaponDamage;
-        if (projectile) this.projectiles = this.projectiles.filter(({ id }) => id !== projectile.id);
+        if (projectile) this.objects.playerProjectiles.remove(projectile.id);
         target.health = Math.max(0, target.health - damage);
         const resolution = target.health <= 0 ? "enemy-defeated" : "enemy-hit";
         this.recordProjectileResolution(
@@ -3425,9 +3453,9 @@ export class GameSimulation {
                 }
             }
         }
-        this.enemies = this.enemies.filter(({ health }) => health > 0);
+        this.objects.enemies.removeWhere(({ health }) => health <= 0);
         if (defeatedTrainingDummyId) {
-            this.enemyProjectiles = this.enemyProjectiles.filter(({ ownerId }) => ownerId !== defeatedTrainingDummyId);
+            this.objects.enemyProjectiles.removeOwnedBy(defeatedTrainingDummyId);
             this.debugTrainingDummy.clear();
             this.collisionBroadPhase.invalidateFrame();
         }
@@ -3487,9 +3515,9 @@ export class GameSimulation {
         if (!bossHazard.accepted) return bossHazard;
         const impactId = claim.impactId ?? claim.projectileId;
         const isFallDamage = claim.impactType === "fall-damage";
-        const projectile = isFallDamage ? null : this.enemyProjectiles.find(({ id }) => id === impactId);
+        const projectile = isFallDamage ? null : this.objects.enemyProjectiles.find(impactId);
         if (projectile && this.debugTrainingDummy.ownsProjectile(projectile)) {
-            this.enemyProjectiles = this.enemyProjectiles.filter(({ id }) => id !== projectile.id);
+            this.objects.enemyProjectiles.remove(projectile.id);
             this.recordProjectileResolution({
                 projectileId: projectile.id,
                 resolution: claim.impactType,
@@ -3606,7 +3634,7 @@ export class GameSimulation {
             }
             player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
             for (const reflected of protection.events) {
-                const attacker = this.enemies.find(({ id }) => id === reflected.attackerId);
+                const attacker = this.objects.enemies.find(reflected.attackerId);
                 if (!attacker) continue;
                 player.augmentCombat.queueDamageReflection({
                     player,
@@ -3618,7 +3646,7 @@ export class GameSimulation {
             }
             this.#commitAugmentImpactEvents(player.augmentCombat.drainQueuedImpactEvents());
         }
-        this.enemyProjectiles = this.enemyProjectiles.filter(({ id }) => id !== projectile.id);
+        this.objects.enemyProjectiles.remove(projectile.id);
         this.recordProjectileResolution(
             {
                 projectileId: projectile.id,
@@ -3728,7 +3756,7 @@ export class GameSimulation {
                 respawned: claim.outcome.respawned
             });
         }
-        if (projectile) this.enemyProjectiles = this.enemyProjectiles.filter(({ id }) => id !== projectile.id);
+        if (projectile) this.objects.enemyProjectiles.remove(projectile.id);
         this.recordProjectileResolution(
             {
                 projectileId: impactId,
@@ -3870,6 +3898,7 @@ export class GameSimulation {
         const player = this.#primaryPlayer();
         const playerState = this.playerState(player.id);
         const ropeState = player.ropeObject.renderSnapshot();
+        const bossStage = this.bossStageSnapshot();
         return {
             tick: this.tick,
             world: this.world,
@@ -3880,8 +3909,8 @@ export class GameSimulation {
             eventFlash: eventFlashState(this.eventFlash),
             swingDrag: playerState.control.swingDrag,
             enemies: this.enemyStates(),
-            projectiles: this.projectiles.map((projectile) => projectile.renderSnapshot()),
-            enemyProjectiles: this.enemyProjectiles.map((projectile) => projectile.renderSnapshot()),
+            projectiles: this.objects.playerProjectiles.renderSnapshots(),
+            enemyProjectiles: this.objects.enemyProjectiles.renderSnapshots(),
             augmentProjectiles: playerState.augmentRuntimeState.combat.actionProjectiles,
             playerHealth: playerState.health,
             playerMaxHealth: playerState.maxHealth,
@@ -3900,8 +3929,8 @@ export class GameSimulation {
             foundationRewards: Object.fromEntries(this.foundationRewards),
             metrics: this.metrics.snapshot(),
             worldProgress: this.worldProgress?.snapshot() ?? null,
-            bossStage: this.bossStageSnapshot(),
-            bossRuntime: this.bossStageSnapshot(),
+            bossStage,
+            bossRuntime: bossStage,
             windStates: this.world.windZones
                 ? snapshotWindStates(this.world.windZones, this.elapsedSeconds)
                 : Object.freeze([]),

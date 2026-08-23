@@ -1,4 +1,4 @@
-export class EntityRegistry {
+export class GameObjectIdAllocator {
     constructor() {
         this.nextId = 1;
     }

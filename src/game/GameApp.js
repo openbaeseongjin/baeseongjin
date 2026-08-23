@@ -126,6 +126,7 @@ export class GameApp {
             render: (alpha) => this.render(alpha)
         });
         this.previousRenderSnapshot = null;
+        this.currentRenderSnapshot = this.authority.snapshot();
         this.tick = (time) => {
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
             this.frameId = requestAnimationFrame(this.tick);
@@ -145,6 +146,8 @@ export class GameApp {
         this.setMetricsVisible(metrics);
         if (startAreaId && this.authority.applyDebugStartArea(startAreaId)) {
             this.camera = this.createCamera();
+            this.currentRenderSnapshot = this.authority.snapshot();
+            this.previousRenderSnapshot = null;
         }
     }
 
@@ -306,7 +309,7 @@ export class GameApp {
             cssWidth: this.renderer.cssWidth,
             cssHeight: this.renderer.cssHeight
         }).worldBounds;
-        const before = this.authority.snapshot();
+        const before = this.currentRenderSnapshot;
         this.previousRenderSnapshot = before;
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         this.authority.step(dt, createPlayerCommand(input, aimWorld));
@@ -339,7 +342,8 @@ export class GameApp {
         }
         this.queuePlayerPresentationEvents(predictedImpacts);
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts], { visibleWorldBounds: particleBounds });
-        state = this.authority.snapshot();
+        if (predictedImpacts.length > 0) state = this.authority.snapshot();
+        this.currentRenderSnapshot = state;
         const cameraShot = this.updatePresentationCamera(
             dt,
             state.player,
@@ -462,7 +466,7 @@ export class GameApp {
     }
 
     render(alpha = 0) {
-        const state = interpolateRenderSnapshot(this.previousRenderSnapshot, this.authority.snapshot(), alpha);
+        const state = interpolateRenderSnapshot(this.previousRenderSnapshot, this.currentRenderSnapshot, alpha);
         const dummy = this.authority.debugTrainingDummySnapshot();
         const forcedState = this.debugTrainingDummyControl?.forcedState ?? null;
         const renderState =

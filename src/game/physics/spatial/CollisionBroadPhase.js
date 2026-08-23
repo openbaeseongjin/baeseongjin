@@ -152,6 +152,16 @@ export class CollisionBroadPhase {
         return candidates;
     }
 
+    querySurfaceBounds(bounds) {
+        const candidates = this.surfaceTree
+            .query(bounds)
+            .sort((left, right) => this.surfaceOrder.get(left) - this.surfaceOrder.get(right));
+        this.surfaceQueries += 1;
+        this.surfaceCandidates += candidates.length;
+        this.surfacePotential += this.surfaceCount;
+        return candidates;
+    }
+
     queryActors({ actorId, collider, start, end, kinds = null }) {
         const candidateKinds = kinds ? new Set(kinds) : null;
         const candidates = this.actorTree

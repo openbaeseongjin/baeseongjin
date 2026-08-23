@@ -45,11 +45,15 @@ export function createImpactDamage({
 }
 
 export class ImpactTarget {
-    constructor({ id, kind = IMPACT_TARGET_KIND.ENEMY, snapshot, applyImpact }) {
+    constructor({ id, kind = IMPACT_TARGET_KIND.ENEMY, isActive = null, snapshot, applyImpact }) {
         this.id = requireId(id, "ImpactTarget id");
         this.kind = requireId(kind, "ImpactTarget kind");
         if (typeof snapshot !== "function") throw new Error("ImpactTarget requires snapshot()");
         if (typeof applyImpact !== "function") throw new Error("ImpactTarget requires applyImpact()");
+        if (isActive !== null && typeof isActive !== "function") {
+            throw new Error("ImpactTarget isActive must be a function");
+        }
+        this.isTargetActive = isActive;
         this.snapshotTarget = snapshot;
         this.applyTargetImpact = applyImpact;
     }
@@ -61,8 +65,18 @@ export class ImpactTarget {
     }
 
     get active() {
+        if (this.isTargetActive) return this.isTargetActive() === true;
         const state = this.snapshot();
         return state.active !== false && (state.health === undefined || state.health > 0);
+    }
+
+    activeSnapshot() {
+        if (this.isTargetActive && !this.active) return null;
+        const state = this.snapshot();
+        if (!this.isTargetActive && (state.active === false || (state.health !== undefined && state.health <= 0))) {
+            return null;
+        }
+        return state;
     }
 
     resolve({ sourcePlayerId, sourceKind, normalDamage, position, causalId }) {
