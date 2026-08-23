@@ -1,0 +1,200 @@
+{
+    "$schema": "../sprite-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "environment-sector-06-rooftop-evacuation",
+    "generator": {
+        "tool": "openai-imagegen-depth-island-normalization",
+        "exportVersion": null,
+        "sourceExport": "assets/artwork/environments/sector-06-rooftop-evacuation-background/export/depth-islands-v4-contract"
+    },
+    "atlases": {
+        "sector-06-rooftop-evacuation-backdrop-fixed": {
+            "image": "backdrop-fixed.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "sector-06-rooftop-evacuation-island-left": {
+            "image": "parallax-island-left.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "sector-06-rooftop-evacuation-island-right": {
+            "image": "parallax-island-right.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "sector-06-rooftop-evacuation-terrain-fill": {
+            "image": "terrain-fill.png",
+            "size": { "width": 48, "height": 48 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "sector-06-rooftop-evacuation-terrain-edge": {
+            "image": "terrain-edge.png",
+            "size": { "width": 48, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        },
+        "sector-06-rooftop-evacuation-decoration": {
+            "image": "decoration.png",
+            "size": { "width": 96, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        }
+    },
+    "zones": [
+        {
+            "id": "waste",
+            "label": "Sector 06 Skybreak Access",
+            "minAltitude": 0,
+            "palette": {
+                "skyTop": "#17366b",
+                "skyBottom": "#0d1831",
+                "silhouetteFar": "#263f6a",
+                "silhouetteMid": "#182c50",
+                "silhouetteNear": "#081424",
+                "terrainFill": "#283545",
+                "terrainEdge": "#60738a",
+                "oneWayEdge": "#8ee8ff",
+                "accent": "#79b8ff"
+            },
+            "backdropVariant": "sector-06-skybreak",
+            "terrainMaterial": "sector-06-rooftop",
+            "decorationGroup": "sector-06-rooftop"
+        },
+        {
+            "id": "industrial-maintenance",
+            "label": "Sector 06 Crosswind Masts",
+            "minAltitude": 1800,
+            "palette": {
+                "skyTop": "#1c407b",
+                "skyBottom": "#11203d",
+                "silhouetteFar": "#2c4976",
+                "silhouetteMid": "#1b3157",
+                "silhouetteNear": "#09172a",
+                "terrainFill": "#2d3a4b",
+                "terrainEdge": "#687c93",
+                "oneWayEdge": "#96ebff",
+                "accent": "#82bdff"
+            },
+            "backdropVariant": "sector-06-masts",
+            "terrainMaterial": "sector-06-rooftop",
+            "decorationGroup": "sector-06-rooftop"
+        },
+        {
+            "id": "residential-commercial",
+            "label": "Sector 06 Pad Approach",
+            "minAltitude": 3600,
+            "palette": {
+                "skyTop": "#235090",
+                "skyBottom": "#17294a",
+                "silhouetteFar": "#365784",
+                "silhouetteMid": "#203962",
+                "silhouetteNear": "#0b1a2f",
+                "terrainFill": "#334153",
+                "terrainEdge": "#70869e",
+                "oneWayEdge": "#9eedff",
+                "accent": "#8fc5ff"
+            },
+            "backdropVariant": "sector-06-approach",
+            "terrainMaterial": "sector-06-rooftop",
+            "decorationGroup": "sector-06-rooftop"
+        },
+        {
+            "id": "corporate-security",
+            "label": "Sector 06 Beacon Span",
+            "minAltitude": 5400,
+            "palette": {
+                "skyTop": "#2b60a5",
+                "skyBottom": "#20365b",
+                "silhouetteFar": "#40658f",
+                "silhouetteMid": "#27436d",
+                "silhouetteNear": "#0d1e35",
+                "terrainFill": "#39485a",
+                "terrainEdge": "#788ea6",
+                "oneWayEdge": "#a7f0ff",
+                "accent": "#9bcaff"
+            },
+            "backdropVariant": "sector-06-beacon",
+            "terrainMaterial": "sector-06-rooftop",
+            "decorationGroup": "sector-06-rooftop"
+        },
+        {
+            "id": "landing-pad",
+            "label": "Sector 06 Rooftop Pad 03",
+            "minAltitude": 7200,
+            "palette": {
+                "skyTop": "#3b78bc",
+                "skyBottom": "#314a73",
+                "silhouetteFar": "#5277a0",
+                "silhouetteMid": "#31517a",
+                "silhouetteNear": "#10233d",
+                "terrainFill": "#405061",
+                "terrainEdge": "#8399b1",
+                "oneWayEdge": "#b0f3ff",
+                "accent": "#ffd08a"
+            },
+            "backdropVariant": "sector-06-pad-03",
+            "terrainMaterial": "sector-06-rooftop",
+            "decorationGroup": "sector-06-rooftop"
+        }
+    ],
+    "backdrop": {
+        "layers": [
+            {
+                "id": "fixed-background",
+                "depth": 0,
+                "parallaxX": 0.012,
+                "parallaxY": 0.018,
+                "frames": [
+                    { "atlas": "sector-06-rooftop-evacuation-backdrop-fixed", "cell": { "column": 0, "row": 0 } }
+                ],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            },
+            {
+                "id": "parallax-island-left",
+                "depth": 1,
+                "parallaxX": 0.06,
+                "parallaxY": 0.07,
+                "frames": [{ "atlas": "sector-06-rooftop-evacuation-island-left", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            },
+            {
+                "id": "parallax-island-right",
+                "depth": 2,
+                "parallaxX": 0.06,
+                "parallaxY": 0.07,
+                "frames": [{ "atlas": "sector-06-rooftop-evacuation-island-right", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            }
+        ]
+    },
+    "terrain": {
+        "materials": {
+            "sector-06-rooftop": {
+                "fill": { "atlas": "sector-06-rooftop-evacuation-terrain-fill", "cell": { "column": 1, "row": 0 } },
+                "edge": { "atlas": "sector-06-rooftop-evacuation-terrain-edge", "cell": { "column": 0, "row": 0 } },
+                "oneWayColor": "#a7f0ff"
+            }
+        }
+    },
+    "decoration": {
+        "groups": {
+            "sector-06-rooftop": {
+                "items": [
+                    {
+                        "frame": {
+                            "atlas": "sector-06-rooftop-evacuation-decoration",
+                            "cell": { "column": 3, "row": 0 }
+                        },
+                        "placement": { "depth": "far", "surfaceLevelOffset": 0, "avoidPlayPath": true },
+                        "size": { "width": 12, "height": 12 }
+                    }
+                ]
+            }
+        }
+    }
+}

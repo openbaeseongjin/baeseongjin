@@ -1,0 +1,7 @@
+Use case: precise-object-edit
+Asset type: Baeseongjin Sector 06 vertical game-environment background authoring candidate v2
+Input images: Image 1 is the Sector 05 continuity reference; Image 2 is the Sector 06 edit target.
+Primary request: edit only the bottom transition band of Image 2 so it connects naturally to the top edge of Image 1 when Sector 06 is placed above Sector 05.
+Transition contract: Sector 05 visual influence occupies no more than the bottom 15% of the 1024x1536 Sector 06 canvas. At the bottom edge, echo Sector 05's pale graphite-gray facades, muted lavender-blue haze, cobalt window lights, and vertical canyon rhythm. Through that band only, darken into Sector 06 deep navy and charcoal. By 15% height, the image is fully Sector 06.
+Invariants: preserve the upper 85%, sky exposure, Pad silhouette, one shuttle, central corridor, lighting, crop, and crisp pixel-art density. Do not recolor anything above the transition band.
+Constraints: background only; no player, Rope, anchor, enemy, UI, route line, text, numbers, logos, fake platform, or watermark.

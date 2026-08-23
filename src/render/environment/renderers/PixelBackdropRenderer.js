@@ -8,11 +8,15 @@ import {
 } from "../AltitudeZoneResolver.js";
 
 const AUTHORED_SECTOR_CROSSFADE_WORLD_SPAN = 1024;
-const AUTHORED_SECTOR_CROSSFADE_PAIRS = Object.freeze([
-    Object.freeze(["sector-01", "sector-02"]),
-    Object.freeze(["sector-02", "sector-03"]),
-    Object.freeze(["sector-03", "sector-04"]),
-    Object.freeze(["sector-04", "sector-05"])
+const AUTHORED_SECTOR_CLIMB_PROGRESS_OFFSET = Object.freeze({
+    "sector-06": 0.05
+});
+const AUTHORED_SECTOR_TRANSITIONS = Object.freeze([
+    Object.freeze({ fromSectorId: "sector-01", toSectorId: "sector-02", outgoingBlurCssPixels: 0 }),
+    Object.freeze({ fromSectorId: "sector-02", toSectorId: "sector-03", outgoingBlurCssPixels: 0 }),
+    Object.freeze({ fromSectorId: "sector-03", toSectorId: "sector-04", outgoingBlurCssPixels: 0 }),
+    Object.freeze({ fromSectorId: "sector-04", toSectorId: "sector-05", outgoingBlurCssPixels: 0 }),
+    Object.freeze({ fromSectorId: "sector-05", toSectorId: "sector-06", outgoingBlurCssPixels: 12 })
 ]);
 
 export class PixelBackdropRenderer {
@@ -89,7 +93,8 @@ export class PixelBackdropRenderer {
                             area: transition.fromArea,
                             viewport,
                             scene,
-                            opacity: 1 - transition.progress
+                            opacity: 1 - transition.progress,
+                            blurCssPixels: transition.outgoingBlurCssPixels * transition.progress
                         }) || drawn;
                 }
                 if (transition.progress > 0) {
@@ -114,17 +119,22 @@ export class PixelBackdropRenderer {
         });
     }
 
-    drawAuthoredBackdropDefinition(context, { definition, area, viewport, scene, opacity }) {
+    drawAuthoredBackdropDefinition(context, { definition, area, viewport, scene, opacity, blurCssPixels = 0 }) {
         if (!definition) return false;
         const layers = [...definition.backdrop.layers].sort((a, b) => a.depth - b.depth);
         if (!layers.some(({ frames }) => frames.length > 0)) return false;
-        const climbProgress = sectorClimbProgress(scene, area);
+        const climbProgress = clamp(
+            sectorClimbProgress(scene, area) + (AUTHORED_SECTOR_CLIMB_PROGRESS_OFFSET[area.sectorId] ?? 0),
+            0,
+            1
+        );
         const areaCenterX = area.bounds.x + area.bounds.width * 0.5;
         const cameraX = scene.camera?.x ?? scene.player?.position?.x ?? areaCenterX;
         const horizontalOverscan = viewport.cssWidth * 0.03;
         context.save();
         const previousAlpha = Number.isFinite(context.globalAlpha) ? context.globalAlpha : 1;
         context.globalAlpha = previousAlpha * clamp(opacity, 0, 1);
+        context.filter = blurCssPixels > 0 ? `blur(${blurCssPixels.toFixed(2)}px)` : "none";
         context.imageSmoothingEnabled = false;
         for (const layer of layers) {
             const frame = layer.frames[0];
@@ -145,8 +155,10 @@ export class PixelBackdropRenderer {
                 horizontalOverscan
             );
             const verticalDrift = (climbProgress - 0.5) * viewport.cssHeight * parallaxY * 0.2;
-            const destinationX = (viewport.cssWidth - destinationWidth) * 0.5 + horizontalDrift;
-            const destinationY = clamp(-verticalOverflow * (1 - climbProgress) + verticalDrift, -verticalOverflow, 0);
+            const destinationX = Math.round((viewport.cssWidth - destinationWidth) * 0.5 + horizontalDrift);
+            const destinationY = Math.round(
+                clamp(-verticalOverflow * (1 - climbProgress) + verticalDrift, -verticalOverflow, 0)
+            );
             context.drawImage(
                 image,
                 frame.x,
@@ -211,7 +223,8 @@ function authoredSectorBackdropTransition(scene) {
     const playerY = scene.player?.position?.y;
     if (!Number.isFinite(playerY)) return null;
     const regions = authoredRegions(scene.world);
-    for (const [fromSectorId, toSectorId] of AUTHORED_SECTOR_CROSSFADE_PAIRS) {
+    for (const transition of AUTHORED_SECTOR_TRANSITIONS) {
+        const { fromSectorId, toSectorId } = transition;
         const fromArea = endpointRegion(regions, fromSectorId, "last");
         const toArea = endpointRegion(regions, toSectorId, "first");
         if (!fromArea || !toArea) continue;
@@ -225,6 +238,7 @@ function authoredSectorBackdropTransition(scene) {
         if (playerY > boundaryY + halfSpan || playerY < boundaryY - halfSpan) continue;
         const linearProgress = clamp((boundaryY + halfSpan - playerY) / (halfSpan * 2), 0, 1);
         return {
+            ...transition,
             fromArea,
             toArea,
             progress: smoothstep(linearProgress)

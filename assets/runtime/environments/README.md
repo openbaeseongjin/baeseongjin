@@ -22,6 +22,7 @@ assets/runtime/environments/
 ├─ sector-03-central-exchange/   # Sector 03 최종 authored package
 ├─ sector-04-upper-residential/  # Sector 04 최종 authored package
 ├─ sector-05-continuity-control/ # Sector 05 최종 authored package
+├─ sector-06-rooftop-evacuation/ # Sector 06 최종 authored package
 └─ README.md
 ```
 
@@ -42,5 +43,5 @@ npm run validate:environment-assets -- assets/runtime/environments/default-mock
 - `formatVersion: 1`, 5개 zone, backdrop layer, terrain material, decoration group을 필수로 요구한다.
 - authored package 선택은 `AuthoredAreaEnvironmentCatalog`의 stable Area ID가 소유한다.
 - 일반 맵은 Player의 현재 Area package를 사용한다. Boss source Area는 Boss encounter가 `active`인 동안에만 같은 선택을 override한다.
-- Sector 01→02, Sector 02→03, Sector 03→04, Sector 04→05 전환은 `PixelBackdropRenderer`가 Player world Y에서만 파생한 비율로 양쪽 backdrop과 sky를 교차 합성한다. gameplay·camera·network state나 collision을 추가하지 않는다.
+- Sector 01→02, Sector 02→03, Sector 03→04, Sector 04→05, Sector 05→06 전환은 `PixelBackdropRenderer`가 Player world Y에서만 파생한 비율로 양쪽 backdrop과 sky를 교차 합성한다. Sector 05→06만 나가는 Sector 05 package 전체에 같은 alpha와 증가하는 blur를 적용하고 들어오는 Sector 06 package는 blur 없이 합성한다. gameplay·camera·network state나 collision을 추가하지 않는다.
 - player animation definition/schema에 환경 의미를 넣지 않는다.
