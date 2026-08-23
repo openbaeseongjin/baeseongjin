@@ -10,7 +10,31 @@ import {
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const MIGRATED_DIRECTION_SPEC_PATHS = Object.freeze([
     "docs/bsh/scenario/1/1-1/DIRECTION-SPEC.json",
-    "docs/bsh/scenario/1/1-2/DIRECTION-SPEC.json"
+    "docs/bsh/scenario/1/1-2/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/4/4-1/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/4/4-2/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/4/4-3/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/4/4-4/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/4/4-5/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/4/4-6/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/4/4-7/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/4/4-8/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/5/5-1/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/5/5-2/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/5/5-3/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/5/5-4/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/5/5-5/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/5/5-6/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/5/5-7/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/5/5-8/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/6/6-1/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/6/6-2/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/6/6-3/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/6/6-4/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/6/6-5/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/6/6-6/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/6/6-7/DIRECTION-SPEC.json",
+    "docs/bsh/scenario/6/6-8/DIRECTION-SPEC.json"
 ]);
 
 function readJson(relativePath) {

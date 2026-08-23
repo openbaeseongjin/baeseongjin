@@ -53,7 +53,7 @@ class AccessTransitLockRenderer extends WorldObjectRendererDefinition {
             a.context,
             a.object,
             a.scene,
-            a.gateUnlocked,
+            a.gateUnlocked || a.objectiveComplete,
             a.renderArgs.presentationTimeSeconds ?? 0
         );
     }

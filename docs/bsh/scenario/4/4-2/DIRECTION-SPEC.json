@@ -1,4 +1,5 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
   "stage": {
@@ -68,7 +69,7 @@
       "worldPause": false,
       "playerControl": "ON",
       "camera": {
-        "zoneId": "limited-pursuit-read",
+        "zoneId": "courtyard-pursuit",
         "forcedPan": false
       },
       "tracks": [
@@ -134,7 +135,7 @@
       "worldPause": false,
       "playerControl": "ON",
       "camera": {
-        "zoneId": "override-a-safe",
+        "zoneId": "override-vestibule",
         "forcedPan": false
       },
       "tracks": [
@@ -156,7 +157,7 @@
       "purpose": "Override A 획득을 모든 진행 상태와 일치하게 확인한다.",
       "trigger": {
         "type": "objective-completed",
-        "objectiveId": "sector-04:resident-security-override:a"
+      "objectiveId": "sector-04-02:override-a-acquired"
       },
       "scope": "party",
       "replayPolicy": "once-per-source-state",
@@ -164,7 +165,7 @@
       "worldPause": false,
       "playerControl": "ON",
       "camera": {
-        "zoneId": "override-a-safe",
+        "zoneId": "override-vestibule",
         "forcedPan": false
       },
       "tracks": [
@@ -197,7 +198,7 @@
       "worldPause": false,
       "playerControl": "ON",
       "camera": {
-        "zoneId": "exit-skybridge-preview",
+        "zoneId": "override-vestibule",
         "forcedPan": false
       },
       "tracks": [

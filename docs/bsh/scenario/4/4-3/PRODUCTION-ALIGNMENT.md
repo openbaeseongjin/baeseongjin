@@ -8,7 +8,7 @@ At the audited main:
 - Rope hookSpeed = `1200`
 - hookFlightRatio = `1/3`
 - base Hook Reach = `400px`
-- Pursuit defaults: move `160`, acquire `640`, trigger `96`, windup `.25`, dashSpeed `640`, dash `.2`, recovery `.5`
+- Pursuit defaults: move `160`, acquire `960`, trigger `96`, windup `.25`, dashSpeed `640`, dash `.2`, recovery `.5`
 - Pursuit movement is direct toward eligible Player target and clamps to activation when authored.
 
 Approved design max mandatory relation:

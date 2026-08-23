@@ -1,230 +1,61 @@
 {
-  "schemaVersion": "one-rope-direction-spec-1.0",
-  "areaId": "sector-04-08",
-  "status": "APPROVED-DIRECTION-REV2",
-  "voiceRules": {
-    "system": "objective fact only",
-    "player": "reaction/emotion only",
-    "hardRopeDialogue": false,
-    "corePlayerBarkCount": 1,
-    "coreBark": "…여긴 아직도 정상이라고?"
-  },
+  "$schema": "../../direction-spec.schema.json",
+  "schemaVersion": "direction-spec-v1",
+  "directionStatus": "RUNTIME VERIFIED",
+  "stage": { "sector": 4, "stage": 8, "sourceAreaId": "sector-04-08", "name": "PROTECTED ASCENT GATEHOUSE", "id": "4-8" },
+  "globalControl": { "worldPause": false, "movement": true, "aim": true, "rope": true, "action": true, "interaction": true },
   "beats": [
     {
-      "id": "S0",
-      "name": "GATEHOUSE ARRIVAL",
-      "trigger": "area-entry",
-      "purpose": "Compress 4-7's open terrace into a tall double-lock gatehouse and preview alternating service faces.",
-      "system": [
-        [
-          "PROTECTED ASCENT GATE",
-          "RESIDENT SECURITY CHECK"
-        ]
-      ],
-      "playerBark": null,
-      "camera": {
-        "mode": "vertical-switchback-reveal",
-        "show": [
-          "lower-console",
-          "east-lower-face",
-          "west-gallery"
-        ],
-        "hide": [
-          "final-control-full-view"
-        ]
-      },
-      "audio": "external refuge ambience down; pressurization hum up",
-      "storyBoundary": "Do not identify the protected population."
+      "beatId": "s0-quorum-landing",
+      "purpose": "실제 persistent Override 수를 Gatehouse 진입에서 제시한다.",
+      "trigger": { "type": "area-enter" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-8:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "quorum-landing", "forcedPan": false },
+      "tracks": [{ "type": "systemText", "content": { "title": "RESIDENT SECURITY", "detail": "2 OVERRIDES REQUIRED" }, "timing": { "durationSeconds": 1.3 } }]
     },
     {
-      "id": "S1",
-      "name": "QUORUM READ",
-      "trigger": "stable-on-quorum-landing",
-      "purpose": "Convert earlier optional override choices into world access.",
-      "system": [
-        [
-          "RESIDENT SECURITY",
-          "A / B / C"
-        ],
-        [
-          "GATE REQUIREMENT",
-          "2 OF 3"
-        ]
-      ],
-      "playerBark": null,
-      "camera": {
-        "mode": "stable-console"
-      },
-      "audio": "one relay tick per collected override + one verdict tone"
+      "beatId": "s1-quorum-accepted",
+      "purpose": "2-of-3 state-check 완료에 맞춰 Interlock 해제를 알린다.",
+      "trigger": { "type": "objective-completed", "objectiveId": "sector-04-08:quorum-read" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-8:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "quorum-landing", "forcedPan": false },
+      "tracks": [{ "type": "systemText", "content": { "title": "OVERRIDE QUORUM", "detail": "ACCEPTED" }, "timing": { "durationSeconds": 1.2 } }]
     },
     {
-      "id": "S1-PASS",
-      "name": "QUORUM PASS",
-      "trigger": "override-count>=2",
-      "system": [
-        [
-          "RESIDENT SECURITY",
-          "2 OF 3 VERIFIED"
-        ],
-        [
-          "PROTECTED ASCENT",
-          "INTERLOCK RELEASED"
-        ]
-      ],
-      "playerBark": null,
-      "camera": {
-        "mode": "pan-to-east-lower-face"
-      },
-      "audio": "unlock thump + pressure equalization",
-      "worldResult": "open lower security interlock; enable success ascent"
+      "beatId": "s2-mid-interlock",
+      "purpose": "중간 Interlock를 별도 자격 확인 없이 리듬 재설정으로 사용한다.",
+      "trigger": { "type": "camera-zone", "zoneId": "mid-interlock" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-8:s2",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "mid-interlock", "forcedPan": false },
+      "tracks": []
     },
     {
-      "id": "S1-FAIL",
-      "name": "QUORUM FAIL",
-      "trigger": "override-count<2",
-      "system": [
-        [
-          "RESIDENT SECURITY",
-          "ACCESS INCOMPLETE"
-        ],
-        [
-          "GATE REQUIREMENT",
-          "2 OVERRIDES REQUIRED"
-        ]
-      ],
-      "playerBark": null,
-      "camera": {
-        "mode": "show-return-access"
-      },
-      "audio": "short deny tone; no failure sting",
-      "worldResult": "keep interlock closed; keep return access available",
-      "forbidden": "No damage, death, substitute credential, or preferred-override recommendation."
-    },
-    {
-      "id": "S2",
-      "name": "LOWER EAST FACE",
-      "trigger": "pass-lower-interlock",
-      "system": [],
-      "playerBark": null,
-      "camera": {
-        "mode": "east-up",
-        "revealNext": "center-crossover"
-      },
-      "audio": "actuator/vent machinery proximity",
-      "silence": true
-    },
-    {
-      "id": "S3",
-      "name": "CENTER CROSSOVER",
-      "trigger": "reach-east-lower-peak",
-      "system": [],
-      "playerBark": null,
-      "camera": {
-        "mode": "reverse-to-west-up",
-        "revealNext": "west-lower-gallery"
-      },
-      "audio": "pressure-core resonance",
-      "silence": true
-    },
-    {
-      "id": "S4",
-      "name": "MID INTERLOCK",
-      "trigger": "stable-on-mid-interlock",
-      "system": [
-        [
-          "ASCENT INTERLOCK",
-          "LOWER CHAMBER SEALED"
-        ],
-        [
-          "UPPER CHAMBER",
-          "READY"
-        ]
-      ],
-      "playerBark": null,
-      "camera": {
-        "mode": "stable-reset",
-        "revealNext": "east-upper-face"
-      },
-      "audio": "seal tone + pressure equalization"
-    },
-    {
-      "id": "S5",
-      "name": "UPPER EAST FACE",
-      "trigger": "upper-interlock-release",
-      "system": [],
-      "playerBark": null,
-      "camera": {
-        "mode": "east-up",
-        "hide": [
-          "final-control-until-peak"
-        ]
-      },
-      "audio": "steady power hum",
-      "silence": true
-    },
-    {
-      "id": "S6",
-      "name": "FINAL WEST RETURN",
-      "trigger": "reach-east-upper-peak",
-      "system": [],
-      "playerBark": null,
-      "camera": {
-        "mode": "reverse-to-final-west",
-        "reveal": [
-          "final-ascent-control"
-        ]
-      },
-      "audio": "relay hum becomes clearer",
-      "silence": true
-    },
-    {
-      "id": "S7",
-      "name": "FINAL ASCENT CONTROL",
-      "trigger": "stable-on-final-ascent-control",
-      "sequence": [
-        {
-          "t": 0.4,
-          "system": [
-            "PROTECTED ASCENT",
-            "POWER NORMAL"
-          ]
-        },
-        {
-          "t": 1.1,
-          "system": [
-            "ASCENT CONTROL",
-            "READY"
-          ]
-        },
-        {
-          "t": "after-second-fact+0.6",
-          "playerBark": "…여긴 아직도 정상이라고?"
-        }
-      ],
-      "camera": {
-        "mode": "stable-story",
-        "showUpperAccess": "partial"
-      },
-      "audio": "slight ambience dip before bark, then normal power hum",
-      "barkGuard": "delay while Rope attached or unstable",
-      "storyBoundary": "Do not reveal who is protected, who ordered the system, continuity policy, priority class, or causal relation to lower-sector collapse."
-    },
-    {
-      "id": "S8",
-      "name": "CONTENT BOUNDARY",
-      "trigger": "final-control-complete",
-      "system": [
-        [
-          "UPPER CONTROL",
-          "ACCESS AHEAD"
-        ]
-      ],
-      "playerBark": null,
-      "camera": {
-        "mode": "partial-forward-hold"
-      },
-      "audio": "gate idle + distant facility hum",
-      "worldResult": "stage-local completion only; no Sector05 direct wiring; no boss/timer transition"
+      "beatId": "s3-final-control",
+      "purpose": "Sector04의 보호 시스템이 정상 작동 중이라는 모순으로 끝낸다.",
+      "trigger": { "type": "objective-completed", "objectiveId": "sector-04-08:final-ascent-control-reached" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-8:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "final-ascent-control", "forcedPan": false },
+      "tracks": [
+        { "type": "systemText", "content": { "title": "PROTECTED ASCENT", "detail": "POWER NORMAL" }, "timing": { "durationSeconds": 1.2 } },
+        { "type": "systemText", "content": { "title": "ASCENT CONTROL", "detail": "READY" }, "timing": { "durationSeconds": 1.2 } },
+        { "type": "dialogue", "content": { "text": "…여긴 아직도 정상이라고?" }, "timing": { "minDelaySeconds": 0.7, "durationSeconds": 2 } }
+      ]
     }
   ]
 }

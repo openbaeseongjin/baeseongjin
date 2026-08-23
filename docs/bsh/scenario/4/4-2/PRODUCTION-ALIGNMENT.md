@@ -23,7 +23,7 @@ Therefore this is a **major re-author**.
 Current Pursuit behavior supports:
 - activation-constrained eligible targets
 - moveSpeed 160
-- acquireRange 640
+- acquireRange 960
 - triggerDistance 96
 - windup 0.25s
 - dashSpeed 640
@@ -38,7 +38,7 @@ No new enemy AI required.
 Sector01~03 current seamless Runtime uses Access Module **3-of-3**.
 Sector04 new design requires Resident Security Override **2-of-3**.
 
-This is **NOT IMPLEMENTED** and must not be faked as 3-of-3.
+This is implemented as a data-driven 2-of-3 requirement and is not represented as 3-of-3.
 
 4-2:
 - owns Source A

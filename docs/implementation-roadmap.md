@@ -26,7 +26,7 @@
 - [0.55.0 / #858] Boss01의 kinematic Carriage·공유 Beam collider, 끝점 Telegraph→Sweep→약점 loop, P3 50% 파손→Ram, 닫힌 몸체 25%·반복 약점 보너스, owner-first Boss hazard claim과 mock audio
 - 공용 명령·시뮬레이션 경계, PWA 설치와 자동 최신 배포 적용
 - [과거 절차 프로토타입] 마지막 암석의 정상 목표와 최종 완료 상태
-- [과거 절차 프로토타입] 8레벨 간격 체크포인트 생성·활성화·시각 표시. 현재 기본 Runtime은 24개 Stage마다 진입 세이브 포인트를 사용한다.
+- [과거 절차 프로토타입] 8레벨 간격 체크포인트 생성·활성화·시각 표시. 현재 기본 Runtime은 48개 Stage마다 진입 세이브 포인트를 사용한다.
 - [0.26.0] Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer, Player별 최대 6장, owner-first damage/movement claim
 - 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 generic Augment 선택 지표 수집
 - 원격 배포에서 설정 버튼 길게 누르기로 여는 옵트인 런 지표 패널
@@ -38,8 +38,8 @@
 - 0.45.0 Stage Direction v1 schema·compiler·coverage/review release gate·timeline runtime·authority adapter와 1-1/1-2 Camera/Story/Bark/Audio/Lighting/비언어 migration
 - 0.46.0 전투 밸런스: 낙하 피해 50% 완화, 로프 몸체 충돌 `1000px/s → 100 피해` 속력 비례화, 감전 로프 100 DPS와 속력 기반 충돌 폭발의 augment-impact v2 검증
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.
-- Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Sector 01~~03의 24개는 generated production Runtime이고 Sector 04~~06의 24개는 scenario-only다. Gameplay View는 production seamless compiler·renderer를 재사용하며 수기 catalog·v1 AREA-SPEC·migration provenance·fallback 실행 경로는 없다. Entry·Exit 복합 이동, Runtime Registry 기반 Enemy·Wind·Boss 선택, 추가·삭제·Undo, Route·Enemy activation, 메모리 초안, read-only 보호와 Apply 직전 source hash 확인을 지원한다.
-- `npm run check`의 production map parity gate는 Stage별 authored/derived/hidden/progress-gated surface, mismatch ID, 중복·퇴화 geometry, seam ownership, Sector 03 generated 의미 동등성과 `24 Runtime / 24 scenario-only` 분리를 검증한다.
+- Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. 48개 모두 generated production Runtime이며 scenario-only Stage는 없다. Gameplay View는 production seamless compiler·renderer를 재사용하며 수기 catalog·v1 AREA-SPEC·migration provenance·fallback 실행 경로는 없다. Entry·Exit 복합 이동, Runtime Registry 기반 Enemy·Wind·Boss 선택, 추가·삭제·Undo, Route·Enemy activation, 메모리 초안, read-only 보호와 Apply 직전 source hash 확인을 지원한다.
+- `npm run check`의 production map parity gate는 48개 Stage별 authored/derived/hidden/progress-gated surface와 generated 의미 동등성, mismatch ID, 중복·퇴화 geometry, seam ownership, 콘텐츠 경계의 무연결, Access source 권위, Sector 05 Jammer/proof와 Sector 06 기존 시스템 재사용을 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
 - 생성·해결 이벤트만 공유하고 클라이언트에서 재생하는 플레이어·적 투사체
 - 네트워크 설정을 변경하지 않는 Cloudflare Quick Tunnel 임시 공유 명령
@@ -49,7 +49,7 @@
 - 실제 플레이에서 새로 발견된 실패 사례와 초반 2분 지표 표본
 - 실제 조작 기반 전체 등반 검증
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
-- Sector 03 3-3~~3-8 Direction migration, Sector 04~~06 Runtime 연결과 각 Post-Sector Boss transition (Stage별 Runtime 승격 계약 확정 뒤 진행)
+- Sector 03 3-3~~3-8 Direction migration과 각 Post-Sector Boss transition
 - 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`의 topology trigger·origin·개인 복귀 확정과 구현
 - 영구 성장, 자동 자원 생산, 도감과 다중 바이옴
 
@@ -67,9 +67,9 @@
 
 ### 제출 전 시나리오 구현 트랙
 
-AS IS → Sector 01~~03의 24개 Stage는 canonical v2/generated catalog로 production seamless Runtime에 연결됐고 Sector 04~~06의 24개는 scenario-only다.
+AS IS → Sector 01~~06의 48개 Stage는 canonical v2/generated catalog로 production Runtime에 연결됐고 scenario-only Stage는 없다.
 
-TO BE → Sector 04~~06은 Stage별 geometry·Gate·전환·적 type과 Post-Sector Boss 계약을 완결한 뒤에만 generated manifest와 facade를 추가한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
+TO BE → 3-8·4-8·5-8·6-8의 content boundary를 유지한 채 Post-Sector Boss·Sector 간 전환을 각각 별도 계약으로 구현하고 실제 desktop/mobile 및 멀티플레이 등반을 검증한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 
 Sector 03은 Access Scan Field Runtime(#523)과 3-1~~3-8 authored catalog(#525)를 구현했고, 현재 메인 진행은 `2-8 → boss-02 → 3-1 → … → 3-8`이다. Boss02는 Map Editor에서 수정 가능한 독립 Boss Stage로 골목·공동중정·옥상 추격, 지정 구조물 충돌 약점 개방, 3페이즈 HP와 polygon mock을 소유한다. Issue #790에서 offline depth map 기반 fixed background + 좌·우 parallax island 공용 backdrop과 2→3 교차 전환을 표현 계층에 연결했다. Issue #797은 3-1을 REV8 `3072×1088` Market Island topology의 v2 generated Stage로 원자 전환했고, Issue #801은 3-2를 REV8 `3200×1472` Facade Service Gallery의 single Scanner Group·C1~C4·선택 Access A·`3-3` exit 계약으로 원자 전환한다. 3-3~3-8의 REV8/REV8.1 topology와 Direction track은 다음 Stage별 migration이다. Sector 04는 4-1~~4-8 standalone catalog와 Camera·Story 인계 범위를 저작했으며 메인 월드 연결은 Boss03 전환 결정을 기다린다.
 
@@ -81,7 +81,7 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 
 재사용 Canvas particle/VFX foundation은 완료됐다. Player action/shot/impact와 Enemy one-shot, Shield·Support·Swarm·Pursuit·Artillery 및 Wind의 복제 상태 기반 continuous 표현에 더해 Rope launch·flight·attach·tension·swing·release·miss와 Player high-speed/impulse 표현도 동일 preset DTO와 Polygon/Sprite 공통 renderer를 사용한다. Rope Augment는 resolved material/actual-event accent로 합성하고 particle state는 multiplayer protocol에 추가하지 않는다. 기준은 [`particle-system.md`](./particle-system.md)다.
 
-P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI + Boss01 → Timer/Purge mapping → Sector04/05/06 Runtime → Final Security/Ending → Playtest`다. Boss03~06은 Phase base HP 1000과 공용 0.5 인원 multiplier·25% 약점 고정 보너스를 authoring 기준으로 사용하되 concrete Runtime은 별도 Issue로 구현한다. Map Editor 공개 계약 안의 위치·수치·Phase·mechanic·HUD·전환은 사람이 편집하고 새 mechanic만 AI 개발로 확장한다. 나머지 HOLD와 NPC 우선순위는 기존 기준을 유지한다.
+P1~~P5 구현 순서는 `P0 Alignment → BossStage authoring/runtime/UI + Boss01 → Sector04/05/06 Runtime → Post-Sector Boss/transition → Timer/Purge mapping → Final Security/Ending → Playtest`다. Sector 04~~06 Stage Runtime은 완료됐지만 Boss/transition과 Timer/Purge는 별도 HOLD다. Boss03~06은 Phase base HP 1000과 공용 0.5 인원 multiplier·25% 약점 고정 보너스를 authoring 기준으로 사용하되 concrete Runtime은 별도 Issue로 구현한다. Map Editor 공개 계약 안의 위치·수치·Phase·mechanic·HUD·전환은 사람이 편집하고 새 mechanic만 AI 개발로 확장한다. 나머지 HOLD와 NPC 우선순위는 기존 기준을 유지한다.
 
 ### P0. 로그라이크 한 판의 순환 완성
 

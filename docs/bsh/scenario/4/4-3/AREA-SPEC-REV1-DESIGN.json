@@ -300,7 +300,7 @@
       "ropeCut": false,
       "runtimeVerifiedDefaults": {
         "moveSpeed": 160,
-        "acquireRange": 640,
+        "acquireRange": 960,
         "triggerDistance": 96,
         "windupSeconds": 0.25,
         "dashSpeed": 640,

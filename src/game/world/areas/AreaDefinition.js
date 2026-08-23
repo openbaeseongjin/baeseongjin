@@ -169,6 +169,7 @@ export function defineArea(definition) {
         objectives: [],
         windZones: [],
         scannerGroups: [],
+        jammerGroups: [],
         // Scenario-planning inventory only. The assembler intentionally does not expose this as runtime state.
         storyTriggers: [],
         routes: ["safe", "flow", "recovery"],
@@ -178,6 +179,6 @@ export function defineArea(definition) {
     });
 }
 
-export function defineAreaCatalog({ id, revision, areas }) {
-    return freezeValue({ id, revision, areas });
+export function defineAreaCatalog({ id, revision, areas, accessModuleRequirement = 0, contentBoundaryStageId = null }) {
+    return freezeValue({ id, revision, areas, accessModuleRequirement, contentBoundaryStageId });
 }

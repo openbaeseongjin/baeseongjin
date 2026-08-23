@@ -188,146 +188,170 @@
         {
             "stageId": "4-1",
             "areaId": "sector-04-01",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/4/4-1/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/4/4-1/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector04.json"
         },
         {
             "stageId": "4-2",
             "areaId": "sector-04-02",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/4/4-2/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/4/4-2/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector04.json"
         },
         {
             "stageId": "4-3",
             "areaId": "sector-04-03",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/4/4-3/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/4/4-3/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector04.json"
         },
         {
             "stageId": "4-4",
             "areaId": "sector-04-04",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/4/4-4/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/4/4-4/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector04.json"
         },
         {
             "stageId": "4-5",
             "areaId": "sector-04-05",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/4/4-5/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/4/4-5/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector04.json"
         },
         {
             "stageId": "4-6",
             "areaId": "sector-04-06",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/4/4-6/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/4/4-6/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector04.json"
         },
         {
             "stageId": "4-7",
             "areaId": "sector-04-07",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/4/4-7/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/4/4-7/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector04.json"
         },
         {
             "stageId": "4-8",
             "areaId": "sector-04-08",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/4/4-8/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/4/4-8/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector04.json"
         },
         {
             "stageId": "5-1",
             "areaId": "sector-05-01",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/5/5-1/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/5/5-1/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector05.json"
         },
         {
             "stageId": "5-2",
             "areaId": "sector-05-02",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/5/5-2/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/5/5-2/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector05.json"
         },
         {
             "stageId": "5-3",
             "areaId": "sector-05-03",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/5/5-3/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/5/5-3/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector05.json"
         },
         {
             "stageId": "5-4",
             "areaId": "sector-05-04",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/5/5-4/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/5/5-4/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector05.json"
         },
         {
             "stageId": "5-5",
             "areaId": "sector-05-05",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/5/5-5/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/5/5-5/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector05.json"
         },
         {
             "stageId": "5-6",
             "areaId": "sector-05-06",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/5/5-6/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/5/5-6/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector05.json"
         },
         {
             "stageId": "5-7",
             "areaId": "sector-05-07",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/5/5-7/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/5/5-7/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector05.json"
         },
         {
             "stageId": "5-8",
             "areaId": "sector-05-08",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/5/5-8/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/5/5-8/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector05.json"
         },
         {
             "stageId": "6-1",
             "areaId": "sector-06-01",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/6/6-1/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/6/6-1/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector06.json"
         },
         {
             "stageId": "6-2",
             "areaId": "sector-06-02",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/6/6-2/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/6/6-2/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector06.json"
         },
         {
             "stageId": "6-3",
             "areaId": "sector-06-03",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/6/6-3/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/6/6-3/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector06.json"
         },
         {
             "stageId": "6-4",
             "areaId": "sector-06-04",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/6/6-4/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/6/6-4/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector06.json"
         },
         {
             "stageId": "6-5",
             "areaId": "sector-06-05",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/6/6-5/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/6/6-5/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector06.json"
         },
         {
             "stageId": "6-6",
             "areaId": "sector-06-06",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/6/6-6/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/6/6-6/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector06.json"
         },
         {
             "stageId": "6-7",
             "areaId": "sector-06-07",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/6/6-7/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/6/6-7/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector06.json"
         },
         {
             "stageId": "6-8",
             "areaId": "sector-06-08",
-            "authoringMode": "scenario-only",
-            "sourcePath": "docs/bsh/scenario/6/6-8/AREA-SPEC.v2.json"
+            "authoringMode": "runtime-generated",
+            "sourcePath": "docs/bsh/scenario/6/6-8/AREA-SPEC.v2.json",
+            "manifestPath": "docs/bsh/scenario/AREA-CATALOG.sector06.json"
         }
     ]
 }

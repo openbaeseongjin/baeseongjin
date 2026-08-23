@@ -1,9 +1,9 @@
 # SECTOR 05-2 — CONTROL ATRIUM REV1.0
 
-> Status: **DESIGN LOCKED · NOT IMPLEMENTED**<br>
+> Status: **RUNTIME GENERATED · PLAYTEST PENDING**<br>
 > Authoring snapshot: `3c9f661bba58af6f7351e00754c12aef86575a12`<br>
 > Source Area ID: `sector-05-02`<br>
-> Bounds: **4608×2624**<br>
+> Bounds: **4704×2784 EDITOR RECONCILED**<br>
 > Enemy: **AEGIS / shield-drone-t1 ×2, never simultaneous**<br>
 > Signature: **STAGGERED SECURITY PARTITION FLANKS / AEGIS ANGLE CONTROL**<br>
 > Next: **5-3 SECURITY REVIEW GALLERY**

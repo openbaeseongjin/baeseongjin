@@ -1,135 +1,62 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
-  "directionStatus": "DESIGN LOCKED",
-  "runtimeStatus": "NOT IMPLEMENTED",
-  "stage": {
-    "sector": 4,
-    "stage": 3,
-    "sourceAreaId": "sector-04-03",
-    "name": "RESIDENTIAL SKYBRIDGE",
-    "id": "4-3"
-  },
-  "baselineCommit": "3c9f661bba58af6f7351e00754c12aef86575a12",
-  "globalControl": {
-    "worldPause": false,
-    "playerControl": "ON",
-    "forcedCinematicCamera": false
-  },
+  "directionStatus": "RUNTIME VERIFIED",
+  "stage": { "sector": 4, "stage": 3, "sourceAreaId": "sector-04-03", "name": "RESIDENTIAL SKYBRIDGE", "id": "4-3" },
+  "globalControl": { "worldPause": false, "movement": true, "aim": true, "rope": true, "action": true, "interaction": true },
   "beats": [
     {
-      "beatId": "s1-entry-normal",
-      "purpose": "Establish maintained upper residential circulation.",
-      "trigger": {
-        "type": "position-zone",
-        "intent": "entry terrace"
-      },
+      "beatId": "s0-entry-normal",
+      "purpose": "정상 순환과 Block C 연결 상태를 먼저 읽힌다.",
+      "trigger": { "type": "area-enter" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-3:s0",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "block-c-offline-read", "forcedPan": false },
       "tracks": [
-        {
-          "type": "systemText",
-          "content": {
-            "title": "UPPER RESIDENTIAL ACCESS",
-            "detail": "NORMAL CIRCULATION"
-          },
-          "durationSeconds": 1.1
-        }
+        { "type": "systemText", "content": { "title": "UPPER RESIDENTIAL ACCESS", "detail": "NORMAL CIRCULATION" }, "timing": { "durationSeconds": 1.2 } },
+        { "type": "systemText", "content": { "title": "BLOCK C LINK", "detail": "OFFLINE" }, "timing": { "durationSeconds": 1.2 } }
       ]
     },
     {
-      "beatId": "s2-link-offline",
-      "purpose": "Make the destination and fault readable before descent.",
-      "trigger": {
-        "type": "position-zone",
-        "intent": "far Garden Skybridge / Block B fault read"
-      },
+      "beatId": "s1-relay-read",
+      "purpose": "하강 전에 Relay B-03 복구 목적을 제시한다.",
+      "trigger": { "type": "camera-zone", "zoneId": "relay-service-run" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-3:s1",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "relay-service-run", "forcedPan": false },
+      "tracks": [{ "type": "systemText", "content": { "title": "LOCAL SERVICE RELAY B-03", "detail": "MANUAL RESET REQUIRED" }, "timing": { "durationSeconds": 1.4 } }]
+    },
+    {
+      "beatId": "s2-relay-reset",
+      "purpose": "실제 Relay objective 완료에 맞춰 연결 복구를 알린다.",
+      "trigger": { "type": "objective-completed", "objectiveId": "sector-04-03:service-relay-b03" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-3:s2",
+      "worldPause": false,
+      "playerControl": "ON",
       "tracks": [
-        {
-          "type": "systemText",
-          "content": {
-            "title": "BLOCK C LINK",
-            "detail": "OFFLINE"
-          },
-          "durationSeconds": 1.2
-        },
-        {
-          "type": "systemText",
-          "content": {
-            "title": "LOCAL SERVICE RELAY B-03",
-            "detail": "MANUAL RESET REQUIRED"
-          },
-          "durationSeconds": 1.3
-        }
+        { "type": "systemText", "content": { "title": "SERVICE RELAY B-03", "detail": "RESET COMPLETE" }, "timing": { "durationSeconds": 1.2 } },
+        { "type": "systemText", "content": { "title": "BLOCK C LINK", "detail": "RESTORED" }, "timing": { "durationSeconds": 1.2 } }
       ]
     },
     {
-      "beatId": "s3-pursuit-track",
-      "purpose": "Confirm actual Pursuit acquire without explaining AI.",
-      "trigger": {
-        "type": "runtime-enemy-state",
-        "intent": "pursuit acquired player"
-      },
-      "tracks": [
-        {
-          "type": "systemText",
-          "content": {
-            "title": "RESIDENTIAL SECURITY",
-            "detail": "TRACKING"
-          },
-          "durationSeconds": 1
-        }
-      ]
-    },
-    {
-      "beatId": "s4-relay-reset",
-      "purpose": "Confirm actual local objective completion.",
-      "trigger": {
-        "type": "runtime-objective-completed",
-        "objectiveId": "sector-04-03:service-relay-b03",
-        "runtimeMapping": "REQUIRED / NOT VERIFIED"
-      },
-      "tracks": [
-        {
-          "type": "systemText",
-          "content": {
-            "title": "SERVICE RELAY B-03",
-            "detail": "RESET COMPLETE"
-          },
-          "durationSeconds": 1
-        },
-        {
-          "type": "systemText",
-          "content": {
-            "title": "BLOCK C LINK",
-            "detail": "RESTORED"
-          },
-          "durationSeconds": 1.15
-        }
-      ]
-    },
-    {
-      "beatId": "s5-exit-contact-lost",
-      "purpose": "End chase pressure and return to protected residential calm.",
-      "trigger": {
-        "type": "position-zone",
-        "intent": "Block C private terrace / exit"
-      },
-      "tracks": [
-        {
-          "type": "systemText",
-          "content": {
-            "title": "SECURITY CONTACT",
-            "detail": "LOST"
-          },
-          "durationSeconds": 1
-        }
-      ]
+      "beatId": "s3-block-c-reentry",
+      "purpose": "Block C 재진입과 Pursuit 종료를 확인한다.",
+      "trigger": { "type": "camera-zone", "zoneId": "block-c-reentry" },
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "4-3:s3",
+      "worldPause": false,
+      "playerControl": "ON",
+      "camera": { "zoneId": "block-c-reentry", "forcedPan": false },
+      "tracks": [{ "type": "systemText", "content": { "title": "SECURITY CONTACT", "detail": "LOST" }, "timing": { "durationSeconds": 1.2 } }]
     }
-  ],
-  "rules": [
-    "No world pause",
-    "No player-control lock",
-    "OFFLINE and Relay objective must be readable before descent",
-    "TRACKING must correspond to real Pursuit state",
-    "RESET COMPLETE must correspond to real objective state",
-    "No Sector05 explanatory dialogue"
   ]
 }

@@ -73,6 +73,7 @@ export class OwnerPredictionRuntime {
         }
         this.ownerId = ownerId;
         this.simulation = simulation ?? new GameSimulation({ playerId: ownerId });
+        this.simulation.useHardpointJammerSnapshotAuthority();
         if (this.simulation.getPrimaryPlayerId() !== ownerId) {
             throw new Error(
                 `prediction simulation ownerId mismatch: expected ${ownerId}, received ${this.simulation.getPrimaryPlayerId()}`
@@ -171,6 +172,7 @@ export class OwnerPredictionRuntime {
                 snapshot.state.worldElapsedSeconds ?? snapshot.serverTick * this.fixedDt
             );
         }
+        this.simulation.restoreHardpointJammers(snapshot.state.hardpointJammerStates ?? []);
         this.simulation.restoreBossRuntime(snapshot.state.bossStage ?? snapshot.state.bossRuntime ?? null);
         if (!preserveCheckpoint) this.simulation.synchronizePredictionProgress(this.ownerId, progress);
     }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "6-6",
     "sector": 6,
@@ -39,15 +39,15 @@
     },
     "entry": {
       "id": "sector-06-06:entry",
-      "x": 0,
-      "y": -32
+      "x": -520,
+      "y": -80
     },
     "exit": {
-      "id": "sector-06-06:scenario-exit",
+      "id": "sector-06-06:exit",
       "x": 660,
       "y": -1680
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-06-07",
     "surfaces": [
       {
         "id": "R0",
@@ -122,28 +122,39 @@
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": 0,
-          "y": 0
+          "x": -520,
+          "y": -48
         },
         "vertices": [
           {
-            "x": -96,
-            "y": 0
+            "x": -616,
+            "y": -48
           },
           {
-            "x": 96,
-            "y": 0
+            "x": -424,
+            "y": -48
           },
           {
-            "x": 96,
-            "y": 32
+            "x": -424,
+            "y": -16
           },
           {
-            "x": -96,
-            "y": 32
+            "x": -616,
+            "y": -16
           }
         ]
-      }
+      },
+      { "id": "beacon-entry", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -650, "y": -115 }, "vertices": [{ "x": -650, "y": -115 }, { "x": -390, "y": -115 }, { "x": -390, "y": -85 }, { "x": -650, "y": -85 }] },
+      { "id": "needle-cantilever", "kind": "cantilever", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -620, "y": -330 }, "vertices": [{ "x": -620, "y": -330 }, { "x": -420, "y": -330 }, { "x": -420, "y": -304 }, { "x": -620, "y": -304 }] },
+      { "id": "patrol-preview", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -660, "y": -535 }, "vertices": [{ "x": -660, "y": -535 }, { "x": -380, "y": -535 }, { "x": -380, "y": -505 }, { "x": -660, "y": -505 }] },
+      { "id": "span-1", "kind": "cantilever", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -320, "y": -660 }, "vertices": [{ "x": -320, "y": -660 }, { "x": -140, "y": -660 }, { "x": -140, "y": -632 }, { "x": -320, "y": -632 }] },
+      { "id": "span-2", "kind": "cantilever", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -100, "y": -690 }, "vertices": [{ "x": -100, "y": -690 }, { "x": 80, "y": -690 }, { "x": 80, "y": -662 }, { "x": -100, "y": -662 }] },
+      { "id": "span-3", "kind": "cantilever", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 120, "y": -730 }, "vertices": [{ "x": 120, "y": -730 }, { "x": 300, "y": -730 }, { "x": 300, "y": -702 }, { "x": 120, "y": -702 }] },
+      { "id": "span-4", "kind": "cantilever", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 340, "y": -780 }, "vertices": [{ "x": 340, "y": -780 }, { "x": 520, "y": -780 }, { "x": 520, "y": -752 }, { "x": 340, "y": -752 }] },
+      { "id": "span-5", "kind": "cantilever", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 540, "y": -910 }, "vertices": [{ "x": 540, "y": -910 }, { "x": 700, "y": -910 }, { "x": 700, "y": -882 }, { "x": 540, "y": -882 }] },
+      { "id": "beacon-full-safe", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 490, "y": -1195 }, "vertices": [{ "x": 490, "y": -1195 }, { "x": 770, "y": -1195 }, { "x": 770, "y": -1165 }, { "x": 490, "y": -1165 }] },
+      { "id": "upper-cantilever", "kind": "cantilever", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 550, "y": -1450 }, "vertices": [{ "x": 550, "y": -1450 }, { "x": 770, "y": -1450 }, { "x": 770, "y": -1424 }, { "x": 550, "y": -1424 }] },
+      { "id": "beacon-exit-deck", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 520, "y": -1710 }, "vertices": [{ "x": 520, "y": -1710 }, { "x": 800, "y": -1710 }, { "x": 800, "y": -1680 }, { "x": 520, "y": -1680 }] }
     ],
     "routePoints": [
       {
@@ -211,7 +222,8 @@
         "x": 660,
         "y": -1680,
         "sourceId": "sector-06-06:p3"
-      }
+      },
+      { "id": "sector-06-06:route-exit", "x": 596, "y": -1680, "sourceId": "exit" }
     ],
     "recoveryPoints": [
       {
@@ -228,14 +240,34 @@
       }
     ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-06-06:D1",
+        "kind": "patrol-drone",
+        "presentationId": "world-object:patrol-drone",
+        "enemyType": "patrol-drone-t1",
+        "position": { "x": 420, "y": -600 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -320, "y": -950, "width": 1010, "height": 400 },
+        "rules": ["standard-projectile", "no-rope-cut", "kill-optional"],
+        "patrol": {
+          "mode": "pingpong",
+          "speed": 48,
+          "waitSeconds": 0.45,
+          "points": [{ "x": 420, "y": -600 }, { "x": -100, "y": -870 }]
+        }
+      }
+    ],
+    "objectives": [
+      { "id": "exit-reached", "type": "reach", "bounds": { "x": 612, "y": -1760, "width": 96, "height": 160 } }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "gate": { "id": "sector-06-06:gate", "nextAreaId": "sector-06-07", "requiredObjectiveIds": ["exit-reached"], "trigger": { "x": 612, "y": -1760, "width": 96, "height": 160 } }
   },
   "anchors": [
     {
@@ -459,9 +491,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "inferred-editor-viewport"
-  }
+  "behaviorRefs": []
 }

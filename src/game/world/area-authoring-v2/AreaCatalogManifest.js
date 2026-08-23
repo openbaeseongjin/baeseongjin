@@ -1,3 +1,5 @@
+import { isAuthoredRuntimeContentBoundary } from "./AreaRuntimePromotion.js";
+
 export const AREA_CATALOG_MANIFEST_V2 = "area-catalog-v2";
 const GENERATED_OUTPUT_ROOT = "src/game/world/areas/generated/";
 
@@ -62,6 +64,23 @@ export function validateAreaCatalogManifest(
     }
     if (typeof manifest.catalogRevision !== "string" || manifest.catalogRevision.length === 0) {
         issue(issues, "manifest-catalog-revision");
+    }
+    if (!Number.isSafeInteger(manifest.accessModuleRequirement) || manifest.accessModuleRequirement < 0) {
+        issue(issues, "manifest-access-module-requirement", {
+            accessModuleRequirement: manifest.accessModuleRequirement ?? null
+        });
+    }
+    const expectedContentBoundaryStageId = expectedStageIds.find((stageId) =>
+        isAuthoredRuntimeContentBoundary(stageId)
+    );
+    if (
+        (expectedContentBoundaryStageId && manifest.contentBoundaryStageId !== expectedContentBoundaryStageId) ||
+        (!expectedContentBoundaryStageId && manifest.contentBoundaryStageId !== undefined)
+    ) {
+        issue(issues, "manifest-content-boundary-stage-id", {
+            expectedStageId: expectedContentBoundaryStageId ?? null,
+            actualStageId: manifest.contentBoundaryStageId ?? null
+        });
     }
     if (!Array.isArray(manifest.stageSources)) {
         issue(issues, "manifest-stage-sources-invalid");

@@ -1,7 +1,7 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
-  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
   "stage": {
     "sector": 6,
     "stage": 3,
@@ -9,10 +9,14 @@
     "name": "PERIMETER SIGNAL DECK",
     "id": "6-3"
   },
-  "languagePolicy": {
-    "playerDialogue": "ko",
-    "directionNotes": "ko-first",
-    "diegeticSystemText": "en-allowed"
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
   },
   "beats": [
     {
@@ -39,7 +43,11 @@
             "text": "…숨을 데가 없네."
           }
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-3:safe-preview"
     },
     {
       "beatId": "ascent-firing-band",
@@ -54,13 +62,17 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-3:ascent-firing-band"
     },
     {
       "beatId": "central-sentry",
       "trigger": {
-        "type": "enemy-band",
-        "enemyId": "S1"
+        "type": "position-zone",
+        "zoneId": "S1"
       },
       "worldPause": false,
       "playerControl": "ON",
@@ -69,7 +81,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-3:central-sentry"
     },
     {
       "beatId": "upper-safe-deck",
@@ -84,7 +100,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-3:upper-safe-deck"
     },
     {
       "beatId": "shelter-handoff",
@@ -106,16 +126,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-3:shelter-handoff"
     }
-  ],
-  "validation": [
-    "Macro route continuously gains height.",
-    "No large U-shaped descent/re-ascent.",
-    "One stationary Standard Sentry only.",
-    "No cover-ends-los and no cutter-fire.",
-    "No dialogue during high-input combat.",
-    "Upper Safe Deck ends new acquisition.",
-    "Recovery returns to upward route within target 5 seconds."
   ]
 }

@@ -108,6 +108,7 @@ export const ENEMY_PRESENTATION_DEFINITIONS = Object.freeze({
         behaviorKind: ENEMY_BEHAVIOR_KIND.ARTILLERY,
         usesProjectileAttack: false
     }),
+    [ENEMY_TYPE.HARDPOINT_JAMMER_V1]: definition({ usesProjectileAttack: false }),
     [ENEMY_TYPE.SUPPORT_DRONE_T1]: definition({
         behaviorKind: ENEMY_BEHAVIOR_KIND.SUPPORT,
         usesProjectileAttack: false

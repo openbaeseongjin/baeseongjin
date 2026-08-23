@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "5-2",
     "sector": 5,
@@ -43,37 +43,37 @@
       "y": -100
     },
     "exit": {
-      "id": "sector-05-02:scenario-exit",
-      "x": 340,
-      "y": 305.29
+      "id": "sector-05-02:exit",
+      "x": -347,
+      "y": -2542
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-05-03",
     "surfaces": [
       {
-        "id": "entry-deck",
+        "id": "authored-entry-deck",
         "kind": "scenario-surface",
         "oneWay": true,
         "grappleable": true,
         "coordinateAnchor": "top-center",
         "position": {
-          "x": -2220,
+          "x": -2180,
           "y": -120
         },
         "vertices": [
           {
-            "x": -2385,
+            "x": -2345,
             "y": -120
           },
           {
-            "x": -2055,
+            "x": -2015,
             "y": -120
           },
           {
-            "x": -2055,
+            "x": -2015,
             "y": -92
           },
           {
-            "x": -2385,
+            "x": -2345,
             "y": -92
           }
         ],
@@ -651,50 +651,112 @@
         "sourceId": "x"
       },
       {
-        "id": "sector-05-02:route-route-3-neighborDistancesPx-16",
-        "x": 340,
-        "y": 305.29,
-        "sourceId": "route-3-neighborDistancesPx-16"
+        "id": "sector-05-02:route-exit",
+        "x": -347,
+        "y": -2542,
+        "sourceId": "exit"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      {
+        "id": "sector-05-02:recovery-1",
+        "x": -1450,
+        "y": -954,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-02:recovery-2",
+        "x": 20,
+        "y": -1624,
+        "maxRetrySeconds": 5
+      },
+      {
+        "id": "sector-05-02:recovery-3",
+        "x": 390,
+        "y": -2204,
+        "maxRetrySeconds": 5
+      }
+    ],
     "checkpoints": [],
     "objects": [
       {
         "id": "sector-05-02:aegis-a",
-        "kind": "scenario-enemy-slot",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
         "enemyType": "shield-drone-t1",
         "position": {
           "x": -900,
           "y": -820
         },
         "coordinateAnchor": "center",
-        "sourceId": "sector-05-02:aegis-a"
+        "activation": {
+          "x": -1400,
+          "y": -1100,
+          "width": 640,
+          "height": 600
+        },
+        "rules": []
       },
       {
         "id": "sector-05-02:aegis-b",
-        "kind": "scenario-enemy-slot",
+        "kind": "sentry",
+        "presentationId": "world-object:sentry",
         "enemyType": "shield-drone-t1",
         "position": {
           "x": 650,
           "y": -1660
         },
         "coordinateAnchor": "center",
-        "sourceId": "sector-05-02:aegis-b"
+        "activation": {
+          "x": 180,
+          "y": -1920,
+          "width": 600,
+          "height": 610
+        },
+        "rules": []
+      },
+      {
+        "id": "sector-05-02:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": {
+          "x": -459,
+          "y": -2510
+        },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "exit-panel-engaged",
+        "gateId": "sector-05-02:gate"
+      },
+      {
+        "id": "sector-05-02:exit-gate",
+        "kind": "gate",
+        "presentationId": "world-object:gate",
+        "position": {
+          "x": -347,
+          "y": -2510
+        },
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-02:gate"
       }
     ],
     "objectives": [
       {
-        "id": "final-control-deck-reached",
+        "id": "final-deck-reached",
         "type": "reach",
-        "preset": "reach-deck"
+        "bounds": {
+          "x": -690,
+          "y": -2690,
+          "width": 420,
+          "height": 180
+        }
       },
       {
         "id": "exit-panel-engaged",
         "type": "interact",
-        "preset": "exit-panel",
+        "sourceObjectId": "sector-05-02:exit-panel",
         "requiredObjectiveIds": [
-          "final-control-deck-reached"
+          "final-deck-reached"
         ]
       }
     ],
@@ -708,7 +770,21 @@
     ],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "jammerGroups": [],
+    "gate": {
+      "id": "sector-05-02:gate",
+      "nextAreaId": "sector-05-03",
+      "requiredObjectiveIds": [
+        "exit-panel-engaged"
+      ],
+      "trigger": {
+        "x": -395,
+        "y": -2638,
+        "width": 96,
+        "height": 160
+      }
+    }
   },
   "anchors": [
     {
@@ -1012,9 +1088,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "expanded-for-authored-points"
-  }
+  "behaviorRefs": []
 }

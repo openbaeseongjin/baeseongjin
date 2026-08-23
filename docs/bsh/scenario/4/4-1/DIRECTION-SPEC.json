@@ -42,7 +42,7 @@
       "worldPause": false,
       "playerControl": "ON",
       "camera": {
-        "zoneId": "high-arrival-wide",
+        "zoneId": "arrival-basin-reveal",
         "forcedPan": false
       },
       "tracks": [
@@ -75,7 +75,7 @@
       "worldPause": false,
       "playerControl": "ON",
       "camera": {
-        "zoneId": "m0-basin-overlook",
+        "zoneId": "arrival-basin-reveal",
         "forcedPan": false
       },
       "tracks": [
@@ -124,7 +124,7 @@
       "worldPause": false,
       "playerControl": "ON",
       "camera": {
-        "zoneId": "basin-patrol-read",
+        "zoneId": "basin-patrol",
         "forcedPan": false
       },
       "tracks": [
@@ -162,7 +162,7 @@
       "worldPause": false,
       "playerControl": "ON",
       "camera": {
-        "zoneId": "private-lobby-safe",
+        "zoneId": "private-lobby",
         "forcedPan": false
       },
       "tracks": [

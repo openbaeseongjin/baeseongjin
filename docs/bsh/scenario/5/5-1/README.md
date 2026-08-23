@@ -1,10 +1,10 @@
 # SECTOR 05-1 — CONTINUITY RECEPTION REV8.0
 
-> Status: **DESIGN LOCKED · NOT IMPLEMENTED**<br>
+> Status: **RUNTIME GENERATED · PLAYTEST PENDING**<br>
 > Authoring snapshot: `4551798860193a16e53814aae5c3a42022b4e1cf`<br>
 > Source Area ID: `sector-05-01`<br>
-> Runtime connection: **NOT AUTHORED / NOT CONNECTED**<br>
-> Bounds: **4608×2432**<br>
+> Runtime connection: **5-1 → 5-2 INTERNAL ONLY**<br>
+> Bounds: **4608×2496 EDITOR RECONCILED**<br>
 > Enemy: **NONE**<br>
 > Signature: **MONUMENTAL SEALED CORE ALTERNATING ASCENT**<br>
 > Lesson: **SEALED CORPORATE SURFACE ≠ SERVICE HARDPOINT**<br>

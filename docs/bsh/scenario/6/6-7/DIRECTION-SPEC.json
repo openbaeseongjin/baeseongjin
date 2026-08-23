@@ -1,7 +1,7 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
-  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
   "stage": {
     "sector": 6,
     "stage": 7,
@@ -9,10 +9,14 @@
     "name": "CONTAINMENT LATTICE",
     "id": "6-7"
   },
-  "languagePolicy": {
-    "playerDialogue": "ko",
-    "directionNotes": "ko-first",
-    "diegeticSystemText": "en-allowed"
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
   },
   "beats": [
     {
@@ -34,7 +38,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-7:entry"
     },
     {
       "beatId": "safe-preview",
@@ -53,40 +61,41 @@
           }
         },
         {
-          "type": "camera",
+          "type": "object",
           "action": "show-cutter-three-bays-three-recovery-tiers-pad03"
         },
         {
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-7:safe-preview"
     },
     {
       "beatId": "cutter-band",
       "trigger": {
-        "type": "route-band",
-        "targetIds": [
-          "sector-06-07:h2",
-          "sector-06-07:h3",
-          "sector-06-07:h4",
-          "sector-06-07:h5",
-          "sector-06-07:h6",
-          "sector-06-07:h7"
-        ]
+        "type": "position-zone",
+        "zoneId": "sector-06-07:h2"
       },
       "worldPause": false,
       "playerControl": "ON",
       "tracks": [
         {
-          "type": "gameplay",
+          "type": "object",
           "action": "real-projectile-rope-intersection-only"
         },
         {
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-7:cutter-band"
     },
     {
       "beatId": "full-safe",
@@ -108,7 +117,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-7:full-safe"
     },
     {
       "beatId": "exit",
@@ -130,7 +143,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-7:exit"
     }
   ]
 }

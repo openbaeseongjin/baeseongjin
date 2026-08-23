@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "4-2",
     "sector": 4,
@@ -43,11 +43,11 @@
       "y": -288
     },
     "exit": {
-      "id": "sector-04-02:scenario-exit",
+      "id": "sector-04-02:exit",
       "x": 1984,
       "y": -1856
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-04-03",
     "surfaces": [
       {
         "id": "entry-terrace",
@@ -328,16 +328,69 @@
         "sourceId": "EXIT"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      { "id": "sector-04-02:arcade-recovery", "x": 640, "y": -992, "maxRetrySeconds": 5 }
+    ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-04-02:resident-courtyard-pursuit",
+        "kind": "patrol-drone",
+        "enemyType": "pursuit-drone-t1",
+        "position": { "x": -960, "y": -560 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -1280, "y": -940, "width": 2000, "height": 580 }
+      },
+      {
+        "id": "sector-04-02:override-a-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 1392, "y": -1536 },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-04-02:override-a-acquired"
+      },
+      {
+        "id": "sector-04-02:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 1872, "y": -1824 },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-04-02:exit-panel-engaged",
+        "gateId": "sector-04-02:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "sector-04-02:override-a-acquired",
+        "type": "interact",
+        "sourceObjectId": "sector-04-02:override-a-panel",
+        "accessModuleId": "sector-04:resident-security-override:a"
+      },
+      {
+        "id": "sector-04-02:exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-04-02:exit-panel"
+      }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
-    "cameraZones": [],
-    "cueIds": []
+    "cameraZones": [
+      { "id": "courtyard-overlook", "minY": -640, "maxY": 0, "desktopZoom": 0.88, "mobileZoom": 0.66 },
+      { "id": "courtyard-pursuit", "minY": -1088, "maxY": -640, "desktopZoom": 0.84, "mobileZoom": 0.64 },
+      { "id": "arcade-contact-break", "minY": -1536, "maxY": -1088, "desktopZoom": 0.92, "mobileZoom": 0.68 },
+      { "id": "override-vestibule", "minY": -2112, "maxY": -1536, "desktopZoom": 0.96, "mobileZoom": 0.72 }
+    ],
+    "cueIds": [],
+    "gate": {
+      "id": "sector-04-02:gate",
+      "nextAreaId": "sector-04-03",
+      "requiredObjectiveIds": ["sector-04-02:exit-panel-engaged"],
+      "trigger": { "x": 1936, "y": -1952, "width": 96, "height": 128 }
+    }
   },
   "anchors": [
     {
@@ -539,11 +592,39 @@
           "sourceId": "A7"
         }
       }
+    },
+    {
+      "target": {
+        "id": "V0-surface",
+        "x": 1184,
+        "y": -1408,
+        "properties": { "sourceId": "V0" }
+      },
+      "landmark": {
+        "id": "V0",
+        "x": 1184,
+        "y": -1408,
+        "properties": { "label": "V0", "coordinateAnchor": "center", "sourceId": "V0" }
+      }
+    },
+    {
+      "target": {
+        "id": "OVR-surface",
+        "x": 1456,
+        "y": -1504,
+        "properties": { "sourceId": "OVR" }
+      },
+      "landmark": {
+        "id": "OVR",
+        "x": 1456,
+        "y": -1504,
+        "properties": { "label": "OVR", "coordinateAnchor": "center", "sourceId": "OVR" }
+      }
     }
   ],
   "behaviorRefs": [],
   "scenario": {
-    "status": "scenario-only",
+    "status": "runtime-generated",
     "boundsProvenance": "authored"
   }
 }

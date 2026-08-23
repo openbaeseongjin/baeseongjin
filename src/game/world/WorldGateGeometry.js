@@ -5,8 +5,17 @@ function isRouteUnlocked(progress, routeId) {
     return Array.isArray(progress.unlockedRouteIds) && progress.unlockedRouteIds.includes(routeId);
 }
 
+function isObjectiveComplete(progress, objectiveId) {
+    if (typeof progress.isObjectiveComplete === "function") {
+        return progress.isObjectiveComplete(objectiveId);
+    }
+    return Array.isArray(progress.completedObjectiveIds) && progress.completedObjectiveIds.includes(objectiveId);
+}
+
 export function isSurfaceEnabledForProgress(surface, progress) {
-    if (surface.kind !== "sector-transit-barrier" || !surface.blockedByRouteId || !progress) return true;
+    if (!progress) return true;
+    if (surface.blockedByObjectiveId) return !isObjectiveComplete(progress, surface.blockedByObjectiveId);
+    if (surface.kind !== "sector-transit-barrier" || !surface.blockedByRouteId) return true;
     return !isRouteUnlocked(progress, surface.blockedByRouteId);
 }
 

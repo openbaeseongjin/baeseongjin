@@ -1,7 +1,7 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
-  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
   "stage": {
     "sector": 6,
     "stage": 5,
@@ -9,10 +9,14 @@
     "name": "PAD ACCESS ARRAY",
     "id": "6-5"
   },
-  "languagePolicy": {
-    "playerDialogue": "ko",
-    "directionNotes": "ko-first",
-    "diegeticSystemText": "en-allowed"
+  "baselineCommit": "8b344f0f7a2309bfb316655668ed180718db7781",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
   },
   "beats": [
     {
@@ -34,7 +38,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-5:entry"
     },
     {
       "beatId": "safe-preview",
@@ -56,17 +64,17 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-5:safe-preview"
     },
     {
       "beatId": "controlled-chain",
       "trigger": {
-        "type": "route-band",
-        "targetIds": [
-          "sector-06-05:c1",
-          "sector-06-05:c2",
-          "sector-06-05:c3"
-        ]
+        "type": "position-zone",
+        "zoneId": "sector-06-05:c1"
       },
       "worldPause": false,
       "playerControl": "ON",
@@ -75,7 +83,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-5:controlled-chain"
     },
     {
       "beatId": "full-safe",
@@ -90,7 +102,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-5:full-safe"
     },
     {
       "beatId": "beacon-handoff",
@@ -112,15 +128,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-5:beacon-handoff"
     }
-  ],
-  "validation": [
-    "C1/C2/C3 use one shared phase.",
-    "No dialogue during timing traversal.",
-    "C1/C2/C3 cannot be skipped via Base Reach geometry.",
-    "R1 cannot be used to bypass directly to C3.",
-    "P2 is full safe after C3.",
-    "ACCESS DENIED and CONTAINMENT VIOLATION remain withheld."
   ]
 }

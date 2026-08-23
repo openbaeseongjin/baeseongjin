@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "6-4",
     "sector": 6,
@@ -43,11 +43,11 @@
       "y": -120
     },
     "exit": {
-      "id": "sector-06-04:scenario-exit",
+      "id": "sector-06-04:exit",
       "x": -80,
       "y": -920
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-06-05",
     "surfaces": [
       {
         "id": "sector-06-04:entry-deck",
@@ -77,7 +77,15 @@
             "y": -56
           }
         ]
-      }
+      },
+      { "id": "shelter-entry", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -720, "y": -150 }, "vertices": [{ "x": -720, "y": -150 }, { "x": -470, "y": -150 }, { "x": -470, "y": -120 }, { "x": -720, "y": -120 }] },
+      { "id": "shelter-eave", "kind": "shelter-eave", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -470, "y": -215 }, "vertices": [{ "x": -470, "y": -215 }, { "x": -260, "y": -215 }, { "x": -260, "y": -190 }, { "x": -470, "y": -190 }] },
+      { "id": "quiet-service-deck", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -250, "y": -290 }, "vertices": [{ "x": -250, "y": -290 }, { "x": 10, "y": -290 }, { "x": 10, "y": -260 }, { "x": -250, "y": -260 }] },
+      { "id": "roof-access", "kind": "shelter-roof", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -25, "y": -495 }, "vertices": [{ "x": -25, "y": -495 }, { "x": 75, "y": -495 }, { "x": 75, "y": -469 }, { "x": -25, "y": -469 }] },
+      { "id": "shelter-upper-deck", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -170, "y": -700 }, "vertices": [{ "x": -170, "y": -700 }, { "x": 150, "y": -700 }, { "x": 150, "y": -668 }, { "x": -170, "y": -668 }] },
+      { "id": "pad-view-deck", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -470, "y": -790 }, "vertices": [{ "x": -470, "y": -790 }, { "x": -170, "y": -790 }, { "x": -170, "y": -758 }, { "x": -470, "y": -758 }] },
+      { "id": "shelter-exit-deck", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -210, "y": -950 }, "vertices": [{ "x": -210, "y": -950 }, { "x": 100, "y": -950 }, { "x": 100, "y": -918 }, { "x": -210, "y": -918 }] },
+      { "id": "R1", "kind": "recovery", "oneWay": true, "grappleable": false, "coordinateAnchor": "top-left", "position": { "x": -160, "y": -405 }, "vertices": [{ "x": -160, "y": -405 }, { "x": 90, "y": -405 }, { "x": 90, "y": -387 }, { "x": -160, "y": -387 }], "maxRetrySeconds": 5 }
     ],
     "routePoints": [
       {
@@ -121,18 +129,24 @@
         "x": -80,
         "y": -920,
         "sourceId": "h06"
-      }
+      },
+      { "id": "sector-06-04:route-exit", "x": -144, "y": -920, "sourceId": "exit" }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      { "id": "sector-06-04:recovery-R1", "x": -35, "y": -405, "sourceId": "R1", "maxRetrySeconds": 5 }
+    ],
     "checkpoints": [],
     "objects": [],
-    "objectives": [],
+    "objectives": [
+      { "id": "exit-reached", "type": "reach", "bounds": { "x": -128, "y": -1000, "width": 96, "height": 160 } }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
     "cameraZones": [],
-    "cueIds": []
+    "cueIds": [],
+    "gate": { "id": "sector-06-04:gate", "nextAreaId": "sector-06-05", "requiredObjectiveIds": ["exit-reached"], "trigger": { "x": -128, "y": -1000, "width": 96, "height": 160 } }
   },
   "anchors": [
     {
@@ -276,9 +290,5 @@
       }
     }
   ],
-  "behaviorRefs": [],
-  "scenario": {
-    "status": "scenario-only",
-    "boundsProvenance": "inferred-editor-viewport"
-  }
+  "behaviorRefs": []
 }

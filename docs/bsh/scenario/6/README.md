@@ -1,12 +1,12 @@
 # SECTOR 06 — ROOFTOP / EVACUATION MASTER PLAN
 
-*AUTHORED PACKAGE MERGED · RUNTIME MIGRATION APPROVAL REQUIRED*
+*RUNTIME GENERATED · PLAYTEST TUNING PENDING*
 
 `SECTOR 06 ROOFTOP / EVACUATION` · `THE GOAL IS VISIBLE; THE ROOM IS GONE` · `OPEN SKY / STRUCTURAL ISLANDS` · `FINAL BUILD EXAM` · `ESCAPE`
 
 | 항목 | REV 1.0 기준 |
 |---|---|
-| Status | AUTHORED PACKAGE MERGED — Runtime not implemented |
+| Status | 6-1~6-8 RUNTIME GENERATED — browser playtest tuning pending |
 | Authoring Snapshot | `8b344f0f7a2309bfb316655668ed180718db7781` |
 | Sector Role | Corporate Continuity Zone 이후 최종 Rooftop / Pad 03 접근 |
 | Core Gameplay Shift | Sparse Corporate Hardpoint Commitment → Open-Sky Structural-Island Execution |
@@ -27,7 +27,7 @@
 | Sector06 Direct Wiring | 6-8 → Final Encounter boundary only; no arbitrary next-area wiring |
 | Final Escape | ROOFTOP PAD 03 → MAINTENANCE SHUTTLE |
 | Ending Tone | ESCAPE, not revenge / revolution |
-| Sector06 Runtime | NOT AUTHORED / NOT CONNECTED |
+| Sector06 Runtime | 6-1~6-8 internally connected; 6-8 content boundary |
 | Approved Gameplay Art | HOLD until Runtime Area / Camera Zone / Stable IDs exist |
 
 ---

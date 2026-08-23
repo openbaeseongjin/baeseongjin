@@ -87,6 +87,8 @@ export function renderGeneratedCatalogModule(manifest) {
         "export const GENERATED_AREA_CATALOG = defineAreaCatalog({",
         "    id: GENERATED_AREA_CATALOG_MANIFEST.catalogId,",
         "    revision: GENERATED_AREA_CATALOG_MANIFEST.catalogRevision,",
+        "    accessModuleRequirement: GENERATED_AREA_CATALOG_MANIFEST.accessModuleRequirement,",
+        "    contentBoundaryStageId: GENERATED_AREA_CATALOG_MANIFEST.contentBoundaryStageId ?? null,",
         "    areas: GENERATED_AREAS",
         "});",
         ""

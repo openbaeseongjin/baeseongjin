@@ -1,5 +1,6 @@
 import { ropeAttachmentPoint, ropeLaunchHandPoint } from "../../game/rope/RopeAttachment.js";
 import { ROPE_CONFIG, ropeHookReach } from "../../game/config.js";
+import { HARDPOINT_JAMMER_PHASE } from "../../game/world/HardpointJammerField.js";
 import { windBladePhase } from "../../game/world/WorldForceField.js";
 import { isSurfaceEnabledForProgress } from "../../game/world/WorldGateGeometry.js";
 import { authoredRegionForPosition } from "../../game/world/AuthoredLandmarkResolver.js";
@@ -286,6 +287,40 @@ export class AccessScanSurfaceRenderer {
             drawAccessScanMarker(context, surface, stateById[surface.grappleAccessGroup]);
         }
         renderStats?.recordCollection("accessScanSurfaces", surfaces.length, visible.length);
+    }
+}
+
+const JAMMER_SURFACE_STYLE = Object.freeze({
+    [HARDPOINT_JAMMER_PHASE.WARNING]: Object.freeze({ color: "#fbbf24", lineWidth: 5, dash: [10, 6] }),
+    [HARDPOINT_JAMMER_PHASE.ACTIVE]: Object.freeze({ color: "#d946ef", lineWidth: 7, dash: [] }),
+    [HARDPOINT_JAMMER_PHASE.CLEAR]: Object.freeze({ color: "#67e8f9", lineWidth: 3, dash: [4, 8] })
+});
+
+export class HardpointJammerSurfaceRenderer {
+    draw({ context, scene, viewport, renderStats }) {
+        const surfaceById = Object.freeze(
+            Object.fromEntries((scene.world.surfaces ?? []).map((surface) => [surface.id, surface]))
+        );
+        let drawn = 0;
+        for (const state of scene.hardpointJammerStates ?? []) {
+            const style = JAMMER_SURFACE_STYLE[state.phase];
+            const surface = surfaceById[state.targetSurfaceId];
+            if (!style || !surface || !isVisible(viewport, boundsForVertices(surface.vertices))) continue;
+            drawn += 1;
+            context.save();
+            context.strokeStyle = style.color;
+            context.lineWidth = style.lineWidth;
+            context.setLineDash?.(style.dash);
+            context.beginPath();
+            context.moveTo(surface.vertices[0].x, surface.vertices[0].y);
+            for (let index = 1; index < surface.vertices.length; index += 1) {
+                context.lineTo(surface.vertices[index].x, surface.vertices[index].y);
+            }
+            context.closePath();
+            context.stroke();
+            context.restore();
+        }
+        renderStats?.recordCollection("hardpointJammerSurfaces", scene.hardpointJammerStates?.length ?? 0, drawn);
     }
 }
 

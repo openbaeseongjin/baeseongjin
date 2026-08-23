@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "4-5",
     "sector": 4,
@@ -43,11 +43,11 @@
       "y": -352
     },
     "exit": {
-      "id": "sector-04-05:scenario-exit",
+      "id": "sector-04-05:exit",
       "x": 1660,
       "y": -2140
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-04-06",
     "surfaces": [
       {
         "id": "high-amenity-entry",
@@ -203,7 +203,7 @@
         "id": "west-upper-garden-balcony",
         "kind": "garden-balcony",
         "oneWay": true,
-        "grappleable": true,
+        "grappleable": false,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -1750,
@@ -233,7 +233,7 @@
         "id": "upper-garden-recovery",
         "kind": "amenity-recovery",
         "oneWay": true,
-        "grappleable": true,
+        "grappleable": false,
         "coordinateAnchor": "top-center",
         "position": {
           "x": -1525,
@@ -448,16 +448,85 @@
         "sourceId": "EXIT"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      { "id": "sector-04-05:lower-amenity-recovery", "x": -280, "y": -848, "maxRetrySeconds": 5 },
+      { "id": "sector-04-05:upper-garden-recovery", "x": -480, "y": -1618, "maxRetrySeconds": 5 }
+    ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-04-05:wellness-patrol",
+        "kind": "patrol-drone",
+        "enemyType": "patrol-drone-t1",
+        "position": { "x": 1040, "y": -1120 },
+        "coordinateAnchor": "center",
+        "activation": { "x": 640, "y": -1408, "width": 960, "height": 576 },
+        "patrol": {
+          "mode": "pingpong",
+          "speed": 48,
+          "waitSeconds": 0.4,
+          "points": [{ "x": 800, "y": -1120 }, { "x": 1400, "y": -1200 }]
+        }
+      },
+      {
+        "id": "sector-04-05:upper-pursuit",
+        "kind": "patrol-drone",
+        "enemyType": "pursuit-drone-t1",
+        "position": { "x": 480, "y": -1520 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -1440, "y": -2320, "width": 3040, "height": 1056 }
+      },
+      {
+        "id": "sector-04-05:override-b-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 640, "y": -1790 },
+        "coordinateAnchor": "center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-04-05:override-b-acquired"
+      },
+      {
+        "id": "sector-04-05:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 1548, "y": -2108 },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-04-05:exit-panel-engaged",
+        "gateId": "sector-04-05:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "sector-04-05:override-b-acquired",
+        "type": "interact",
+        "sourceObjectId": "sector-04-05:override-b-panel",
+        "accessModuleId": "sector-04:resident-security-override:b"
+      },
+      {
+        "id": "sector-04-05:exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-04-05:exit-panel"
+      }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
-    "cameraZones": [],
-    "cueIds": []
+    "cameraZones": [
+      { "id": "atrium-lower-sweep", "minY": -1024, "maxY": 0, "desktopZoom": 0.82, "mobileZoom": 0.62 },
+      { "id": "east-wellness-read", "minY": -1408, "maxY": -1024, "desktopZoom": 0.9, "mobileZoom": 0.67 },
+      { "id": "upper-spiral-pursuit", "minY": -1920, "maxY": -1408, "desktopZoom": 0.84, "mobileZoom": 0.64 },
+      { "id": "security-overlook", "minY": -2240, "maxY": -1920, "desktopZoom": 0.88, "mobileZoom": 0.66 },
+      { "id": "refuge-access-handoff", "minY": -2432, "maxY": -2240, "desktopZoom": 0.96, "mobileZoom": 0.72 }
+    ],
+    "cueIds": [],
+    "gate": {
+      "id": "sector-04-05:gate",
+      "nextAreaId": "sector-04-06",
+      "requiredObjectiveIds": ["sector-04-05:exit-panel-engaged"],
+      "trigger": { "x": 1612, "y": -2236, "width": 96, "height": 128 }
+    }
   },
   "anchors": [
     {
@@ -903,7 +972,7 @@
   ],
   "behaviorRefs": [],
   "scenario": {
-    "status": "scenario-only",
+    "status": "runtime-generated",
     "boundsProvenance": "authored"
   }
 }

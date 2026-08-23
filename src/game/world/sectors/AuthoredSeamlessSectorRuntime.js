@@ -3,31 +3,45 @@ import { defineAreaCatalog } from "../areas/AreaDefinition.js";
 import { SECTOR_01_AREA_CATALOG } from "../areas/sector01/Sector01AreaCatalog.js";
 import { SECTOR_02_AREA_CATALOG } from "../areas/sector02/Sector02AreaCatalog.js";
 import { SECTOR_03_AREA_CATALOG } from "../areas/sector03/Sector03AreaCatalog.js";
+import { SECTOR_04_AREA_CATALOG } from "../areas/sector04/Sector04AreaCatalog.js";
+import { SECTOR_05_AREA_CATALOG } from "../areas/sector05/Sector05AreaCatalog.js";
+import { SECTOR_06_AREA_CATALOG } from "../areas/sector06/Sector06AreaCatalog.js";
 import { AUTHORED_SECTOR_CATALOG, buildAuthoredSectorCatalog } from "./AuthoredSectorCatalog.js";
 import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSavePointGeometry.js";
-import { GRAPPLE_LINK_BUDGET } from "../../config.js";
+import { GRAPPLE_LINK_BUDGET, ROPE_CONFIG, ropeHookReach } from "../../config.js";
 import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
+import { isAuthoredRuntimeContentBoundary } from "../area-authoring-v2/AreaRuntimePromotion.js";
+import { ACCESS_MODULE_SOURCE_KIND } from "./SectorDefinition.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v11-multi-boss-stage";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "seamless-sector-runtime-v12-multi-boss-stage";
 export const SEAMLESS_SECTOR_RUNTIME_WIDTH = 4800;
 export const SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT = 9600;
 
 const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_01_AREA_CATALOG,
     SECTOR_02_AREA_CATALOG,
-    SECTOR_03_AREA_CATALOG
+    SECTOR_03_AREA_CATALOG,
+    SECTOR_04_AREA_CATALOG,
+    SECTOR_05_AREA_CATALOG,
+    SECTOR_06_AREA_CATALOG
 ]);
 const BOSS_ARENA_ISOLATION_X = 7000;
 export const SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID = Object.freeze({
     "sector-01": SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT,
     "sector-02": SEAMLESS_SECTOR_RUNTIME_MAX_HEIGHT,
-    "sector-03": 12416
+    "sector-03": 12416,
+    "sector-04": 18432,
+    "sector-05": 22528,
+    "sector-06": 16384
 });
 const SECTOR_HALF_WIDTH = SEAMLESS_SECTOR_RUNTIME_WIDTH * 0.5;
 const CITY_WING_INSET = 96;
 const CITY_WING_CORE_GAP = 64;
 const CITY_WING_THICKNESS = 32;
-const ACCESS_MODULES_PER_SECTOR = 3;
+export const CONTENT_BOUNDARY_ISOLATION_GAP =
+    Math.max(...Object.values(SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID)) +
+    ropeHookReach(ROPE_CONFIG) +
+    GRAPPLE_LINK_BUDGET;
 const TRANSIT_BARRIER_THICKNESS = 24;
 const TRANSIT_BARRIER_LATERAL_MARGIN = GRAPPLE_LINK_BUDGET;
 const AREA_BOUNDARY_KIND_LOOKUP = Object.freeze({
@@ -79,7 +93,7 @@ function withoutAreaAuthority(value, properties) {
     return freezeValue({ ...rest, ...properties });
 }
 
-function shiftSurface(surface, dx, dy, landmark, sourceAreaId) {
+function shiftSurface(surface, dx, dy, landmark, sourceAreaId, objectiveIdBySourceId = {}) {
     return withoutAreaAuthority(surface, {
         id: surface.id.startsWith(`${sourceAreaId}:`) ? surface.id : `${sourceAreaId}:${surface.id}`,
         landmarkId: landmark.id,
@@ -88,6 +102,12 @@ function shiftSurface(surface, dx, dy, landmark, sourceAreaId) {
         y: surface.y + dy,
         topY: surface.topY + dy,
         ...(surface.position ? { position: shiftPoint(surface.position, dx, dy) } : {}),
+        ...(surface.blockedByObjectiveId
+            ? {
+                  blockedByObjectiveId:
+                      objectiveIdBySourceId[surface.blockedByObjectiveId] ?? surface.blockedByObjectiveId
+              }
+            : {}),
         vertices: surface.vertices.map((vertex) => shiftPoint(vertex, dx, dy))
     });
 }
@@ -365,11 +385,11 @@ function interSectorRise(interSectorRiseById, sourceSectorId, targetSectorId) {
     return rise;
 }
 
-function authoredAreaCatalogsWithOverrides(areaOverrides) {
+function authoredAreaCatalogsWithOverrides(areaCatalogs, areaOverrides) {
     const overrideIds = Object.keys(areaOverrides ?? {});
-    if (overrideIds.length === 0) return DEFAULT_AUTHORED_AREA_CATALOGS;
+    if (overrideIds.length === 0) return areaCatalogs;
     const appliedIds = Object.create(null);
-    const areaCatalogs = DEFAULT_AUTHORED_AREA_CATALOGS.map((catalog) => {
+    const overriddenCatalogs = areaCatalogs.map((catalog) => {
         const areas = catalog.areas.map((area) => {
             const replacement = areaOverrides[area.id];
             if (!replacement) return area;
@@ -377,11 +397,63 @@ function authoredAreaCatalogsWithOverrides(areaOverrides) {
             appliedIds[area.id] = true;
             return replacement;
         });
-        return defineAreaCatalog({ id: catalog.id, revision: catalog.revision, areas });
+        return defineAreaCatalog({
+            id: catalog.id,
+            revision: catalog.revision,
+            accessModuleRequirement: catalog.accessModuleRequirement,
+            contentBoundaryStageId: catalog.contentBoundaryStageId,
+            areas
+        });
     });
     const unknownId = overrideIds.find((id) => appliedIds[id] !== true);
     if (unknownId) throw new Error(`authored-area-override-not-found:${unknownId}`);
-    return Object.freeze(areaCatalogs);
+    return Object.freeze(overriddenCatalogs);
+}
+
+function assertRuntimeContentBoundary(area) {
+    if (!isAuthoredRuntimeContentBoundary(area.stageId)) return;
+    if (
+        area.nextAreaId !== null ||
+        area.gate?.nextAreaId !== null ||
+        area.gate?.completionMode !== "content-boundary"
+    ) {
+        throw new Error(`authored-runtime-content-boundary-invalid:${area.stageId}`);
+    }
+}
+
+function accessSourcePosition(objective, objects) {
+    const sourceObject = objects.find(({ id }) => id === objective.sourceObjectId);
+    if (sourceObject?.position) return sourceObject.position;
+    if (objective.bounds) {
+        return freezeValue({
+            x: objective.bounds.x + objective.bounds.width * 0.5,
+            y: objective.bounds.y + objective.bounds.height * 0.5
+        });
+    }
+    return null;
+}
+
+function registerAccessModuleSource(accessModuleById, { id, sectorId, landmarkId, position, source }) {
+    if (!id) return;
+    if (!Number.isFinite(position?.x) || !Number.isFinite(position?.y)) {
+        throw new Error(`authored-access-module-position-missing:${id}`);
+    }
+    const current = accessModuleById[id];
+    if (current && current.sectorId !== sectorId) {
+        throw new Error(`authored-access-module-sector-mismatch:${id}`);
+    }
+    let module = current;
+    if (!module) {
+        module = {
+            id,
+            sectorId,
+            landmarkId,
+            position,
+            sources: []
+        };
+        accessModuleById[id] = module;
+    }
+    module.sources.push(source);
 }
 
 function bossStageSurface(surface, dx, dy, stageId) {
@@ -449,9 +521,11 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
     interSectorRiseById = {},
     areaOverrides = null,
     bossStageSpec = null,
-    bossStageSpecs = null
+    bossStageSpecs = null,
+    areaCatalogs = DEFAULT_AUTHORED_AREA_CATALOGS,
+    sectorHeightBudgetById = SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID
 } = {}) {
-    const authoredAreaCatalogs = authoredAreaCatalogsWithOverrides(areaOverrides);
+    const authoredAreaCatalogs = authoredAreaCatalogsWithOverrides(areaCatalogs, areaOverrides);
     const authoredSectorCatalog =
         authoredAreaCatalogs === DEFAULT_AUTHORED_AREA_CATALOGS
             ? AUTHORED_SECTOR_CATALOG
@@ -462,11 +536,12 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
     const surfaces = [];
     const route = [];
     const enemySpawns = [];
-    const accessModules = [];
+    const accessModuleById = Object.create(null);
     const objects = [];
     const objectives = [];
     const windZones = [];
     const scannerGroups = [];
+    const jammerGroups = [];
     const landmarks = [];
     const sectors = [];
     const sectorEntries = [];
@@ -489,6 +564,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         let previousCityWingExitSurfaces = Object.freeze([]);
 
         for (const [landmarkIndex, area] of sourceCatalog.areas.entries()) {
+            assertRuntimeContentBoundary(area);
             const landmarkDefinition = sectorDefinition.landmarks[landmarkIndex];
             const localWorld = isolatedAreaWorld(area, seed);
             const localArea = localWorld.areas[0];
@@ -504,10 +580,11 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             const exit = shiftPoint(localArea.exit, dx, dy);
             const coreBounds = shiftBounds(localArea.bounds, dx, dy);
             const bounds = shiftBounds(localBounds, 0, sectorWorldOriginY);
-            const nextLandmarkDefinition =
-                sectorDefinition.landmarks[landmarkIndex + 1] ??
-                authoredSectorCatalog.sectors[sectorIndex + 1]?.landmarks[0] ??
-                null;
+            const nextLandmarkDefinition = isAuthoredRuntimeContentBoundary(area.stageId)
+                ? null
+                : (sectorDefinition.landmarks[landmarkIndex + 1] ??
+                  authoredSectorCatalog.sectors[sectorIndex + 1]?.landmarks[0] ??
+                  null);
             const outboundRouteId = nextLandmarkDefinition
                 ? routeId(landmarkDefinition.id, nextLandmarkDefinition.id)
                 : null;
@@ -548,24 +625,25 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                     accessModuleId: encounter.accessModuleId,
                     patrol: source.patrol ? shiftPatrol(source.patrol, dx, dy) : null,
                     rules: source.rules ?? Object.freeze([]),
+                    jammer: source.jammer ?? null,
                     level: landmarks.length
                 });
             });
             for (const encounter of landmarkEnemySpawns) {
-                if (!encounter.accessModuleId) continue;
-                accessModules.push(
-                    freezeValue({
-                        id: encounter.accessModuleId,
-                        sectorId: sectorDefinition.id,
-                        landmarkId: landmarkDefinition.id,
-                        encounterId: encounter.encounterId,
-                        position: encounter.position
+                registerAccessModuleSource(accessModuleById, {
+                    id: encounter.accessModuleId,
+                    sectorId: sectorDefinition.id,
+                    landmarkId: landmarkDefinition.id,
+                    position: encounter.position,
+                    source: freezeValue({
+                        kind: ACCESS_MODULE_SOURCE_KIND.ENEMY_DEFEAT,
+                        encounterId: encounter.encounterId
                     })
-                );
+                });
             }
             const landmarkSurfaces = localWorld.surfaces
                 .filter(({ kind }) => AREA_BOUNDARY_KIND_LOOKUP[kind] !== true)
-                .map((surface) => shiftSurface(surface, dx, dy, landmarkDefinition, area.id));
+                .map((surface) => shiftSurface(surface, dx, dy, landmarkDefinition, area.id, objectiveIdBySourceId));
             const landmarkWingSurfaces = cityWingSurfaces({
                 landmark: landmarkDefinition,
                 coreBounds,
@@ -580,6 +658,18 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 .map((object) =>
                     shiftObject(object, dx, dy, landmarkDefinition, objectiveIdBySourceId, outboundRouteId)
                 );
+            for (const objective of landmarkObjectives) {
+                registerAccessModuleSource(accessModuleById, {
+                    id: objective.accessModuleId,
+                    sectorId: sectorDefinition.id,
+                    landmarkId: landmarkDefinition.id,
+                    position: accessSourcePosition(objective, landmarkObjects),
+                    source: freezeValue({
+                        kind: ACCESS_MODULE_SOURCE_KIND.OBJECTIVE_COMPLETION,
+                        objectiveId: objective.id
+                    })
+                });
+            }
             const landmarkRoute = localWorld.route.map((point) =>
                 withoutAreaAuthority(shiftPoint(point, dx, dy), {
                     landmarkId: landmarkDefinition.id,
@@ -596,6 +686,21 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             );
             const landmarkScannerGroups = localWorld.scannerGroups.map((group) =>
                 withoutAreaAuthority(group, {
+                    landmarkId: landmarkDefinition.id,
+                    stageId: landmarkDefinition.stageId
+                })
+            );
+            const landmarkJammerGroups = (localWorld.jammerGroups ?? []).map((group) =>
+                freezeValue({
+                    ...group,
+                    id: group.id.startsWith(`${area.id}:`) ? group.id : `${area.id}:${group.id}`,
+                    sourceObjectId:
+                        landmarkEnemySpawns[
+                            sourceEnemySpawns.findIndex(({ objectId }) => objectId === group.sourceObjectId)
+                        ]?.objectId ?? group.sourceObjectId,
+                    eligibleSurfaceIds: group.eligibleSurfaceIds.map((surfaceId) =>
+                        surfaceId.startsWith(`${area.id}:`) ? surfaceId : `${area.id}:${surfaceId}`
+                    ),
                     landmarkId: landmarkDefinition.id,
                     stageId: landmarkDefinition.stageId
                 })
@@ -617,7 +722,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 id: landmarkDefinition.id,
                 order: landmarks.length + 1,
                 sectorId: sectorDefinition.id,
-                sectorOrder: sectorIndex + 1,
+                sectorOrder: sectorDefinition.order,
                 landmarkOrder: landmarkIndex + 1,
                 areaId: area.id,
                 stageId: landmarkDefinition.stageId,
@@ -639,13 +744,18 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 routes: area.routes,
                 cameraZones: area.cameraZones,
                 cueIds: area.cueIds,
+                contentBoundaryId: landmarkDefinition.contentBoundaryId,
+                contentBoundaryRequiredObjectiveIds: landmarkDefinition.contentBoundaryRequiredObjectiveIds,
                 outboundRouteId
             });
 
-            if (previousLandmark) {
+            if (previousLandmark && !isAuthoredRuntimeContentBoundary(previousLandmark.stageId)) {
                 const lockId = routeId(previousLandmark.id, runtimeLandmark.id);
                 const surfaceId = `${lockId}:surface`;
                 const sectorTransition = previousLandmark.sectorId !== runtimeLandmark.sectorId;
+                const sourceSectorDefinition = authoredSectorCatalog.sectors.find(
+                    ({ id }) => id === previousLandmark.sectorId
+                );
                 const connectorBridge = connectorSurface(
                     surfaceId,
                     previousLandmark.id,
@@ -671,7 +781,9 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                         targetLandmarkId: runtimeLandmark.id,
                         connectorId: connector.id,
                         requiredObjectiveIds: previousOutboundObjectiveIds,
-                        ...(connector.sectorTransition ? { requiredAccessModuleCount: ACCESS_MODULES_PER_SECTOR } : {}),
+                        ...(connector.sectorTransition
+                            ? { requiredAccessModuleCount: sourceSectorDefinition.accessModuleRequirement }
+                            : {}),
                         sectorTransition: connector.sectorTransition
                     })
                 );
@@ -685,6 +797,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             enemySpawns.push(...landmarkEnemySpawns);
             windZones.push(...landmarkWindZones);
             scannerGroups.push(...landmarkScannerGroups);
+            jammerGroups.push(...landmarkJammerGroups);
             respawnAnchors.push(landmarkRespawnAnchor);
             landmarks.push(runtimeLandmark);
             sectorLandmarks.push(runtimeLandmark);
@@ -707,7 +820,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         if (sectorContentWidth > SEAMLESS_SECTOR_RUNTIME_WIDTH) {
             throw new Error(`${sectorDefinition.id} exceeds the seamless Sector width`);
         }
-        const sectorHeightLimit = SEAMLESS_SECTOR_RUNTIME_HEIGHT_BUDGET_BY_ID[sectorDefinition.id];
+        const sectorHeightLimit = sectorHeightBudgetById[sectorDefinition.id];
         if (!Number.isFinite(sectorHeightLimit)) {
             throw new Error(`${sectorDefinition.id} has no seamless Sector height limit`);
         }
@@ -724,7 +837,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         sectors.push(
             freezeValue({
                 id: sectorDefinition.id,
-                order: sectorIndex + 1,
+                order: sectorDefinition.order,
                 width: SEAMLESS_SECTOR_RUNTIME_WIDTH,
                 origin: { x: 0, y: sectorWorldOriginY },
                 localBounds: {
@@ -739,26 +852,30 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 landmarkIds: sectorLandmarks.map(({ id }) => id),
                 entryLandmarkId: firstLandmark.id,
                 exitLandmarkId: lastLandmark.id,
-                accessModuleIds: accessModules
+                accessModuleIds: Object.values(accessModuleById)
                     .filter(({ sectorId }) => sectorId === sectorDefinition.id)
                     .map(({ id }) => id),
-                accessModuleRequirement: ACCESS_MODULES_PER_SECTOR
+                accessModuleRequirement: sectorDefinition.accessModuleRequirement,
+                contentBoundaryStageId: sectorDefinition.contentBoundaryStageId
             })
         );
         const nextSectorDefinition = authoredSectorCatalog.sectors[sectorIndex + 1];
         if (nextSectorDefinition) {
             const rise = interSectorRise(interSectorRiseById, sectorDefinition.id, nextSectorDefinition.id);
-            sectorTransitions.push(
-                freezeValue({
-                    id: sectorTransitionId(sectorDefinition.id, nextSectorDefinition.id),
-                    sourceSectorId: sectorDefinition.id,
-                    targetSectorId: nextSectorDefinition.id,
-                    sourceExit: lastLandmark.exit,
-                    targetOrigin: { x: 0, y: lastLandmark.exit.y - rise },
-                    rise
-                })
-            );
-            sectorWorldOriginY = lastLandmark.exit.y - rise;
+            if (!isAuthoredRuntimeContentBoundary(lastLandmark.stageId)) {
+                sectorTransitions.push(
+                    freezeValue({
+                        id: sectorTransitionId(sectorDefinition.id, nextSectorDefinition.id),
+                        sourceSectorId: sectorDefinition.id,
+                        targetSectorId: nextSectorDefinition.id,
+                        sourceExit: lastLandmark.exit,
+                        targetOrigin: { x: 0, y: lastLandmark.exit.y - rise },
+                        rise
+                    })
+                );
+            }
+            sectorWorldOriginY =
+                lastLandmark.exit.y - rise - (lastLandmark.contentBoundaryId ? CONTENT_BOUNDARY_ISOLATION_GAP : 0);
         }
     }
 
@@ -801,6 +918,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         }
     }
 
+    const accessModules = Object.freeze(Object.values(accessModuleById).map((module) => freezeValue(module)));
     const finalLandmark = landmarks.at(-1);
     return freezeValue({
         seed,
@@ -828,6 +946,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
         objectives,
         gates: [],
         windZones,
-        scannerGroups
+        scannerGroups,
+        jammerGroups
     });
 }

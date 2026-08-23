@@ -38,7 +38,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-4:s0-entry"
     },
     {
       "beatId": "s1-artillery-a",
@@ -57,7 +58,8 @@
           "type": "systemText",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-4:s1-artillery-a"
     },
     {
       "beatId": "s2-riser-turn",
@@ -76,7 +78,8 @@
           "type": "systemText",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-4:s2-riser-turn"
     },
     {
       "beatId": "s3-artillery-b",
@@ -95,7 +98,8 @@
           "type": "systemText",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-4:s3-artillery-b"
     },
     {
       "beatId": "s4-capacity-record",
@@ -127,7 +131,8 @@
             "minDelaySeconds": 2.2
           }
         }
-      ]
+      ],
+      "dedupeToken": "5-4:s4-capacity-record"
     },
     {
       "beatId": "s5-exit",
@@ -149,7 +154,8 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "dedupeToken": "5-4:s5-exit"
     }
   ],
   "validation": [

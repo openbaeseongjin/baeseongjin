@@ -2,7 +2,19 @@ import { compileDirectionAuthoring } from "./DirectionDefinition.js";
 
 export const DEFAULT_DIRECTION_AUTHORING_URLS = Object.freeze([
     new URL("../../../docs/bsh/scenario/1/1-1/DIRECTION-SPEC.json", import.meta.url),
-    new URL("../../../docs/bsh/scenario/1/1-2/DIRECTION-SPEC.json", import.meta.url)
+    new URL("../../../docs/bsh/scenario/1/1-2/DIRECTION-SPEC.json", import.meta.url),
+    ...Array.from(
+        { length: 8 },
+        (_, index) => new URL(`../../../docs/bsh/scenario/4/4-${index + 1}/DIRECTION-SPEC.json`, import.meta.url)
+    ),
+    ...Array.from(
+        { length: 8 },
+        (_, index) => new URL(`../../../docs/bsh/scenario/5/5-${index + 1}/DIRECTION-SPEC.json`, import.meta.url)
+    ),
+    ...Array.from(
+        { length: 8 },
+        (_, index) => new URL(`../../../docs/bsh/scenario/6/6-${index + 1}/DIRECTION-SPEC.json`, import.meta.url)
+    )
 ]);
 
 export async function loadDirectionAuthoring(url, { fetcher = globalThis.fetch } = {}) {

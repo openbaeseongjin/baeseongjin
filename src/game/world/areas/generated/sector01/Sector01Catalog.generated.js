@@ -13,6 +13,7 @@ import { GENERATED_AREA as STAGE_1_8 } from "./Sector01Stage08.generated.js";
 // JSON ordering and formatting are deterministic generator output.
 // prettier-ignore
 const MANIFEST = {
+  "accessModuleRequirement": 3,
   "catalogId": "sector-01-authored-mock",
   "catalogOutputPath": "src/game/world/areas/generated/sector01/Sector01Catalog.generated.js",
   "catalogRevision": "sector-01-scenarios-rev3-v3-v2-stage01-stage07",
@@ -109,5 +110,7 @@ export const GENERATED_AREAS = Object.freeze([
 export const GENERATED_AREA_CATALOG = defineAreaCatalog({
     id: GENERATED_AREA_CATALOG_MANIFEST.catalogId,
     revision: GENERATED_AREA_CATALOG_MANIFEST.catalogRevision,
+    accessModuleRequirement: GENERATED_AREA_CATALOG_MANIFEST.accessModuleRequirement,
+    contentBoundaryStageId: GENERATED_AREA_CATALOG_MANIFEST.contentBoundaryStageId ?? null,
     areas: GENERATED_AREAS
 });

@@ -1,6 +1,6 @@
 # ONE ROPE — SECTOR 04-5 AMENITY ATRIUM — REV1.0
 
-Status: **DESIGN LOCKED / RUNTIME NOT IMPLEMENTED**<br>
+Status: **RUNTIME GENERATED / PLAYABLE**<br>
 Baseline audit: `3c9f661bba58af6f7351e00754c12aef86575a12`
 
 ## 1. Stage identity

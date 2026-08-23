@@ -9,6 +9,11 @@ export const PREVIEW_SECTOR_WIDTH_RANGE = Object.freeze({
     max: 4800
 });
 
+export const ACCESS_MODULE_SOURCE_KIND = Object.freeze({
+    ENEMY_DEFEAT: "enemy-defeat",
+    OBJECTIVE_COMPLETION: "objective-completion"
+});
+
 export function canonicalSectorId(sectorNumber) {
     return `sector-${String(sectorNumber).padStart(2, "0")}`;
 }
@@ -70,7 +75,10 @@ export function sectorObjective({
     requiredObjectiveIds = [],
     completionDelaySeconds,
     sourceObjectId,
-    stageId
+    stageId,
+    accessModuleId,
+    sources,
+    requiredCount
 } = {}) {
     return freezeValue({
         id,
@@ -79,6 +87,9 @@ export function sectorObjective({
         ...(bounds ? { bounds } : {}),
         ...(completionDelaySeconds !== undefined ? { completionDelaySeconds } : {}),
         ...(sourceObjectId ? { sourceObjectId } : {}),
+        ...(accessModuleId ? { accessModuleId } : {}),
+        ...(sources ? { sources } : {}),
+        ...(requiredCount !== undefined ? { requiredCount } : {}),
         ...(stageId ? { stageId } : {})
     });
 }
@@ -93,6 +104,8 @@ export function landmark({
     subregionBounds: previewBounds,
     entry,
     exit,
+    contentBoundaryId = null,
+    contentBoundaryRequiredObjectiveIds = [],
     encounters = [],
     objectives = []
 } = {}) {
@@ -106,17 +119,30 @@ export function landmark({
         subregionBounds: previewBounds,
         entry,
         exit,
+        contentBoundaryId,
+        contentBoundaryRequiredObjectiveIds,
         encounters,
         objectives
     });
 }
 
-export function defineSector({ id, order, width, runtimePreview = false, sectorEntry: entry, landmarks = [] } = {}) {
+export function defineSector({
+    id,
+    order,
+    width,
+    runtimePreview = false,
+    accessModuleRequirement = 0,
+    contentBoundaryStageId = null,
+    sectorEntry: entry,
+    landmarks = []
+} = {}) {
     return freezeValue({
         id,
         order,
         width,
         runtimePreview,
+        accessModuleRequirement,
+        contentBoundaryStageId,
         sectorEntry: entry,
         landmarks
     });

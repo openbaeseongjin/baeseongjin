@@ -1,6 +1,6 @@
 {
   "schemaVersion": "area-spec-v2",
-  "authoringMode": "scenario",
+  "authoringMode": "runtime",
   "stage": {
     "id": "4-3",
     "sector": 4,
@@ -43,11 +43,11 @@
       "y": -544
     },
     "exit": {
-      "id": "sector-04-03:scenario-exit",
+      "id": "sector-04-03:exit",
       "x": 2060,
       "y": -2060
     },
-    "nextAreaId": null,
+    "nextAreaId": "sector-04-04",
     "surfaces": [
       {
         "id": "entry-terrace",
@@ -652,16 +652,71 @@
         "sourceId": "EXIT"
       }
     ],
-    "recoveryPoints": [],
+    "recoveryPoints": [
+      { "id": "sector-04-03:lower-service-recovery", "x": 577, "y": -554, "maxRetrySeconds": 5 },
+      { "id": "sector-04-03:utility-riser-recovery", "x": -960, "y": -1216, "maxRetrySeconds": 5 }
+    ],
     "checkpoints": [],
-    "objects": [],
-    "objectives": [],
+    "objects": [
+      {
+        "id": "sector-04-03:residential-skybridge-pursuit",
+        "kind": "patrol-drone",
+        "enemyType": "pursuit-drone-t1",
+        "position": { "x": -1280, "y": -720 },
+        "coordinateAnchor": "center",
+        "activation": { "x": -1920, "y": -1664, "width": 3200, "height": 1280 }
+      },
+      {
+        "id": "sector-04-03:service-relay-b03-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 577, "y": -554 },
+        "coordinateAnchor": "center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-04-03:service-relay-b03"
+      },
+      {
+        "id": "sector-04-03:exit-panel",
+        "kind": "gate-panel",
+        "presentationId": "world-object:gate-panel",
+        "position": { "x": 1948, "y": -2028 },
+        "coordinateAnchor": "bottom-center",
+        "interactionRadius": 72,
+        "objectiveId": "sector-04-03:exit-panel-engaged",
+        "gateId": "sector-04-03:gate"
+      }
+    ],
+    "objectives": [
+      {
+        "id": "sector-04-03:service-relay-b03",
+        "type": "interact",
+        "sourceObjectId": "sector-04-03:service-relay-b03-panel",
+        "completionDelaySeconds": 1.2
+      },
+      {
+        "id": "sector-04-03:exit-panel-engaged",
+        "type": "interact",
+        "sourceObjectId": "sector-04-03:exit-panel",
+        "requiredObjectiveIds": ["sector-04-03:service-relay-b03"]
+      }
+    ],
     "windZones": [],
     "scannerGroups": [],
     "storyTriggers": [],
     "routes": [],
-    "cameraZones": [],
-    "cueIds": []
+    "cameraZones": [
+      { "id": "block-c-offline-read", "minY": -768, "maxY": 0, "desktopZoom": 0.84, "mobileZoom": 0.64 },
+      { "id": "relay-service-run", "minY": -1280, "maxY": -768, "desktopZoom": 0.86, "mobileZoom": 0.65 },
+      { "id": "utility-riser", "minY": -1792, "maxY": -1280, "desktopZoom": 0.88, "mobileZoom": 0.66 },
+      { "id": "block-c-reentry", "minY": -2432, "maxY": -1792, "desktopZoom": 0.94, "mobileZoom": 0.7 }
+    ],
+    "cueIds": [],
+    "gate": {
+      "id": "sector-04-03:gate",
+      "nextAreaId": "sector-04-04",
+      "requiredObjectiveIds": ["sector-04-03:exit-panel-engaged"],
+      "trigger": { "x": 2012, "y": -2156, "width": 96, "height": 128 }
+    }
   },
   "anchors": [
     {
@@ -1207,7 +1262,7 @@
   ],
   "behaviorRefs": [],
   "scenario": {
-    "status": "scenario-only",
+    "status": "runtime-generated",
     "boundsProvenance": "authored"
   }
 }

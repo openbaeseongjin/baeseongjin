@@ -1,7 +1,7 @@
 {
+  "$schema": "../../direction-spec.schema.json",
   "schemaVersion": "direction-spec-v1",
   "directionStatus": "DESIGN LOCKED",
-  "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
   "stage": {
     "sector": 6,
     "stage": 1,
@@ -9,10 +9,14 @@
     "name": "SKYBREAK ACCESS",
     "id": "6-1"
   },
-  "languagePolicy": {
-    "playerDialogue": "ko",
-    "directionNotes": "ko-first",
-    "diegeticSystemText": "en-allowed"
+  "baselineCommit": "1009af0ef14ec9f64af891833156e6af8a1abdc1",
+  "globalControl": {
+    "worldPause": false,
+    "movement": true,
+    "aim": true,
+    "rope": true,
+    "action": true,
+    "interaction": true
   },
   "beats": [
     {
@@ -39,7 +43,11 @@
             "text": "…이제 진짜 밖이네."
           }
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-1:roof-hatch"
     },
     {
       "beatId": "skybreak-drop",
@@ -54,7 +62,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-1:skybreak-drop"
     },
     {
       "beatId": "lower-island",
@@ -69,7 +81,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-1:lower-island"
     },
     {
       "beatId": "mast",
@@ -84,7 +100,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-1:mast"
     },
     {
       "beatId": "crown-exit",
@@ -106,14 +126,11 @@
           "type": "dialogue",
           "action": "none"
         }
-      ]
+      ],
+      "status": "DESIGN LOCKED",
+      "scope": "local-player",
+      "replayPolicy": "once-per-stage-attempt",
+      "dedupeToken": "6-1:crown-exit"
     }
-  ],
-  "validation": [
-    "Skybreak Drop is visually downward/outward.",
-    "Lower Sky Island visible before drop commitment.",
-    "Recovery Shadow never becomes mandatory shortcut.",
-    "Freestanding Mast has no large enclosing wall.",
-    "No Wind force in 6-1."
   ]
 }

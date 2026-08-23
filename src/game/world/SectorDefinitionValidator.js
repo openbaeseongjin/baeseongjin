@@ -1,8 +1,6 @@
 import { PREVIEW_SECTOR_WIDTH_RANGE } from "./sectors/SectorDefinition.js";
 import { SWARM_MEMBER_COUNT } from "../EnemyType.js";
 
-const ACCESS_MODULES_PER_SECTOR = 3;
-
 function issue(code, sectorId = null, details = {}) {
     return Object.freeze({ code, ...(sectorId ? { sectorId } : {}), ...details });
 }
@@ -118,6 +116,13 @@ export function validateSectorCatalog(catalog) {
         ) {
             issues.push(issue("sector-width-range", sector.id));
         }
+        if (!Number.isSafeInteger(sector.accessModuleRequirement) || sector.accessModuleRequirement < 0) {
+            issues.push(
+                issue("access-module-requirement", sector.id, {
+                    actual: sector.accessModuleRequirement ?? null
+                })
+            );
+        }
 
         const sectorLandmarkIds = new Set();
         const sectorAccessModuleIds = new Set();
@@ -175,8 +180,34 @@ export function validateSectorCatalog(catalog) {
                     issues.push(issue("objective-id-duplicate", sector.id, { id: objective.id }));
                 }
                 objectiveIds.add(objective.id);
+                if (Object.hasOwn(objective, "accessModuleId")) {
+                    if (!isNonEmptyString(objective.accessModuleId)) {
+                        issues.push(issue("access-module-id-invalid", sector.id, { objectiveId: objective.id }));
+                    } else {
+                        accessModuleIds.add(objective.accessModuleId);
+                        sectorAccessModuleIds.add(objective.accessModuleId);
+                    }
+                }
                 if (objective.bounds && !boundsInsideLocalBounds(landmark.localBounds, objective.bounds)) {
                     issues.push(issue("objective-bounds", sector.id, { id: objective.id, landmarkId: landmark.id }));
+                }
+                if (objective.type === "state-check") {
+                    const sources = objective.sources;
+                    if (
+                        !Array.isArray(sources) ||
+                        sources.length === 0 ||
+                        sources.some((id) => !isNonEmptyString(id)) ||
+                        new Set(sources).size !== sources.length
+                    ) {
+                        issues.push(issue("objective-state-check-sources", sector.id, { id: objective.id }));
+                    }
+                    if (
+                        !Number.isSafeInteger(objective.requiredCount) ||
+                        objective.requiredCount <= 0 ||
+                        objective.requiredCount > (sources?.length ?? 0)
+                    ) {
+                        issues.push(issue("objective-state-check-requirement", sector.id, { id: objective.id }));
+                    }
                 }
             }
 
@@ -227,17 +258,10 @@ export function validateSectorCatalog(catalog) {
                 }
                 encounterIds.add(encounter.encounterId);
                 slotIds.add(encounter.slotId);
-                if (encounter.accessModuleId) {
+                if (Object.hasOwn(encounter, "accessModuleId")) {
                     if (!isNonEmptyString(encounter.accessModuleId)) {
                         issues.push(
                             issue("access-module-id-invalid", sector.id, { encounterId: encounter.encounterId })
-                        );
-                    } else if (accessModuleIds.has(encounter.accessModuleId)) {
-                        issues.push(
-                            issue("access-module-id-duplicate", sector.id, {
-                                encounterId: encounter.encounterId,
-                                accessModuleId: encounter.accessModuleId
-                            })
                         );
                     } else {
                         accessModuleIds.add(encounter.accessModuleId);
@@ -263,10 +287,14 @@ export function validateSectorCatalog(catalog) {
             }
         }
 
-        if (sector.runtimePreview && sectorAccessModuleIds.size !== ACCESS_MODULES_PER_SECTOR) {
+        if (
+            sector.runtimePreview &&
+            Number.isSafeInteger(sector.accessModuleRequirement) &&
+            sectorAccessModuleIds.size < sector.accessModuleRequirement
+        ) {
             issues.push(
                 issue("access-module-count", sector.id, {
-                    expected: ACCESS_MODULES_PER_SECTOR,
+                    required: sector.accessModuleRequirement,
                     actual: sectorAccessModuleIds.size
                 })
             );

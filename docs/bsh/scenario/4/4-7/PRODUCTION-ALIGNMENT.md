@@ -45,7 +45,7 @@ Reuse existing Runtime primitives whenever possible:
 
 ## Runtime dependency: Resident Security Override C
 
-The new Sector04 A/B/C override progression is later planning authority and is not represented by the current legacy 4-7.
+Sector04 A/B/C override progression is implemented; 4-7 owns optional source C.
 
 Implementation rule:
 
@@ -57,7 +57,7 @@ Implementation rule:
 
 ## Downstream boundary
 
-Current 4-8 is still legacy `TRANSIT CONTROL TRUNK`.
+Current 4-8 is the generated Protected Ascent Gatehouse and owns the 2-of-3 quorum check.
 
 This package may preserve `nextAreaId: sector-04-08` for continuity, but it does **not** authorize:
 - rewriting 4-8,
