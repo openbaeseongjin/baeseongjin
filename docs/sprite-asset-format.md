@@ -174,16 +174,18 @@ manifest에는 collider·hitbox·hurtbox, 피해량·무적 시간, 물리 속�
 
 ### 런타임 로딩
 
-`loadPlayerSpriteManifest(manifestUrl)`는 JSON을 읽고 상대 PNG 경로를 manifest URL 기준으로 해석해 불변 `PlayerSpriteDefinition`으로 변환한다. 그 definition을 `SpriteSceneRenderer`에 주입하면 renderer가 모든 atlas를 함께 준비하고, 하나라도 실패하면 기존 polygon scene fallback을 사용한다.
+`loadPlayerSpriteManifest(manifestUrl)`는 JSON을 읽고 상대 PNG 경로를 manifest URL 기준으로 해석해 불변 `PlayerSpriteDefinition`으로 변환한다. bootstrap은 Player·Enemy·Environment definition으로 `SpriteSceneResourceBundle` 하나를 만들고 모든 atlas의 load·decode·실제 크기 검증이 terminal 상태가 될 때까지 startup loading을 유지한다. 정상 gameplay 첫 frame에는 pending fallback을 노출하지 않는다. Player atlas가 실제로 실패하면 local/remote Player renderer만 polygon body로 복구하며 준비된 Enemy·Environment 표현은 유지한다. 같은 bundle은 싱글·멀티·디버그 재시작에서 재사용한다.
 
 ```js
-import { SpriteSceneRenderer } from "/src/render/SpriteSceneRenderer.js";
+import { SpriteSceneRenderer, SpriteSceneResourceBundle } from "/src/render/SpriteSceneRenderer.js";
 import { loadPlayerSpriteManifest } from "/src/render/sprites/PlayerSpriteManifest.js";
 
 const definition = await loadPlayerSpriteManifest(
     new URL("./assets/runtime/characters/player-main/sprite-manifest.json", import.meta.url)
 );
-const renderer = new SpriteSceneRenderer({ playerDefinition: definition });
+const resources = new SpriteSceneResourceBundle({ playerDefinition: definition });
+await resources.prepare();
+const renderer = new SpriteSceneRenderer({ resources });
 ```
 
 ## 도구별 원본 수령 형식

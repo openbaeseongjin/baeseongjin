@@ -126,10 +126,12 @@ Authored backdrop은 `imageSmoothingEnabled = false`를 유지하고 layer의 de
 
 atlas 준비와 실패는 backdrop, terrain, decoration이 각각 판단한다.
 
+bootstrap의 `SpriteSceneResourceBundle.prepare()`는 선택된 모든 Environment atlas의 load·decode·크기 검증을 startup loading 안에서 끝낸다. 정상 gameplay은 environment asset이 terminal ready/failed인 뒤에만 시작하므로 pending polygon 표현이 첫 frame에 보였다가 교체되는 흐름을 허용하지 않는다. 준비된 asset set은 싱글·멀티·디버그 재시작이 공유한다.
+
 - backdrop atlas만 실패하면 기존 polygon backdrop만 대신 그리고 terrain·decoration은 계속 도트로 그린다.
 - terrain atlas만 실패하면 기존 collision geometry만 대신 그린다.
 - decoration atlas만 실패하면 장식만 생략한다. 충돌이나 다른 환경 component에는 영향이 없다.
-- 아직 로딩 중인 `pending`은 실패로 보고하지 않는다. 실제 load/크기 검증 실패로 전환할 때 한 번만 console 경고를 남긴다.
+- 아직 로딩 중인 `pending`은 실패로 보고하지 않으며 startup loading이 계속 소유한다. 실제 load·decode·크기 검증 실패로 전환할 때 한 번만 console 경고를 남긴다.
 - 디버그 수치 표시는 실패한 component와 관련 atlas ID를 표시한다.
 
 전체 scene이나 캐릭터 renderer로 fallback하는 것은 환경 component 실패 규칙이 아니다. 이 경계를 바꾸면 partial-failure 테스트와 실제 화면 진단을 함께 갱신한다.

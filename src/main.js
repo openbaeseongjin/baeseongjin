@@ -12,7 +12,8 @@ import { setupInstallPrompt } from "./pwa/InstallPrompt.js";
 import { setupServiceWorkerUpdater } from "./pwa/ServiceWorkerUpdater.js";
 import { StartupUpdateLoadingScreen } from "./pwa/StartupUpdateLoadingScreen.js";
 import { setupPlaytestDiagnostics } from "./game/metrics/PlaytestDiagnostics.js";
-import { createGameRenderer, resolveRendererProfile } from "./render/GameRendererFactory.js";
+import { createGameRenderer, DEFAULT_RENDERER_PROFILE, resolveRendererProfile } from "./render/GameRendererFactory.js";
+import { SpriteSceneResourceBundle } from "./render/SpriteSceneRenderer.js";
 import { AudioSettings } from "./audio/AudioSettings.js";
 import { createAudioDefinitionLoader } from "./audio/AudioCatalog.js";
 import { BrowserAudioAdapter } from "./audio/BrowserAudioAdapter.js";
@@ -41,6 +42,7 @@ let enemyDefinition = null;
 let enemyDefinitionsBySectorId = Object.freeze({});
 let authoredAreaEnvironmentDefinitions = Object.freeze({});
 let directionDefinitions = Object.freeze([]);
+let spriteSceneResources = null;
 
 let app = null;
 let hudVisible = true;
@@ -181,6 +183,14 @@ function updateDiagnostics(snapshot) {
     diagnostics.update({ ...snapshot, audioDiagnostics: audioHost?.snapshot() ?? null });
 }
 
+function createRuntimeGameRenderer() {
+    return createGameRenderer({
+        canvas,
+        profile: rendererProfile,
+        sceneRendererOptions: spriteSceneResources ? { resources: spriteSceneResources } : {}
+    });
+}
+
 async function refreshMultiplayerAvailability() {
     const sequence = ++multiplayerProbeSequence;
     const serverUrl = configuredMultiplayerServer();
@@ -200,15 +210,7 @@ function startMultiplayerAvailabilityMonitor() {
 function createSingleGameApp(debug) {
     return new GameApp({
         canvas,
-        renderer: createGameRenderer({
-            canvas,
-            profile: rendererProfile,
-            sceneRendererOptions: {
-                playerDefinition,
-                enemyDefinitionsBySectorId,
-                authoredAreaEnvironmentDefinitions
-            }
-        }),
+        renderer: createRuntimeGameRenderer(),
         audioBindings,
         playerDefinition,
         enemyDefinition,
@@ -287,15 +289,7 @@ async function launch() {
                 const debug = debugSettings.snapshot();
                 app = new MultiplayerGameApp({
                     canvas,
-                    renderer: createGameRenderer({
-                        canvas,
-                        profile: rendererProfile,
-                        sceneRendererOptions: {
-                            playerDefinition,
-                            enemyDefinitionsBySectorId,
-                            authoredAreaEnvironmentDefinitions
-                        }
-                    }),
+                    renderer: createRuntimeGameRenderer(),
                     authority,
                     audioBindings,
                     playerDefinition,
@@ -349,6 +343,14 @@ async function bootstrap() {
         ]);
     enemyDefinition = enemyDefinitionsBySectorId[DEFAULT_ENEMY_SPRITE_SECTOR_ID] ?? null;
     debugEnemyTrainingControls.setDefinition(enemyDefinition);
+    if (rendererProfile === DEFAULT_RENDERER_PROFILE) {
+        spriteSceneResources = new SpriteSceneResourceBundle({
+            playerDefinition,
+            enemyDefinitionsBySectorId,
+            authoredAreaEnvironmentDefinitions
+        });
+        await spriteSceneResources.prepare();
+    }
     if (pageClosing) return;
     await refreshMultiplayerAvailability();
     startMultiplayerAvailabilityMonitor();

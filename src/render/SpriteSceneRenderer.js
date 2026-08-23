@@ -29,7 +29,7 @@ import {
 } from "./sprites/SpriteActorRenderers.js";
 import { SpriteImageAssetSet } from "./sprites/SpriteImageAsset.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "./sprites/PlayerSpriteCatalog.js";
-import { PolygonSceneRenderer } from "./PolygonSceneRenderer.js";
+import { PolygonLocalPlayerRenderer, PolygonRemotePlayerRenderer } from "./polygon/PolygonActorRenderers.js";
 import { DEFAULT_ENVIRONMENT_DEFINITION } from "./environment/EnvironmentCatalog.js";
 import { EnvironmentAssetSet } from "./environment/EnvironmentAssetSet.js";
 import { EnvironmentRendererComposer } from "./environment/EnvironmentRendererComposer.js";
@@ -38,6 +38,79 @@ import { ActorStatusRenderer, ElectrifiedStatusRenderer } from "./ActorStatusPre
 import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
 import { DEFAULT_ENEMY_SPRITE_SECTOR_ID } from "./sprites/EnemySpriteCatalog.js";
 import { EnemySpritePackageCatalog } from "./sprites/EnemySpritePackageCatalog.js";
+
+function authoredEnvironmentAtlases(authoredAreaEnvironmentDefinitions) {
+    return Object.fromEntries(
+        Object.values(authoredAreaEnvironmentDefinitions).flatMap((definition) => Object.entries(definition.atlases))
+    );
+}
+
+export class SpriteSceneResourceBundle {
+    constructor({
+        playerDefinition = DEFAULT_PLAYER_SPRITE_DEFINITION,
+        playerAssets = null,
+        enemyDefinition = null,
+        enemyAssets = null,
+        enemyDefinitionsBySectorId = null,
+        enemyAssetsBySectorId = null,
+        enemySpritePackages = null,
+        environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
+        environmentAssets = null,
+        authoredAreaEnvironmentDefinitions = Object.freeze({})
+    } = {}) {
+        this.playerDefinition = playerDefinition;
+        this.playerAssets = playerAssets ?? new SpriteImageAssetSet({ atlases: playerDefinition.atlases });
+        const resolvedEnemyDefinitions =
+            enemyDefinitionsBySectorId ??
+            (enemyDefinition
+                ? Object.freeze({ [DEFAULT_ENEMY_SPRITE_SECTOR_ID]: enemyDefinition })
+                : Object.freeze({}));
+        const resolvedEnemyAssets =
+            enemyAssetsBySectorId ??
+            (enemyAssets ? Object.freeze({ [DEFAULT_ENEMY_SPRITE_SECTOR_ID]: enemyAssets }) : Object.freeze({}));
+        this.enemySpritePackages =
+            enemySpritePackages ??
+            new EnemySpritePackageCatalog({
+                definitionsBySectorId: resolvedEnemyDefinitions,
+                defaultSectorId: DEFAULT_ENEMY_SPRITE_SECTOR_ID,
+                assetsBySectorId: resolvedEnemyAssets
+            });
+        this.environmentDefinition = environmentDefinition;
+        this.authoredAreaEnvironmentDefinitions = authoredAreaEnvironmentDefinitions;
+        this.environmentAssets =
+            environmentAssets ??
+            new EnvironmentAssetSet({
+                atlases: {
+                    ...environmentDefinition.atlases,
+                    ...authoredEnvironmentAtlases(authoredAreaEnvironmentDefinitions)
+                }
+            });
+    }
+
+    async prepare() {
+        await Promise.all([
+            this.playerAssets.prepare(),
+            this.enemySpritePackages.prepare(),
+            this.environmentAssets.prepare()
+        ]);
+        return this.snapshot();
+    }
+
+    snapshot() {
+        return Object.freeze({
+            player: this.playerAssets.status,
+            enemies: Object.freeze(
+                Object.fromEntries(
+                    Object.entries(this.enemySpritePackages.packagesBySectorId).map(([sectorId, spritePackage]) => [
+                        sectorId,
+                        spritePackage.assets.status
+                    ])
+                )
+            ),
+            environment: this.environmentAssets.status
+        });
+    }
+}
 
 export class SpriteAssetFallbackRenderer {
     constructor({ asset, spriteRenderer, polygonRenderer }) {
@@ -63,40 +136,35 @@ export class SpriteSceneRenderer {
         enemySpritePackages = null,
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
         environmentAssets = null,
-        authoredAreaEnvironmentDefinitions = Object.freeze({})
+        authoredAreaEnvironmentDefinitions = Object.freeze({}),
+        resources = null
     } = {}) {
         this.profile = "sprite";
-        this.playerDefinition = playerDefinition;
-        this.playerAssets = playerAssets ?? new SpriteImageAssetSet({ atlases: playerDefinition.atlases });
-        const resolvedEnemyDefinitions =
-            enemyDefinitionsBySectorId ??
-            (enemyDefinition
-                ? Object.freeze({ [DEFAULT_ENEMY_SPRITE_SECTOR_ID]: enemyDefinition })
-                : Object.freeze({}));
-        const resolvedEnemyAssets =
-            enemyAssetsBySectorId ??
-            (enemyAssets ? Object.freeze({ [DEFAULT_ENEMY_SPRITE_SECTOR_ID]: enemyAssets }) : Object.freeze({}));
-        this.enemySpritePackages =
-            enemySpritePackages ??
-            new EnemySpritePackageCatalog({
-                definitionsBySectorId: resolvedEnemyDefinitions,
-                defaultSectorId: DEFAULT_ENEMY_SPRITE_SECTOR_ID,
-                assetsBySectorId: resolvedEnemyAssets
+        if (resources !== null && !(resources instanceof SpriteSceneResourceBundle)) {
+            throw new Error("SpriteSceneRenderer resources must be a SpriteSceneResourceBundle");
+        }
+        this.resources =
+            resources ??
+            new SpriteSceneResourceBundle({
+                playerDefinition,
+                playerAssets,
+                enemyDefinition,
+                enemyAssets,
+                enemyDefinitionsBySectorId,
+                enemyAssetsBySectorId,
+                enemySpritePackages,
+                environmentDefinition,
+                environmentAssets,
+                authoredAreaEnvironmentDefinitions
             });
+        this.playerDefinition = this.resources.playerDefinition;
+        this.playerAssets = this.resources.playerAssets;
+        this.enemySpritePackages = this.resources.enemySpritePackages;
         this.enemyDefinition = this.enemySpritePackages.defaultDefinition;
         this.enemyAssets = this.enemySpritePackages.defaultAssets;
-        this.environmentDefinition = environmentDefinition;
-        this.authoredAreaEnvironmentDefinitions = authoredAreaEnvironmentDefinitions;
-        const authoredAreaEnvironmentAtlases = Object.fromEntries(
-            Object.values(authoredAreaEnvironmentDefinitions).flatMap((definition) =>
-                Object.entries(definition.atlases)
-            )
-        );
-        this.environmentAssets =
-            environmentAssets ??
-            new EnvironmentAssetSet({
-                atlases: { ...environmentDefinition.atlases, ...authoredAreaEnvironmentAtlases }
-            });
+        this.environmentDefinition = this.resources.environmentDefinition;
+        this.authoredAreaEnvironmentDefinitions = this.resources.authoredAreaEnvironmentDefinitions;
+        this.environmentAssets = this.resources.environmentAssets;
         this.environmentDiagnostics = null;
 
         const polygonBackdrop = new BackdropRenderer();
@@ -122,7 +190,14 @@ export class SpriteSceneRenderer {
             new RopeRenderer(remoteRopes),
             new RopeShotRenderer(localShots),
             new RopeShotRenderer(remoteShots),
-            new SpriteRemotePlayerRenderer({ assets: this.playerAssets, definition: playerDefinition }),
+            new SpriteAssetFallbackRenderer({
+                asset: this.playerAssets,
+                spriteRenderer: new SpriteRemotePlayerRenderer({
+                    assets: this.playerAssets,
+                    definition: this.playerDefinition
+                }),
+                polygonRenderer: new PolygonRemotePlayerRenderer()
+            }),
             new SwingRenderer(),
             new SpriteEnemyRenderer({ packageCatalog: this.enemySpritePackages }),
             new SpriteProjectileRenderer({
@@ -155,27 +230,27 @@ export class SpriteSceneRenderer {
             new CombatEffectRenderer(),
             new EventEffectRenderer(),
             new AttachmentCandidateRenderer(),
-            new SpriteLocalPlayerRenderer({ assets: this.playerAssets, definition: playerDefinition }),
+            new SpriteAssetFallbackRenderer({
+                asset: this.playerAssets,
+                spriteRenderer: new SpriteLocalPlayerRenderer({
+                    assets: this.playerAssets,
+                    definition: this.playerDefinition
+                }),
+                polygonRenderer: new PolygonLocalPlayerRenderer()
+            }),
             new ElectrifiedStatusRenderer(),
             new ActorStatusRenderer()
         ]);
 
-        const spriteComposition = new SceneRendererComposition({
+        this.composition = new SceneRendererComposition({
             profile: this.profile,
             renderers: [this.environmentComposer, actorRenderers]
         });
-
-        this.composition = new SceneRendererComposition({
-            profile: this.profile,
-            renderers: [
-                new SpriteAssetFallbackRenderer({
-                    asset: this.playerAssets,
-                    spriteRenderer: spriteComposition,
-                    polygonRenderer: new PolygonSceneRenderer()
-                })
-            ]
-        });
         this.renderers = this.composition.renderers;
+    }
+
+    prepare() {
+        return this.resources.prepare();
     }
 
     draw(args) {

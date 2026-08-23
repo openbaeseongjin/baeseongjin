@@ -1,53 +1,8 @@
-export class EnvironmentImageAsset {
-    constructor({ source, expectedSize = null, ImageClass = globalThis.Image } = {}) {
-        if (typeof source !== "string" || !source) throw new Error("EnvironmentImageAsset requires source");
-        if (
-            expectedSize !== null &&
-            (!Number.isInteger(expectedSize?.width) ||
-                !Number.isInteger(expectedSize?.height) ||
-                expectedSize.width <= 0 ||
-                expectedSize.height <= 0)
-        ) {
-            throw new Error("EnvironmentImageAsset expectedSize requires positive integer width and height");
-        }
-        this.source = source;
-        this.expectedSize = expectedSize ? Object.freeze({ ...expectedSize }) : null;
-        this.status = "pending";
-        this.image = null;
-        this.error = null;
-        if (typeof ImageClass !== "function") {
-            this.status = "failed";
-            this.error = new Error("Image constructor is unavailable");
-            return;
-        }
-        const image = new ImageClass();
-        image.addEventListener("load", () => {
-            const actualSize = {
-                width: image.naturalWidth ?? image.width,
-                height: image.naturalHeight ?? image.height
-            };
-            if (
-                this.expectedSize &&
-                (actualSize.width !== this.expectedSize.width || actualSize.height !== this.expectedSize.height)
-            ) {
-                this.fail(
-                    `Environment '${source}' is ${actualSize.width}x${actualSize.height}; expected ${this.expectedSize.width}x${this.expectedSize.height}`
-                );
-                return;
-            }
-            this.status = "ready";
-            this.image = image;
-        });
-        image.addEventListener("error", () => {
-            this.fail(`Failed to load environment '${source}'`);
-        });
-        image.src = source;
-    }
+import { ImageAsset } from "../assets/ImageAsset.js";
 
-    fail(message) {
-        this.status = "failed";
-        this.image = null;
-        this.error = new Error(message);
+export class EnvironmentImageAsset extends ImageAsset {
+    constructor({ source, expectedSize = null, ImageClass = globalThis.Image } = {}) {
+        super({ source, expectedSize, ImageClass, assetLabel: "Environment" });
     }
 }
 
@@ -79,6 +34,11 @@ export class EnvironmentAssetSet {
 
     get error() {
         return Object.values(this.assets).find((asset) => asset.error)?.error ?? null;
+    }
+
+    async prepare() {
+        await Promise.all(Object.values(this.assets).map((asset) => asset.prepare()));
+        return this.status;
     }
 
     imageFor(atlasId) {
