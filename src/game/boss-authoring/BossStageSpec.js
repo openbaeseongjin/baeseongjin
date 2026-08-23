@@ -1,6 +1,11 @@
 export const BOSS_STAGE_SPEC_VERSION = "boss-stage-spec-v2";
 export const BOSS_STAGE_SPEC_TYPE = "boss-stage";
 
+export const BOSS_ANCHOR_ROLE = Object.freeze({
+    ROUTE: "route",
+    SWING_ATTACK: "swing-attack"
+});
+
 export const BOSS_MECHANIC_TYPE = Object.freeze({
     FULL_CROSSBEAM_SWEEP: "full-crossbeam-sweep",
     DIRECTIONAL_BROKEN_BEAM_SWEEP: "directional-broken-beam-sweep",

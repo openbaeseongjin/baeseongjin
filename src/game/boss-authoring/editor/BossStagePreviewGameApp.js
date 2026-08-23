@@ -2,10 +2,22 @@ import { GameApp } from "../../GameApp.js";
 import { defineBossStage } from "../../boss/BossStageDefinition.js";
 import { resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../../config.js";
 import { LocalAuthority } from "../../runtime/LocalAuthority.js";
+import { PreviewFlightController } from "../../runtime/PreviewFlightController.js";
 import { GameSimulation } from "../../simulation/GameSimulation.js";
 import { createAuthoredSeamlessSectorRuntimeWorld } from "../../world/sectors/AuthoredSeamlessSectorRuntime.js";
 
-const BOSS_PREVIEW_VERTICAL_OFFSET_RATIO = 0.1;
+const BOSS_PREVIEW_DEBUG_WEAKPOINT_DAMAGE = 100;
+
+class BossPreviewAuthority extends LocalAuthority {
+    applyFlightMotion(position) {
+        this.simulation.applyOwnerMotion(this.playerId, {
+            ...this.ownerState(),
+            position,
+            velocity: { x: 0, y: 0 },
+            isGrounded: false
+        });
+    }
+}
 
 function requireBossStageSpec(spec) {
     if (spec?.specType !== "boss-stage" || typeof spec.id !== "string") {
@@ -21,16 +33,8 @@ function requirePreviewRevision(revision) {
     return String(revision);
 }
 
-function bossPreviewStartPosition(simulation, stage) {
-    const carriage = simulation
-        .bossStageSnapshot()
-        ?.presentation?.objects.find(({ kind, physicsBody }) => physicsBody === true || kind === "boss-carriage");
-    return Object.freeze({
-        x: carriage?.position.x ?? stage.presentationOrigin.x,
-        y:
-            (carriage?.position.y ?? stage.presentationOrigin.y) +
-            stage.bossCollider.height * BOSS_PREVIEW_VERTICAL_OFFSET_RATIO
-    });
+function bossPreviewStartPosition(stage) {
+    return Object.freeze({ x: stage.entry.x, y: stage.entry.y });
 }
 
 export class BossStagePreviewGameApp extends GameApp {
@@ -56,11 +60,11 @@ export class BossStagePreviewGameApp extends GameApp {
         const playerId = simulation.getPrimaryPlayerId();
         simulation.applyPortalTransition(
             playerId,
-            bossPreviewStartPosition(simulation, stage),
+            bossPreviewStartPosition(stage),
             simulation.getTick(),
             `${stage.id}:preview-entry`
         );
-        const authority = new LocalAuthority(simulation);
+        const authority = new BossPreviewAuthority(simulation);
         super({
             ...options,
             authority,
@@ -69,6 +73,8 @@ export class BossStagePreviewGameApp extends GameApp {
         });
         this.previewBossStageId = spec.id;
         this.previewRevision = previewRevision;
+        this.previewFlight = new PreviewFlightController();
+        this.debugWeakpointStrikeSequence = 0;
     }
 
     previewScope() {
@@ -85,5 +91,34 @@ export class BossStagePreviewGameApp extends GameApp {
     applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
         this.setMetricsVisible(metrics);
         return startAreaId === null;
+    }
+
+    setPreviewFlightEnabled(enabled) {
+        return this.previewFlight.setEnabled(enabled);
+    }
+
+    debugStrikeWeakpoint() {
+        const snapshot = this.authority.snapshot().bossStage;
+        const targetId = snapshot?.vulnerability?.targetId ?? null;
+        if (snapshot?.status !== "active" || snapshot.vulnerability?.active !== true || !targetId) {
+            return Object.freeze({ accepted: false, reason: "boss-preview-weakpoint-unavailable" });
+        }
+        this.debugWeakpointStrikeSequence += 1;
+        return this.authority.simulation.applyBossImpact({
+            impactId: `${this.previewBossStageId}:preview-weakpoint:${this.debugWeakpointStrikeSequence}`,
+            sourcePlayerId: this.authority.playerId,
+            baseDamage: BOSS_PREVIEW_DEBUG_WEAKPOINT_DAMAGE,
+            targetId
+        });
+    }
+
+    update(dt, input) {
+        if (!this.previewFlight.enabled) return super.update(dt, input);
+        const owner = this.authority.ownerState();
+        const stage = this.authority.simulation.world.bossStages?.find(({ id }) => id === this.previewBossStageId);
+        if (!stage) return super.update(dt, input);
+        const nextPosition = this.previewFlight.nextPosition(owner.position, stage.bounds, dt, input);
+        super.update(dt, this.previewFlight.neutralInput(input));
+        this.authority.applyFlightMotion(nextPosition);
     }
 }

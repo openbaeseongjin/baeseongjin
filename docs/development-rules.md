@@ -84,6 +84,11 @@
 
 ## 4. 객체와 책임 설계
 
+### Boss 본체 Polygon 계약
+
+- 큰 Boss 본체는 visual preset이 소유하는 정규화 polygon 하나를 Renderer와 Physics collider가 함께 사용한다.
+- 렌더 외곽과 무관한 box·circle 근사 collider를 Boss별 Runtime에 따로 만들지 않는다. 크기·회전은 같은 polygon에 적용하며 공격 영역 collider는 본체와 별도 객체로 둔다.
+
 새 상태나 행동은 먼저 작은 순수 함수로 구현할 수 있는지 확인하고, 객체가 필요할 때 아래 순서로 판단한다. 같은 책임을 상속·조합·믹스인에 중복해서 두지 않는다.
 
 ### Is-A: 정체성

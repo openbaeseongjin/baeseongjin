@@ -1,4 +1,5 @@
 import {
+    BOSS_ANCHOR_ROLE,
     BOSS_DAMAGE_MODE,
     BOSS_HEALTH_BAR_STYLE,
     BOSS_MECHANIC_TYPE,
@@ -18,6 +19,7 @@ const VISUAL_PRESET_IDS = Object.freeze(Object.values(BOSS_VISUAL_PRESET_ID));
 const VULNERABILITY_TARGET_IDS = Object.freeze(Object.values(BOSS_VULNERABILITY_TARGET_ID));
 const VULNERABILITY_TRIGGERS = Object.freeze(Object.values(BOSS_VULNERABILITY_TRIGGER));
 const HEALTH_BAR_STYLES = Object.freeze(Object.values(BOSS_HEALTH_BAR_STYLE));
+const ANCHOR_ROLES = Object.freeze(Object.values(BOSS_ANCHOR_ROLE));
 const ARCHITECTURE_IMPACT_MECHANIC_TYPES = Object.freeze([
     BOSS_MECHANIC_TYPE.SIMPLE_LOCK_CHARGE,
     BOSS_MECHANIC_TYPE.ROTATING_GROUND_SLAM,
@@ -132,6 +134,11 @@ function validateArena(spec, issues, file) {
             issue(issues, file, "arena-point-out-of-bounds", { id: entry.id });
         }
     }
+    for (const anchor of arena?.anchors ?? []) {
+        if (anchor.role !== undefined && !ANCHOR_ROLES.includes(anchor.role)) {
+            issue(issues, file, "arena-anchor-role-invalid", { id: anchor.id ?? null });
+        }
+    }
     if (!positive(arena?.baseHookReach)) issue(issues, file, "arena-hook-reach-invalid");
     if (arena?.routeEdges !== undefined) {
         if (!Array.isArray(arena.routeEdges)) {
@@ -147,63 +154,10 @@ function validateArena(spec, issues, file) {
                     edge.from === edge.to
                 ) {
                     issue(issues, file, "arena-route-edge-reference-invalid", { id: edge.id ?? null });
-                    continue;
-                }
-                const from = arena.anchors.find(({ id }) => id === edge.from);
-                const to = arena.anchors.find(({ id }) => id === edge.to);
-                const distance = Math.hypot(from.x - to.x, from.y - to.y);
-                if (distance > arena.baseHookReach) {
-                    issue(issues, file, "arena-route-relation-out-of-reach", {
-                        from: edge.from,
-                        to: edge.to,
-                        distance
-                    });
-                }
-            }
-            const adjacency = Object.fromEntries((arena.anchors ?? []).map(({ id }) => [id, []]));
-            for (const edge of arena.routeEdges) {
-                if (!adjacency[edge.from] || !adjacency[edge.to] || edge.from === edge.to) continue;
-                adjacency[edge.from].push(edge.to);
-                adjacency[edge.to].push(edge.from);
-            }
-            const startId = arena.anchors?.[0]?.id;
-            const visited = new Set(startId ? [startId] : []);
-            const queue = startId ? [startId] : [];
-            while (queue.length > 0) {
-                const current = queue.shift();
-                for (const next of adjacency[current] ?? []) {
-                    if (visited.has(next)) continue;
-                    visited.add(next);
-                    queue.push(next);
-                }
-            }
-            if (visited.size !== (arena.anchors?.length ?? 0)) {
-                issue(issues, file, "arena-route-disconnected");
-            }
-        }
-    } else
-        for (let index = 0; index < (arena?.anchors?.length ?? 0); index += 1) {
-            for (let targetIndex = index + 1; targetIndex < arena.anchors.length; targetIndex += 1) {
-                const distance = Math.hypot(
-                    arena.anchors[index].x - arena.anchors[targetIndex].x,
-                    arena.anchors[index].y - arena.anchors[targetIndex].y
-                );
-                if (targetIndex === index + 1 && distance > arena.baseHookReach) {
-                    issue(issues, file, "arena-route-relation-out-of-reach", {
-                        from: arena.anchors[index].id,
-                        to: arena.anchors[targetIndex].id,
-                        distance
-                    });
-                }
-                if (targetIndex > index + 1 && distance <= arena.baseHookReach) {
-                    issue(issues, file, "arena-route-unintended-shortcut", {
-                        from: arena.anchors[index].id,
-                        to: arena.anchors[targetIndex].id,
-                        distance
-                    });
                 }
             }
         }
+    }
     if (arena?.phaseZones !== undefined) {
         if (!Array.isArray(arena.phaseZones)) issue(issues, file, "arena-phase-zones-invalid");
         else {

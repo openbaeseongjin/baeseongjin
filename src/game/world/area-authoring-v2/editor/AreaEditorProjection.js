@@ -207,13 +207,44 @@ export function hitTestEditorEntity(entities, point, radius) {
         throw new TypeError("editor-hit-test-invalid");
     }
     const candidates = entities
-        .map((entry, index) => ({
-            entry,
-            index,
-            distance: Math.hypot(entry.point.x - point.x, entry.point.y - point.y)
-        }))
+        .map((entry, index) => {
+            const interactionPriority = Number.isFinite(entry.interactionPriority) ? entry.interactionPriority : 0;
+            const pointDistance = entry.point ? Math.hypot(entry.point.x - point.x, entry.point.y - point.y) : Infinity;
+            if (!entry.bounds || !Number.isFinite(entry.bounds.x) || !Number.isFinite(entry.bounds.y)) {
+                return { entry, index, priority: interactionPriority, distance: pointDistance, area: 0 };
+            }
+            const { x, y, width, height } = entry.bounds;
+            const inside = point.x >= x && point.x <= x + width && point.y >= y && point.y <= y + height;
+            const edgeDistance = inside
+                ? Math.min(point.x - x, x + width - point.x, point.y - y, y + height - point.y)
+                : Infinity;
+            const boundary = entry.domain === "bounds" || entry.domain === "arena";
+            if (pointDistance <= radius)
+                return { entry, index, priority: interactionPriority, distance: pointDistance, area: 0 };
+            if (boundary)
+                return {
+                    entry,
+                    index,
+                    priority: interactionPriority + 2,
+                    distance: edgeDistance,
+                    area: width * height
+                };
+            return {
+                entry,
+                index,
+                priority: interactionPriority + 1,
+                distance: inside ? 0 : Infinity,
+                area: width * height
+            };
+        })
         .filter(({ distance }) => distance <= radius)
-        .sort((left, right) => left.distance - right.distance || left.index - right.index);
+        .sort(
+            (left, right) =>
+                left.priority - right.priority ||
+                left.distance - right.distance ||
+                left.area - right.area ||
+                left.index - right.index
+        );
     return candidates[0]?.entry ?? null;
 }
 

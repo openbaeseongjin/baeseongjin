@@ -1,6 +1,7 @@
 import { KinematicPhysicsBody } from "../physics/KinematicPhysicsBody.js";
 import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
 import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
+import { bossBodyPolygonVertices } from "./BossBodyPolygon.js";
 
 const CARRIAGE_STATE = Object.freeze({
     TRAVEL: "travel",
@@ -77,6 +78,11 @@ export class GateLockingCarriageRuntime {
             minX: Number.isFinite(rail.minX) ? rail.minX : DEFAULT_CONFIG.minX,
             maxX: Number.isFinite(rail.maxX) ? rail.maxX : DEFAULT_CONFIG.maxX,
             railY: Number.isFinite(rail.y) ? rail.y : (this.bossSpec.position?.y ?? DEFAULT_CONFIG.railY),
+            carriageY: Number.isFinite(this.bossSpec.position?.y)
+                ? this.bossSpec.position.y
+                : Number.isFinite(rail.y)
+                  ? rail.y
+                  : DEFAULT_CONFIG.railY,
             ramTelegraphSeconds: positive(
                 this.railRam?.parameters?.telegraphSeconds,
                 DEFAULT_CONFIG.telegraphSeconds,
@@ -136,8 +142,10 @@ export class GateLockingCarriageRuntime {
         this.body = new KinematicPhysicsBody({
             id: this.bossSpec.actorId ?? `${definition.id}:carriage`,
             actorKind: PHYSICS_ACTOR_KIND.BOSS,
-            position: { x: this.config.minX, y: this.config.railY },
-            collider: PolygonCollider.box({ width: bodyBounds.width, height: bodyBounds.height }),
+            position: { x: this.config.minX, y: this.config.carriageY },
+            collider: new PolygonCollider({
+                vertices: bossBodyPolygonVertices(this.bossSpec.visualPresetId, bodyBounds)
+            }),
             canGroundActors: true,
             ropeAttachment: true
         });
@@ -209,7 +217,7 @@ export class GateLockingCarriageRuntime {
         const step = this.direction * speed * dt;
         const reached = Math.abs(step) >= Math.abs(distance);
         const x = reached ? this.motionTargetX : this.positionX + step;
-        this.body.setKinematicPosition({ x, y: this.config.railY }, dt);
+        this.body.setKinematicPosition({ x, y: this.config.carriageY }, dt);
         const total = Math.abs(this.motionTargetX - this.motionStartX);
         this.movementProgress = total > 0 ? Math.min(1, Math.abs(x - this.motionStartX) / total) : 1;
         this.#syncBeamBody(dt);
@@ -270,7 +278,7 @@ export class GateLockingCarriageRuntime {
 
     #breakBeamAtAuthoredProgress(dt) {
         const x = this.motionStartX + (this.motionTargetX - this.motionStartX) * this.config.failureProgress;
-        this.body.setKinematicPosition({ x, y: this.config.railY }, dt);
+        this.body.setKinematicPosition({ x, y: this.config.carriageY }, dt);
         this.movementProgress = this.config.failureProgress;
         this.beamFailed = true;
         this.weakpointExposed = true;
@@ -297,7 +305,7 @@ export class GateLockingCarriageRuntime {
     reset(phaseIndex) {
         this.phaseIndex = phaseIndex;
         this.direction = 1;
-        this.body.setKinematicPosition({ x: this.config.minX, y: this.config.railY }, 0);
+        this.body.setKinematicPosition({ x: this.config.minX, y: this.config.carriageY }, 0);
         this.beamFailed = phaseIndex === 2;
         this.weakpointExposed = phaseIndex === 2;
         this.hazardSequence = 0;
@@ -392,9 +400,7 @@ export class GateLockingCarriageRuntime {
     }
 
     collisionActors(offset = { x: 0, y: 0 }) {
-        const actors = [this.body.collisionActor(offset)];
-        if (this.state === CARRIAGE_STATE.SWEEP && !this.beamFailed) actors.push(this.beamBody.collisionActor(offset));
-        return Object.freeze(actors);
+        return Object.freeze([this.body.collisionActor(offset)]);
     }
 
     beamGeometry(offset = { x: 0, y: 0 }) {

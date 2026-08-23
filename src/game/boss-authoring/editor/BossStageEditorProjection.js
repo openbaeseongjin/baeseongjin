@@ -2,14 +2,15 @@ function finitePoint(value) {
     return Number.isFinite(value?.x) && Number.isFinite(value?.y);
 }
 
-function entity({ domain, id, kind, point = null, bounds = null, path }) {
+function entity({ domain, id, kind, point = null, bounds = null, path, interactionPriority = 0 }) {
     return Object.freeze({
         domain,
         id,
         kind,
         ...(point ? { point: Object.freeze({ ...point }) } : {}),
         ...(bounds ? { bounds: Object.freeze({ ...bounds }) } : {}),
-        path
+        path,
+        interactionPriority
     });
 }
 
@@ -60,8 +61,16 @@ export function collectBossStageEditorEntities(spec) {
         );
     }
     for (const [index, anchor] of spec.arena.anchors.entries()) {
+        if (anchor.role !== BOSS_ANCHOR_ROLE.SWING_ATTACK) continue;
         result.push(
-            entity({ domain: "anchors", id: anchor.id, kind: "anchor", point: anchor, path: `/arena/anchors/${index}` })
+            entity({
+                domain: "combatAnchors",
+                id: anchor.id,
+                kind: "swing-anchor",
+                point: anchor,
+                path: `/arena/anchors/${index}`,
+                interactionPriority: 0
+            })
         );
     }
     for (const [index, point] of spec.arena.recoveryPoints.entries()) {
@@ -112,7 +121,8 @@ export function translateBossStageEditorEntity(spec, selected, delta) {
         point.x += delta.x;
         point.y += delta.y;
     };
-    if (selected.domain === "entry") move(next.arena.entry);
+    if (selected.domain === "arena") move(next.arena.bounds);
+    else if (selected.domain === "entry") move(next.arena.entry);
     else if (selected.domain === "exit") move(next.arena.exit);
     else if (selected.domain === "boss") {
         move(next.boss.position);
@@ -121,7 +131,7 @@ export function translateBossStageEditorEntity(spec, selected, delta) {
         const surface = next.arena.surfaces.find(({ id }) => id === selected.id);
         if (!surface) throw new TypeError("boss-editor-entity-not-found");
         move(surface.bounds);
-    } else if (selected.domain === "anchors") {
+    } else if (selected.domain === "combatAnchors") {
         const anchor = next.arena.anchors.find(({ id }) => id === selected.id);
         if (!anchor) throw new TypeError("boss-editor-entity-not-found");
         move(anchor);
@@ -141,3 +151,4 @@ export function translateBossStageEditorEntity(spec, selected, delta) {
     } else throw new TypeError("boss-editor-entity-not-movable");
     return next;
 }
+import { BOSS_ANCHOR_ROLE } from "../BossStageSpec.js";

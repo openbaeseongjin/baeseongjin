@@ -21,8 +21,8 @@ import {
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
 
-const BOSS_CAMERA_FOCUS_WEIGHT = 0.65;
-const BOSS_CAMERA_ZOOM_RATIO = 0.72;
+const BOSS_CAMERA_FOCUS_WEIGHT = 0.3;
+const BOSS_CAMERA_ZOOM_RATIO = 0.55;
 
 function bossCameraPlayer(player, bossStage) {
     if (bossStage?.status !== "active") return player;
@@ -30,11 +30,12 @@ function bossCameraPlayer(player, bossStage) {
         ({ kind }) => kind === "boss-carriage" || kind === "boss-security-hub" || kind === "boss-continuity-core"
     );
     if (!carriage?.position) return player;
+    const carriageFocusY = carriage.position.y - Math.max(0, carriage.suspensionHeight ?? 0) * 0.5;
     return {
         ...player,
         position: {
             x: player.position.x * (1 - BOSS_CAMERA_FOCUS_WEIGHT) + carriage.position.x * BOSS_CAMERA_FOCUS_WEIGHT,
-            y: player.position.y * (1 - BOSS_CAMERA_FOCUS_WEIGHT) + carriage.position.y * BOSS_CAMERA_FOCUS_WEIGHT
+            y: player.position.y * (1 - BOSS_CAMERA_FOCUS_WEIGHT) + carriageFocusY * BOSS_CAMERA_FOCUS_WEIGHT
         }
     };
 }

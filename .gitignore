@@ -12,6 +12,7 @@ service-account*.json
 .ai_execution_log.ndjson
 .omx/
 /.handoffs/
+/.map-editor-history/
 
 # AI tool settings sync (vsync) project cache artifacts
 .vsync/

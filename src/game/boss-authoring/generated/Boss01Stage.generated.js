@@ -4,102 +4,42 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
     arena: {
         anchors: [
             {
-                id: "boss-01:route-entry",
-                x: 420,
-                y: -670
+                id: "boss-01:strike-anchor-1",
+                role: "swing-attack",
+                x: 880,
+                y: -950
             },
             {
-                id: "boss-01:route-l0",
-                x: 720,
-                y: -620
+                id: "boss-01:strike-anchor-2",
+                role: "swing-attack",
+                x: 1685,
+                y: -970
             },
             {
-                id: "boss-01:route-l1",
-                x: 980,
-                y: -810
+                id: "boss-01:strike-anchor-3",
+                role: "swing-attack",
+                x: 2595,
+                y: -975
             },
             {
-                id: "boss-01:route-l2",
-                x: 1200,
-                y: -1060
+                id: "boss-01:strike-anchor-4",
+                role: "swing-attack",
+                x: 3715,
+                y: -1005
             },
             {
-                id: "boss-01:route-l3",
-                x: 1360,
-                y: -1380
-            },
-            {
-                id: "boss-01:route-u0",
-                x: 1510,
-                y: -1690
-            },
-            {
-                id: "boss-01:route-u1",
-                x: 1760,
-                y: -1920
-            },
-            {
-                id: "boss-01:route-u2",
-                x: 2070,
-                y: -2040
-            },
-            {
-                id: "boss-01:route-u3",
-                x: 2400,
-                y: -2100
-            },
-            {
-                id: "boss-01:route-u4",
-                x: 2730,
-                y: -2100
-            },
-            {
-                id: "boss-01:route-u5",
-                x: 3060,
-                y: -2040
-            },
-            {
-                id: "boss-01:route-u6",
-                x: 3370,
-                y: -1910
-            },
-            {
-                id: "boss-01:route-u7",
-                x: 3610,
-                y: -1680
-            },
-            {
-                id: "boss-01:route-r3",
-                x: 3760,
-                y: -1370
-            },
-            {
-                id: "boss-01:route-r2",
-                x: 3920,
-                y: -1060
-            },
-            {
-                id: "boss-01:route-r1",
-                x: 4140,
-                y: -810
-            },
-            {
-                id: "boss-01:route-r0",
-                x: 4400,
-                y: -620
-            },
-            {
-                id: "boss-01:route-exit",
-                x: 4700,
-                y: -540
+                id: "boss-01:strike-anchor-5",
+                role: "swing-attack",
+                x: 4515,
+                y: -1025
             }
         ],
         baseHookReach: 400,
         bounds: {
-            height: 2800,
+            height: 1450,
             width: 5200,
             x: 0,
-            y: -2800
+            y: -1850
         },
         entry: {
             id: "boss-01:entry",
@@ -131,10 +71,10 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
         surfaces: [
             {
                 bounds: {
-                    height: 350,
+                    height: 300,
                     width: 4200,
                     x: 300,
-                    y: -2320
+                    y: -1750
                 },
                 grappleable: true,
                 id: "boss-01:upper-maintenance-frame",
@@ -143,37 +83,13 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 80,
-                    width: 3990,
-                    x: 500,
-                    y: -1390
-                },
-                grappleable: true,
-                id: "boss-01:main-locking-rail",
-                kind: "rail",
-                oneWay: false
-            },
-            {
-                bounds: {
                     height: 100,
-                    width: 4180,
+                    width: 4500,
                     x: 340,
                     y: -650
                 },
                 grappleable: true,
                 id: "boss-01:lower-catwalk",
-                kind: "platform",
-                oneWay: true
-            },
-            {
-                bounds: {
-                    height: 130,
-                    width: 520,
-                    x: 4020,
-                    y: -770
-                },
-                grappleable: true,
-                id: "boss-01:open-gate-deck",
                 kind: "platform",
                 oneWay: true
             }
@@ -185,17 +101,17 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             height: 430,
             width: 980,
             x: 2110,
-            y: -1610
+            y: -1465
         },
         mechanicId: "rail-carriage",
         position: {
             x: 2600,
-            y: -1395
+            y: -1250
         },
         rail: {
             maxX: 4490,
             minX: 500,
-            y: -1390
+            y: -1500
         },
         visualPresetId: "gate-locking-carriage"
     },
@@ -225,17 +141,19 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
                 height: 120,
                 width: 2190,
                 x: 1510,
-                y: -1250
+                y: -765
             },
             id: "boss-01:full-crossbeam-sweep",
             parameters: {
+                damageIntervalSeconds: 0.1,
+                damagePerPulse: 3,
                 recoverySeconds: 2.5,
                 telegraphSeconds: 0.8,
                 travelSpeed: 240
             },
             position: {
                 x: 2600,
-                y: -1190
+                y: -705
             },
             type: "full-crossbeam-sweep"
         },
@@ -244,17 +162,19 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
                 height: 115,
                 width: 1120,
                 x: 2600,
-                y: -1265
+                y: -762.5
             },
             id: "boss-01:directional-broken-beam-sweep",
             parameters: {
+                damageIntervalSeconds: 0.1,
+                damagePerPulse: 3,
                 recoverySeconds: 2,
                 telegraphSeconds: 0.65,
                 travelSpeed: 300
             },
             position: {
                 x: 3160,
-                y: -1207.5
+                y: -705
             },
             type: "directional-broken-beam-sweep"
         },
@@ -268,7 +188,7 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             },
             position: {
                 x: 2600,
-                y: -1395
+                y: -1250
             },
             type: "beam-failure"
         },
@@ -287,7 +207,7 @@ export const BOSS_01_STAGE_SPEC = freezeBossStageValue({
             },
             position: {
                 x: 2600,
-                y: -1395
+                y: -705
             },
             type: "rail-ram"
         }
