@@ -190,7 +190,7 @@
 
 Boss 입장은 Player별 위치 주도 사건이다. source Gate trigger에 들어간 Player만 즉시 Boss Entry로 이동해 participant가 되고, 같은 Boss가 진행 중일 때 늦게 들어온 Player만 participant로 추가한다. 다른 Stage·Sector의 Player를 소환하지 않으며 각 클라이언트의 Boss camera·HUD·world presentation은 local Player가 해당 Arena Bounds 안에 있을 때만 활성화한다. Boss 완료 ID는 공용 Sector progress에 남아 재등반 Player의 source Gate를 다음 Sector Entry로 직행시킨다.
 
-Boss06 승리 뒤 Boarding은 Player별 위치 주도 사건과 공용 완료 상태를 분리한다. 각 소유 Player는 Gate/Bridge를 직접 건너 boarding zone에 들어가고 서버는 Player별 ready ID를 공유한다. 연결된 모든 참가자가 ready일 때만 run completion을 확정하며 첫 ready Player가 동료를 순간이동시키지 않는다. Boss spectator는 승리 시 final safe Pad deck으로 복귀한 뒤 같은 Boarding 경로를 사용한다.
+Boss06 승리 뒤 Boarding은 Player별 위치 주도 사건과 공용 완료 상태를 분리한다. 각 소유 Player는 Gate/Bridge를 직접 건너 boarding zone에 들어가고 서버는 Player별 ready ID를 공유한다. 연결된 모든 참가자가 ready일 때만 run completion을 확정하며 첫 ready Player가 동료를 순간이동시키지 않는다. Boss spectator는 승리 시 ID 순서로 final safe Bridge deck에 간격을 두고 복귀하며 참가 상태도 `active`로 함께 전환한 뒤 같은 Boarding 경로를 사용한다. Wipe respawn도 같은 정렬·간격 계약을 사용한다.
 
 generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. `FoundationAugmentState`, `foundation-selection`, `foundationRewards`는 이전 snapshot과 wire 호환을 위한 이름이며 과거 Foundation 3종 gameplay를 뜻하지 않는다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 호환 `foundation-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 대상 Player state의 `respawnAnchorId`가 가리키는 최근 직접 접촉 Stage checkpoint로 되돌리며 선택 카드와 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
@@ -280,7 +280,7 @@ Player Bark는 gameplay/network 사건이 아니라 각 클라이언트의 local
 
 `GameSimulation`은 처리한 스텝마다 단조 증가하는 `tick`을 기록한다. 명시적으로 활성화한 싱글 자동 무기 발사, 멀티에서 승인된 플레이어 발사 claim, 서버 중립 발사와 투사체 종료는 이 틱의 `PredictableObjectEvent`를 발행하며, 권위 전송 계층은 `drainReplicationEvents()`로 각 사건을 한 번만 가져간다. 플레이어·적 투사체는 8초의 서버 수명이 끝나면 `expired` resolve로 제거한다. 활성 투사체는 원래 spawn 이벤트를 내부에 보존해 welcome 복원에만 재사용하며 일반 스냅샷마다 반복하지 않는다. 로컬 렌더링은 기존 투사체 배열을 계속 사용하지만 네트워크 상태에는 그 배열을 넣지 않는다.
 
-`AuthoritySnapshotBuilder`는 `GameSimulation`의 로컬 렌더 상태를 그대로 복제하지 않는다. 플레이어별 물리·로프·생명·무기·generic Augment, enemy 동적 상태와 월드 진행만 뽑고, 정적 지형과 authored enemy 정적 정의 대신 `worldSeed`, `worldRevision`과 stable `objectId`를 보낸다. 클라이언트는 이 값으로 월드와 enemy 정의를 재생성하며 revision이 다르면 세션 참가를 중단한다.
+`AuthoritySnapshotBuilder`는 `GameSimulation`의 로컬 렌더 상태를 그대로 복제하지 않는다. 플레이어별 물리·로프·생명·무기·generic Augment, enemy 동적 상태와 월드 진행만 뽑고, 정적 지형과 authored enemy 정적 정의 대신 `worldSeed`, `worldRevision`과 stable `objectId`를 보낸다. 활성 Boss DTO는 snapshot 한 회당 한 번만 만들고 `bossStage`와 호환 `bossRuntime`이 같은 객체를 가리키며 envelope 정규화도 이 별칭을 보존한다. 클라이언트는 이 값으로 월드와 enemy 정의를 재생성하며 revision이 다르면 세션 참가를 중단한다.
 
 ## 예측과 보정
 

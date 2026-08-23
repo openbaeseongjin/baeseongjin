@@ -67,6 +67,9 @@ function normalizeState(state) {
     } else {
         throw new Error("state.progressKind must be sector or area");
     }
+    if (Object.hasOwn(normalized, "bossStage") && Object.hasOwn(normalized, "bossRuntime")) {
+        return Object.freeze({ ...normalized, bossRuntime: normalized.bossStage });
+    }
     return normalized;
 }
 

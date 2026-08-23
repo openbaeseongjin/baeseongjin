@@ -24,6 +24,7 @@ function freezeWorldObject(object) {
             : null,
         active: object.active !== false,
         position: Object.freeze({ x: finite(object.position?.x), y: finite(object.position?.y) }),
+        ...(Number.isSafeInteger(object.order) ? { order: object.order } : {}),
         ...(object.geometry?.type === "polygon" && Array.isArray(object.geometry.vertices)
             ? {
                   geometry: Object.freeze({

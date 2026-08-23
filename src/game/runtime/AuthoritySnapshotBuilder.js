@@ -19,6 +19,7 @@ export function buildAuthoritySnapshot({
               ).values()
           ]
         : drainedEvents;
+    const bossStage = simulation.bossStageSnapshot();
     return createWorldSnapshotEnvelope({
         snapshotSequence,
         serverTick: simulation.getTick(),
@@ -43,10 +44,10 @@ export function buildAuthoritySnapshot({
             runState: simulation.runState,
             metrics: simulation.metrics.snapshot(),
             worldProgress: simulation.worldProgress?.snapshot() ?? null,
-            bossStage: simulation.bossStageSnapshot(),
-            bossRuntime: simulation.bossStageSnapshot(),
+            bossStage,
+            bossRuntime: bossStage,
             worldElapsedSeconds: simulation.elapsedSeconds,
-            windStates: simulation.snapshot().windStates,
+            windStates: simulation.windStateSnapshots(),
             hardpointJammerStates: simulation.hardpointJammers.snapshot(),
             completed: simulation.runState === "completed"
         },

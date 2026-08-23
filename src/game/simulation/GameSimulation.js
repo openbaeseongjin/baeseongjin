@@ -1139,45 +1139,57 @@ export class GameSimulation {
             player.ropeImpactState.reset();
             return defeat;
         }
-        for (const participant of this.players) {
-            if (this.#bossParticipantStatus(participant.id) !== BOSS_PARTICIPANT_STATUS.ACTIVE) continue;
-            this.respawnPlayerAtCheckpoint(participant, "boss-wipe");
-        }
+        this.#respawnBossParticipants("boss-wipe");
         return defeat;
+    }
+
+    #respawnBossParticipants(reason) {
+        const participants = this.players
+            .filter(({ id }) => this.#bossParticipantStatus(id) === BOSS_PARTICIPANT_STATUS.ACTIVE)
+            .sort((left, right) => left.id.localeCompare(right.id, "en"));
+        const basePosition = this.bossRuntime?.respawnPosition?.(this.#bossWorldOffset()) ?? null;
+        for (const [index, participant] of participants.entries()) {
+            const position = basePosition ? portalArrivalPosition(basePosition, index, participants.length) : null;
+            this.respawnPlayerAtCheckpoint(participant, reason, `${reason}:${this.tick}:${participant.id}`, position);
+        }
+        return participants.length;
     }
 
     #recoverBossSpectatorsOnVictory() {
         const stage = this.#bossStageWorld();
         if (!stage) return;
-        const spectators = this.players.filter(
-            ({ id, lifeState }) =>
-                lifeState === "spectating" && this.#bossParticipantStatus(id) === BOSS_PARTICIPANT_STATUS.SPECTATING
-        );
+        const spectators = this.players
+            .filter(
+                ({ id, lifeState }) =>
+                    lifeState === "spectating" && this.#bossParticipantStatus(id) === BOSS_PARTICIPANT_STATUS.SPECTATING
+            )
+            .sort((left, right) => left.id.localeCompare(right.id, "en"));
+        const victoryBase = this.bossRuntime?.victoryRecoveryPosition?.(this.#bossWorldOffset()) ?? stage.exit;
+        let participantStateChanged = false;
         for (const [index, player] of spectators.entries()) {
-            this.respawnPlayerAtCheckpoint(player, "boss-victory");
-            this.applyPortalTransition(
-                player.id,
-                portalArrivalPosition(stage.entry, index, Math.max(1, spectators.length)),
-                this.tick,
-                `${stage.id}:victory-recovery`
-            );
+            const recovery = this.bossRuntime?.recoverParticipant?.(player.id);
+            participantStateChanged = recovery?.changed === true || participantStateChanged;
+            const position = portalArrivalPosition(victoryBase, index, Math.max(1, spectators.length));
+            this.respawnPlayerAtCheckpoint(player, "boss-victory", `boss-victory:${this.tick}:${player.id}`, position);
+            this.applyPortalTransition(player.id, position, this.tick, `${stage.id}:victory-recovery`);
         }
+        if (participantStateChanged) this.#commitBossEvents();
     }
 
     #compositeHazardOverlapsPlayer(hazard, player) {
         const position = player.physics.position;
         const radius = PLAYER_CONFIG.radius;
+        if (hazard.position && hazard.collider) {
+            return player.physics.collider.overlapsCollider(position, hazard.position, hazard.collider);
+        }
         if (hazard.position && Number.isFinite(hazard.radius)) {
             return Math.hypot(position.x - hazard.position.x, position.y - hazard.position.y) <= hazard.radius + radius;
         }
         const bounds = hazard.bounds;
-        return Boolean(
-            bounds &&
-            position.x + radius >= bounds.x &&
-            position.x - radius <= bounds.x + bounds.width &&
-            position.y + radius >= bounds.y &&
-            position.y - radius <= bounds.y + bounds.height
-        );
+        if (!bounds) return false;
+        const closestX = Math.max(bounds.x, Math.min(position.x, bounds.x + bounds.width));
+        const closestY = Math.max(bounds.y, Math.min(position.y, bounds.y + bounds.height));
+        return Math.hypot(position.x - closestX, position.y - closestY) <= radius;
     }
 
     #resolveCompositeBossHazards({ players, replicate }) {
@@ -4017,10 +4029,7 @@ export class GameSimulation {
         if (fatal) {
             const defeat = this.bossRuntime.handlePlayerDefeat(player.id, `boss-${claim.sourceType}`);
             if (defeat.retryStarted) {
-                for (const participant of this.players) {
-                    if (this.#bossParticipantStatus(participant.id) !== BOSS_PARTICIPANT_STATUS.ACTIVE) continue;
-                    this.respawnPlayerAtCheckpoint(participant, "boss-wipe");
-                }
+                this.#respawnBossParticipants("boss-wipe");
             }
         }
         this.#restorePlayer(player, recoveredState);
@@ -4122,20 +4131,21 @@ export class GameSimulation {
         return events;
     }
 
-    respawnPlayerAtCheckpoint(player, reason, causeId = `${reason}:${this.tick}`) {
+    respawnPlayerAtCheckpoint(player, reason, causeId = `${reason}:${this.tick}`, overridePosition = null) {
         if (!player || this.runState !== "playing") return false;
         const deathPosition = this.#deathPosition(player.physics.position, player.id);
-        this.#resetPlayerAtCheckpoint(player);
+        this.#resetPlayerAtCheckpoint(player, overridePosition);
         this.#recordPlayerRespawn(player, reason, causeId, deathPosition);
         return true;
     }
 
-    #resetPlayerAtCheckpoint(player) {
+    #resetPlayerAtCheckpoint(player, overridePosition = null) {
         const bossStage = this.bossRuntime?.status === "active" ? this.#bossStageWorld() : null;
         const bossRespawn = bossStage
             ? (this.bossRuntime?.respawnPosition?.(this.#bossWorldOffset()) ?? bossStage.entry)
             : null;
-        const respawnPosition = bossRespawn ??
+        const respawnPosition = overridePosition ??
+            bossRespawn ??
             (this.isSeamlessSectorWorld ? this.respawnAnchorForPlayer(player.id)?.position : this.activeCheckpoint) ?? {
                 x: 120,
                 y: 500
@@ -4210,6 +4220,10 @@ export class GameSimulation {
         return true;
     }
 
+    windStateSnapshots() {
+        return this.world.windZones ? snapshotWindStates(this.world.windZones, this.elapsedSeconds) : Object.freeze([]);
+    }
+
     snapshot() {
         const player = this.#primaryPlayer();
         const playerState = this.playerState(player.id);
@@ -4247,9 +4261,7 @@ export class GameSimulation {
             worldProgress: this.worldProgress?.snapshot() ?? null,
             bossStage,
             bossRuntime: bossStage,
-            windStates: this.world.windZones
-                ? snapshotWindStates(this.world.windZones, this.elapsedSeconds)
-                : Object.freeze([]),
+            windStates: this.windStateSnapshots(),
             accessScanStates: this.world.scannerGroups
                 ? snapshotAccessScanStates(this.world.scannerGroups, this.elapsedSeconds)
                 : Object.freeze([]),
