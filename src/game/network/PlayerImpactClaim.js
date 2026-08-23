@@ -451,6 +451,36 @@ export function createPlayerImpactClaim({
 }
 
 const EMPTY_PLAYER_IMPACT_EVENT_PARAMETERS = Object.freeze({});
+const EMPTY_PLAYER_IMPACT_CLAIM_SOURCE = Object.freeze({
+    sourceKind: null,
+    sourceId: null,
+    sourceType: null,
+    sourceSequence: null
+});
+const NO_PLAYER_IMPACT_CLAIM_SOURCE_DEFINITION = Object.freeze({
+    project: () => EMPTY_PLAYER_IMPACT_CLAIM_SOURCE
+});
+
+function playerImpactClaimSourceDefinition(sourceKind) {
+    return Object.freeze({
+        project: ({ sourceId = null, sourceType = null, sourceSequence = null }) =>
+            Object.freeze({ sourceKind, sourceId, sourceType, sourceSequence })
+    });
+}
+
+const PLAYER_IMPACT_CLAIM_SOURCE_BY_EVENT_SOURCE_KIND = Object.freeze({
+    [PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD]: playerImpactClaimSourceDefinition(PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD),
+    [PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER]: playerImpactClaimSourceDefinition(
+        PLAYER_IMPACT_SOURCE_KIND.HARDPOINT_JAMMER
+    )
+});
+
+function playerImpactClaimSource(parameters) {
+    return (
+        PLAYER_IMPACT_CLAIM_SOURCE_BY_EVENT_SOURCE_KIND[parameters.sourceKind] ??
+        NO_PLAYER_IMPACT_CLAIM_SOURCE_DEFINITION
+    ).project(parameters);
+}
 
 export function createPlayerImpactClaimFromEvent({ event, authorityTick, outcome }) {
     if (!event || Array.isArray(event) || typeof event !== "object") {
@@ -460,6 +490,7 @@ export function createPlayerImpactClaimFromEvent({ event, authorityTick, outcome
     if (Array.isArray(parameters) || typeof parameters !== "object") {
         throw new Error("player impact event parameters must be an object when provided");
     }
+    const source = playerImpactClaimSource(parameters);
     return createPlayerImpactClaim({
         impactId: event.impactId ?? event.projectileId,
         clientTick: event.clientTick,
@@ -468,10 +499,7 @@ export function createPlayerImpactClaimFromEvent({ event, authorityTick, outcome
         position: event.position,
         velocity: event.velocity,
         damage: event.damage ?? parameters.damage ?? 0,
-        sourceKind: parameters.sourceKind ?? null,
-        sourceId: parameters.sourceId ?? null,
-        sourceType: parameters.sourceType ?? null,
-        sourceSequence: parameters.sourceSequence ?? null,
+        ...source,
         outcome
     });
 }

@@ -252,6 +252,7 @@
             "states": {
                 "idle": { "fallback": "jammer-normal" },
                 "knockback": { "fallback": "jammer-normal" },
+                "jammer-roam": { "fallback": "jammer-normal" },
                 "jammer-normal": {
                     "loop": true,
                     "frames": [

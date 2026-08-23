@@ -75,6 +75,20 @@ export class EnemySpritePackageCatalog {
         return this.defaultPackage?.assets ?? null;
     }
 
+    async prepare() {
+        await Promise.all(
+            Object.values(this.packagesBySectorId).map((spritePackage) => spritePackage.assets.prepare())
+        );
+        return Object.freeze(
+            Object.fromEntries(
+                Object.entries(this.packagesBySectorId).map(([sectorId, spritePackage]) => [
+                    sectorId,
+                    spritePackage.assets.status
+                ])
+            )
+        );
+    }
+
     packageFor({ sectorId = null, enemyType }) {
         const sectorPackage = sectorId ? this.packagesBySectorId[sectorId] : null;
         const candidates =

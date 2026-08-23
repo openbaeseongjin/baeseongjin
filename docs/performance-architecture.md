@@ -69,5 +69,6 @@
 - Rope attachment는 `GameObjectManager`가 소유한 surface Quadtree 후보만 narrow phase에 전달한다.
 - 싱글 앱은 fixed step에서 만든 최신 snapshot을 render까지 재사용하고 실제 예측 impact가 상태를 바꾼 경우에만 같은 step에서 다시 읽는다.
 - 남은 renderer 전체 순회와 정적 backdrop 재합성은 viewport candidate·cache 경계의 후속 최적화 대상이다.
+- `SpriteSceneResourceBundle`은 manifest definition에서 Image asset set을 한 번 조립하고 startup에서 load·decode를 병렬 준비한다. 싱글·멀티·디버그 재시작은 같은 bundle을 재사용하므로 gameplay frame과 모드 전환이 atlas 요청을 다시 만들지 않는다.
 
 새 기능은 남은 위반을 핑계로 같은 패턴을 추가하지 않는다. 해당 권위 컴포넌트 경계를 복구하는 별도 수정 단위로 제거한다.
