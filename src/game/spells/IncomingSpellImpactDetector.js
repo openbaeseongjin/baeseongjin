@@ -3,6 +3,7 @@ import { IMPACT_TARGET_KIND } from "../combat/ImpactTarget.js";
 import { SPELL_KEY, SPELL_SOURCE_KIND } from "./SpellRuntimeDefinition.js";
 import { spellTargetPolicy } from "./SpellTargetPolicy.js";
 import { SpellProjectileState } from "./SpellProjectileState.js";
+import { spellAreaContainsTarget } from "./SpellAreaState.js";
 
 export const INCOMING_SPELL_IMPACT_SPEC = Object.freeze({
     initialSweepSeconds: 0.075,
@@ -23,6 +24,8 @@ function sweepStart(projectile, previous, spec) {
 }
 
 function knockback(projectile) {
+    if (projectile.knockbackImpulse > 0)
+        return Object.freeze({ direction: projectile.direction, impulse: projectile.knockbackImpulse });
     if (!(projectile.knockbackDistance > 0)) return null;
     return Object.freeze({
         direction: projectile.direction,
@@ -46,6 +49,7 @@ function incomingImpact({ target, projectile, tick, details }) {
         contactPosition: Object.freeze({ ...details.contactPosition }),
         position: Object.freeze({ ...details.contactPosition }),
         damage: details.damage,
+        ...(details.statusEffectId ? { statusEffectId: details.statusEffectId } : {}),
         knockback: details.knockback ?? null,
         predictedResolution: "player-hit"
     });
@@ -63,6 +67,36 @@ export class IncomingSpellImpactDetector {
         const impacts = [];
         const observedProjectileIds = new Set();
         for (const remotePlayer of remotePlayers) {
+            const areas = remotePlayer.augmentRuntimeState?.combat?.spellAreas ?? [];
+            for (const area of areas) {
+                const impactId = SPELL_KEY.projectileImpact(area.id, target.id);
+                if (
+                    this.resolvedImpactIds.has(impactId) ||
+                    !spellTargetPolicy(area.targetPolicyId).allows(area.ownerId, target.id) ||
+                    !spellAreaContainsTarget(area, target)
+                )
+                    continue;
+                this.#rememberResolved(impactId);
+                impacts.push(
+                    Object.freeze({
+                        eventId: impactId,
+                        predictionId: impactId,
+                        sourcePlayerId: area.ownerId ?? remotePlayer.id,
+                        targetId: target.id,
+                        targetKind: IMPACT_TARGET_KIND.PLAYER,
+                        clientTick: target.tick,
+                        effectId: area.spellId,
+                        sourceKind: SPELL_SOURCE_KIND.AREA,
+                        sourcePosition: Object.freeze({ ...area.position }),
+                        contactPosition: Object.freeze({ ...target.position }),
+                        position: Object.freeze({ ...target.position }),
+                        damage: area.damage,
+                        ...(area.statusEffectId ? { statusEffectId: area.statusEffectId } : {}),
+                        knockback: null,
+                        predictedResolution: "player-hit"
+                    })
+                );
+            }
             const projectiles = remotePlayer.augmentRuntimeState?.combat?.spellProjectiles ?? [];
             for (const projectile of projectiles) {
                 observedProjectileIds.add(projectile.id);
@@ -72,9 +106,10 @@ export class IncomingSpellImpactDetector {
                 if (this.resolvedImpactIds.has(impactId)) continue;
                 if (!spellTargetPolicy(projectile.targetPolicyId).allows(projectile.ownerId, target.id)) continue;
                 const start = sweepStart(projectile, previous, this.spec);
+                const aura = projectile.auraRadius > 0;
                 if (
                     distancePointToSegment(target.position, start, projectile.position) >
-                    targetRadius(target) + projectile.radius
+                    targetRadius(target) + (aura ? projectile.auraRadius : projectile.radius)
                 ) {
                     continue;
                 }
@@ -88,13 +123,18 @@ export class IncomingSpellImpactDetector {
                         targetId: target.id,
                         targetKind: IMPACT_TARGET_KIND.PLAYER,
                         clientTick: target.tick,
-                        effectId: projectile.spellId,
-                        sourceKind: SPELL_SOURCE_KIND.PROJECTILE,
+                        effectId: aura ? projectile.auraEffectId : projectile.spellId,
+                        sourceKind: aura ? SPELL_SOURCE_KIND.AREA : SPELL_SOURCE_KIND.PROJECTILE,
                         sourcePosition: Object.freeze({ x: start.x, y: start.y }),
                         contactPosition: Object.freeze({ x: target.position.x, y: target.position.y }),
                         position: Object.freeze({ x: target.position.x, y: target.position.y }),
-                        damage: projectile.damage,
-                        knockback: knockback(projectile),
+                        damage: aura ? projectile.auraDamage : projectile.damage,
+                        ...(aura && projectile.auraStatusEffectId
+                            ? { statusEffectId: projectile.auraStatusEffectId }
+                            : projectile.statusEffectId
+                              ? { statusEffectId: projectile.statusEffectId }
+                              : {}),
+                        knockback: aura ? null : knockback(projectile),
                         predictedResolution: "player-hit"
                     })
                 );

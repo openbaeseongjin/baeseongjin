@@ -1,10 +1,12 @@
 import { ElectrifiedStatusEffect } from "./ElectrifiedStatusEffect.js";
 import { FrozenStatusEffect } from "./FrozenStatusEffect.js";
 import { IgnitedStatusEffect } from "./IgnitedStatusEffect.js";
+import { HighVoltageStatusEffect } from "./HighVoltageStatusEffect.js";
 import { STATUS_EFFECT_ID, STATUS_EFFECT_IDS } from "./StatusEffectDefinition.js";
 
 const STATUS_EFFECT_FACTORY = Object.freeze({
     [STATUS_EFFECT_ID.ELECTRIFIED]: () => new ElectrifiedStatusEffect(),
+    [STATUS_EFFECT_ID.HIGH_VOLTAGE]: () => new HighVoltageStatusEffect(),
     [STATUS_EFFECT_ID.IGNITED]: () => new IgnitedStatusEffect(),
     [STATUS_EFFECT_ID.FROZEN]: () => new FrozenStatusEffect()
 });

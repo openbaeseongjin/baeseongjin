@@ -182,7 +182,17 @@ function clamp(value, minimum, maximum) {
 }
 
 function applyPlayerSpellKnockback(player, knockback) {
-    if (!knockback || !(knockback.distance > 0)) return false;
+    if (!knockback) return false;
+    if (knockback.impulse > 0) {
+        const magnitude = Math.hypot(knockback.direction?.x ?? 0, knockback.direction?.y ?? 0);
+        if (!(magnitude > 0)) return false;
+        player.physics.applyImpulse(
+            { x: knockback.direction.x / magnitude, y: knockback.direction.y / magnitude },
+            knockback.impulse
+        );
+        return true;
+    }
+    if (!(knockback.distance > 0)) return false;
     const duration = knockback.duration ?? knockback.durationSeconds;
     const magnitude = Math.hypot(knockback.direction?.x ?? 0, knockback.direction?.y ?? 0);
     if (!(duration > 0) || !(magnitude > 0)) return false;
@@ -1233,6 +1243,7 @@ export class GameSimulation {
     #resolveBossParticipantDefeat(player, cause) {
         const defeat = this.handleBossParticipantDefeat(player.id, cause);
         if (!defeat.accepted) return defeat;
+        this.#applyExperienceDeathPenalty(player, cause);
         if (!defeat.retryStarted) {
             player.lifeState = "spectating";
             player.ropeObject.rope.detach();
@@ -2416,7 +2427,7 @@ export class GameSimulation {
         });
         const enemyProjectileSpawns = updateEnemyWeapons({
             enemies: this.activeSimulationEnemies.filter(
-                (enemy) => enemy.awakened && !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
+                (enemy) => enemy.awakened && this.debugTrainingDummy.canSimulate(enemy)
             ),
             targets: this.players,
             registerProjectile: (projectile) => this.objects.enemyProjectiles.add(projectile),
@@ -2857,7 +2868,7 @@ export class GameSimulation {
     #advanceEnemyBehaviorSimulation(dt) {
         const outcomes = advanceEnemyBehaviors({
             enemies: this.activeSimulationEnemies.filter(
-                (enemy) => enemy.awakened && !enemy.knockbackState && this.debugTrainingDummy.canSimulate(enemy)
+                (enemy) => enemy.awakened && this.debugTrainingDummy.canSimulate(enemy)
             ),
             targets: this.players,
             dt
@@ -3100,8 +3111,9 @@ export class GameSimulation {
             knockback: claim.knockback
                 ? {
                       direction: claim.knockback.direction,
-                      distance: claim.knockback.distance,
-                      durationSeconds: claim.knockback.duration
+                      ...(claim.knockback.impulse !== undefined
+                          ? { impulse: claim.knockback.impulse }
+                          : { distance: claim.knockback.distance, durationSeconds: claim.knockback.duration })
                   }
                 : null,
             tombstones: this.enemyImpactTombstones
@@ -3162,8 +3174,12 @@ export class GameSimulation {
                         knockback: event.knockback
                             ? {
                                   direction: event.knockback.direction,
-                                  distance: event.knockback.distance,
-                                  duration: event.knockback.duration ?? event.knockback.durationSeconds
+                                  ...(event.knockback.impulse !== undefined
+                                      ? { impulse: event.knockback.impulse }
+                                      : {
+                                            distance: event.knockback.distance,
+                                            duration: event.knockback.duration ?? event.knockback.durationSeconds
+                                        })
                               }
                             : undefined
                     },
@@ -4323,9 +4339,20 @@ export class GameSimulation {
     respawnPlayerAtCheckpoint(player, reason, causeId = `${reason}:${this.tick}`, overridePosition = null) {
         if (!player || this.runState !== "playing") return false;
         const deathPosition = this.#deathPosition(player.physics.position, player.id);
+        const experienceLoss =
+            reason === "boss-victory" || reason === "boss-wipe"
+                ? null
+                : this.#applyExperienceDeathPenalty(player, causeId);
         this.#resetPlayerAtCheckpoint(player, overridePosition);
-        this.#recordPlayerRespawn(player, reason, causeId, deathPosition);
+        this.#recordPlayerRespawn(player, reason, causeId, deathPosition, experienceLoss);
         return true;
+    }
+
+    #applyExperienceDeathPenalty(player, causeId) {
+        const loss = player.experience.loseForDeath();
+        if (player.experience.pendingRewardCount <= 0) this.augmentRewards.delete(player.id);
+        if (loss.amount > 0) this.recordReplicationEvent("experience-lost", { playerId: player.id, causeId, ...loss });
+        return loss;
     }
 
     #resetPlayerAtCheckpoint(player, overridePosition = null) {
@@ -4365,7 +4392,7 @@ export class GameSimulation {
         });
     }
 
-    #recordPlayerRespawn(player, reason, causeId, deathPosition = player.physics.position) {
+    #recordPlayerRespawn(player, reason, causeId, deathPosition = player.physics.position, experienceLoss = null) {
         const normalizedDeathPosition = this.#deathPosition(deathPosition);
         const statusType = this.isSeamlessSectorWorld ? "sector-respawn" : "checkpoint-respawn";
         this.metrics.recordDefeat();
@@ -4376,7 +4403,8 @@ export class GameSimulation {
             reason,
             causeId,
             deathPosition: normalizedDeathPosition,
-            position: player.physics.position.clone()
+            position: player.physics.position.clone(),
+            experienceLoss
         };
         this.recordReplicationEvent("player-respawned", {
             playerId: player.id,
@@ -4385,7 +4413,8 @@ export class GameSimulation {
             statusType,
             health: player.health,
             deathPosition: normalizedDeathPosition,
-            position: { x: player.physics.position.x, y: player.physics.position.y }
+            position: { x: player.physics.position.x, y: player.physics.position.y },
+            experienceLoss
         });
         this.resets += 1;
     }
@@ -4430,6 +4459,7 @@ export class GameSimulation {
             projectiles: this.objects.playerProjectiles.renderSnapshots(),
             enemyProjectiles: this.objects.enemyProjectiles.renderSnapshots(),
             augmentProjectiles: playerState.augmentRuntimeState.combat.spellProjectiles,
+            augmentAreas: playerState.augmentRuntimeState.combat.spellAreas,
             playerHealth: playerState.health,
             playerMaxHealth: playerState.maxHealth,
             ropeDisabledRemaining: playerState.ropeDisabledRemaining,

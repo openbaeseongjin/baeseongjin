@@ -12,6 +12,7 @@ import {
     RopeRenderer,
     RopeShotRenderer,
     SwingRenderer,
+    SpellEffectRenderer,
     WorldGeometryRenderer,
     localRopes,
     localShots,
@@ -305,6 +306,7 @@ export class SpriteSceneRenderer {
                 size: { width: 12, height: 8 },
                 category: "augmentProjectiles"
             }),
+            new SpellEffectRenderer(),
             new SpriteProjectileRenderer({
                 selectProjectiles: (scene) =>
                     (scene.enemyProjectiles ?? []).filter(

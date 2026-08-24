@@ -1,5 +1,6 @@
 export const STATUS_EFFECT_ID = Object.freeze({
     ELECTRIFIED: "electrified",
+    HIGH_VOLTAGE: "high-voltage",
     IGNITED: "ignited",
     FROZEN: "frozen"
 });
@@ -23,6 +24,22 @@ export const STATUS_EFFECT_SPEC = Object.freeze({
             shape: "streak",
             motion: "orbit",
             glow: 0.18
+        })
+    }),
+    HIGH_VOLTAGE: Object.freeze({
+        id: STATUS_EFFECT_ID.HIGH_VOLTAGE,
+        durationSeconds: 1.5,
+        pulseSeconds: 0.05,
+        totalDamage: 75,
+        particle: Object.freeze({
+            palette: ELECTRIC_PALETTE,
+            count: 7,
+            size: 3,
+            speed: 95,
+            lifetime: 0.35,
+            shape: "streak",
+            motion: "orbit",
+            glow: 0.28
         })
     }),
     IGNITED: Object.freeze({

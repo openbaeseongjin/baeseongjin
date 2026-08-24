@@ -16,11 +16,11 @@ const FIXED_TURRET_TYPE = Object.freeze({
 });
 
 export function enemyImpactDisplacementEnabled(enemyType) {
-    return DIRECT_PLAYER_PURSUIT_TYPE[enemyType] === true;
+    return FIXED_TURRET_TYPE[enemyType] !== true;
 }
 
 export function enemyMobilityKind(enemyType) {
-    return enemyImpactDisplacementEnabled(enemyType)
+    return DIRECT_PLAYER_PURSUIT_TYPE[enemyType] === true
         ? ENEMY_MOBILITY_KIND.DIRECT_PLAYER_PURSUIT
         : ENEMY_MOBILITY_KIND.AUTHORED_POSITION;
 }

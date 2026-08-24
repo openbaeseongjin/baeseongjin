@@ -65,8 +65,16 @@ class SpellProjectile extends withPhysics(class {}) {
         splashEffectId = null,
         knockbackDistance = 0,
         knockbackDurationSeconds = 0,
+        knockbackImpulse = 0,
+        knockbackMode = "outward",
         statusEffectId = null,
-        piercedTargetIds = []
+        piercedTargetIds = [],
+        targetsBodyCollision = true,
+        auraRadius = 0,
+        auraDamage = 0,
+        auraEffectId = null,
+        auraStatusEffectId = null,
+        auraTargetIds = []
     }) {
         super();
         this.id = id;
@@ -85,9 +93,17 @@ class SpellProjectile extends withPhysics(class {}) {
         this.splashEffectId = splashEffectId;
         this.knockbackDistance = knockbackDistance;
         this.knockbackDurationSeconds = knockbackDurationSeconds;
+        this.knockbackImpulse = knockbackImpulse;
+        this.knockbackMode = knockbackMode;
         this.statusEffectId = statusEffectId;
         this.collisionPolicy = spellProjectileCollisionPolicy(piercing);
         this.piercedTargetIds = new Set(piercedTargetIds);
+        this.targetsBodyCollision = targetsBodyCollision;
+        this.auraRadius = auraRadius;
+        this.auraDamage = auraDamage;
+        this.auraEffectId = auraEffectId;
+        this.auraStatusEffectId = auraStatusEffectId;
+        this.auraTargetIds = new Set(auraTargetIds);
         this.initializePhysics({
             position: { x: position.x, y: position.y },
             velocity: { x: direction.x * speed, y: direction.y * speed }
@@ -113,8 +129,16 @@ class SpellProjectile extends withPhysics(class {}) {
             splashEffectId: this.splashEffectId,
             knockbackDistance: this.knockbackDistance,
             knockbackDurationSeconds: this.knockbackDurationSeconds,
+            knockbackImpulse: this.knockbackImpulse,
+            knockbackMode: this.knockbackMode,
             statusEffectId: this.statusEffectId,
-            piercedTargetIds: Object.freeze([...this.piercedTargetIds])
+            piercedTargetIds: Object.freeze([...this.piercedTargetIds]),
+            targetsBodyCollision: this.targetsBodyCollision,
+            auraRadius: this.auraRadius,
+            auraDamage: this.auraDamage,
+            auraEffectId: this.auraEffectId,
+            auraStatusEffectId: this.auraStatusEffectId,
+            auraTargetIds: Object.freeze([...this.auraTargetIds])
         });
     }
 }
@@ -154,7 +178,30 @@ export class SpellProjectileState {
                   })
                 : surfaces;
             const wallRatio = firstSurfaceHitRatio(start, end, collisionSurfaces);
-            const contacts = targets
+            if (projectile.auraRadius > 0) {
+                for (const target of targets) {
+                    if (
+                        projectile.auraTargetIds.has(target.id) ||
+                        !projectile.targetPolicy.allows(projectile.ownerId, target.id) ||
+                        target.health <= SPELL_RUNTIME_SPEC.ZERO ||
+                        distancePointToSegment(target.position, start, end) >
+                            projectile.auraRadius + (target.radius ?? target.collider?.radius ?? 0)
+                    )
+                        continue;
+                    projectile.auraTargetIds.add(target.id);
+                    emitImpact({
+                        eventId: SPELL_KEY.projectileImpact(projectile.id, target.id),
+                        target,
+                        effectId: projectile.auraEffectId ?? projectile.spellId,
+                        sourceKind: SPELL_SOURCE_KIND.AREA,
+                        damage: projectile.auraDamage,
+                        sourcePosition: start,
+                        contactPosition: target.position,
+                        statusEffectId: projectile.auraStatusEffectId
+                    });
+                }
+            }
+            const contacts = (projectile.targetsBodyCollision ? targets : [])
                 .filter(
                     (target) =>
                         projectile.targetPolicy.allows(projectile.ownerId, target.id) &&
@@ -195,13 +242,17 @@ export class SpellProjectileState {
                     contactPosition: target.position,
                     statusEffectId: projectile.statusEffectId,
                     knockback:
-                        projectile.knockbackDistance > 0
-                            ? Object.freeze({
-                                  direction: projectile.direction,
-                                  distance: projectile.knockbackDistance,
-                                  durationSeconds: projectile.knockbackDurationSeconds
-                              })
-                            : null
+                        projectile.knockbackMode === "inward"
+                            ? null
+                            : projectile.knockbackImpulse > 0
+                              ? Object.freeze({ direction: projectile.direction, impulse: projectile.knockbackImpulse })
+                              : projectile.knockbackDistance > 0
+                                ? Object.freeze({
+                                      direction: projectile.direction,
+                                      distance: projectile.knockbackDistance,
+                                      durationSeconds: projectile.knockbackDurationSeconds
+                                  })
+                                : null
                 });
             }
             const hitEnemy = projectile.collisionPolicy.terminatesAfterContacts(resolvedContacts);
@@ -238,17 +289,25 @@ export class SpellProjectileState {
                         contactPosition: target.position,
                         statusEffectId: projectile.statusEffectId,
                         knockback:
-                            projectile.knockbackDistance > 0
+                            projectile.knockbackImpulse > 0
                                 ? Object.freeze({
-                                      direction: directionBetween(
-                                          impactPosition,
-                                          target.position,
-                                          projectile.direction
-                                      ),
-                                      distance: projectile.knockbackDistance,
-                                      durationSeconds: projectile.knockbackDurationSeconds
+                                      direction:
+                                          projectile.knockbackMode === "inward"
+                                              ? directionBetween(target.position, impactPosition, projectile.direction)
+                                              : directionBetween(impactPosition, target.position, projectile.direction),
+                                      impulse: projectile.knockbackImpulse
                                   })
-                                : null
+                                : projectile.knockbackDistance > 0
+                                  ? Object.freeze({
+                                        direction: directionBetween(
+                                            impactPosition,
+                                            target.position,
+                                            projectile.direction
+                                        ),
+                                        distance: projectile.knockbackDistance,
+                                        durationSeconds: projectile.knockbackDurationSeconds
+                                    })
+                                  : null
                     });
                 }
             }

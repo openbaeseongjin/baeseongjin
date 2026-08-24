@@ -31,11 +31,14 @@ function normalizeKnockback(knockback) {
     if (direction.length() === 0) throw new Error("knockback.direction must be non-zero");
     return Object.freeze({
         direction: direction.normalize(),
-        distance: assertFinite(knockback.distance, "knockback.distance", { minimum: 0, exclusiveMinimum: true }),
-        durationSeconds: assertFinite(knockback.durationSeconds, "knockback.durationSeconds", {
-            minimum: 0,
-            exclusiveMinimum: true
-        })
+        impulse:
+            knockback.impulse !== undefined
+                ? assertFinite(knockback.impulse, "knockback.impulse", { minimum: 0, exclusiveMinimum: true })
+                : assertFinite(knockback.distance, "knockback.distance", { minimum: 0, exclusiveMinimum: true }) /
+                  assertFinite(knockback.durationSeconds, "knockback.durationSeconds", {
+                      minimum: 0,
+                      exclusiveMinimum: true
+                  })
     });
 }
 
@@ -85,7 +88,7 @@ export function resolvePlayerEnemyImpact({
     tombstones = null
 }) {
     const normalizedTargetId = assertId(targetId, "targetId");
-    const normalizedDamage = assertFinite(damage, "damage", { minimum: 0, exclusiveMinimum: true });
+    const normalizedDamage = assertFinite(damage, "damage", { minimum: 0 });
     const normalizedSourcePosition =
         sourcePosition === null || sourcePosition === undefined
             ? null
@@ -117,10 +120,10 @@ export function resolvePlayerEnemyImpact({
     if (
         displacementAllowed &&
         normalizedKnockback &&
-        typeof target.canApplyImpactKnockback === "function" &&
-        target.canApplyImpactKnockback(normalizedKnockback)
+        typeof target.canApplyExternalImpulse === "function" &&
+        target.canApplyExternalImpulse(normalizedKnockback)
     ) {
-        target.applyImpactKnockback(normalizedKnockback);
+        target.applyExternalImpulse(normalizedKnockback);
         knockbackApplied = true;
     }
 

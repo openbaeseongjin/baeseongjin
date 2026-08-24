@@ -72,7 +72,7 @@
 | 몹·적 투사체·공용 월드         | 서버 상태                                   | 서버 스냅샷과 생성·해결 사건을 적용하고 연속 위치만 보간·제한 외삽                                                                                |
 | 최초 입장·재접속               | 서버가 보존한 최신 공유 상태                | 전체 소유자 상태를 한 번 복원한 뒤 다시 클라이언트 우선 시뮬레이션 시작                                                                           |
 
-현재 player-impact 프로토콜 v15는 impact ID, client tick, 충돌 자료, 관측 피해, 부활 여부와 공통 상태이상·Spell·Experience를 포함한 상태 지문을 운반한다. 피격 후 무적 타이머는 recovery state와 지문에 포함하지 않는다. augment-impact v5의 성공 결과도 `applied`, `shield-blocked`, `target-already-dead`만 허용하고 시간 기반 무적으로 후속 피해를 `duplicate` 처리하지 않는다. `jammer-shock`은 owner-motion v10의 Rope attachment와 감전 Pool 상태를 검증한다. 결과 지문이 다를 때만 최신 피해자 상태를 한 번 요청한다.
+현재 player-impact 프로토콜 v15는 impact ID, client tick, 충돌 자료, 관측 피해, 부활 여부와 공통 상태이상·Spell·Experience를 포함한 상태 지문을 운반한다. 피격 후 무적 타이머는 recovery state와 지문에 포함하지 않는다. augment-impact v5의 성공 결과도 `applied`, `shield-blocked`, `target-already-dead`만 허용하고 시간 기반 무적으로 후속 피해를 `duplicate` 처리하지 않는다. `jammer-shock`은 owner-motion v11의 Rope attachment와 감전 Pool 상태를 검증한다. 결과 지문이 다를 때만 최신 피해자 상태를 한 번 요청한다.
 
 상태 지문은 raw 플레이어 객체 전체의 정확 일치 해시가 아니다. impact가 소유하는 지속 결과만 결정적 순서로 투영하고, 위치·속도·로프 기하는 0.1 단위, 남은 수명 타이머는 1/120초 tick, 체력·무기 수치는 0.001 단위로 양자화한 뒤 비암호학적 64비트 FNV-1a를 계산한다. 일반 본체 피격은 HP·속도·생명 상태, 로프 절단은 부착 여부·재부착 제한, 치명 피격은 여기에 체크포인트 위치·로프·무기·generic Augment 순간 상태를 포함한다. 입력 포인터·렌더 상태와 다른 동기화 경계가 소유한 값은 제외한다. 이 지문은 불일치 감지용이며 인증이나 치트 방지 증거가 아니다.
 
@@ -197,7 +197,7 @@ Boss06 공격형 몹 소환은 서버 중립 사건이다. Boss Runtime이 15초
 
 generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. `AugmentLoadoutState`, `augment-selection`, `augmentRewards`는 이전 snapshot과 wire 호환을 위한 이름이며 과거 Augment 3종 gameplay를 뜻하지 않는다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 호환 `augment-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 대상 Player state의 `respawnAnchorId`가 가리키는 최근 직접 접촉 Stage checkpoint로 되돌리며 선택 카드와 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
-기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. WorldSnapshot v17은 각 Player의 개인 anchor, Spell 슬롯·쿨다운, Experience, 공통 상태이상 Pool과 Augment loadout을 복제하며 피격 후 무적 타이머는 포함하지 않는다.
+기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. WorldSnapshot v17은 각 Player의 개인 anchor, Spell 슬롯·쿨다운·charge·area·Passive, Experience, 공통 상태이상 Pool과 Augment loadout을 복제하며 피격 후 무적 타이머는 포함하지 않는다.
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·authorityTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
@@ -221,7 +221,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 
 각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
 
-- `owner-motion` protocol v10은 Rope joint와 함께 Spell·Experience·공통 상태이상 Pool을 보낸다.
+- `owner-motion` protocol v11은 Rope joint와 함께 Spell·Experience·공통 상태이상 Pool을 보낸다.
 - `WorldSnapshot` protocol v17의 각 Player는 Rope joint, `selectedAugmentIds`, `augmentRuntimeState`, Experience와 공통 `statusEffects`를 포함한다.
 - 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
 - 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 도착한 최신 detached `owner-motion`은 같은 tick의 위치·속도·각도와 함께 해제를 원자적으로 확정하며, 이후 도착한 과거 tick은 성공한 no-op으로 무시한다.
@@ -383,7 +383,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 - offer는 owner와 서버가 `runSeed + stablePlayerId + rewardLevel`로 독립 재계산하고 snapshot의 pending XP reward를 보존한다.
 - Rope·Spell의 Enemy·Boss 적중은 공격 owner가 먼저 시뮬레이션하고 서버가 확정한다. 다른 Player 피격은 피해 Player가 먼저 적용해 claim하며, 막타 XP는 서버 확정 결과에서 한 번 귀속한다.
-- 피해 클라이언트의 `IncomingSpellImpactDetector`는 owner-motion에 복제된 원격 Spell projectile의 이전·현재 위치를 공통 선분 충돌로 검사한다. 피해·상태이상·넉백을 로컬 `GameSimulation`에 먼저 적용하고, 인증된 피해 Player가 `AugmentImpactClaim`을 보내며 서버는 원인 Spell definition과 source Player loadout을 검증한다. 같은 event ID는 서버에서 한 번만 확정한다.
+- 피해 클라이언트의 `IncomingSpellImpactDetector`는 owner-motion v11에 복제된 원격 Spell projectile·이동 aura·단발 area의 이전·현재 형상을 검사한다. 피해·상태이상·외부 Impulse를 로컬 `GameSimulation`에 먼저 적용하고 인증된 피해 Player가 Augment impact v5 claim을 보낸다. 서버는 원인 Spell definition과 source Player loadout을 검증하며 같은 Spell 객체 ID와 대상 ID로 만든 event ID는 한 번만 확정하고 상태 pulse는 전송하지 않는다.
 - `augment-impact`는 event ID, tick, source/target/effect, 접촉 위치, 공식 damage와 선택적 movement intent만 보낸다. 서버는 source card 보유와 수치 공식을 다시 계산한다.
 - live enemy는 `blocksImpactFrom`을 먼저 호출하고, lethal event의 own knockback을 적용하지 않는다. Boss displacement 면역은 public reaction에서 처리한다.
 - 같은 event ID는 같은 receipt를 반환한다. known tombstone은 accepted `target-already-dead` silent no-op, never-known ID는 rejected `target-missing`이다.
