@@ -12,13 +12,13 @@
 - 그래픽·오디오 담당자는 메인 개발자가 공개한 목록과 mock 배치를 이어받아 정식 리소스를 병행 제작한다. 정식 리소스는 메인 개발의 선행 조건이 아니며 검증된 결과만 선택 통합한다.
 - 과거 Specialization은 generic 증강 v1로 대체됐다. Boss·Timer·NPC 범위·Ending 기획은 P1~P5 답변으로 확정됐고 NPC는 예선 핵심 범위에서 제외한다.
 - 각 섹터 일반 구간은 하나의 60초 Timer를 공유한다. 확정될 progress trigger가 +10초를 보충하고 0초부터 Containment Purge Field가 240px/s로 상승한다. 정확한 trigger·origin·개인 사망 복귀는 HOLD다.
-- Boss03·06 진입 때 일반 타이머·Purge와 잔여 시간을 끝낸다. 현재 Boss는 시간 제한 없이 진행하고 일반 전투 피해로 전원 탈락하면 해당 시도만 재시작한다. 별도 Boss Timer와 시간 만료 Arena collapse는 후속 구현이다.
-- 메인 개발자는 `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s` 계약의 HOLD 세 mapping을 확정한 뒤 구현하고 공동 플레이로 최종 수치를 조정한다. Boss03은 이동형 보스몹 상세 기획을 기다리고 Boss06·Boarding은 현행 계약을 유지한다.
+- Boss06 진입 때 일반 타이머·Purge와 잔여 시간을 끝낸다. 현재 Boss는 시간 제한 없이 진행하고 일반 전투 피해로 전원 탈락하면 해당 시도만 재시작한다. 별도 Boss Timer와 시간 만료 Arena collapse는 후속 구현이다.
+- 메인 개발자는 `60초 / 진행 보상 +10초 / cap 60초 / Purge 240px/s` 계약의 HOLD 세 mapping을 확정한 뒤 구현하고 공동 플레이로 최종 수치를 조정한다. Boss06·Boarding은 현행 계약을 유지한다.
 - 8월 22~23일을 마지막 전체 스퍼트, 8월 24일을 기능·콘텐츠 동결일로 둔다.
 
 ## 간트차트
 
-> 이 간트차트의 날짜는 최초 계획 기록이다. 최신 실행 순서는 `두 Boss 월드 정렬 → 신규 Boss03 → Boss03/06 Playtest → Timer/Purge mapping`이며 generic 증강 v1과 Sector 01~~03 획득 Node는 별도 완료 기록을 따른다.
+> 이 간트차트의 날짜는 최초 계획 기록이다. 최신 실행 순서는 `Boss06 Playtest → Timer/Purge mapping`이며 generic 증강 v1과 Sector 01~~03 획득 Node는 별도 완료 기록을 따른다.
 
 기호: `▨` 필수 기획 · `■` mock 구현·검증 · `▦` 정식 리소스 제작 · `◇` 선택 통합 · `★` 최종 스퍼트 · `◆` 마감
 
@@ -61,17 +61,17 @@
 4. 엔딩 기획은 확정됐다. 6-8 Denial 뒤 Final Security·개별 Boarding·Escape 순서로 구현한다.
 5. 정식 그래픽·오디오 리소스는 필수 선행 조건이 아니다. mock 빌드를 기준으로 개발과 검증을 계속하고 준비된 결과만 교체한다.
 6. 일반 타이머·Gate 보충·상승 붕괴·최소 관전 흐름은 확정됐으므로 메인 개발자가 mock 수치로 구현한다. 정확한 수치는 구현 선행 조건이 아니며 공동 플레이 뒤 조정한다.
-7. Boss03·06의 위치·전투 시나리오는 해당 보스 구현의 필수 선행이다. 진입 시 일반 Timer/Purge 종료만 지키고 Boss Timer·시간 만료 흐름은 후속 결정 전 연결하지 않으며, 개발자가 Boss03 전투 내용을 추정하지 않는다.
+7. Boss06의 위치·전투 시나리오는 해당 보스 구현의 필수 선행이다. 진입 시 일반 Timer/Purge 종료만 지키고 Boss Timer·시간 만료 흐름은 후속 결정 전 연결하지 않는다.
 
 ## 확정 상태와 남은 조정
 
 | 항목 | 현재 확정 | 추가 확정 필요 | 차단하는 작업 |
 | --- | --- | --- | --- |
 | 섹터 일반 구간 타이머 | 섹터 전체 공유, progress reward `+10초`, cap `60초`, 0초부터 Purge `240px/s`, 다음 섹터에서 새 Timer | reward trigger·Field origin·개인 사망 복귀, 최종 cue | HOLD 세 mapping이 Runtime 구현을 차단 |
-| Boss | Sector 03·06 끝의 두 개; Boss03 재기획 중, Boss06·Boarding 유지 | Boss03 상세, 최종 수치 | Boss03 신규 개발 대기, Boss06 실제 검증 필요 |
-| 보스 전투 타이머 | **후속 범위**; 현재 Boss03·06에는 Timer·시간 만료 Arena collapse 없음 | 최종 시간·붕괴 속도, 관전·탈락·cue | 두 Boss 실제 전투 뒤 별도 구현 |
+| Boss | Sector 06 끝의 Boss06; Boarding 유지 | 최종 수치 | Boss06 실제 검증 필요 |
+| 보스 전투 타이머 | **후속 범위**; 현재 Boss06에는 Timer·시간 만료 Arena collapse 없음 | 최종 시간·붕괴 속도, 관전·탈락·cue | Boss06 실제 전투 뒤 별도 구현 |
 
-일반 타이머는 Prototype baseline으로 구현한 뒤 Q1 누적 플레이테스트에서 팀과 기획자가 함께 조정한다. Boss03은 상세 계약 전 추정하지 않고 Boss06·Boarding은 현행 계약을 유지한다. 상세 흐름은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)와 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)를 따른다.
+일반 타이머는 Prototype baseline으로 구현한 뒤 Q1 누적 플레이테스트에서 팀과 기획자가 함께 조정한다. Boss06·Boarding은 현행 계약을 유지한다. 상세 흐름은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)와 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)를 따른다.
 
 ## 주요 마감
 

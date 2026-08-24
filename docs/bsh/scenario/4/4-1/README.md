@@ -7,7 +7,7 @@
 > Previous REV2: **SUPERSEDED — MAP SIMILARITY FAIL vs 2-6**
 > Legacy Runtime `sector-04-01 / TRANSIT INTAKE`: **SUPERSEDED FOR NEW AUTHORING**
 > New 4-1 Runtime: **GENERATED / PLAYABLE**
-> Post-Sector03 Boss / Transition → 4-1: **TBD**
+> Post-Sector03 transition → 4-1: **DIRECT AUTHORED PORTAL — 3-8 → 4-1**
 
 ---
 

@@ -35,7 +35,7 @@
 
 - 기획(`BOSS-06-BRIEF.md` §3 최우선 3, `FINAL-PREFLIGHT.md` §13 하드 게이트, `IMPLEMENTATION-PREFLIGHT.md` §13, `BLOCKOUT-QA.md` §6, `README.md`): 실제 로프 부착 가능 대상은 **정확히 U1~U8 + RR1 + RR3뿐**이어야 하며, Main Runway·보조 발판·복구 발판·탑승 발판은 부착 금지.
 - 코드(`Boss06Stage.generated.js`): `main-runway`(163줄), `ledge-left`/`ledge-right`(174/186줄), `recovery-left`/`recovery-right`(196/207줄), `departure-deck`(218줄)이 전부 `grappleable:true`로 authored되어 있다.
-- 원인: `BossStageSpecValidator.js:124` 등 공용 검증기가 `collision !== false`인 모든 surface에 대해 `grappleable === true`를 강제하는 엔진 전역 규칙이며, 이미 배포된 Boss03도 동일 패턴이다. 즉 Boss06만의 버그라기보다 엔진 제약과 기획 문서 간의 정합화 누락에 가깝다.
+- 원인: `BossStageSpecValidator.js:124` 등 공용 검증기가 `collision !== false`인 모든 surface에 대해 `grappleable === true`를 강제하는 엔진 전역 규칙이다. 즉 Boss06만의 버그라기보다 엔진 제약과 기획 문서 간의 정합화 누락에 가깝다.
 - 참고로 `RUNTIME-ALIGNMENT.md`(후속 문서)는 이미 이 차이를 "Main/Gate는 grappleable true"로 조용히 수정 반영했으나, BRIEF/COMPONENTS/FINAL-PREFLIGHT/IMPLEMENTATION-PREFLIGHT/BLOCKOUT-QA/README 6개 문서는 갱신되지 않아 여전히 "정확히 10개 대상만" 규칙을 하드 게이트로 명시하고 있다.
 - 조치 필요: (a) 엔진 제약을 받아들이고 6개 문서를 갱신하거나, (b) 정말 기획대로 비-그래플 solid surface를 지원하도록 검증기를 확장한다. 현재 상태로는 문서와 코드 중 어느 쪽이 맞는 기준인지 팀 내 합의가 없다.
 

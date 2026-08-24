@@ -199,7 +199,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·authorityTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
-현재 저작 시나리오는 영구 Stage cursor나 summit claim을 사용하지 않는다. 서버와 owner prediction의 같은 `GameSimulation`은 authored Gate objective·trigger를 통과한 Player 한 명에게 `gate-portal-entered`를 만들고 다음 authored Entry로 즉시 이동한다. Player별 savepoint 충돌은 owner-first claim으로 수렴한다. 3-8 Gate만 Boss03 완료 전에는 Boss entry, 완료 뒤에는 4-1 Entry를 사용한다. 4-8·5-8은 각각 5-1·6-1 Entry로 직접 이동하고 6-8은 terminal Boss06 entry만 연다.
+현재 저작 시나리오는 영구 Stage cursor나 summit claim을 사용하지 않는다. 서버와 owner prediction의 같은 `GameSimulation`은 authored Gate objective·trigger를 통과한 Player 한 명에게 `gate-portal-entered`를 만들고 다음 authored Entry로 즉시 이동한다. Player별 savepoint 충돌은 owner-first claim으로 수렴한다. 3-8·4-8·5-8은 각각 4-1·5-1·6-1 Entry로 직접 이동하고 6-8은 terminal Boss06 entry만 연다.
 
 1-4·2-3·3-5 explicit Augment Node 선택은 개인 입력 중립화와 공용 시계 지속 원칙을 사용한다. owner client는 Node 근처에서 공식 `runSeed + stablePlayerId + selectionIndex` offer를 즉시 열고 `augment-offer` claim으로 pending entitlement를 서버에 보존한다. 확정은 호환 `foundation-selection` claim을 사용하지만 의미는 generic Augment다. 서버는 연결 소유권·tick·stable source ID·반경·공식 offer membership·Player별 source 소비를 검증하고 멱등 확정한다. 현재 채널 Player 전원이 source를 소비한 뒤 공유 objective를 한 번 완료하며, 완료 전 퇴장한 Player는 요구 집합에서 제거해 route 교착을 막는다. 완료 뒤 합류 Player도 Node에서 자기 offer를 독립 확정할 수 있지만 열린 route를 다시 잠그지 않는다. 사망·Stage 세이브 포인트 부활·landmark 이동과 전원 사망은 선택·consumed source·공용 objective를 보존하고 순간 Action/Rope window만 초기화한다.
 

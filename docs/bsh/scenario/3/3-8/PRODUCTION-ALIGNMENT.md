@@ -2,7 +2,7 @@
 
 Baseline: `cb4f690ac180a04868322e9c4cfe1384897c348b`
 
-Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage08.generated.js`; the generated Stage uses `UPPER EXCHANGE GATE`, `4608×2176`, explicit Preview platform/Anchor topology, 5 enemy slots, C1/C2/C3/C4 Scanner, the existing exit-panel objective interaction, `nextAreaId: null`, and `content-boundary`. Sector 04 remains disconnected.
+Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage08.generated.js`; the generated Stage uses `UPPER EXCHANGE GATE`, `4608×2176`, explicit Preview platform/Anchor topology, 5 enemy slots, C1/C2/C3/C4 Scanner, the existing exit-panel objective interaction, `nextAreaId: null`, and `content-boundary`. The runtime compiles its unlocked Gate to the 4-1 authored Entry as the Sector03→04 direct portal.
 
 ## Pre-cutover legacy baseline
 - `sector-03-08`
@@ -12,6 +12,7 @@ Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage08.genera
 - no required kill
 - `nextAreaId: null`
 - `completionMode: content-boundary`
+- Gate objective + Sector03 Access 3-of-3 → `4-1` authored Entry
 
 ## Direction Runtime VERIFIED
 Direction Runtime v1 exists on main.
@@ -30,6 +31,4 @@ Direction Runtime v1 exists on main.
 
 ## Critical
 Do not infer causality.
-Do not connect directly to Sector04.
-
-Boss03의 Central Exchange Scanner·점검 Arm·좌/중앙/우 route 최종 인계는 [`../../../../boss/03/README.md`](../../../../boss/03/README.md)가 소유한다. 이는 authored content이며 Boss Runtime·전환·Timer를 구현하거나 `3-8` 경계를 연결하지 않는다.
+Do not add a separate Boss or transition geometry: the existing authored Gate portal is the sole Sector03→04 connection.

@@ -9,7 +9,7 @@
 > **Core Story Shift:** `왜 C만 멈췄지? → 같은 사고였는데… 이동 조건은 같지 않았어.`
 > **General Stages:** `3-1 → 3-8`
 > **3-8 Boss:** NONE IN THIS STAGE
-> **Post-Sector Boss / Transition:** TBD
+> **Post-Sector Transition:** Direct authored portal `3-8 → 4-1`
 > **New Enemy Type:** NONE
 > **New Rope Input / Mode:** NONE
 > **Growth:** 3-5에서 generic Augment Offer #3
@@ -151,7 +151,7 @@ Sector 03은 서로 독립된 상업 방 8개가 아니다.
 
 ```text
 SECTOR 04
-TRANSIT / INFRASTRUCTURE
+UPPER RESIDENTIAL / AMENITY
         ↑
 UPPER EXCHANGE
         │
@@ -180,7 +180,7 @@ RESIDENTIAL LIFE
 → BUILDING CORE
 → MONUMENTAL ATRIUM
 → TRANSFER LEVEL
-→ CITY TRANSIT BOUNDARY
+→ UPPER RESIDENTIAL BOUNDARY
 ```
 
 ---
@@ -1173,7 +1173,7 @@ Bark:
 
 3-8 내부 Boss 없음.
 
-Post-Sector Boss / Transition은 TBD.
+3-8의 source objective와 Sector03 Access 3-of-3 뒤 Gate는 4-1 authored Entry로 직접 이동한다.
 
 ---
 
@@ -1580,14 +1580,10 @@ Transition:
 ```text
 UPPER EXCHANGE GATE
 ↓
-POST-SECTOR SAFE / BOSS ENTRY
+DIRECT AUTHORED PORTAL
 ↓
-SECTOR 03 BOSS
-↓
-SECTOR 04 TRANSIT / INFRASTRUCTURE
+SECTOR 04 UPPER RESIDENTIAL / AMENITY
 ```
-
-Boss exact design is still TBD.
 
 ---
 
@@ -1757,7 +1753,7 @@ Sector 03는:
 - 3-5 압축 / 3-6 확장이 강하게 대비
 - 3-6 = spatial climax
 - 3-8 = gameplay mastery finale
-- Sector 04 Transit identity를 침범하지 않음
+- Sector 04 Upper Residential identity를 침범하지 않음
 
 ## Gameplay
 
@@ -1871,8 +1867,8 @@ ARCHIVE CONNECTION
 ↓
 
 POST-SECTOR 03
-BOSS / TRANSITION
-TBD
+DIRECT AUTHORED PORTAL
+4-1
 ```
 
 ---

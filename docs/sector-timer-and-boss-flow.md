@@ -10,8 +10,8 @@
 | Purge 동작 | 확정 | Timer 0초부터 `240px/s`, 보상 중 정지, 다음 0초 재상승, 후퇴 없음 |
 | Purge 접촉 | 확정 | lethal |
 | 전멸 | 확정 | current Sector reset, 보유 성장과 이전 Sector 진행 보존 |
-| Boss 경계 | 확정 | Boss03·06 진입에서 일반 Timer·Purge·잔여 시간 종료, 현재 Boss 전투는 시간 제한 없이 시작 |
-| Boss Timer·Arena collapse | **DEFERRED** | Boss03·06 Runtime·snapshot·HUD·위험 판정에 연결 금지 |
+| Boss 경계 | 확정 | Boss06 진입에서 일반 Timer·Purge·잔여 시간 종료, 현재 Boss 전투는 시간 제한 없이 시작 |
+| Boss Timer·Arena collapse | **DEFERRED** | Boss06 Runtime·snapshot·HUD·위험 판정에 연결 금지 |
 | `+10초` trigger | **HOLD** | seamless landmark/objective 중 어떤 physical transition인지 후속 결정 |
 | 최초 Field origin | **HOLD** | 연속 Sector geometry 안의 시작 위치 후속 결정 |
 | 개인 Purge 사망 복귀 | **HOLD** | Sector-entry 즉시 복귀와 관전·후속 전이 합류 중 후속 결정 |
@@ -60,7 +60,7 @@ Timer는 speedrun 점수가 아니라 안전한 하층 정체를 막는 상승 �
 - 초기 Boss 전투는 별도 Timer나 시간 만료 Arena 위험 없이 진행한다.
 - 일반 `60초 / +10초 / Purge Field`를 Boss에 이어 붙이지 않는다.
 - 대체된 Boss timer prototype 값은 후속 Timer 작업의 구현 입력으로 사용하지 않는다.
-- Boss 전원 탈락은 해당 Boss 시도만 재시작한다. Boss03 처치 뒤 Sector 04 Timer를 새로 시작하고 Boss06 처치 뒤에는 Boarding·run completion으로 진행한다.
+- Boss 전원 탈락은 해당 Boss 시도만 재시작한다. Boss06 처치 뒤에는 Boarding·run completion으로 진행한다.
 
 `1-8` 같은 legacy Stage alias는 migration 주소다. Boss room은 Sector transition slot에 삽입하며 downstream Sector local 좌표와 콘텐츠 ID를 다시 쓰지 않는다.
 

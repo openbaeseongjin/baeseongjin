@@ -26,12 +26,6 @@ const WARDEN_ATTACK_FAMILY_COLOR = Object.freeze({
 
 const KIND = Object.freeze({
     GRAPPLE_ANCHOR: "grapple-anchor",
-    EXCHANGE_MAINTENANCE_BODY: "boss-exchange-maintenance-body",
-    EXCHANGE_RAIL: "boss-exchange-rail",
-    EXCHANGE_ARCHITECTURE: "boss-exchange-architecture",
-    EXCHANGE_ARM: "boss-exchange-arm",
-    EXCHANGE_END_STOP: "boss-exchange-end-stop",
-    EXCHANGE_MODULE: "boss-exchange-module",
     CONTINUITY_WARDEN: "boss-continuity-warden",
     SECURITY_EMITTER: "boss-security-emitter",
     WARDEN_HAZARD: "boss-warden-hazard",
@@ -107,156 +101,6 @@ class GrappleAnchorRenderer extends BossPolygonObjectRenderer {
         context.moveTo(-radius * 0.55, 0);
         context.lineTo(radius * 0.55, 0);
         context.stroke();
-    }
-}
-
-class ExchangeMaintenanceBodyRenderer extends BossPolygonObjectRenderer {
-    drawShape(context, object) {
-        const { width, height } = size(object, 360, 150);
-        const disabled = object.state === "disabled";
-        const telegraph = object.state === "telegraph";
-        context.globalAlpha = disabled ? 0.48 : 1;
-        context.fillStyle = "#7e304c";
-        context.strokeStyle = telegraph ? COLOR.WARNING : disabled ? "#64748b" : "#ff8caf";
-        context.lineWidth = telegraph ? 6 : 4;
-        polygon(context, bossBodyPolygonVertices("central-exchange-maintenance-system", { width, height }));
-        context.fill();
-        context.stroke();
-        context.fillStyle = disabled ? "#475569" : "#63e7ff";
-        context.beginPath();
-        context.arc(0, height * 0.18, height * 0.18, 0, Math.PI * 2);
-        context.fill();
-        context.stroke();
-        context.strokeStyle = "#ff9b67";
-        context.lineWidth = 5;
-        for (const sign of [-1, 1]) {
-            context.beginPath();
-            context.moveTo(sign * width * 0.34, height * 0.08);
-            context.lineTo(sign * width * 0.52, height * 0.32);
-            context.stroke();
-        }
-        context.globalAlpha = 1;
-    }
-}
-
-class ExchangeRailRenderer extends BossPolygonObjectRenderer {
-    drawShape(context, object) {
-        const { width, height } = size(object, 1800, 24);
-        context.globalAlpha = object.state === "disabled" ? 0.45 : 1;
-        context.fillStyle = "#5d2942";
-        context.strokeStyle = object.state === "disabled" ? "#64748b" : "#ff8caf";
-        context.lineWidth = 4;
-        context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
-        for (let x = -width * 0.42; x <= width * 0.42; x += 180) {
-            context.beginPath();
-            context.moveTo(x, -height * 0.5);
-            context.lineTo(x + 60, height * 0.5);
-            context.stroke();
-        }
-        context.globalAlpha = 1;
-    }
-}
-
-const EXCHANGE_ARCHITECTURE_STYLE = Object.freeze({
-    "entry-deck": Object.freeze({ fill: "#31464e", stroke: "#90a5ad" }),
-    gallery: Object.freeze({ fill: "#31464e", stroke: "#90a5ad" }),
-    "media-frame": Object.freeze({ fill: "#233841", stroke: "#5f94a1" }),
-    "safe-landing": Object.freeze({ fill: "#315a47", stroke: "#73d49a" })
-});
-
-class ExchangeArchitectureRenderer extends BossPolygonObjectRenderer {
-    drawShape(context, object) {
-        const { width, height } = size(object, 240, 42);
-        const style = EXCHANGE_ARCHITECTURE_STYLE[object.variant] ?? EXCHANGE_ARCHITECTURE_STYLE.gallery;
-        context.fillStyle = style.fill;
-        context.strokeStyle = style.stroke;
-        context.lineWidth = object.variant === "safe-landing" ? 5 : 3;
-        context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
-        if (object.variant === "media-frame") {
-            context.strokeStyle = "rgba(99, 231, 255, 0.45)";
-            for (let x = -width * 0.35; x < width * 0.4; x += 54) {
-                context.beginPath();
-                context.moveTo(x, -height * 0.42);
-                context.lineTo(x + 24, height * 0.42);
-                context.stroke();
-            }
-        }
-    }
-}
-
-class ExchangeArmRenderer extends BossPolygonObjectRenderer {
-    drawShape(context, object) {
-        const { width, height } = size(object, 3000, 250);
-        const telegraph = object.state === "telegraph";
-        const sweep = object.state === "sweep";
-        context.globalAlpha = sweep ? 0.52 : telegraph ? 0.3 : 0.12;
-        context.fillStyle = sweep ? "rgba(255, 109, 96, 0.42)" : "rgba(255, 155, 103, 0.22)";
-        context.strokeStyle = sweep ? "#ff6d60" : "#ff9b67";
-        context.lineWidth = sweep ? 7 : 4;
-        context.setLineDash(telegraph ? [28, 18] : []);
-        context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
-        context.setLineDash([]);
-        const progress = Math.max(0, Math.min(1, object.movementProgress ?? 0));
-        const armX = -width * 0.42 + width * 0.84 * progress;
-        context.globalAlpha = sweep ? 0.95 : 0.45;
-        context.strokeStyle = "#ffc08a";
-        context.lineWidth = 18;
-        context.beginPath();
-        context.moveTo(armX - width * 0.22, -height * 0.22);
-        context.lineTo(armX + width * 0.22, height * 0.22);
-        context.stroke();
-        context.globalAlpha = 1;
-    }
-}
-
-class ExchangeEndStopRenderer extends BossPolygonObjectRenderer {
-    drawShape(context, object) {
-        const { width, height } = size(object, 120, 90);
-        context.fillStyle = object.state === "damaged" ? "#4b342d" : "#8d5134";
-        context.strokeStyle = object.state === "damaged" ? COLOR.HAZARD : "#ffc08a";
-        context.lineWidth = 4;
-        context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeStyle = "#fcd34d";
-        for (const sign of [-1, 1]) {
-            context.beginPath();
-            context.moveTo(sign * width * 0.16, -height * 0.42);
-            context.lineTo(sign * width * 0.32, height * 0.42);
-            context.stroke();
-        }
-    }
-}
-
-class ExchangeModuleRenderer extends BossPolygonObjectRenderer {
-    drawShape(context, object) {
-        const { width, height } = size(object, 96, 96);
-        const radius = Math.min(width, height) * 0.42;
-        const exposed = object.state === "exposed";
-        const broken = object.state === "broken";
-        context.globalAlpha = broken ? 0.38 : 1;
-        context.fillStyle = exposed ? "#ffe36c" : broken ? "#4b5563" : "#ff5360";
-        context.strokeStyle = exposed ? "#fff7b2" : "#f8fafc";
-        context.lineWidth = exposed ? 6 : 3;
-        context.beginPath();
-        if (object.variant === "central-core") {
-            context.moveTo(0, -radius);
-            context.lineTo(radius, 0);
-            context.lineTo(0, radius);
-            context.lineTo(-radius, 0);
-            context.closePath();
-        } else context.arc(0, 0, radius, 0, Math.PI * 2);
-        context.fill();
-        context.stroke();
-        if (broken) {
-            context.beginPath();
-            context.moveTo(-radius * 0.7, radius * 0.7);
-            context.lineTo(radius * 0.7, -radius * 0.7);
-            context.stroke();
-        }
-        context.globalAlpha = 1;
     }
 }
 
@@ -508,12 +352,6 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
 const GENERIC_RENDERER = new GenericRenderer();
 const RENDERER_BY_KIND = Object.freeze({
     [KIND.GRAPPLE_ANCHOR]: new GrappleAnchorRenderer(),
-    [KIND.EXCHANGE_MAINTENANCE_BODY]: new ExchangeMaintenanceBodyRenderer(),
-    [KIND.EXCHANGE_RAIL]: new ExchangeRailRenderer(),
-    [KIND.EXCHANGE_ARCHITECTURE]: new ExchangeArchitectureRenderer(),
-    [KIND.EXCHANGE_ARM]: new ExchangeArmRenderer(),
-    [KIND.EXCHANGE_END_STOP]: new ExchangeEndStopRenderer(),
-    [KIND.EXCHANGE_MODULE]: new ExchangeModuleRenderer(),
     [KIND.CONTINUITY_WARDEN]: new ContinuityWardenRenderer(),
     [KIND.SECURITY_EMITTER]: new SecurityEmitterRenderer(),
     [KIND.WARDEN_HAZARD]: new ZoneRenderer(),

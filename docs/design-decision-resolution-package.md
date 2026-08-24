@@ -8,18 +8,18 @@
 
 ## 2. Boss
 
-제품 Boss는 Sector 03·06 끝의 두 개다.
+제품 Boss는 Sector 06 끝의 Boss06 하나다.
 
 | 경계 | 계약 |
 | --- | --- |
 | 1-8 → 2-1 | 일반 Stage objective·Access 조건 뒤 직접 Gate portal |
 | 2-8 → 3-1 | 일반 Stage objective·Access 조건 뒤 직접 Gate portal |
-| 3-8 → Boss03 → 4-1 | 독립 Boss Stage; 이동형 보스몹 재기획 중, Scanner·Arm Runtime 임시 유지 |
+| 3-8 → 4-1 | Sector03 objective·Access 조건 뒤 직접 Gate portal |
 | 4-8 → 5-1 | 2-of-3 quorum과 objective 뒤 직접 Gate portal |
 | 5-8 → 6-1 | objective 뒤 직접 Gate portal |
 | 6-8 → Boss06 → Boarding → Escape | CONTINUITY WARDEN과 terminal completion 유지 |
 
-Boss03은 일반몹이 아니라 공간을 이동하며 Player와 직접 싸우는 보스몹이다. 새 기획 전까지 기존 Atrium·Scanner·Arm의 정체성·공격·수치를 신규 구현 입력으로 사용하지 않는다. Boss06의 단일 body·Guard/Counter·Security·개별 Boarding 계약은 [boss/06/README.md](./boss/06/README.md)가 소유한다.
+Boss06의 단일 body·Guard/Counter·Security·개별 Boarding 계약은 [boss/06/README.md](./boss/06/README.md)가 소유한다.
 
 ## 3. 일반 Timer / Purge
 
@@ -29,12 +29,12 @@ PROGRESS REWARD: +10 sec
 TIMER CAP: 60 sec
 CONTAINMENT PURGE FIELD: 240 world px/sec
 PURGE CONTACT: lethal
-BOSS03/06 ENTRY: general Timer/Purge 종료, 잔여 시간 폐기
+BOSS06 ENTRY: general Timer/Purge 종료, 잔여 시간 폐기
 ~~~
 
 Field는 보상 중 현재 높이에서 멈추고 다음 0초부터 같은 위치에서 재상승한다. 전멸은 current Sector만 reset하고 Player별 증강과 이전 Sector 진행은 보존한다. 정확한 reward trigger·최초 Field origin·개인 Purge 사망 복귀는 HOLD이며 [sector-timer-and-boss-flow.md](./sector-timer-and-boss-flow.md)가 소유한다.
 
-Boss Timer와 시간 만료 Arena collapse는 후속 범위다. 현재 Boss03·06은 시간 제한 없이 진행하고 전원 탈락 시 해당 Boss 시도만 재시작한다.
+Boss Timer와 시간 만료 Arena collapse는 후속 범위다. 현재 Boss06은 시간 제한 없이 진행하고 전원 탈락 시 해당 Boss 시도만 재시작한다.
 
 ## 4. NPC
 
@@ -56,9 +56,7 @@ Boss Timer와 시간 만료 Arena collapse는 후속 범위다. 현재 Boss03·0
 ## 6. 실행 우선순위
 
 ~~~text
-두 Boss 월드 정렬
-→ 신규 이동형 Boss03 기획·구현
-→ Boss03/06 실제 플레이·멀티 검증
+Boss06 실제 플레이·멀티 검증
 → Timer/Purge topology mapping
 → NPC는 여유가 있을 때만
 ~~~

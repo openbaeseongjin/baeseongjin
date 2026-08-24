@@ -38,11 +38,11 @@ const runtimeCatalogs = Object.freeze([
 const RUNTIME_STAGE_COUNT = 48;
 const SCENARIO_STAGE_COUNT = 0;
 const TOTAL_STAGE_COUNT = RUNTIME_STAGE_COUNT + SCENARIO_STAGE_COUNT;
-const EXPECTED_BOSS_STAGE_IDS = Object.freeze(["boss-03", "boss-06"]);
+const EXPECTED_BOSS_STAGE_IDS = Object.freeze(["boss-06"]);
 const EXPECTED_SECTOR_END_FLOW = Object.freeze({
     "1-8": Object.freeze({ targetStageId: "2-1", bossStageId: null }),
     "2-8": Object.freeze({ targetStageId: "3-1", bossStageId: null }),
-    "3-8": Object.freeze({ targetStageId: "4-1", bossStageId: "boss-03" }),
+    "3-8": Object.freeze({ targetStageId: "4-1", bossStageId: null }),
     "4-8": Object.freeze({ targetStageId: "5-1", bossStageId: null }),
     "5-8": Object.freeze({ targetStageId: "6-1", bossStageId: null }),
     "6-8": Object.freeze({ targetStageId: null, bossStageId: "boss-06" })

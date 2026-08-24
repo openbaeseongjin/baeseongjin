@@ -27,7 +27,7 @@
 | [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md) | 섹터 `60/+10/cap60` Timer·Purge 240px/s·topology HOLD·보스 분리 기준 |
 | [`design-decision-requests.md`](./design-decision-requests.md) | P1~P5 기획 결정의 확정 답변과 구현 상태 추적 |
 | [`design-decision-resolution-package.md`](./design-decision-resolution-package.md) | Boss·Timer·NPC·Ending의 구현 가능한 통합 기획 계약 |
-| [`boss/README.md`](./boss/README.md) | Boss03 재기획 대기·임시 Runtime과 Boss06 terminal Runtime의 두 Boss 기준 |
+| [`boss/README.md`](./boss/README.md) | Boss06 terminal Runtime 기준 |
 | [`decision-history.md`](./decision-history.md) | 대체되거나 완료된 결정 이력 |
 
 ## 아키텍처와 개발 규칙

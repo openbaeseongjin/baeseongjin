@@ -222,8 +222,6 @@ function cloneSwingDrag(swingDrag) {
 const PORTAL_ARRIVAL_SPACING = PLAYER_CONFIG.radius * 2 + 10;
 const BOSS_WEAKPOINT_RADIUS = 90;
 const BOSS_HAZARD_KIND = Object.freeze({
-    "maintenance-arm-low": true,
-    "maintenance-arm-high": true,
     "baton-1": true,
     "baton-2": true,
     "overhead-slam": true,

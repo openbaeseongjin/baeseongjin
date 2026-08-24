@@ -2723,9 +2723,9 @@ NPC system을 요구하지 않는다.
 
 NPC 도입은 별도 P4 design decision.
 
-### 10. Boss03·06 cadence
+### 10. Boss06 cadence
 
-제품 Boss는 Sector 03·06 끝의 두 개다. Boss03은 이동형 보스몹으로 재기획 중이며, Boss06은 최종 전투와 Boarding을 소유한다. 두 전투의 Tone·Difficulty는 신규 Boss03 기획에서 함께 대조한다.
+제품 Boss는 Sector 06 끝의 Boss06 하나다. Boss06은 최종 전투와 Boarding을 소유한다.
 
 ### 11. Sector05 Runtime Drift — 대부분 RESOLVED
 

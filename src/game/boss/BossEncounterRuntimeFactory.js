@@ -1,9 +1,7 @@
 import { BOSS_MECHANIC_TYPE } from "../boss-authoring/BossStageSpec.js";
-import { CentralExchangeMaintenanceRuntime } from "./CentralExchangeMaintenanceRuntime.js";
 import { ContinuityWardenRuntime } from "./ContinuityWardenRuntime.js";
 
 const ENCOUNTER_RUNTIME_BY_MECHANIC = Object.freeze({
-    [BOSS_MECHANIC_TYPE.CENTRAL_EXCHANGE_MAINTENANCE]: CentralExchangeMaintenanceRuntime,
     [BOSS_MECHANIC_TYPE.CONTINUITY_WARDEN]: ContinuityWardenRuntime
 });
 
