@@ -1,6 +1,7 @@
 import { AreaPreviewGameApp } from "../../src/game/runtime/AreaPreviewGameApp.js";
 import { BossStagePreviewGameApp } from "../../src/game/boss-authoring/editor/BossStagePreviewGameApp.js";
 import { createGameRenderer, resolveRendererProfile } from "../../src/render/GameRendererFactory.js";
+import { SpriteSceneResourceBundle } from "../../src/render/SpriteSceneRenderer.js";
 import { loadDefaultPlayerSpriteDefinition } from "../../src/render/sprites/PlayerSpriteCatalog.js";
 import { loadEnemySpriteDefinitions } from "../../src/render/sprites/EnemySpriteCatalog.js";
 import { loadAuthoredAreaEnvironmentDefinitions } from "../../src/render/environment/AuthoredAreaEnvironmentCatalog.js";
@@ -16,6 +17,7 @@ const weakpointStrikeButton = document.querySelector("#preview-weakpoint-strike"
 const stageId = new URLSearchParams(globalThis.location.search).get("stage");
 let currentApp = null;
 let previewRenderer = null;
+let previewResources = null;
 let flightEnabled = false;
 const PREVIEW_CANVAS_OPTIONS = Object.freeze({
     performancePolicy: Object.freeze({
@@ -73,17 +75,34 @@ async function requestPreview() {
 
 function rendererForPreview(presentation) {
     if (previewRenderer) return previewRenderer;
-    previewRenderer = createGameRenderer({
-        canvas,
-        profile: resolveRendererProfile(globalThis.location.search),
-        canvasOptions: PREVIEW_CANVAS_OPTIONS,
-        sceneRendererOptions: {
+    const profile = resolveRendererProfile(globalThis.location.search);
+    if (profile === "sprite") {
+        previewResources = new SpriteSceneResourceBundle({
             playerDefinition: presentation.playerDefinition,
             enemyDefinitionsBySectorId: presentation.enemyDefinitionsBySectorId,
             authoredAreaEnvironmentDefinitions: presentation.authoredAreaEnvironmentDefinitions
-        }
+        });
+    }
+    previewRenderer = createGameRenderer({
+        canvas,
+        profile,
+        canvasOptions: PREVIEW_CANVAS_OPTIONS,
+        sceneRendererOptions: previewResources ? { resources: previewResources } : {}
     });
     return previewRenderer;
+}
+
+function previewGraphicsIdentity(areaId) {
+    const match = /^(sector-\d{2})-\d{2}$/.exec(areaId ?? "");
+    if (!match) throw new Error(`미리보기 Area의 그래픽 package를 확인할 수 없습니다: ${areaId}`);
+    return Object.freeze({ areaId, sectorId: match[1] });
+}
+
+async function preparePreviewGraphics(areaId) {
+    if (!previewResources) return;
+    const identity = previewGraphicsIdentity(areaId);
+    await previewResources.prepareArea(identity);
+    void previewResources.prepareRemaining(identity);
 }
 
 async function createPreview() {
@@ -101,9 +120,11 @@ async function createPreview() {
             const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(
                 preview.spec.sourceAreaId
             );
+            const renderer = rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions });
+            await preparePreviewGraphics(preview.spec.sourceAreaId);
             currentApp = new BossStagePreviewGameApp({
                 canvas,
-                renderer: rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions }),
+                renderer,
                 bossStageSpec: preview.spec,
                 revision,
                 playerDefinition: presentation.playerDefinition,
@@ -121,9 +142,11 @@ async function createPreview() {
             return;
         }
         const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(areaId);
+        const renderer = rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions });
+        await preparePreviewGraphics(areaId);
         currentApp = new AreaPreviewGameApp({
             canvas,
-            renderer: rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions }),
+            renderer,
             areaId,
             previewArea,
             playerDefinition: presentation.playerDefinition,
