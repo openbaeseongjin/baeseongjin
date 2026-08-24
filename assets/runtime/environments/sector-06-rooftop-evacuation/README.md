@@ -4,9 +4,12 @@
 
 - Package ID: `environment-sector-06-rooftop-evacuation`
 - 적용 범위: `sector-06-01`~`sector-06-08`
+- 상태: depth-island 배경 + Sector 06 Rooftop Evacuation terrain skin Runtime 통합
 - 원본: `assets/artwork/environments/sector-06-rooftop-evacuation-background/`
+- Terrain 원본·export: `assets/artwork/environments/sector-06-rooftop-evacuation-platforms/`
 - Runtime 입력: opaque fixed background 1장과 좌·우 RGBA parallax island 2장, 모두 `1024×1536`
-- 비범위: Collision, Terrain geometry, Camera, Stage progression, Enemy, Rope, Network authority
+- Terrain 크기: RGBA fill `32×32`, RGBA edge `32×8`
+- 비범위: Collision, one-way edge chain, surface kind, grappleable, Rope, Physics, Camera, Stage progression, Enemy, Network authority
 
 | 레이어 | 역할 | Parallax X/Y | 형식 |
 |---|---|---:|---|
@@ -14,7 +17,9 @@
 | `parallax-island-left` | 좌측 연결 근경 건물 island | `0.060 / 0.070` | `parallax-island-left.png`, RGBA |
 | `parallax-island-right` | 우측 연결 근경 건물 island | `0.060 / 0.070` | `parallax-island-right.png`, RGBA |
 
-Runtime은 정규화된 PNG만 nearest sampling과 정수 좌표 이동으로 그린다. depth map 처리, per-frame mask 생성, texture 재생성, WebGL 전용 경로를 추가하지 않는다. Terrain과 Decoration PNG는 manifest v1 fallback 계약만 유지하고 collision geometry를 만들지 않는다.
+Runtime은 정규화된 PNG만 nearest sampling과 정수 좌표 이동으로 그린다. depth map 처리, per-frame mask 생성, texture 재생성, WebGL 전용 경로를 추가하지 않는다. Terrain은 pale aviation-metal walking cap·deep navy의 열린 service-gantry bay·32px 단위 사선 load brace를 기존 collision polygon과 one-way edge chain 위에 그린다. Decoration PNG는 manifest v1 계약을 유지하며 collision geometry를 만들지 않는다.
+
+solid platform은 두꺼운 외부 load-bearing deck와 열린 brace 하부, one-way platform은 authored polygon의 얕은 두께와 중성 pale-steel chain stroke로 구분한다. 일반 terrain에는 antenna·mast·rail·socket·hook 같은 돌출물을 넣지 않으며, muted amber aviation accent는 `landing-pad` zone에만 제한한다. Cyan Rope·Anchor와 Red/Orange Telegraph가 terrain보다 먼저 읽히며 위치·크기·collision·grappleable·Rope·Physics·맵 동선·멀티플레이 상태는 변경하지 않는다.
 
 ## Stage 노출 리듬
 
