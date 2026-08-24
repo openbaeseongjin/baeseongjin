@@ -38,165 +38,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g1"
         },
-        "x": -864,
-        "y": -416
+        "x": -845,
+        "y": -425
       },
       "target": {
         "id": "sector-03-07:g1-surface",
         "properties": {
           "sourceId": "g1"
         },
-        "x": -864,
-        "y": -416
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:o1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "O1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "o1"
-        },
-        "x": -1056,
-        "y": -704
-      },
-      "target": {
-        "id": "sector-03-07:o1-surface",
-        "properties": {
-          "sourceId": "o1"
-        },
-        "x": -1056,
-        "y": -704
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:c1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "c1"
-        },
-        "x": -1344,
-        "y": -832
-      },
-      "target": {
-        "id": "sector-03-07:c1-surface",
-        "properties": {
-          "scannerControlled": true,
-          "sourceId": "c1"
-        },
-        "x": -1344,
-        "y": -832
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:o2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "O2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "o2"
-        },
-        "x": -1600,
-        "y": -960
-      },
-      "target": {
-        "id": "sector-03-07:o2-surface",
-        "properties": {
-          "sourceId": "o2"
-        },
-        "x": -1600,
-        "y": -960
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:c2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "c2"
-        },
-        "x": -1280,
-        "y": -1088
-      },
-      "target": {
-        "id": "sector-03-07:c2-surface",
-        "properties": {
-          "scannerControlled": true,
-          "sourceId": "c2"
-        },
-        "x": -1280,
-        "y": -1088
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:o3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "O3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "o3"
-        },
-        "x": -928,
-        "y": -1168
-      },
-      "target": {
-        "id": "sector-03-07:o3-surface",
-        "properties": {
-          "sourceId": "o3"
-        },
-        "x": -928,
-        "y": -1168
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:o4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "O4",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "o4"
-        },
-        "x": -576,
-        "y": -1216
-      },
-      "target": {
-        "id": "sector-03-07:o4-surface",
-        "properties": {
-          "sourceId": "o4"
-        },
-        "x": -576,
-        "y": -1216
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:o5",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "O5",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "o5"
-        },
-        "x": -224,
-        "y": -1240
-      },
-      "target": {
-        "id": "sector-03-07:o5-surface",
-        "properties": {
-          "sourceId": "o5"
-        },
-        "x": -224,
-        "y": -1240
+        "x": -845,
+        "y": -425
       }
     },
     {
@@ -208,38 +59,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "o6"
         },
-        "x": 128,
-        "y": -1256
+        "x": 220,
+        "y": -1180
       },
       "target": {
         "id": "sector-03-07:o6-surface",
         "properties": {
           "sourceId": "o6"
         },
-        "x": 128,
-        "y": -1256
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:c3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "c3"
-        },
-        "x": -192,
-        "y": -800
-      },
-      "target": {
-        "id": "sector-03-07:c3-surface",
-        "properties": {
-          "scannerControlled": true,
-          "sourceId": "c3"
-        },
-        "x": -192,
-        "y": -800
+        "x": 220,
+        "y": -1180
       }
     },
     {
@@ -251,37 +80,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "psp1"
         },
-        "x": 96,
-        "y": -944
+        "x": 10,
+        "y": -940
       },
       "target": {
         "id": "sector-03-07:psp1-surface",
         "properties": {
           "sourceId": "psp1"
         },
-        "x": 96,
-        "y": -944
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:psp2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "PSP2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "psp2"
-        },
-        "x": 384,
-        "y": -1088
-      },
-      "target": {
-        "id": "sector-03-07:psp2-surface",
-        "properties": {
-          "sourceId": "psp2"
-        },
-        "x": 384,
-        "y": -1088
+        "x": 10,
+        "y": -940
       }
     },
     {
@@ -293,121 +101,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "s1"
         },
-        "x": -64,
-        "y": -656
+        "x": -325,
+        "y": -810
       },
       "target": {
         "id": "sector-03-07:s1-surface",
         "properties": {
           "sourceId": "s1"
         },
-        "x": -64,
-        "y": -656
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:s2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "S2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "s2"
-        },
-        "x": 256,
-        "y": -720
-      },
-      "target": {
-        "id": "sector-03-07:s2-surface",
-        "properties": {
-          "sourceId": "s2"
-        },
-        "x": 256,
-        "y": -720
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:s3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "S3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "s3"
-        },
-        "x": 576,
-        "y": -800
-      },
-      "target": {
-        "id": "sector-03-07:s3-surface",
-        "properties": {
-          "sourceId": "s3"
-        },
-        "x": 576,
-        "y": -800
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:s4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "S4",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "s4"
-        },
-        "x": 864,
-        "y": -928
-      },
-      "target": {
-        "id": "sector-03-07:s4-surface",
-        "properties": {
-          "sourceId": "s4"
-        },
-        "x": 864,
-        "y": -928
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:s5",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "S5",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "s5"
-        },
-        "x": 800,
-        "y": -1088
-      },
-      "target": {
-        "id": "sector-03-07:s5-surface",
-        "properties": {
-          "sourceId": "s5"
-        },
-        "x": 800,
-        "y": -1088
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-07:post-m2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "POST-M2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "post-m2"
-        },
-        "x": 256,
-        "y": -1408
-      },
-      "target": {
-        "id": "sector-03-07:post-m2-surface",
-        "properties": {
-          "sourceId": "post-m2"
-        },
-        "x": 256,
-        "y": -1408
+        "x": -325,
+        "y": -810
       }
     },
     {
@@ -419,16 +122,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "exit-approach"
         },
-        "x": -256,
-        "y": -1600
+        "x": -205,
+        "y": -1560
       },
       "target": {
         "id": "sector-03-07:exit-approach-surface",
         "properties": {
           "sourceId": "exit-approach"
         },
-        "x": -256,
-        "y": -1600
+        "x": -205,
+        "y": -1560
       }
     }
   ],
@@ -500,8 +203,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 384,
-            "width": 512
+            "height": 500,
+            "width": 1200
           }
         },
         "coordinateAnchor": "center",
@@ -517,8 +220,8 @@ const SPEC = {
         "id": "sector-03-07:concourse-lower-guard",
         "kind": "sentry",
         "position": {
-          "x": -1184,
-          "y": -256
+          "x": -1105,
+          "y": -345
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -535,8 +238,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 448,
-            "width": 720
+            "height": 500,
+            "width": 1200
           }
         },
         "coordinateAnchor": "center",
@@ -578,8 +281,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 384,
-            "width": 512
+            "height": 500,
+            "width": 2000
           }
         },
         "coordinateAnchor": "center",
@@ -596,8 +299,8 @@ const SPEC = {
         "id": "sector-03-07:concourse-centre-guard",
         "kind": "sentry",
         "position": {
-          "x": 704,
-          "y": -864
+          "x": -665,
+          "y": -860
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -615,8 +318,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 384,
-            "width": 512
+            "height": 500,
+            "width": 1200
           }
         },
         "coordinateAnchor": "center",
@@ -633,8 +336,8 @@ const SPEC = {
         "id": "sector-03-07:concourse-upper-guard",
         "kind": "sentry",
         "position": {
-          "x": 96,
-          "y": -1472
+          "x": 120,
+          "y": -1360
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -665,8 +368,8 @@ const SPEC = {
         "id": "sector-03-07:access-directory",
         "kind": "story-display",
         "position": {
-          "x": 640,
-          "y": -1385
+          "x": 810,
+          "y": -1280
         },
         "presentationId": "world-object:story-display"
       },
@@ -853,38 +556,7 @@ const SPEC = {
       "service",
       "recovery"
     ],
-    "scannerGroups": [
-      {
-        "contract": {
-          "currentRopePersistsThroughLocked": true,
-          "damage": 0,
-          "forcedDetach": false,
-          "knockback": 0,
-          "newAttachAllowed": [
-            "AVAILABLE",
-            "WARNING"
-          ],
-          "newAttachDenied": [
-            "LOCKED",
-            "RESET"
-          ],
-          "ropeCut": false
-        },
-        "controlledSurfaceIds": [
-          "sector-03-07:c1-surface",
-          "sector-03-07:c2-surface",
-          "sector-03-07:c3-surface"
-        ],
-        "cycle": {
-          "available": 1.5,
-          "locked": 1.1,
-          "reset": 0.3,
-          "warning": 0.6
-        },
-        "id": "sector-03-07:scanner-priority-concourse-A",
-        "phaseOffsetSeconds": 0
-      }
-    ],
+    "scannerGroups": [],
     "sectorId": "sector-03",
     "storyTriggers": [
       "priority-concourse",
@@ -930,26 +602,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -1184,
-          "y": -256
+          "x": -1110,
+          "y": -290
         },
         "sourceId": "entry-concourse",
         "vertices": [
           {
-            "x": -1344,
-            "y": -256
+            "x": -1270,
+            "y": -290
           },
           {
-            "x": -1024,
-            "y": -256
+            "x": -950,
+            "y": -290
           },
           {
-            "x": -1024,
-            "y": -228
+            "x": -950,
+            "y": -262
           },
           {
-            "x": -1344,
-            "y": -228
+            "x": -1270,
+            "y": -262
           }
         ]
       },

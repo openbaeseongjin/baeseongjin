@@ -17,16 +17,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g1"
         },
-        "x": -960,
-        "y": -224
+        "x": -1110,
+        "y": -275
       },
       "target": {
         "id": "sector-03-05:g1-surface",
         "properties": {
           "sourceId": "g1"
         },
-        "x": -960,
-        "y": -224
+        "x": -1110,
+        "y": -275
       }
     },
     {
@@ -38,16 +38,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g2"
         },
-        "x": -640,
-        "y": -448
+        "x": -380,
+        "y": -390
       },
       "target": {
         "id": "sector-03-05:g2-surface",
         "properties": {
           "sourceId": "g2"
         },
-        "x": -640,
-        "y": -448
+        "x": -380,
+        "y": -390
       }
     },
     {
@@ -59,16 +59,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g3"
         },
-        "x": -512,
-        "y": -736
+        "x": -365,
+        "y": -880
       },
       "target": {
         "id": "sector-03-05:g3-surface",
         "properties": {
           "sourceId": "g3"
         },
-        "x": -512,
-        "y": -736
+        "x": -365,
+        "y": -880
       }
     },
     {
@@ -80,37 +80,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g4"
         },
-        "x": 192,
-        "y": -928
+        "x": 500,
+        "y": -725
       },
       "target": {
         "id": "sector-03-05:g4-surface",
         "properties": {
           "sourceId": "g4"
         },
-        "x": 192,
-        "y": -928
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-05:g5",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G5",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g5"
-        },
-        "x": 768,
-        "y": -832
-      },
-      "target": {
-        "id": "sector-03-05:g5-surface",
-        "properties": {
-          "sourceId": "g5"
-        },
-        "x": 768,
-        "y": -832
+        "x": 500,
+        "y": -725
       }
     },
     {
@@ -122,16 +101,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g6"
         },
-        "x": 1120,
-        "y": -1056
+        "x": 1195,
+        "y": -955
       },
       "target": {
         "id": "sector-03-05:g6-surface",
         "properties": {
           "sourceId": "g6"
         },
-        "x": 1120,
-        "y": -1056
+        "x": 1195,
+        "y": -955
       }
     }
   ],
@@ -209,8 +188,8 @@ const SPEC = {
         "objectiveId": "sector-03-05:augment-selected",
         "offerContract": "generic Augment v1",
         "position": {
-          "x": -160,
-          "y": -800
+          "x": -530,
+          "y": -565
         },
         "presentationId": "world-object:augment-node"
       },
@@ -239,8 +218,8 @@ const SPEC = {
         "id": "sector-03-05:node-entry-guard",
         "kind": "sentry",
         "position": {
-          "x": -672,
-          "y": -288
+          "x": -825,
+          "y": -400
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -276,8 +255,8 @@ const SPEC = {
         "id": "sector-03-05:node-exit-guard",
         "kind": "sentry",
         "position": {
-          "x": 960,
-          "y": -864
+          "x": 785,
+          "y": -890
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -295,8 +274,8 @@ const SPEC = {
         "id": "sector-03-05:node-id",
         "kind": "story-display",
         "position": {
-          "x": -160,
-          "y": -826
+          "x": 280,
+          "y": -570
         },
         "presentationId": "world-object:story-display"
       },
@@ -308,8 +287,8 @@ const SPEC = {
         "id": "sector-03-05:access-summary",
         "kind": "story-display",
         "position": {
-          "x": 416,
-          "y": -986
+          "x": 520,
+          "y": -970
         },
         "presentationId": "world-object:story-display"
       },
@@ -386,8 +365,8 @@ const SPEC = {
       {
         "id": "sector-03-05:route-p1-left",
         "sourceId": "p1-left",
-        "x": -800,
-        "y": -288
+        "x": -810,
+        "y": -290
       },
       {
         "id": "sector-03-05:route-p1-right",
@@ -462,12 +441,6 @@ const SPEC = {
         "y": -864
       },
       {
-        "id": "sector-03-05:route-p5-right",
-        "sourceId": "p5-right",
-        "x": 1088,
-        "y": -864
-      },
-      {
         "id": "sector-03-05:route-g6",
         "sourceId": "g6",
         "x": 1120,
@@ -538,26 +511,26 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": -672,
-          "y": -288
+          "x": -695,
+          "y": -195
         },
         "sourceId": "p1-delivery-approach",
         "vertices": [
           {
-            "x": -800,
-            "y": -288
+            "x": -823,
+            "y": -195
           },
           {
-            "x": -544,
-            "y": -288
+            "x": -567,
+            "y": -195
           },
           {
-            "x": -544,
-            "y": -262
+            "x": -567,
+            "y": -169
           },
           {
-            "x": -800,
-            "y": -262
+            "x": -823,
+            "y": -169
           }
         ]
       },
@@ -598,26 +571,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -160,
-          "y": -800
+          "x": 65,
+          "y": -555
         },
         "sourceId": "p3-operations-control-balcony",
         "vertices": [
           {
-            "x": -384,
-            "y": -800
+            "x": -159,
+            "y": -555
           },
           {
-            "x": 64,
-            "y": -800
+            "x": 289,
+            "y": -555
           },
           {
-            "x": 64,
-            "y": -770
+            "x": 289,
+            "y": -525
           },
           {
-            "x": -384,
-            "y": -770
+            "x": -159,
+            "y": -525
           }
         ]
       },
@@ -658,26 +631,26 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 960,
-          "y": -864
+          "x": 1015,
+          "y": -775
         },
         "sourceId": "p5-tenant-transfer-deck",
         "vertices": [
           {
-            "x": 832,
-            "y": -864
+            "x": 887,
+            "y": -775
           },
           {
-            "x": 1088,
-            "y": -864
+            "x": 1143,
+            "y": -775
           },
           {
-            "x": 1088,
-            "y": -836
+            "x": 1143,
+            "y": -747
           },
           {
-            "x": 832,
-            "y": -836
+            "x": 887,
+            "y": -747
           }
         ]
       },
@@ -708,38 +681,6 @@ const SPEC = {
           {
             "x": 1248,
             "y": -1124
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "gameplayRelevant": true,
-        "grappleable": true,
-        "id": "staff-partition",
-        "kind": "solid-los-blocker",
-        "oneWay": true,
-        "position": {
-          "x": -415,
-          "y": -625
-        },
-        "role": "staff-access / fire partition separating delivery circulation from protected operations balcony",
-        "sourceId": "staff-partition",
-        "vertices": [
-          {
-            "x": -455,
-            "y": -625
-          },
-          {
-            "x": -375,
-            "y": -625
-          },
-          {
-            "x": -375,
-            "y": -205
-          },
-          {
-            "x": -455,
-            "y": -205
           }
         ]
       }
