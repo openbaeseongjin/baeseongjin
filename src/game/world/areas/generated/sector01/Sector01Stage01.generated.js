@@ -202,8 +202,8 @@ const SPEC = {
       },
       {
         "id": "sector-01-01:route-p1",
-        "x": 224,
-        "y": -320
+        "x": 50,
+        "y": -300
       },
       {
         "id": "sector-01-01:route-p2",
@@ -211,20 +211,10 @@ const SPEC = {
         "y": -560
       },
       {
-        "id": "sector-01-01:route-structural-grip",
-        "x": 304,
-        "y": -592
-      },
-      {
         "id": "sector-01-01:route-c",
         "landmark": "C",
         "x": -96,
         "y": -736
-      },
-      {
-        "id": "sector-01-01:route-p3",
-        "x": 256,
-        "y": -864
       },
       {
         "id": "sector-01-01:route-final-deck",
@@ -308,25 +298,25 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 224,
-          "y": -320
+          "x": 50,
+          "y": -300
         },
         "vertices": [
           {
-            "x": 112,
-            "y": -320
+            "x": -62,
+            "y": -300
           },
           {
-            "x": 336,
-            "y": -320
+            "x": 162,
+            "y": -300
           },
           {
-            "x": 336,
-            "y": -304
+            "x": 162,
+            "y": -284
           },
           {
-            "x": 112,
-            "y": -304
+            "x": -62,
+            "y": -284
           }
         ]
       },
@@ -362,35 +352,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-01-01:cable-overhang",
-        "kind": "overhang",
-        "oneWay": false,
-        "position": {
-          "x": 240,
-          "y": -608
-        },
-        "vertices": [
-          {
-            "x": 112,
-            "y": -608
-          },
-          {
-            "x": 368,
-            "y": -608
-          },
-          {
-            "x": 368,
-            "y": -576
-          },
-          {
-            "x": 112,
-            "y": -576
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "sector-01-01:r3",
         "kind": "recovery",
         "oneWay": true,
@@ -414,35 +375,6 @@ const SPEC = {
           {
             "x": -368,
             "y": -752
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-01:p3",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": 275,
-          "y": -645
-        },
-        "vertices": [
-          {
-            "x": 147,
-            "y": -645
-          },
-          {
-            "x": 403,
-            "y": -645
-          },
-          {
-            "x": 403,
-            "y": -621
-          },
-          {
-            "x": 147,
-            "y": -621
           }
         ]
       },
