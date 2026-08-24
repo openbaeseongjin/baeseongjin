@@ -21,6 +21,8 @@ Boss06 `CONTINUITY WARDEN`의 사용자 승인 64×96 logical pixel motion을 �
 
 지원 상태는 `neutral`, `baton-1`, `baton-2`, `overhead-slam`, `back-swing`, `guard`, `counter-ready`, `counter-bash`, `ground-thruster-dash`, `diagonal-thruster-dash`, `charge`, `security-command`, `security-active`, `defeated`다. Guard 종료는 renderer-local `guard-exit`, Charge 종료는 `charge-exit`, 나머지 공격 종료는 `neutral-recovery`로 재생한다.
 
+Boss06 V3의 `jump`·`landing`은 신규 atlas를 가장하지 않고 승인된 `combat-idle` body frame에 renderer-local `takeoff/jump/fall/landing` 압축·기울기 pose를 적용하는 명시적 fallback이다. `enemy-summon`은 기존 `security-command` clip을 재사용해 원격 명령 의미를 유지한다. 두 경로는 gameplay·network animation state를 추가하지 않으며, 전용 direct-pixel jump/landing clip 승인 전까지 `FULL PLAYTEST PENDING` 상태다.
+
 `boss-damaged`와 `boss-guard-blocked`를 presentation event로 전달해 `hit-front`/`hit-back`과 `guard-block`을 재생하고, 방향 label 변화는 `turn`을 재생한다. `defeated`는 표시 전용 `defeatStage`로 `defeated-baton-drop` → `defeated-shield-fall` → `defeated-unconscious`를 선택하고 후속 Gate/Shuttle 단계에서는 마지막 unconscious frame을 유지한다. animation state와 frame index는 gameplay/network snapshot에 추가하지 않는다.
 
 짧은 `ground-thruster-dash`는 기존 6프레임을 한 번 재생한다. 긴 `charge`는 같은 8프레임 atlas를 `charge-telegraph(0~1)`, `charge-sustain(2~5)`, `charge-exit(6~7)`로 나누고 gameplay `actionState`가 `active`인 동안 sustain 구간만 반복한다. 따라서 실제 이동 시간이 clip 길이보다 길어도 skid·회복 자세를 선행 재생하지 않는다.

@@ -22,6 +22,7 @@ import { enemyDisplayName } from "../../src/game/combat/EnemyArchetypeCatalog.js
 import { AUTHORED_COORDINATE_ANCHORS } from "../../src/game/world/AuthoredCoordinateAnchor.js";
 import { WIND_MODE } from "../../src/game/world/WindPhase.js";
 import {
+    BOSS_ANCHOR_ROLE,
     BOSS_MECHANIC_TYPE,
     BOSS_TRANSITION_TRIGGER,
     BOSS_VICTORY_PRESENTATION_ID,
@@ -54,6 +55,8 @@ const BOSS_EDITABLE_GROUPS = Object.freeze([
     ["entry", "시작 지점", null, "실게임 요소"],
     ["exit", "출구", null, "실게임 요소"],
     ["surfaces", "Arena 표면", "boss-surface", "실게임 요소"],
+    ["anchors", "Rope 앵커", "boss-anchor", "실게임 요소"],
+    ["combatAnchors", "앵커 경로", "boss-route-edge", "실게임 요소"],
     ["boss", "Boss Actor", null, "실게임 요소"],
     ["mechanics", "Mechanic", null, "실게임 요소"],
     ["arena", "Arena 경계", null, "표시형 오브젝트"],
@@ -70,7 +73,7 @@ const DOMAIN_LABELS = Object.freeze({
     exit: "출구",
     surfaces: "지형 표면",
     anchors: "앵커",
-    combatAnchors: "Rope 표면 참조",
+    combatAnchors: "앵커 경로",
     recoveryRoute: "복구 / 경로",
     enemySlots: "적 슬롯",
     worldObjects: "표시 / 상호작용 오브젝트",
@@ -97,6 +100,7 @@ const KIND_LABELS = Object.freeze({
     exit: "출구 복합 객체",
     surface: "지형",
     anchor: "앵커",
+    "route-edge": "앵커 경로",
     recovery: "복구 지점",
     "phase-zone": "Phase 구역",
     route: "경로 지점",
@@ -117,6 +121,20 @@ const KIND_LABELS = Object.freeze({
 const MAX_ZOOM = 2.4;
 const MIN_ZOOM = 0.08;
 const POSITION_GRID_SIZE = 5;
+const BOSS_GRAPPLE_TARGET_SIZE = 24;
+const BOSS_ROUTE_RENDER_STYLE = Object.freeze({
+    ARROW_SIZE: 8,
+    ARROW_OFFSET_MULTIPLIER: 1.8,
+    ARROW_HALF_WIDTH_MULTIPLIER: 0.6
+});
+const MECHANIC_PARAMETER_OBJECT_FIELDS = Object.freeze(["x", "y", "width", "height"]);
+const BOSS_REMOVABLE_DOMAINS = Object.freeze({
+    anchors: true,
+    combatAnchors: true,
+    recovery: true,
+    surfaces: true,
+    zones: true
+});
 
 const dom = {
     editorShell: document.querySelector(".editor-shell"),
@@ -290,8 +308,14 @@ function entityAnnotation(entity, spec) {
         if (entity.domain === "exit") return { name: "열린 Gate", effect: "승리 뒤 Sector 02 진입" };
         if (entity.domain === "boss") return { name: spec.name, effect: "Rail 위 중립 Boss Actor" };
         if (entity.domain === "surfaces") return { name: `Arena · ${id}`, effect: "충돌 / Rope 이동 표면" };
-        if (entity.domain === "combatAnchors")
-            return { name: `Rope 표면 참조 · ${id}`, effect: "연결된 collision surface" };
+        if (entity.domain === "anchors") {
+            const anchor = spec.arena.anchors.find(({ id: anchorId }) => anchorId === entity.id);
+            return { name: `Rope 앵커 · ${id}`, effect: `연결 표면 · ${anchor?.surfaceId ?? "없음"}` };
+        }
+        if (entity.domain === "combatAnchors") {
+            const edge = spec.arena.routeEdges?.find(({ id: edgeId }) => edgeId === entity.id);
+            return { name: `앵커 경로 · ${id}`, effect: `${edge?.from ?? "?"} → ${edge?.to ?? "?"}` };
+        }
         if (entity.domain === "recovery") return { name: `복구 · ${id}`, effect: "실패 후 지역 복귀" };
         if (entity.domain === "mechanics") return { name: `Mechanic · ${id}`, effect: kindLabel(entity.kind) };
         if (entity.domain === "phases") return { name: `Phase · ${id}`, effect: "HP floor / 약점 공략" };
@@ -469,6 +493,7 @@ function nextStableId(prefix) {
             spec.id,
             ...spec.arena.surfaces.map(({ id }) => id),
             ...spec.arena.anchors.map(({ id }) => id),
+            ...(spec.arena.routeEdges ?? []).map(({ id }) => id),
             ...spec.arena.recoveryPoints.map(({ id }) => id),
             ...(spec.arena.phaseZones ?? []).map(({ id }) => id),
             ...spec.mechanics.map(({ id }) => id),
@@ -520,6 +545,49 @@ function applyMutation({ domain, label, apply }) {
     render();
 }
 
+function bossAnchorSurfaceId(anchorId) {
+    return `${anchorId}:surface`;
+}
+
+function bossGrappleTargetBounds(point) {
+    const offset = BOSS_GRAPPLE_TARGET_SIZE * 0.5;
+    return {
+        x: point.x - offset,
+        y: point.y - offset,
+        width: BOSS_GRAPPLE_TARGET_SIZE,
+        height: BOSS_GRAPPLE_TARGET_SIZE
+    };
+}
+
+function nextBossRoutePair(spec, point) {
+    const connectedByFrom = Object.create(null);
+    for (const edge of spec.arena.routeEdges ?? []) {
+        connectedByFrom[edge.from] ??= Object.create(null);
+        connectedByFrom[edge.to] ??= Object.create(null);
+        connectedByFrom[edge.from][edge.to] = true;
+        connectedByFrom[edge.to][edge.from] = true;
+    }
+    const anchors = [...spec.arena.anchors].sort((left, right) => left.id.localeCompare(right.id, "en"));
+    const pairs = [];
+    for (const [index, from] of anchors.entries()) {
+        for (const to of anchors.slice(index + 1)) {
+            if (connectedByFrom[from.id]?.[to.id]) continue;
+            pairs.push({
+                from,
+                to,
+                distance: Math.hypot((from.x + to.x) * 0.5 - point.x, (from.y + to.y) * 0.5 - point.y)
+            });
+        }
+    }
+    pairs.sort(
+        (left, right) =>
+            left.distance - right.distance ||
+            left.from.id.localeCompare(right.from.id, "en") ||
+            left.to.id.localeCompare(right.to.id, "en")
+    );
+    return pairs[0] ?? null;
+}
+
 function addPreset(kind) {
     const point = state.replacementPoints[kind] ?? currentWorldAtCanvasCenter();
     if (kind === "boss-surface") {
@@ -539,6 +607,52 @@ function addPreset(kind) {
             }
         });
         state.draft.select({ domain: "surfaces", id, kind: "surface" });
+        return render();
+    }
+    if (kind === "boss-anchor") {
+        const id = nextStableId("anchor");
+        const surfaceId = bossAnchorSurfaceId(id);
+        applyMutation({
+            domain: "anchors",
+            label: "Boss Rope 앵커 추가",
+            apply: (spec) => {
+                spec.arena.surfaces.push({
+                    id: surfaceId,
+                    kind: "grapple-target",
+                    bounds: bossGrappleTargetBounds(point),
+                    grappleable: true
+                });
+                spec.arena.anchors.push({
+                    id,
+                    role: BOSS_ANCHOR_ROLE.SWING_ATTACK,
+                    surfaceId,
+                    x: point.x,
+                    y: point.y
+                });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "anchors", id, kind: "anchor" });
+        return render();
+    }
+    if (kind === "boss-route-edge") {
+        const spec = state.draft.specification();
+        const pair = nextBossRoutePair(spec, point);
+        if (!pair) {
+            setMessage("error", "새 경로를 연결할 서로 다른 미연결 Boss 앵커 두 개가 필요합니다.");
+            return render();
+        }
+        const id = nextStableId("route");
+        applyMutation({
+            domain: "combatAnchors",
+            label: "Boss 앵커 경로 추가",
+            apply: (next) => {
+                next.arena.routeEdges ??= [];
+                next.arena.routeEdges.push({ id, from: pair.from.id, to: pair.to.id });
+                return true;
+            }
+        });
+        state.draft.select({ domain: "combatAnchors", id, kind: "route-edge" });
         return render();
     }
     if (kind === "boss-recovery") {
@@ -990,7 +1104,29 @@ function updateEntityPosition(selected, nextPoint, { buffered = false } = {}) {
     applyMutation({ domain: selected.domain, label: "Move map object", apply });
 }
 
+function removeBossAnchors(spec, anchorIds) {
+    const removedAnchorById = Object.fromEntries(anchorIds.map((anchorId) => [anchorId, true]));
+    const removedSurfaceById = Object.create(null);
+    for (const anchor of spec.arena.anchors) {
+        if (removedAnchorById[anchor.id] && anchor.surfaceId) removedSurfaceById[anchor.surfaceId] = true;
+    }
+    spec.arena.anchors = spec.arena.anchors.filter(({ id }) => !removedAnchorById[id]);
+    spec.arena.surfaces = spec.arena.surfaces.filter(({ id }) => !removedSurfaceById[id]);
+    spec.arena.routeEdges = (spec.arena.routeEdges ?? []).filter(
+        ({ from, to }) => !removedAnchorById[from] && !removedAnchorById[to]
+    );
+    for (const mechanic of spec.mechanics) {
+        const surfaceIds = mechanic.parameters?.validArchitectureSurfaceIds;
+        if (Array.isArray(surfaceIds)) {
+            mechanic.parameters.validArchitectureSurfaceIds = surfaceIds.filter(
+                (surfaceId) => !removedSurfaceById[surfaceId]
+            );
+        }
+    }
+}
+
 function removeBossEntry(domain, id) {
+    state.draft.select(null);
     applyMutation({
         domain,
         label: `Remove ${domain}`,
@@ -1004,6 +1140,10 @@ function removeBossEntry(domain, id) {
                     phase.mechanicIds = phase.mechanicIds.filter((mechanicId) => mechanicId !== id);
                 }
             } else if (domain === "surfaces") {
+                const removedAnchorIds = spec.arena.anchors
+                    .filter(({ surfaceId }) => surfaceId === id)
+                    .map(({ id: anchorId }) => anchorId);
+                if (removedAnchorIds.length > 0) removeBossAnchors(spec, removedAnchorIds);
                 spec.arena.surfaces = spec.arena.surfaces.filter((surface) => surface.id !== id);
                 for (const mechanic of spec.mechanics) {
                     const surfaceIds = mechanic.parameters?.validArchitectureSurfaceIds;
@@ -1013,8 +1153,10 @@ function removeBossEntry(domain, id) {
                         );
                     }
                 }
+            } else if (domain === "anchors") {
+                removeBossAnchors(spec, [id]);
             } else if (domain === "combatAnchors") {
-                spec.arena.anchors = spec.arena.anchors.filter((anchor) => anchor.id !== id);
+                spec.arena.routeEdges = (spec.arena.routeEdges ?? []).filter((edge) => edge.id !== id);
             } else if (domain === "recovery") {
                 spec.arena.recoveryPoints = spec.arena.recoveryPoints.filter((point) => point.id !== id);
             } else if (domain === "zones") {
@@ -1023,7 +1165,6 @@ function removeBossEntry(domain, id) {
             return true;
         }
     });
-    state.draft.select(null);
 }
 
 function moveBossPhase(id, delta) {
@@ -1098,6 +1239,37 @@ function renderBossInspector(snapshot, selected, entity) {
                 replacePointer("surfaces", "Set valid architecture", `${entity.path}/validArchitecture`, value)
         });
     }
+    if (selected.domain === "anchors") {
+        const anchor = spec.arena.anchors.find(({ id }) => id === selected.id);
+        appendSelect(fields, {
+            label: "앵커 역할",
+            value: anchor.role,
+            options: Object.values(BOSS_ANCHOR_ROLE),
+            onChange: (value) => replacePointer("anchors", "Set anchor role", `${entity.path}/role`, value)
+        });
+        appendField(fields, {
+            label: "연결 collision surface",
+            type: "text",
+            value: anchor.surfaceId,
+            disabled: true
+        });
+    }
+    if (selected.domain === "combatAnchors") {
+        const edge = spec.arena.routeEdges.find(({ id }) => id === selected.id);
+        const anchorOptions = spec.arena.anchors.map(({ id }) => ({ value: id, label: id }));
+        appendSelect(fields, {
+            label: "시작 앵커 (from)",
+            value: edge.from,
+            options: anchorOptions.filter(({ value }) => value !== edge.to),
+            onChange: (value) => replacePointer("combatAnchors", "Set route from", `${entity.path}/from`, value)
+        });
+        appendSelect(fields, {
+            label: "도착 앵커 (to)",
+            value: edge.to,
+            options: anchorOptions.filter(({ value }) => value !== edge.from),
+            onChange: (value) => replacePointer("combatAnchors", "Set route to", `${entity.path}/to`, value)
+        });
+    }
     if (selected.domain === "zones") {
         const zone = spec.arena.phaseZones.find(({ id }) => id === selected.id);
         appendField(fields, {
@@ -1164,14 +1336,25 @@ function renderBossInspector(snapshot, selected, entity) {
                 });
                 continue;
             }
-            if (value && typeof value === "object" && !Array.isArray(value)) {
-                for (const axis of ["x", "y"]) {
-                    if (!Number.isFinite(value[axis])) continue;
+            if (Array.isArray(value) && value.every(Number.isFinite)) {
+                for (const [index, entry] of value.entries()) {
                     appendField(fields, {
-                        label: `${key} ${axis.toUpperCase()}`,
-                        value: value[axis],
+                        label: `${key} ${index + 1}`,
+                        value: entry,
                         onChange: (next) =>
-                            replacePointer("mechanics", `Set ${key} ${axis}`, `${parameterPath}/${axis}`, next)
+                            replacePointer("mechanics", `Set ${key} ${index + 1}`, `${parameterPath}/${index}`, next)
+                    });
+                }
+                continue;
+            }
+            if (value && typeof value === "object" && !Array.isArray(value)) {
+                for (const field of MECHANIC_PARAMETER_OBJECT_FIELDS) {
+                    if (!Number.isFinite(value[field])) continue;
+                    appendField(fields, {
+                        label: `${key} ${field.toUpperCase()}`,
+                        value: value[field],
+                        onChange: (next) =>
+                            replacePointer("mechanics", `Set ${key} ${field}`, `${parameterPath}/${field}`, next)
                     });
                 }
                 continue;
@@ -1395,7 +1578,7 @@ function renderBossInspector(snapshot, selected, entity) {
         }
     }
     dom.inspector.append(fields);
-    if (["surfaces", "anchors", "combatAnchors", "recovery", "zones"].includes(selected.domain)) {
+    if (BOSS_REMOVABLE_DOMAINS[selected.domain]) {
         dom.inspector.append(
             button({
                 text: "선택 요소 삭제",
@@ -1409,6 +1592,10 @@ function renderBossInspector(snapshot, selected, entity) {
 
 function removeSelectedEntity() {
     const selected = selectedEntity();
+    if (state.specType === "boss-stage") {
+        if (BOSS_REMOVABLE_DOMAINS[selected?.domain]) removeBossEntry(selected.domain, selected.id);
+        return;
+    }
     if (!canRemoveEditorEntity(selected)) return;
     const removed = state.draft.mutate({
         domain: selected.domain,
@@ -1872,6 +2059,49 @@ function annotationEntityAt(screen) {
     return entities().find(({ domain, id }) => domain === hit.entity.domain && id === hit.entity.id) ?? null;
 }
 
+function drawBossRouteEdge(edge, anchorById, selected) {
+    const from = anchorById[edge.from];
+    const to = anchorById[edge.to];
+    if (!from || !to) return;
+    const start = worldToScreen(from, state.view);
+    const end = worldToScreen(to, state.view);
+    const deltaX = end.x - start.x;
+    const deltaY = end.y - start.y;
+    const length = Math.hypot(deltaX, deltaY);
+    if (length === 0) return;
+    const unitX = deltaX / length;
+    const unitY = deltaY / length;
+    const arrowOffset = BOSS_ROUTE_RENDER_STYLE.ARROW_SIZE * BOSS_ROUTE_RENDER_STYLE.ARROW_OFFSET_MULTIPLIER;
+    const arrowHalfWidth = BOSS_ROUTE_RENDER_STYLE.ARROW_SIZE * BOSS_ROUTE_RENDER_STYLE.ARROW_HALF_WIDTH_MULTIPLIER;
+    const arrowX = end.x - unitX * arrowOffset;
+    const arrowY = end.y - unitY * arrowOffset;
+    const arrowBaseX = arrowX - unitX * BOSS_ROUTE_RENDER_STYLE.ARROW_SIZE;
+    const arrowBaseY = arrowY - unitY * BOSS_ROUTE_RENDER_STYLE.ARROW_SIZE;
+    context.save();
+    context.strokeStyle = selected ? "#66e6ff" : "#4ba7ba";
+    context.fillStyle = selected ? "#66e6ff" : "#4ba7ba";
+    context.lineWidth = selected ? 3 : 1.8;
+    context.setLineDash(selected ? [] : [8, 5]);
+    context.beginPath();
+    context.moveTo(start.x, start.y);
+    context.lineTo(end.x, end.y);
+    context.stroke();
+    context.setLineDash([]);
+    context.beginPath();
+    context.moveTo(arrowX, arrowY);
+    context.lineTo(arrowBaseX - unitY * arrowHalfWidth, arrowBaseY + unitX * arrowHalfWidth);
+    context.lineTo(arrowBaseX + unitY * arrowHalfWidth, arrowBaseY - unitX * arrowHalfWidth);
+    context.closePath();
+    context.fill();
+    context.restore();
+    drawMarker(
+        { x: (from.x + to.x) * 0.5, y: (from.y + to.y) * 0.5 },
+        selected ? "#66e6ff" : "#4ba7ba",
+        "diamond",
+        selected
+    );
+}
+
 function drawBossCanvas(rect, spec) {
     const selected = state.draft.selected();
     const isSelected = (domain, id) => selected?.domain === domain && selected.id === id;
@@ -1880,6 +2110,10 @@ function drawBossCanvas(rect, spec) {
     context.setLineDash([]);
     for (const surface of spec.arena.surfaces) {
         drawRect(surface.bounds, isSelected("surfaces", surface.id) ? "#66e6ff" : "#789dab", true);
+    }
+    const anchorById = Object.fromEntries(spec.arena.anchors.map((anchor) => [anchor.id, anchor]));
+    for (const edge of spec.arena.routeEdges ?? []) {
+        drawBossRouteEdge(edge, anchorById, isSelected("combatAnchors", edge.id));
     }
     for (const zone of spec.arena.phaseZones ?? []) {
         context.setLineDash([9, 6]);
@@ -1900,6 +2134,17 @@ function drawBossCanvas(rect, spec) {
     drawMarker(spec.arena.exit, "#66e6ff", "diamond", isSelected("exit", spec.arena.exit.id));
     for (const point of spec.arena.recoveryPoints)
         drawMarker(point, "#86c99d", "square", isSelected("recovery", point.id));
+    for (const anchor of spec.arena.anchors) {
+        const selectedAnchor = isSelected("anchors", anchor.id);
+        const screen = worldToScreen(anchor, state.view);
+        context.strokeStyle = selectedAnchor ? "#66e6ff" : "#33889d";
+        context.lineWidth = selectedAnchor ? 3 : 1.7;
+        context.beginPath();
+        context.arc(screen.x, screen.y, selectedAnchor ? 12 : 10, 0, Math.PI * 2);
+        context.stroke();
+        const size = BOSS_GRAPPLE_TARGET_SIZE * state.view.zoom;
+        context.strokeRect(screen.x - size * 0.5, screen.y - size * 0.5, size, size);
+    }
     context.fillStyle = "rgba(230,242,245,0.7)";
     context.font = "11px ui-monospace, Consolas, monospace";
     context.fillText(`${spec.id} · ${spec.name}`, 12, 20);

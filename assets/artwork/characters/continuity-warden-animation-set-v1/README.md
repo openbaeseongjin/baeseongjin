@@ -96,6 +96,7 @@ Boss06 `CONTINUITY WARDEN`의 단일 전투 구간에 필요한 공통 대기, �
 ## Runtime 통합 상태와 남은 결정
 
 - 단일 전투 구간의 `neutral`·Baton 3타·Back Swing·Guard/Counter·Ground/Diagonal Dash·Charge·Security Command·Defeated를 Sprite renderer에 연결했다.
+- V3 `jump`·`landing`은 새 저작 frame 승인 전까지 `combat-idle` pixel body의 renderer-local pose fallback, `enemy-summon`은 의미가 같은 `security-command` clip으로 연결한다. 이 fallback을 신규 승인 모션으로 기록하지 않는다.
 - `boss-damaged`와 `boss-guard-blocked` 사건은 presentation FSM에서 `hit-front`/`hit-back`과 `guard-block`을 선택하고, 방향 변화는 `turn`을 선택한다. gameplay snapshot에는 animation/frame 상태를 추가하지 않는다.
 - 패배는 Runtime `defeatStage`를 표시 전용으로 전달해 `baton-drop` → `shield-fall` → `unconscious` 독립 clip으로 재생하며 이후 Gate/Shuttle 단계에서는 unconscious 마지막 frame을 유지한다.
 - 긴 `charge`는 Runtime에서 예고 0~~1, 반복 이동 2~~5, 종료 6~7 프레임으로 분리해 실제 active 이동이 끝날 때까지 돌진 자세를 유지한다. 짧은 `ground-dash`는 기존 단일 재생을 유지한다.

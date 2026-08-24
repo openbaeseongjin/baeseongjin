@@ -1,5 +1,7 @@
 # 보스 06 — CONTINUITY WARDEN
 
+> **V2 SUPERSEDED:** 현재 전투·좌표 기준은 [`../BOSS-06-V3-CONTRACT.md`](../BOSS-06-V3-CONTRACT.md)와 canonical `boss-06.json`이다. 이 문서는 V2 설계 이력으로만 보존한다.
+
 > 상태: **구현 전 최종 설계 점검 단계 / 런타임 미구현**
 > 위치: **6-8 「ROOFTOP PAD 03」 이후 최종 보스전**
 > 전투 공간: **PAD 03 SECURITY COURT**

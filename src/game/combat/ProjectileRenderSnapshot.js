@@ -14,6 +14,10 @@ export const withProjectileRenderSnapshot = createRenderSnapshotCapabilityMixin(
             ageSeconds: this.ageSeconds,
             speed: this.speed,
             objectType: this.objectType,
+            motionKind: this.motionKind,
+            visualPresetId: this.visualPresetId,
+            turnRateRadiansPerSecond: this.turnRateRadiansPerSecond,
+            lifetimeSeconds: this.lifetimeSeconds,
             canCutRope: this.canCutRope,
             predictionId: this.predictionId ?? null
         };

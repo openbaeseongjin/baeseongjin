@@ -10,9 +10,11 @@ import { withEnemyHitPrediction, withPlayerImpactPrediction } from "./Projectile
 import {
     PROJECTILE_COLLISION_STATE,
     PROJECTILE_DEFINITION,
+    PROJECTILE_HOMING,
     PROJECTILE_INITIAL_COLLISION_STATE,
     PROJECTILE_INVISIBLE_COLLISION_STATES,
     PROJECTILE_KEY,
+    PROJECTILE_MOTION_KIND,
     PROJECTILE_REJECTED_COLLISION_STATE,
     PROJECTILE_TYPE
 } from "./ProjectileDefinition.js";
@@ -20,10 +22,28 @@ import { withProjectileRenderSnapshot } from "./ProjectileRenderSnapshot.js";
 
 export const PROJECTILE_MOTION_CAPABILITY = PROJECTILE_MOTION.CAPABILITY;
 
+function resolveHomingTurnRate(options) {
+    const turnRateRadiansPerSecond =
+        options.turnRateRadiansPerSecond ?? PROJECTILE_HOMING.DEFAULT_TURN_RATE_RADIANS_PER_SECOND;
+    if (!Number.isFinite(turnRateRadiansPerSecond) || turnRateRadiansPerSecond <= 0) {
+        throw new Error("homing projectile turn rate must be positive and finite");
+    }
+    return turnRateRadiansPerSecond;
+}
+
+function resolveProjectileLifetime(lifetimeSeconds) {
+    if (lifetimeSeconds === null || lifetimeSeconds === undefined) return null;
+    if (!Number.isFinite(lifetimeSeconds) || lifetimeSeconds <= 0) {
+        throw new Error("projectile lifetime must be positive and finite");
+    }
+    return lifetimeSeconds;
+}
+
 class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapshot(SimulationDrivenObject)) {
     #clientCollisionState;
     #collisionRejectionPolicy;
     #renderCollection;
+    #targetStateCollection;
     #usesOwnerPredictionId;
 
     constructor({
@@ -38,7 +58,12 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
         speed = Math.hypot(velocity.x, velocity.y),
         predictCollision = false,
         canCutRope = false,
+        motionKind,
+        visualPresetId = null,
+        turnRateRadiansPerSecond = null,
+        lifetimeSeconds = null,
         objectType,
+        targetStateCollection,
         renderCollection,
         collisionRejectionPolicy,
         usesOwnerPredictionId
@@ -50,9 +75,16 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
         this.damage = damage;
         this.radius = radius;
         this.speed = speed;
-        this.objectType = objectType;
+        this.definition = Object.freeze({
+            objectType,
+            motionKind,
+            visualPresetId,
+            turnRateRadiansPerSecond,
+            lifetimeSeconds: resolveProjectileLifetime(lifetimeSeconds)
+        });
         this.canCutRope = canCutRope;
         if (predictionId !== null) this.predictionId = predictionId;
+        this.#targetStateCollection = targetStateCollection;
         this.#renderCollection = renderCollection;
         this.#collisionRejectionPolicy = collisionRejectionPolicy;
         this.#usesOwnerPredictionId = usesOwnerPredictionId;
@@ -61,6 +93,30 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
 
     get renderCollection() {
         return this.#renderCollection;
+    }
+
+    get targetStateCollection() {
+        return this.#targetStateCollection;
+    }
+
+    get objectType() {
+        return this.definition.objectType;
+    }
+
+    get motionKind() {
+        return this.definition.motionKind;
+    }
+
+    get visualPresetId() {
+        return this.definition.visualPresetId;
+    }
+
+    get turnRateRadiansPerSecond() {
+        return this.definition.turnRateRadiansPerSecond;
+    }
+
+    get lifetimeSeconds() {
+        return this.definition.lifetimeSeconds;
     }
 
     isClientCollisionPredictionEnabled() {
@@ -95,6 +151,10 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
         if (this.#usesOwnerPredictionId) this.predictionId ??= PROJECTILE_KEY.prediction(this.ownerId, tick);
         return Object.freeze({
             objectType: this.objectType,
+            motionKind: this.motionKind,
+            visualPresetId: this.visualPresetId,
+            turnRateRadiansPerSecond: this.turnRateRadiansPerSecond,
+            lifetimeSeconds: this.lifetimeSeconds,
             ownerId: this.ownerId,
             targetId: this.targetId ?? null,
             predictionId: this.predictionId ?? null,
@@ -110,7 +170,13 @@ export class HomingProjectileObject extends withEnemyHitPrediction(
     withProjectileMotionSimulation(withHomingProjectileSteering(ProjectileObject))
 ) {
     constructor(options) {
-        super({ ...options, ...PROJECTILE_DEFINITION[PROJECTILE_TYPE.PLAYER] });
+        const turnRateRadiansPerSecond = resolveHomingTurnRate(options);
+        super({
+            ...options,
+            ...PROJECTILE_DEFINITION[PROJECTILE_TYPE.PLAYER],
+            motionKind: PROJECTILE_MOTION_KIND.HOMING,
+            turnRateRadiansPerSecond
+        });
     }
 }
 
@@ -118,19 +184,48 @@ export class BallisticProjectileObject extends withPlayerImpactPrediction(
     withProjectileMotionSimulation(ProjectileObject)
 ) {
     constructor(options) {
-        super({ ...options, ...PROJECTILE_DEFINITION[PROJECTILE_TYPE.ENEMY] });
+        super({
+            ...options,
+            ...PROJECTILE_DEFINITION[PROJECTILE_TYPE.ENEMY],
+            motionKind: PROJECTILE_MOTION_KIND.BALLISTIC,
+            turnRateRadiansPerSecond: null
+        });
+    }
+}
+
+export class EnemyHomingProjectileObject extends withPlayerImpactPrediction(
+    withProjectileMotionSimulation(withHomingProjectileSteering(ProjectileObject))
+) {
+    constructor(options) {
+        const turnRateRadiansPerSecond = resolveHomingTurnRate(options);
+        super({
+            ...options,
+            ...PROJECTILE_DEFINITION[PROJECTILE_TYPE.ENEMY],
+            motionKind: PROJECTILE_MOTION_KIND.HOMING,
+            turnRateRadiansPerSecond
+        });
     }
 }
 
 const PROJECTILE_FACTORIES = Object.freeze({
-    [PROJECTILE_TYPE.PLAYER]: ({ hadLocalPrediction = false, ...state }) =>
-        new HomingProjectileObject({ ...state, predictCollision: hadLocalPrediction }),
-    [PROJECTILE_TYPE.ENEMY]: ({ hadLocalPrediction: _hadLocalPrediction, ...state }) =>
-        new BallisticProjectileObject({ ...state, predictCollision: true })
+    [PROJECTILE_TYPE.PLAYER]: Object.freeze({
+        [PROJECTILE_MOTION_KIND.HOMING]: ({ hadLocalPrediction = false, ...state }) =>
+            new HomingProjectileObject({ ...state, predictCollision: hadLocalPrediction })
+    }),
+    [PROJECTILE_TYPE.ENEMY]: Object.freeze({
+        [PROJECTILE_MOTION_KIND.BALLISTIC]: ({ hadLocalPrediction: _hadLocalPrediction, ...state }) =>
+            new BallisticProjectileObject({ ...state, predictCollision: true }),
+        [PROJECTILE_MOTION_KIND.HOMING]: ({ hadLocalPrediction: _hadLocalPrediction, ...state }) =>
+            new EnemyHomingProjectileObject({ ...state, predictCollision: true })
+    })
 });
 
-export function createProjectileObject({ objectType, ...state }) {
-    const create = PROJECTILE_FACTORIES[objectType];
-    if (!create) throw new Error(`unsupported projectile object type: ${objectType}`);
+export function createProjectileObject({
+    objectType,
+    motionKind = PROJECTILE_DEFINITION[objectType]?.defaultMotionKind,
+    ...state
+}) {
+    const create = PROJECTILE_FACTORIES[objectType]?.[motionKind];
+    if (!create) throw new Error(`unsupported projectile object type and motion kind: ${objectType}/${motionKind}`);
     return create(state);
 }

@@ -1,5 +1,7 @@
 # BOSS 06 — PLAYER DAMAGE LOOP PREFLIGHT
 
+> **V2 SUPERSEDED:** 아래 좌표 기반 피해 사전검사는 V2 기록이다. V3 계약은 [`../BOSS-06-V3-CONTRACT.md`](../BOSS-06-V3-CONTRACT.md)를 따른다.
+
 > 목적: **Player가 CONTINUITY WARDEN에게 실제로 피해를 넣을 수 있는지** 구현 전에 검증한다.
 > 기준 GitHub main: `20e6c22deb6e95d9a5a7e351a95874d931a0a845`
 > 판정: **ANALYTICAL PREFLIGHT PASS / 실제 GameSimulation 플레이테스트 필수**
@@ -50,16 +52,16 @@ FixedLengthRope는 그 뒤 방사 방향 속도만 constraint로 제거한다.
 
 최종 Anchor:
 
-| Anchor | x | y |
-|---|---:|---:|
-| U1 | 1300 | 1540 |
-| U2 | 1660 | 1510 |
-| U3 | 2020 | 1490 |
-| U4 | 2380 | 1510 |
-| U5 | 2740 | 1540 |
-| U6 | 3100 | 1510 |
-| U7 | 3460 | 1490 |
-| U8 | 3820 | 1540 |
+| Anchor |    x |    y |
+| ------ | ---: | ---: |
+| U1     | 1300 | 1540 |
+| U2     | 1660 | 1510 |
+| U3     | 2020 | 1490 |
+| U4     | 2380 | 1510 |
+| U5     | 2740 | 1540 |
+| U6     | 3100 | 1510 |
+| U7     | 3460 | 1490 |
+| U8     | 3820 | 1540 |
 
 인접 최대거리: `363.46px`
 비인접 `<=400px` shortcut: `0`

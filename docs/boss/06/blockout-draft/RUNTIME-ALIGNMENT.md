@@ -1,5 +1,7 @@
 # BOSS 06 RUNTIME ALIGNMENT — DRAFT 02
 
+> **V2 SUPERSEDED:** 현재 Runtime 정렬은 [`../BOSS-06-V3-CONTRACT.md`](../BOSS-06-V3-CONTRACT.md)와 `docs/architecture.md`가 소유한다.
+
 > 기준: GitHub main `20e6c22deb6e95d9a5a7e351a95874d931a0a845`
 > 상태: **DESIGN ALIGNED / RUNTIME EXTENSIONS REQUIRED**
 
@@ -49,6 +51,7 @@ Boss06는 별도 weakpoint object를 만들지 않는다.
 dummy weakpoint를 Warden 내부에 만들어 validator만 통과시키는 방식은 금지한다.
 
 권장 최소 확장:
+
 - authoring 내부는 **1 combat segment**
 - 새 target: `boss-06:continuity-warden:body`
 - 새 vulnerability semantic: `always-active`
@@ -97,6 +100,7 @@ Regular `6-9`를 만들지 않는다.
 현재 generic화가 일부 진행되었지만 Warden kind는 focus 대상이 아니다.
 
 필요:
+
 - Warden을 Boss camera focus 대상으로 추가하거나 generic `bossFocus` contract 도입
 - Victory authored shot:
   `Gate lights → Gate open → bridge → camera pan → Shuttle`
@@ -107,6 +111,7 @@ Regular `6-9`를 만들지 않는다.
 ### `ContinuityWardenRuntime`
 
 Physics hard guard:
+
 - solid collider <= `96×150`
 - `canGroundActors:false`
 - `ropeAttachment:false`
@@ -150,6 +155,7 @@ Rope AI, Grapple pathfinding, teleport는 구현하지 않는다.
 ### Direct target
 
 multiplayer 초안:
+
 - Main combat zone nearest active player
 - Charge는 telegraph 시 target/direction lock
 - commit 후 retarget 금지
@@ -180,6 +186,7 @@ Guard/Counter는 weakpoint open/close가 아니라 **impact direction response**
 `activeHazards()`를 사용해 상태별 한 개 이상의 bounds/collider를 반환한다.
 
 Boss06 디자인상:
+
 - direct attack 중 Security Beam OFF
 - Security active 중 Warden direct attack OFF
 - Beam sequence도 한 순간에는 한 height band만 damaging
@@ -187,6 +194,7 @@ Boss06 디자인상:
 따라서 multi-hazard 동시 난사 기능이 필요하지 않다. 최신 main의 composite hazard infrastructure는 그대로 재사용 가능하다.
 
 Hazard family 예:
+
 - `warden-baton`
 - `warden-overhead`
 - `warden-back-swing`
@@ -210,6 +218,7 @@ Recovery에서 Warden direct target 제외.
 ## 7. Victory / Ending
 
 Boss HP 0:
+
 - state `defeated`
 - Warden unconscious
 - hazards OFF
@@ -227,6 +236,7 @@ Boss defeat 순간 자동 completion으로 넘어가지 않는다.
 ## 8. 구현 분류
 
 ### 기존 기능 그대로 사용
+
 - Composite Boss participant/retry/snapshot
 - ImpactTarget registry
 - custom activeHazards
@@ -236,6 +246,7 @@ Boss defeat 순간 자동 completion으로 넘어가지 않는다.
 - beginCompletion
 
 ### 기존 기능 확장
+
 - impact position 전달
 - Boss06 body vulnerability semantic
 - Warden camera focus
@@ -243,6 +254,7 @@ Boss defeat 순간 자동 completion으로 넘어가지 않는다.
 - victory presentation
 
 ### 보스 전용 신규 기능
+
 - ContinuityWardenRuntime
 - Warden pattern selector
 - Shield/Counter response
@@ -251,11 +263,13 @@ Boss defeat 순간 자동 completion으로 넘어가지 않는다.
 - Warden renderer states
 
 ### 신규 범용 시스템
+
 - **현재 필수 없음**
 
 ## 9. 구현 순서
 
 ### 최우선
+
 1. terminal Boss stage construction / completion path
 2. Boss06 spec target + one-segment HUD semantic
 3. `ContinuityWardenRuntime` skeleton
@@ -264,16 +278,17 @@ Boss defeat 순간 자동 completion으로 넘어가지 않는다.
 6. LOW/HIGH Beam sequence
 
 ### 중요
+
 7. multiplayer deterministic targeting
 8. Warden renderer/readability
 9. camera + Gate/Bridge/Shuttle victory presentation
 10. Recovery live playtest
 
 ### 후순위
+
 11. exact HP/damage/timing tuning
 12. VFX/audio
 13. dialogue localization polish
-
 
 ## 10. Map Collision Hard Contract
 

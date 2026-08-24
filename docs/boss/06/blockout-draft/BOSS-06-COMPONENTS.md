@@ -1,5 +1,7 @@
 # BOSS 06 — CONTINUITY WARDEN COMPONENTS
 
+> **V2 SUPERSEDED:** 현재 구성은 [`../BOSS-06-V3-CONTRACT.md`](../BOSS-06-V3-CONTRACT.md)가 소유한다. 아래 U1~U8·평면 보행 계약은 구현 입력이 아니다.
+
 > 상태: **BLOCKOUT DRAFT 02**
 > 목적: 구현 이전에 Boss06가 필요로 하는 시각·전투·Arena 구성요소를 명확히 분리한다.
 
@@ -152,16 +154,16 @@ CHARGE   = long / committed / punishable attack
 
 Blockout coordinates:
 
-| ID | x | y |
-|---|---:|---:|
-| U1 | 1550 | 1510 |
-| U2 | 1840 | 1445 |
-| U3 | 2130 | 1390 |
-| U4 | 2420 | 1445 |
-| U5 | 2710 | 1510 |
-| U6 | 3000 | 1445 |
-| U7 | 3290 | 1390 |
-| U8 | 3580 | 1510 |
+| ID  |    x |    y |
+| --- | ---: | ---: |
+| U1  | 1550 | 1510 |
+| U2  | 1840 | 1445 |
+| U3  | 2130 | 1390 |
+| U4  | 2420 | 1445 |
+| U5  | 2710 | 1510 |
+| U6  | 3000 | 1445 |
+| U7  | 3290 | 1390 |
+| U8  | 3580 | 1510 |
 
 Base Reach 400px 기준 인접 거리는 약 295~314px. U1/U8은 Main floor edge-entry용으로 낮게 배치한다.
 
@@ -169,7 +171,7 @@ Base Reach 400px 기준 인접 거리는 약 295~314px. U1/U8은 Main floor edge
 
 주의:
 
-> 최신 main은 `role: swing-attack` Boss anchor를 24×24 `grapple-target` surface로 자동 materialize한다. U1~U8은 이 공용 계약을 사용한다. Main/Ledge/Gate는 엔진의 공용 지형 규칙에 따라 다른 solid surface와 마찬가지로 `grappleable:true`이며(Emitter는 solid collision이 없어 부착 대상이 아니다), final QA는 U1~U8/RR1/RR3의 `swing-attack` 부착과 나머지 solid surface의 일반 부착을 모두 포함한다.
+> 최신 main은 `role: swing-attack` Boss anchor를 24×24 `grapple-target` surface로 자동 materialize한다. U1~~U8은 이 공용 계약을 사용한다. Main/Ledge/Gate는 엔진의 공용 지형 규칙에 따라 다른 solid surface와 마찬가지로 `grappleable:true`이며(Emitter는 solid collision이 없어 부착 대상이 아니다), final QA는 U1~~U8/RR1/RR3의 `swing-attack` 부착과 나머지 solid surface의 일반 부착을 모두 포함한다.
 
 ## 10. Security Beam Components
 
@@ -269,8 +271,6 @@ Warden 처형 연출 없음.
 - final dialogue localization
 - multiplayer authoritative implementation detail
 - terminal boss integration code
-
-
 
 ## Physics / Hitbox Hard Guard
 

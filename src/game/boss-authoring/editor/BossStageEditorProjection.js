@@ -18,6 +18,15 @@ function center(bounds) {
     return { x: bounds.x + bounds.width * 0.5, y: bounds.y + bounds.height * 0.5 };
 }
 
+function midpoint(left, right) {
+    return { x: (left.x + right.x) * 0.5, y: (left.y + right.y) * 0.5 };
+}
+
+const BOSS_EDITOR_INTERACTION_PRIORITY = Object.freeze({
+    ANCHOR: -2,
+    ROUTE_EDGE: -1
+});
+
 export function collectBossStageEditorEntities(spec) {
     const result = [
         entity({
@@ -48,7 +57,13 @@ export function collectBossStageEditorEntities(spec) {
         entity({ domain: "hud", id: `${spec.id}:hud`, kind: "hud", path: "/hud" }),
         entity({ domain: "transition", id: `${spec.id}:transition`, kind: "transition", path: "/transition" })
     ];
+    const surfaceById = Object.fromEntries(spec.arena.surfaces.map((surface) => [surface.id, surface]));
+    const anchorById = Object.fromEntries(spec.arena.anchors.map((anchor) => [anchor.id, anchor]));
+    const anchorBySurfaceId = Object.fromEntries(
+        spec.arena.anchors.filter(({ surfaceId }) => surfaceId).map((anchor) => [anchor.surfaceId, anchor])
+    );
     for (const [index, surface] of spec.arena.surfaces.entries()) {
+        if (anchorBySurfaceId[surface.id]) continue;
         result.push(
             entity({
                 domain: "surfaces",
@@ -57,6 +72,34 @@ export function collectBossStageEditorEntities(spec) {
                 point: center(surface.bounds),
                 bounds: surface.bounds,
                 path: `/arena/surfaces/${index}`
+            })
+        );
+    }
+    for (const [index, anchor] of spec.arena.anchors.entries()) {
+        result.push(
+            entity({
+                domain: "anchors",
+                id: anchor.id,
+                kind: "anchor",
+                point: anchor,
+                bounds: surfaceById[anchor.surfaceId]?.bounds ?? null,
+                path: `/arena/anchors/${index}`,
+                interactionPriority: BOSS_EDITOR_INTERACTION_PRIORITY.ANCHOR
+            })
+        );
+    }
+    for (const [index, edge] of (spec.arena.routeEdges ?? []).entries()) {
+        const from = anchorById[edge.from];
+        const to = anchorById[edge.to];
+        if (!finitePoint(from) || !finitePoint(to)) continue;
+        result.push(
+            entity({
+                domain: "combatAnchors",
+                id: edge.id,
+                kind: "route-edge",
+                point: midpoint(from, to),
+                path: `/arena/routeEdges/${index}`,
+                interactionPriority: BOSS_EDITOR_INTERACTION_PRIORITY.ROUTE_EDGE
             })
         );
     }
@@ -108,6 +151,21 @@ export function translateBossStageEditorEntity(spec, selected, delta) {
         point.x += delta.x;
         point.y += delta.y;
     };
+    const movedAnchorById = Object.create(null);
+    const movedSurfaceById = Object.create(null);
+    const moveAnchor = (anchorId) => {
+        if (movedAnchorById[anchorId]) return;
+        const anchor = next.arena.anchors.find(({ id }) => id === anchorId);
+        if (!anchor) throw new TypeError("boss-editor-entity-not-found");
+        const surface = next.arena.surfaces.find(({ id }) => id === anchor.surfaceId);
+        if (anchor.surfaceId && !surface) throw new TypeError("boss-editor-anchor-surface-not-found");
+        move(anchor);
+        movedAnchorById[anchor.id] = true;
+        if (surface && !movedSurfaceById[surface.id]) {
+            move(surface.bounds);
+            movedSurfaceById[surface.id] = true;
+        }
+    };
     if (selected.domain === "arena") move(next.arena.bounds);
     else if (selected.domain === "entry") move(next.arena.entry);
     else if (selected.domain === "exit") move(next.arena.exit);
@@ -118,6 +176,13 @@ export function translateBossStageEditorEntity(spec, selected, delta) {
         const surface = next.arena.surfaces.find(({ id }) => id === selected.id);
         if (!surface) throw new TypeError("boss-editor-entity-not-found");
         move(surface.bounds);
+    } else if (selected.domain === "anchors") {
+        moveAnchor(selected.id);
+    } else if (selected.domain === "combatAnchors") {
+        const edge = next.arena.routeEdges?.find(({ id }) => id === selected.id);
+        if (!edge) throw new TypeError("boss-editor-entity-not-found");
+        moveAnchor(edge.from);
+        moveAnchor(edge.to);
     } else if (selected.domain === "recovery") {
         const point = next.arena.recoveryPoints.find(({ id }) => id === selected.id);
         if (!point) throw new TypeError("boss-editor-entity-not-found");

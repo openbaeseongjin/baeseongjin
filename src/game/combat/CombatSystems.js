@@ -165,12 +165,22 @@ export function distancePointToSegment(point, start, end) {
     return Math.hypot(point.x - (start.x + segmentX * projection), point.y - (start.y + segmentY * projection));
 }
 
-export function advanceEnemyProjectiles({ projectiles, dt, maxLifetimeSeconds = Number.POSITIVE_INFINITY }) {
+export function advanceEnemyProjectiles({
+    projectiles,
+    targets = [],
+    dt,
+    maxLifetimeSeconds = Number.POSITIVE_INFINITY
+}) {
+    const targetById = Object.freeze(Object.fromEntries(targets.map((target) => [target.id, target])));
     const survivors = [];
     const expired = [];
     for (const projectile of projectiles) {
-        advanceSimulationObject(projectile, PROJECTILE_MOTION_CAPABILITY, { dt });
-        if (projectile.ageSeconds >= maxLifetimeSeconds) expired.push(projectile);
+        advanceSimulationObject(projectile, PROJECTILE_MOTION_CAPABILITY, {
+            dt,
+            targetPosition: targetById[projectile.targetId]?.position ?? null
+        });
+        const lifetimeSeconds = projectile.lifetimeSeconds ?? maxLifetimeSeconds;
+        if (projectile.ageSeconds >= lifetimeSeconds) expired.push(projectile);
         else survivors.push(projectile);
     }
     return Object.freeze({ survivors: Object.freeze(survivors), expired: Object.freeze(expired) });

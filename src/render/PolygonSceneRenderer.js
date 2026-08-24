@@ -28,6 +28,8 @@ import {
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
 import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
+import { CONTINUITY_WARDEN_PROJECTILE_PRESET_ID } from "../game/boss/ContinuityWardenDefinition.js";
+import { HomingMissileRenderer } from "./projectiles/HomingMissileRenderer.js";
 
 export class PolygonSceneRenderer {
     constructor() {
@@ -64,9 +66,19 @@ export class PolygonSceneRenderer {
                     }),
                     new PolygonProjectileRenderer({
                         selectProjectiles: (scene) =>
-                            (scene.enemyProjectiles ?? []).filter((projectile) => !projectile.canCutRope),
+                            (scene.enemyProjectiles ?? []).filter(
+                                (projectile) =>
+                                    !projectile.canCutRope &&
+                                    projectile.visualPresetId !== CONTINUITY_WARDEN_PROJECTILE_PRESET_ID
+                            ),
                         color: "#f43f5e",
                         category: "enemyProjectiles"
+                    }),
+                    new HomingMissileRenderer({
+                        selectProjectiles: (scene) =>
+                            (scene.enemyProjectiles ?? []).filter(
+                                ({ visualPresetId }) => visualPresetId === CONTINUITY_WARDEN_PROJECTILE_PRESET_ID
+                            )
                     }),
                     new PolygonCutterProjectileRenderer({
                         selectProjectiles: (scene) =>

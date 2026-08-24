@@ -5,8 +5,26 @@ import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 const FIXED_DT = 1 / 120;
 const simulationDispatcher = new SimulationDispatcher();
 
-function createReplicatedProjectile({ objectType, speed, hadLocalPrediction, ...state }) {
-    return createProjectileObject({ objectType, speed, hadLocalPrediction, ...state });
+function createReplicatedProjectile({
+    objectType,
+    motionKind,
+    visualPresetId,
+    turnRateRadiansPerSecond,
+    lifetimeSeconds,
+    speed,
+    hadLocalPrediction,
+    ...state
+}) {
+    return createProjectileObject({
+        objectType,
+        motionKind,
+        visualPresetId,
+        turnRateRadiansPerSecond,
+        lifetimeSeconds,
+        speed,
+        hadLocalPrediction,
+        ...state
+    });
 }
 
 function length(vector) {
@@ -103,6 +121,10 @@ export class PredictableProjectileStore {
             const projectile = createReplicatedProjectile({
                 id: event.objectId,
                 objectType: event.objectType,
+                motionKind: event.parameters.motionKind,
+                visualPresetId: event.parameters.visualPresetId ?? null,
+                turnRateRadiansPerSecond: event.parameters.turnRateRadiansPerSecond,
+                lifetimeSeconds: event.parameters.lifetimeSeconds,
                 ownerId: event.parameters.ownerId,
                 targetId: event.parameters.targetId,
                 radius: event.parameters.radius,
@@ -139,6 +161,10 @@ export class PredictableProjectileStore {
                 createReplicatedProjectile({
                     id: objectId,
                     objectType: event.objectType,
+                    motionKind: event.motionKind,
+                    visualPresetId: event.visualPresetId ?? null,
+                    turnRateRadiansPerSecond: event.turnRateRadiansPerSecond,
+                    lifetimeSeconds: event.lifetimeSeconds,
                     ownerId: event.ownerId,
                     targetId: event.targetId,
                     radius: event.radius,

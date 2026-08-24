@@ -11,40 +11,22 @@ import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
 import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
 import { bossBodyPolygonVertices } from "./BossBodyPolygon.js";
 import { CombatStatusEffectPool } from "../status-effects/CombatStatusEffectPool.js";
+import { ContinuityWardenJumpMotion } from "./ContinuityWardenJumpMotion.js";
+import {
+    CONTINUITY_WARDEN_ACTION_PHASE as ACTION_PHASE,
+    CONTINUITY_WARDEN_EVENT,
+    CONTINUITY_WARDEN_HAZARD,
+    CONTINUITY_WARDEN_ID,
+    CONTINUITY_WARDEN_LOCOMOTION_STATE,
+    CONTINUITY_WARDEN_OBJECT_KIND as OBJECT_KIND,
+    CONTINUITY_WARDEN_PATTERN as PATTERN,
+    CONTINUITY_WARDEN_PROJECTILE_PRESET_ID,
+    CONTINUITY_WARDEN_STATE,
+    CONTINUITY_WARDEN_SUMMON_ENEMY_TYPES,
+    CONTINUITY_WARDEN_SURFACE_KIND
+} from "./ContinuityWardenDefinition.js";
 
-export const CONTINUITY_WARDEN_STATE = Object.freeze({
-    NEUTRAL: "neutral",
-    BATON_1: "baton-1",
-    BATON_2: "baton-2",
-    OVERHEAD_SLAM: "overhead-slam",
-    BACK_SWING: "back-swing",
-    GROUND_DASH: "ground-thruster-dash",
-    DIAGONAL_DASH: "diagonal-thruster-dash",
-    CHARGE: "charge",
-    GUARD: "guard",
-    COUNTER_READY: "counter-ready",
-    COUNTER_BASH: "counter-bash",
-    SECURITY_COMMAND: "security-command",
-    SECURITY_ACTIVE: "security-active",
-    DEFEATED: "defeated"
-});
-
-const ACTION_PHASE = Object.freeze({
-    TELEGRAPH: "telegraph",
-    ACTIVE: "active",
-    GAP: "gap",
-    RECOVERY: "recovery"
-});
-const PATTERN = Object.freeze({
-    BATON: "baton",
-    BACK_SWING: "back-swing",
-    GROUND_DASH: "ground-dash",
-    DIAGONAL_DASH: "diagonal-dash",
-    CHARGE: "charge",
-    GUARD: "guard",
-    COUNTER: "counter",
-    SECURITY: "security"
-});
+export { CONTINUITY_WARDEN_STATE } from "./ContinuityWardenDefinition.js";
 const INTENSITY = Object.freeze({ EARLY: "early", MID: "mid", LATE: "late" });
 const CHAIN_MAX = Object.freeze({ [INTENSITY.EARLY]: 0, [INTENSITY.MID]: 1, [INTENSITY.LATE]: 2 });
 const CHAIN_TRANSITION_SECONDS = 0.15;
@@ -52,6 +34,8 @@ const PATTERN_ORDER = Object.freeze({
     [INTENSITY.EARLY]: Object.freeze([
         PATTERN.BATON,
         PATTERN.GROUND_DASH,
+        PATTERN.MISSILE,
+        PATTERN.SUMMON,
         PATTERN.GUARD,
         PATTERN.CHARGE,
         PATTERN.SECURITY
@@ -59,18 +43,23 @@ const PATTERN_ORDER = Object.freeze({
     [INTENSITY.MID]: Object.freeze([
         PATTERN.BATON,
         PATTERN.DIAGONAL_DASH,
+        PATTERN.MISSILE,
+        PATTERN.SUMMON,
         PATTERN.COUNTER,
         PATTERN.BACK_SWING,
         PATTERN.SECURITY,
         PATTERN.CHARGE
     ]),
     [INTENSITY.LATE]: Object.freeze([
+        PATTERN.MISSILE,
         PATTERN.SECURITY,
+        PATTERN.SUMMON,
         PATTERN.GROUND_DASH,
         PATTERN.COUNTER,
         PATTERN.BATON,
         PATTERN.CHARGE,
-        PATTERN.SECURITY
+        PATTERN.SECURITY,
+        PATTERN.MISSILE
     ])
 });
 const PATTERN_START_HANDLER = Object.freeze({
@@ -79,6 +68,8 @@ const PATTERN_START_HANDLER = Object.freeze({
     [PATTERN.GROUND_DASH]: "_beginGroundDash",
     [PATTERN.DIAGONAL_DASH]: "_beginDiagonalDash",
     [PATTERN.CHARGE]: "_beginCharge",
+    [PATTERN.MISSILE]: "_beginJumpMissile",
+    [PATTERN.SUMMON]: "_beginSummon",
     [PATTERN.GUARD]: "_beginGuard",
     [PATTERN.COUNTER]: "_beginCounter",
     [PATTERN.SECURITY]: "_beginSecurity"
@@ -91,6 +82,9 @@ const STATE_ADVANCE_HANDLER = Object.freeze({
     [CONTINUITY_WARDEN_STATE.GROUND_DASH]: "_advanceMotionAttack",
     [CONTINUITY_WARDEN_STATE.DIAGONAL_DASH]: "_advanceMotionAttack",
     [CONTINUITY_WARDEN_STATE.CHARGE]: "_advanceCharge",
+    [CONTINUITY_WARDEN_STATE.JUMP]: "_advanceJumpMissile",
+    [CONTINUITY_WARDEN_STATE.LANDING]: "_advanceLanding",
+    [CONTINUITY_WARDEN_STATE.SUMMON]: "_advanceSummon",
     [CONTINUITY_WARDEN_STATE.GUARD]: "_advanceGuard",
     [CONTINUITY_WARDEN_STATE.COUNTER_READY]: "_advanceCounter",
     [CONTINUITY_WARDEN_STATE.COUNTER_BASH]: "_advanceSingleAttack",
@@ -114,23 +108,12 @@ const MOTION_HAZARD_STATE = Object.freeze({
     [CONTINUITY_WARDEN_STATE.DIAGONAL_DASH]: true,
     [CONTINUITY_WARDEN_STATE.CHARGE]: true
 });
-const OBJECT_KIND = Object.freeze({
-    WARDEN: "boss-continuity-warden",
-    EMITTER: "boss-security-emitter",
-    HAZARD: "boss-warden-hazard",
-    BEAM: "boss-security-beam",
-    GATE: "boss-departure-gate",
-    BRIDGE: "boss-threshold-bridge",
-    SHUTTLE: "boss-maintenance-shuttle",
-    CAMERA: "boss-victory-camera",
-    PAD_SURFACE: "boss-pad-surface"
-});
 const CAMERA_PRIORITY = Object.freeze({ BODY: 1, HAZARD: 5 });
 const PRESENTED_PAD_SURFACE_KIND = Object.freeze({
-    "main-security-runway": true,
-    "raised-ledge": true,
-    "recovery-deck": true,
-    "departure-deck": true
+    [CONTINUITY_WARDEN_SURFACE_KIND.MAIN]: true,
+    [CONTINUITY_WARDEN_SURFACE_KIND.LEDGE]: true,
+    [CONTINUITY_WARDEN_SURFACE_KIND.RECOVERY]: true,
+    [CONTINUITY_WARDEN_SURFACE_KIND.DEPARTURE]: true
 });
 const OPENING_DIALOGUE = Object.freeze([
     Object.freeze({
@@ -141,7 +124,7 @@ const OPENING_DIALOGUE = Object.freeze([
     Object.freeze({ speakerId: "continuity-warden", text: "Then leave the pad." }),
     Object.freeze({ speakerId: "local-player", text: "Open the gate." })
 ]);
-const TARGET_ID = "boss-06:continuity-warden:body";
+const TARGET_ID = CONTINUITY_WARDEN_ID.BODY;
 const DEFAULT = Object.freeze({
     bodyWidth: 96,
     bodyHeight: 150,
@@ -167,7 +150,24 @@ const DEFAULT = Object.freeze({
     victoryCameraSeconds: 2,
     damage: 25,
     groundDashDistance: 420,
-    dashSeconds: 0.45
+    dashSeconds: 0.45,
+    jumpGravity: 1500,
+    jumpDurationSeconds: 0.95,
+    jumpTelegraphSeconds: 0.4,
+    landingActiveSeconds: 0.3,
+    landingRecoverySeconds: 0.45,
+    landingBurstRadius: 150,
+    missileSpeed: 480,
+    missileDamage: 20,
+    missileRadius: 26,
+    missileLifetimeSeconds: 5,
+    missileTurnRateRadiansPerSecond: 1.75,
+    missileFanAnglesDegrees: Object.freeze([-50, -25, 0, 25, 50]),
+    summonCount: 2,
+    summonCooldownSeconds: 15,
+    summonSkipAliveCount: 6,
+    summonWarningSize: 110,
+    emitterSize: Object.freeze({ width: 95, height: 650 })
 });
 
 function positive(value, fallback) {
@@ -176,6 +176,10 @@ function positive(value, fallback) {
 
 function finite(value, fallback) {
     return Number.isFinite(value) ? value : fallback;
+}
+
+function positiveInteger(value, fallback) {
+    return Number.isSafeInteger(value) && value > 0 ? value : fallback;
 }
 
 function point(value, fallback) {
@@ -189,6 +193,19 @@ function bounds(value, fallback) {
         positive(value.height, 0)
         ? { x: value.x, y: value.y, width: value.width, height: value.height }
         : { ...fallback };
+}
+
+function finiteNumbers(value, fallback) {
+    return Array.isArray(value) && value.length === fallback.length && value.every(Number.isFinite)
+        ? Object.freeze([...value])
+        : fallback;
+}
+
+function landingPosition(surface) {
+    return freezeComposite({
+        x: surface.bounds.x + surface.bounds.width * 0.5,
+        y: surface.bounds.y - DEFAULT.bodyHeight * 0.5
+    });
 }
 
 function translatedBounds(value, offset = { x: 0, y: 0 }) {
@@ -250,6 +267,16 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.victoryCameraRemaining = 0;
         this.chainDepth = 0;
         this.pendingChainPattern = null;
+        this.missileSalvoSequence = 0;
+        this.missileFiredThisJump = false;
+        this.minionSummonSequence = 0;
+        this.summonCooldownRemaining = 0;
+        this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED;
+        this.jumpTarget = { ...this.bodyPosition };
+        this.jumpMotion = new ContinuityWardenJumpMotion({
+            position: this.bodyPosition,
+            gravity: this.config.jumpGravity
+        });
         this.statusEffects = new CombatStatusEffectPool();
         this.resetAttempt({ preserveCompleted: false });
         this.body = new KinematicPhysicsBody({
@@ -277,15 +304,35 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
 
     #configuration() {
         const parameters = this.definition.arena.mechanics?.[0]?.parameters ?? {};
+        const surfaces = this.definition.arena.surfaces ?? [];
+        const mainSurface = surfaces.find(({ kind }) => kind === CONTINUITY_WARDEN_SURFACE_KIND.MAIN);
+        const mainBounds = bounds(mainSurface?.bounds, { x: 1000, y: -1100, width: 3120, height: 115 });
+        const combatBounds = bounds(this.definition.arena.phaseZones?.[0]?.bounds, {
+            x: mainBounds.x,
+            y: mainBounds.y - 650,
+            width: mainBounds.width,
+            height: 870
+        });
+        const ledgeTargets = surfaces
+            .filter(({ kind }) => kind === CONTINUITY_WARDEN_SURFACE_KIND.LEDGE)
+            .map(landingPosition)
+            .sort((left, right) => left.x - right.x);
+        const recoveryPoints = [...(this.definition.arena.recoveryPoints ?? [])]
+            .filter((entry) => Number.isFinite(entry.x) && Number.isFinite(entry.y))
+            .map(({ id, x, y }) => freezeComposite({ id, x, y }))
+            .sort((left, right) => left.x - right.x);
+        const halfBodyWidth = DEFAULT.bodyWidth * 0.5;
+        const guardInset = positive(parameters.guardEdgeInset, 200);
         return freezeComposite({
-            mainBounds: bounds(parameters.mainBounds, { x: 1000, y: -1100, width: 3120, height: 115 }),
-            groundCenterY: finite(parameters.groundCenterY, -1175),
-            combatMinX: finite(parameters.combatMinX, 1048),
-            combatMaxX: finite(parameters.combatMaxX, 4072),
-            guardMinX: finite(parameters.guardMinX, 1250),
-            guardMaxX: finite(parameters.guardMaxX, 3870),
-            ledgeLeft: point(parameters.ledgeLeft, { x: 1930, y: -1455 }),
-            ledgeRight: point(parameters.ledgeRight, { x: 3240, y: -1455 }),
+            mainBounds,
+            combatBounds,
+            groundCenterY: mainBounds.y - DEFAULT.bodyHeight * 0.5,
+            combatMinX: mainBounds.x + halfBodyWidth,
+            combatMaxX: mainBounds.x + mainBounds.width - halfBodyWidth,
+            guardMinX: mainBounds.x + guardInset,
+            guardMaxX: mainBounds.x + mainBounds.width - guardInset,
+            ledgeTargets,
+            recoveryPoints,
             lowBeamBounds: bounds(parameters.lowBeamBounds, { x: 980, y: -1200, width: 3160, height: 130 }),
             highBeamBounds: bounds(parameters.highBeamBounds, { x: 980, y: -1485, width: 3160, height: 270 }),
             gateBounds: bounds(parameters.gateBounds, { x: 4360, y: -1750, width: 480, height: 760 }),
@@ -317,7 +364,43 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             ),
             victoryGateLightSeconds: positive(parameters.victoryGateLightSeconds, DEFAULT.victoryGateLightSeconds),
             victoryCameraSeconds: positive(parameters.victoryCameraSeconds, DEFAULT.victoryCameraSeconds),
-            damage: positive(parameters.damage, DEFAULT.damage)
+            damage: positive(parameters.damage, DEFAULT.damage),
+            jumpGravity: positive(parameters.jumpGravity, DEFAULT.jumpGravity),
+            jumpDurationSeconds: positive(parameters.jumpDurationSeconds, DEFAULT.jumpDurationSeconds),
+            jumpTelegraphSeconds: positive(parameters.jumpTelegraphSeconds, DEFAULT.jumpTelegraphSeconds),
+            landingActiveSeconds: positive(parameters.landingActiveSeconds, DEFAULT.landingActiveSeconds),
+            landingRecoverySeconds: positive(parameters.landingRecoverySeconds, DEFAULT.landingRecoverySeconds),
+            landingBurstRadius: positive(parameters.landingBurstRadius, DEFAULT.landingBurstRadius),
+            missileSpeed: positive(parameters.missileSpeed, DEFAULT.missileSpeed),
+            missileDamage: positive(parameters.missileDamage, DEFAULT.missileDamage),
+            missileRadius: positive(parameters.missileRadius, DEFAULT.missileRadius),
+            missileLifetimeSeconds: positive(parameters.missileLifetimeSeconds, DEFAULT.missileLifetimeSeconds),
+            missileTurnRateRadiansPerSecond: positive(
+                parameters.missileTurnRateRadiansPerSecond,
+                DEFAULT.missileTurnRateRadiansPerSecond
+            ),
+            missileFanAnglesDegrees: finiteNumbers(parameters.missileFanAnglesDegrees, DEFAULT.missileFanAnglesDegrees),
+            summonCount: positiveInteger(parameters.minionSummonCount, DEFAULT.summonCount),
+            summonCooldownSeconds: positive(parameters.minionSummonCooldownSeconds, DEFAULT.summonCooldownSeconds),
+            summonSkipAliveCount: positiveInteger(parameters.minionSummonSkipAliveCount, DEFAULT.summonSkipAliveCount),
+            summonPoints: Object.freeze([
+                point(parameters.summonLeft, {
+                    x: mainBounds.x + mainBounds.width * 0.25,
+                    y: mainBounds.y - 180
+                }),
+                point(parameters.summonRight, {
+                    x: mainBounds.x + mainBounds.width * 0.75,
+                    y: mainBounds.y - 180
+                })
+            ]),
+            emitterLeft: point(parameters.emitterLeft, {
+                x: mainBounds.x + DEFAULT.emitterSize.width * 0.5,
+                y: mainBounds.y - DEFAULT.emitterSize.height * 0.5
+            }),
+            emitterRight: point(parameters.emitterRight, {
+                x: mainBounds.x + mainBounds.width - DEFAULT.emitterSize.width * 0.5,
+                y: mainBounds.y - DEFAULT.emitterSize.height * 0.5
+            })
         });
     }
 
@@ -353,6 +436,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.victoryCameraRemaining = 0;
         this.chainDepth = 0;
         this.pendingChainPattern = null;
+        this.missileSalvoSequence = 0;
+        this.missileFiredThisJump = false;
+        this.minionSummonSequence = 0;
+        this.summonCooldownRemaining = 0;
+        this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED;
+        this.jumpTarget = { ...this.bodyPosition };
+        this.jumpMotion?.cancel(this.bodyPosition);
         this.body?.setKinematicPosition(this.bodyPosition, 0);
         this.body?.holdKinematicPosition();
     }
@@ -371,9 +461,14 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
     }
 
     #combatPlayers(context) {
+        const combat = this.config.combatBounds;
         return this.#localPlayers(context).filter(
             ({ id, position }) =>
-                !this.recoveryProtected(id) && position.x >= 1000 && position.x <= 4120 && position.y <= -900
+                !this.recoveryProtected(id) &&
+                position.x >= combat.x &&
+                position.x <= combat.x + combat.width &&
+                position.y >= combat.y &&
+                position.y <= combat.y + combat.height
         );
     }
 
@@ -412,6 +507,21 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         return this.bodyPosition.x >= this.config.guardMinX && this.bodyPosition.x <= this.config.guardMaxX;
     }
 
+    #summonPatternAvailable(context) {
+        const aliveCount = Number.isSafeInteger(context.bossSummonedEnemyCount) ? context.bossSummonedEnemyCount : 0;
+        return this.summonCooldownRemaining <= 0 && aliveCount < this.config.summonSkipAliveCount;
+    }
+
+    #nextScheduledPattern(context) {
+        const order = PATTERN_ORDER[this.#intensity()];
+        for (let inspected = 0; inspected < order.length; inspected += 1) {
+            const pattern = order[this.patternIndex % order.length];
+            this.patternIndex += 1;
+            if (pattern !== PATTERN.SUMMON || this.#summonPatternAvailable(context)) return pattern;
+        }
+        return PATTERN.BATON;
+    }
+
     #beginNextPattern(context) {
         const target = this.#updateTarget(context);
         if (!target) {
@@ -424,9 +534,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             this.pendingChainPattern = null;
         } else {
             this.chainDepth = 0;
-            const order = PATTERN_ORDER[this.#intensity()];
-            pattern = order[this.patternIndex % order.length];
-            this.patternIndex += 1;
+            pattern = this.#nextScheduledPattern(context);
         }
         if ((pattern === PATTERN.GUARD || pattern === PATTERN.COUNTER) && !this.#guardPositionAvailable()) {
             pattern = PATTERN.GROUND_DASH;
@@ -455,6 +563,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.timer = seconds;
         this.motionElapsed = 0;
         this.motionSeconds = 0;
+        this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED;
         this.body.holdKinematicPosition();
     }
 
@@ -499,14 +608,22 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.actionPhase = ACTION_PHASE.TELEGRAPH;
         this.timer = this.config.meleeTelegraphSeconds;
         const onLedge = Math.abs(this.bodyPosition.y - this.config.groundCenterY) > 20;
+        const closestLedge = this.config.ledgeTargets.reduce(
+            (closest, candidate) =>
+                !closest || Math.abs(candidate.x - target.position.x) < Math.abs(closest.x - target.position.x)
+                    ? candidate
+                    : closest,
+            null
+        );
         const targetPosition = onLedge
             ? {
                   x: Math.max(this.config.combatMinX, Math.min(this.config.combatMaxX, target.position.x)),
                   y: this.config.groundCenterY
               }
-            : target.position.x < this.bodyPosition.x
-              ? this.config.ledgeLeft
-              : this.config.ledgeRight;
+            : (closestLedge ?? {
+                  x: Math.max(this.config.combatMinX, Math.min(this.config.combatMaxX, target.position.x)),
+                  y: this.config.groundCenterY
+              });
         this.facing = targetPosition.x < this.bodyPosition.x ? -1 : 1;
         this.#setMotion(targetPosition, DEFAULT.dashSeconds);
         this.emit("boss-attack-telegraphed", { kind: this.state, targetPlayerId: target.id, target: targetPosition });
@@ -526,6 +643,161 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             direction: this.facing,
             targetX
         });
+    }
+
+    #jumpLandingTarget(target) {
+        const onGround = Math.abs(this.bodyPosition.y - this.config.groundCenterY) <= 20;
+        if (onGround && this.config.ledgeTargets.length > 0) {
+            return this.config.ledgeTargets.reduce((closest, candidate) =>
+                !closest || Math.abs(candidate.x - target.position.x) < Math.abs(closest.x - target.position.x)
+                    ? candidate
+                    : closest
+            );
+        }
+        const landingOffset = target.position.x < this.bodyPosition.x ? 140 : -140;
+        return freezeComposite({
+            x: Math.max(this.config.combatMinX, Math.min(this.config.combatMaxX, target.position.x + landingOffset)),
+            y: this.config.groundCenterY
+        });
+    }
+
+    _beginJumpMissile(target) {
+        this.state = CONTINUITY_WARDEN_STATE.JUMP;
+        this.actionPhase = ACTION_PHASE.TELEGRAPH;
+        this.timer = this.config.jumpTelegraphSeconds;
+        this.targetPlayerId = target.id;
+        this.facing = target.position.x < this.bodyPosition.x ? -1 : 1;
+        this.jumpTarget = { ...this.#jumpLandingTarget(target) };
+        this.missileFiredThisJump = false;
+        this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.TAKEOFF;
+        this.emit("boss-attack-telegraphed", {
+            kind: CONTINUITY_WARDEN_STATE.MISSILE,
+            targetPlayerId: target.id,
+            missileCount: this.config.missileFanAnglesDegrees.length,
+            target: this.jumpTarget
+        });
+    }
+
+    #fireMissileSalvo(context) {
+        const target = this.#combatPlayers(context).find(({ id }) => id === this.targetPlayerId);
+        if (!target) return false;
+        const origin = compositeWorldPoint(
+            { x: this.bodyPosition.x, y: this.bodyPosition.y - DEFAULT.bodyHeight * 0.2 },
+            context.worldOffset ?? { x: 0, y: 0 }
+        );
+        const targetPosition = compositeWorldPoint(target.position, context.worldOffset ?? { x: 0, y: 0 });
+        const baseAngle = Math.atan2(targetPosition.y - origin.y, targetPosition.x - origin.x);
+        this.missileSalvoSequence += 1;
+        for (const [index, degrees] of this.config.missileFanAnglesDegrees.entries()) {
+            const angle = baseAngle + (degrees * Math.PI) / 180;
+            const velocity = {
+                x: Math.cos(angle) * this.config.missileSpeed,
+                y: Math.sin(angle) * this.config.missileSpeed
+            };
+            this.emit(CONTINUITY_WARDEN_EVENT.MISSILE_FIRED, {
+                projectileId: CONTINUITY_WARDEN_ID.MISSILE(this.attempt, this.missileSalvoSequence, index),
+                ownerId: CONTINUITY_WARDEN_ID.MISSILE_OWNER,
+                targetPlayerId: target.id,
+                position: origin,
+                velocity,
+                speed: this.config.missileSpeed,
+                damage: this.config.missileDamage,
+                radius: this.config.missileRadius,
+                lifetimeSeconds: this.config.missileLifetimeSeconds,
+                turnRateRadiansPerSecond: this.config.missileTurnRateRadiansPerSecond,
+                visualPresetId: CONTINUITY_WARDEN_PROJECTILE_PRESET_ID,
+                fanIndex: index,
+                fanAngleDegrees: degrees
+            });
+        }
+        this.missileFiredThisJump = true;
+        return true;
+    }
+
+    _advanceJumpMissile(dt, context = {}) {
+        if (this.actionPhase === ACTION_PHASE.TELEGRAPH) {
+            this.actionPhase = ACTION_PHASE.ACTIVE;
+            this.timer = this.config.jumpDurationSeconds;
+            this.jumpMotion.begin({
+                position: this.bodyPosition,
+                target: this.jumpTarget,
+                durationSeconds: this.config.jumpDurationSeconds
+            });
+            this.locomotionState = this.jumpMotion.phase;
+            this.emit("boss-attack-started", {
+                kind: CONTINUITY_WARDEN_STATE.MISSILE,
+                targetPlayerId: this.targetPlayerId,
+                missileCount: this.config.missileFanAnglesDegrees.length
+            });
+            return;
+        }
+        const wasActive = this.jumpMotion.active;
+        this.jumpMotion.advance(dt);
+        this.bodyPosition = { x: this.jumpMotion.position.x, y: this.jumpMotion.position.y };
+        this.body.setKinematicPosition(this.bodyPosition, dt);
+        this.locomotionState = this.jumpMotion.phase;
+        if (!this.missileFiredThisJump && this.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.FALL) {
+            this.#fireMissileSalvo(context);
+        }
+        if (!wasActive || this.jumpMotion.active) {
+            if (this.jumpMotion.active) this.timer = Math.max(this.timer, Number.EPSILON);
+            return;
+        }
+        this.state = CONTINUITY_WARDEN_STATE.LANDING;
+        this.actionPhase = ACTION_PHASE.ACTIVE;
+        this.timer = this.config.landingActiveSeconds;
+        this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.LANDING;
+        this.hazardSequence += 1;
+        this.emit("boss-attack-started", {
+            kind: CONTINUITY_WARDEN_HAZARD.LANDING_BURST,
+            sequence: this.hazardSequence
+        });
+    }
+
+    _advanceLanding() {
+        this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED;
+        this._beginNeutral(this.config.landingRecoverySeconds);
+    }
+
+    _beginSummon(target) {
+        this.state = CONTINUITY_WARDEN_STATE.SUMMON;
+        this.actionPhase = ACTION_PHASE.TELEGRAPH;
+        this.timer = this.config.securityTelegraphSeconds;
+        this.facing = target.position.x < this.bodyPosition.x ? -1 : 1;
+        this.emit("boss-attack-telegraphed", {
+            kind: CONTINUITY_WARDEN_STATE.SUMMON,
+            targetPlayerId: target.id,
+            summonCount: this.config.summonCount
+        });
+    }
+
+    _advanceSummon(_dt, context = {}) {
+        if (!this.#summonPatternAvailable(context)) {
+            this._beginNeutral();
+            return;
+        }
+        this.actionPhase = ACTION_PHASE.ACTIVE;
+        this.minionSummonSequence += 1;
+        this.summonCooldownRemaining = this.config.summonCooldownSeconds;
+        this.emit("boss-attack-started", {
+            kind: CONTINUITY_WARDEN_STATE.SUMMON,
+            sequence: this.minionSummonSequence,
+            summonCount: this.config.summonCount
+        });
+        for (let index = 0; index < this.config.summonCount; index += 1) {
+            const poolIndex =
+                ((this.minionSummonSequence - 1) * this.config.summonCount + index) %
+                CONTINUITY_WARDEN_SUMMON_ENEMY_TYPES.length;
+            const localPosition = this.config.summonPoints[index % this.config.summonPoints.length];
+            this.emit(CONTINUITY_WARDEN_EVENT.ENEMY_SUMMONED, {
+                enemyId: CONTINUITY_WARDEN_ID.SUMMONED_ENEMY(this.attempt, this.minionSummonSequence, index),
+                enemyType: CONTINUITY_WARDEN_SUMMON_ENEMY_TYPES[poolIndex],
+                position: compositeWorldPoint(localPosition, context.worldOffset ?? { x: 0, y: 0 }),
+                summonSequence: this.minionSummonSequence,
+                summonIndex: index
+            });
+        }
+        this._beginNeutral(this.config.meleeRecoverySeconds);
     }
 
     _beginGuard(target) {
@@ -729,6 +1001,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             return freezeComposite({ accepted: true, changed: this.victoryCameraRemaining > 0 });
         }
         if (this.status !== "active") return freezeComposite({ accepted: false, changed: false });
+        this.summonCooldownRemaining = Math.max(0, this.summonCooldownRemaining - dt);
         for (const outcome of this.statusEffects.advance(dt)) {
             if (outcome.type === "damage") this.health = Math.max(0, this.health - outcome.damage);
         }
@@ -739,7 +1012,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.#updateRecoveries(context);
         this.#updateTarget(context);
         this.timer = Math.max(0, this.timer - dt);
-        if (this.actionPhase === ACTION_PHASE.ACTIVE && this.motionElapsed < this.motionSeconds) {
+        if (
+            this.state === CONTINUITY_WARDEN_STATE.JUMP &&
+            this.actionPhase === ACTION_PHASE.ACTIVE &&
+            this.jumpMotion.active
+        ) {
+            this._advanceJumpMissile(dt, context);
+        } else if (this.actionPhase === ACTION_PHASE.ACTIVE && this.motionElapsed < this.motionSeconds) {
             const handler = STATE_ADVANCE_HANDLER[this.state];
             if (handler === "_advanceMotionAttack" || handler === "_advanceCharge") this[handler](dt, context);
         }
@@ -882,6 +1161,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             this.actionPhase = ACTION_PHASE.RECOVERY;
             this.timer = 0;
             this.securitySequence = [];
+            this.jumpMotion.cancel(this.bodyPosition);
+            this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED;
             this.victoryCameraRemaining = this.#victoryOffsets().playerControlAt;
             this.body.holdKinematicPosition();
             this.emit("boss-encounter-completed", { targetId, sourcePlayerId });
@@ -948,6 +1229,19 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
     }
 
     #currentHazardDefinition() {
+        if (this.state === CONTINUITY_WARDEN_STATE.LANDING) {
+            const diameter = this.config.landingBurstRadius * 2;
+            return {
+                kind: CONTINUITY_WARDEN_HAZARD.LANDING_BURST,
+                bounds: {
+                    x: this.bodyPosition.x - this.config.landingBurstRadius,
+                    y: this.bodyPosition.y - this.config.landingBurstRadius,
+                    width: diameter,
+                    height: diameter
+                },
+                bodyContact: false
+            };
+        }
         if (MELEE_HAZARD_STATE[this.state] === true) {
             return { kind: this.state, bounds: this.#meleeHazardBounds(), bodyContact: false };
         }
@@ -957,7 +1251,10 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         if (this.state !== CONTINUITY_WARDEN_STATE.SECURITY_ACTIVE) return null;
         const band = this.securitySequence[this.securityIndex];
         return {
-            kind: `security-beam-${band}`,
+            kind:
+                band === SECURITY_BAND.HIGH
+                    ? CONTINUITY_WARDEN_HAZARD.SECURITY_HIGH
+                    : CONTINUITY_WARDEN_HAZARD.SECURITY_LOW,
             bounds: band === SECURITY_BAND.HIGH ? this.config.highBeamBounds : this.config.lowBeamBounds,
             bodyContact: false
         };
@@ -1007,7 +1304,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         if (this.#victoryGateOpen()) {
             return Object.freeze([
                 collisionSurface(
-                    `${this.definition.id}:threshold-bridge`,
+                    CONTINUITY_WARDEN_ID.THRESHOLD_BRIDGE,
                     "threshold-bridge",
                     this.config.bridgeBounds,
                     worldOffset,
@@ -1017,7 +1314,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         }
         return Object.freeze([
             collisionSurface(
-                `${this.definition.id}:departure-gate`,
+                CONTINUITY_WARDEN_ID.DEPARTURE_GATE,
                 "departure-gate",
                 this.config.gateBounds,
                 worldOffset,
@@ -1039,11 +1336,16 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
     }
 
     recoverPlayer(playerId, worldOffset = { x: 0, y: 0 }, currentPosition = null) {
-        const local = compositeLocalPoint(currentPosition ?? { x: 2600, y: 0 }, worldOffset);
-        const target = local.x < 2600 ? { x: 770, y: -722 } : { x: 4240, y: -722 };
+        const local = compositeLocalPoint(currentPosition ?? this.definition.arena.entry, worldOffset);
+        const target = this.config.recoveryPoints.reduce(
+            (closest, candidate) =>
+                !closest || Math.abs(candidate.x - local.x) < Math.abs(closest.x - local.x) ? candidate : closest,
+            null
+        );
+        const recoveryTarget = target ?? this.definition.arena.entry;
         this.recoveries[playerId] = { active: true, protection: true };
-        this.emit("boss-player-recovered", { playerId, target });
-        return compositeWorldPoint(target, worldOffset);
+        this.emit("boss-player-recovered", { playerId, target: recoveryTarget });
+        return compositeWorldPoint(recoveryTarget, worldOffset);
     }
 
     respawnPosition(worldOffset = { x: 0, y: 0 }) {
@@ -1086,6 +1388,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
 
     presentationObjects(worldOffset = { x: 0, y: 0 }) {
         const completed = this.status === "completed";
+        const jumpMotion = this.jumpMotion.snapshot();
         const victoryStage = completed ? this.#victoryStage() : null;
         const gateOpen = this.#victoryGateOpen();
         const gateLit = completed && (gateOpen || victoryStage === "gate-light");
@@ -1103,6 +1406,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 defeatStage: victoryStage,
                 actionState: this.actionPhase,
                 remainingSeconds: this.timer,
+                locomotionState: this.locomotionState,
+                verticalVelocity: jumpMotion.velocity.y,
+                motionProgress:
+                    jumpMotion.active && jumpMotion.durationSeconds > 0
+                        ? jumpMotion.elapsedSeconds / jumpMotion.durationSeconds
+                        : 0,
+                missileArmed: this.state === CONTINUITY_WARDEN_STATE.JUMP && this.missileFiredThisJump === false,
                 direction: this.facing,
                 physicsBody: true,
                 ropeAttachable: this.body.isRopeableSurface(),
@@ -1111,25 +1421,25 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 cameraPriority: CAMERA_PRIORITY.BODY
             },
             {
-                id: "boss-06:emitter-left",
+                id: CONTINUITY_WARDEN_ID.EMITTER_LEFT,
                 kind: OBJECT_KIND.EMITTER,
                 variant: "left",
-                position: compositeWorldPoint({ x: 1058, y: -1420 }, worldOffset),
-                size: { width: 95, height: 650 },
+                position: compositeWorldPoint(this.config.emitterLeft, worldOffset),
+                size: DEFAULT.emitterSize,
                 state: beamBand ? "active" : "idle",
                 active: true
             },
             {
-                id: "boss-06:emitter-right",
+                id: CONTINUITY_WARDEN_ID.EMITTER_RIGHT,
                 kind: OBJECT_KIND.EMITTER,
                 variant: "right",
-                position: compositeWorldPoint({ x: 4118, y: -1420 }, worldOffset),
-                size: { width: 95, height: 650 },
+                position: compositeWorldPoint(this.config.emitterRight, worldOffset),
+                size: DEFAULT.emitterSize,
                 state: beamBand ? "active" : "idle",
                 active: true
             },
             {
-                id: "boss-06:departure-gate",
+                id: CONTINUITY_WARDEN_ID.DEPARTURE_GATE,
                 kind: OBJECT_KIND.GATE,
                 position: compositeWorldPoint(
                     {
@@ -1143,7 +1453,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 active: true
             },
             {
-                id: "boss-06:threshold-bridge",
+                id: CONTINUITY_WARDEN_ID.THRESHOLD_BRIDGE,
                 kind: OBJECT_KIND.BRIDGE,
                 position: compositeWorldPoint(
                     {
@@ -1157,7 +1467,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 active: gateOpen
             },
             {
-                id: "boss-06:maintenance-shuttle",
+                id: CONTINUITY_WARDEN_ID.SHUTTLE,
                 kind: OBJECT_KIND.SHUTTLE,
                 position: compositeWorldPoint(this.config.shuttlePosition, worldOffset),
                 size: { width: 500, height: 390 },
@@ -1165,8 +1475,25 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 active: shuttleRevealed
             }
         ];
+        if (this.state === CONTINUITY_WARDEN_STATE.SUMMON && this.actionPhase === ACTION_PHASE.TELEGRAPH) {
+            for (const [index, summonPoint] of this.config.summonPoints.entries()) {
+                objects.push({
+                    id: CONTINUITY_WARDEN_ID.SUMMON_WARNING(index),
+                    kind: OBJECT_KIND.HAZARD,
+                    variant: CONTINUITY_WARDEN_STATE.SUMMON,
+                    position: compositeWorldPoint(summonPoint, worldOffset),
+                    size: { width: DEFAULT.summonWarningSize, height: DEFAULT.summonWarningSize },
+                    state: ACTION_PHASE.TELEGRAPH,
+                    damaging: false,
+                    active: true,
+                    cameraPriority: CAMERA_PRIORITY.HAZARD
+                });
+            }
+        }
         if (
-            (MELEE_HAZARD_STATE[this.state] === true || MOTION_HAZARD_STATE[this.state] === true) &&
+            (MELEE_HAZARD_STATE[this.state] === true ||
+                MOTION_HAZARD_STATE[this.state] === true ||
+                this.state === CONTINUITY_WARDEN_STATE.LANDING) &&
             (this.actionPhase === ACTION_PHASE.TELEGRAPH || this.actionPhase === ACTION_PHASE.ACTIVE)
         ) {
             const hazard = this.#currentHazardDefinition();
@@ -1175,7 +1502,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                     ? this.#motionPathHazardBounds()
                     : hazard.bounds;
             objects.push({
-                id: "boss-06:attack-hazard",
+                id: CONTINUITY_WARDEN_ID.ATTACK_HAZARD,
                 kind: OBJECT_KIND.HAZARD,
                 variant: hazard.kind,
                 position: compositeWorldPoint(
@@ -1196,7 +1523,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 const localBounds =
                     band === SECURITY_BAND.HIGH ? this.config.highBeamBounds : this.config.lowBeamBounds;
                 objects.push({
-                    id: `boss-06:security-beam-warning:${index}`,
+                    id: CONTINUITY_WARDEN_ID.SECURITY_WARNING(index),
                     kind: OBJECT_KIND.BEAM,
                     variant: band,
                     order: index + 1,
@@ -1217,7 +1544,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             const localBounds =
                 beamBand === SECURITY_BAND.HIGH ? this.config.highBeamBounds : this.config.lowBeamBounds;
             objects.push({
-                id: "boss-06:security-beam",
+                id: CONTINUITY_WARDEN_ID.SECURITY_BEAM,
                 kind: OBJECT_KIND.BEAM,
                 variant: beamBand,
                 position: compositeWorldPoint(
@@ -1235,7 +1562,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         }
         if (completed && this.victoryCameraRemaining > 0) {
             objects.push({
-                id: "boss-06:victory-camera",
+                id: CONTINUITY_WARDEN_ID.VICTORY_CAMERA,
                 kind: OBJECT_KIND.CAMERA,
                 position: compositeWorldPoint(this.config.shuttlePosition, worldOffset),
                 size: { width: 1, height: 1 },
@@ -1248,7 +1575,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         for (const surface of this.definition.arena.surfaces) {
             if (PRESENTED_PAD_SURFACE_KIND[surface.kind] !== true) continue;
             padSurfaceObjects.push({
-                id: `${surface.id}:presentation`,
+                id: CONTINUITY_WARDEN_ID.PRESENTATION_SURFACE(surface.id),
                 kind: OBJECT_KIND.PAD_SURFACE,
                 variant: surface.kind,
                 position: compositeWorldPoint(
@@ -1288,6 +1615,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 hazardSequence: this.hazardSequence,
                 direction: this.facing,
                 targetPlayerId: this.targetPlayerId,
+                locomotionState: this.locomotionState,
+                summonCooldownRemaining: this.summonCooldownRemaining,
                 securitySequence: this.securitySequence,
                 securityIndex: this.securityIndex
             }),
@@ -1310,6 +1639,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             victoryCameraRemaining: this.victoryCameraRemaining,
             chainDepth: this.chainDepth,
             pendingChainPattern: this.pendingChainPattern,
+            missileSalvoSequence: this.missileSalvoSequence,
+            missileFiredThisJump: this.missileFiredThisJump,
+            minionSummonSequence: this.minionSummonSequence,
+            summonCooldownRemaining: this.summonCooldownRemaining,
+            locomotionState: this.locomotionState,
+            jumpTarget: this.jumpTarget,
+            jumpMotion: this.jumpMotion.snapshot(),
             body: this.body.snapshot(),
             statusEffects: this.statusEffects.snapshot()
         });
@@ -1342,9 +1678,23 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.victoryCameraRemaining = snapshot.victoryCameraRemaining ?? 0;
         this.chainDepth = snapshot.chainDepth ?? 0;
         this.pendingChainPattern = snapshot.pendingChainPattern ?? null;
+        this.missileSalvoSequence = snapshot.missileSalvoSequence ?? 0;
+        this.missileFiredThisJump = snapshot.missileFiredThisJump ?? false;
+        this.minionSummonSequence = snapshot.minionSummonSequence ?? 0;
+        this.summonCooldownRemaining =
+            snapshot.summonCooldownRemaining ?? snapshot.mechanism?.summonCooldownRemaining ?? 0;
+        this.locomotionState =
+            snapshot.locomotionState ??
+            snapshot.mechanism?.locomotionState ??
+            CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED;
+        this.jumpTarget = {
+            ...(snapshot.jumpTarget ?? snapshot.body?.position ?? this.definition.arena.boss.position)
+        };
         this.statusEffects.restore(snapshot.statusEffects ?? null);
         this.body.restore(snapshot.body);
         this.bodyPosition = { x: this.body.position.x, y: this.body.position.y };
+        if (snapshot.jumpMotion) this.jumpMotion.restore(snapshot.jumpMotion);
+        else this.jumpMotion.cancel(this.bodyPosition);
         return this;
     }
 }

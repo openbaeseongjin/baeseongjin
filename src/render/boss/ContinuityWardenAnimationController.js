@@ -1,3 +1,5 @@
+import { CONTINUITY_WARDEN_STATE } from "../../game/boss/ContinuityWardenDefinition.js";
+
 const RECOVERY_CLIP_BY_STATE = Object.freeze({
     "baton-1": "neutral-recovery",
     "baton-2": "neutral-recovery",
@@ -9,7 +11,10 @@ const RECOVERY_CLIP_BY_STATE = Object.freeze({
     guard: "guard-exit",
     "counter-ready": "neutral-recovery",
     "counter-bash": "neutral-recovery",
-    "security-active": "neutral-recovery"
+    "security-active": "neutral-recovery",
+    [CONTINUITY_WARDEN_STATE.JUMP]: "neutral-recovery",
+    [CONTINUITY_WARDEN_STATE.LANDING]: "neutral-recovery",
+    [CONTINUITY_WARDEN_STATE.SUMMON]: "neutral-recovery"
 });
 const REACTION_CLIP_BY_EVENT_TYPE = Object.freeze({
     "boss-damaged": Object.freeze({ front: "hit-front", flank: "hit-back" }),

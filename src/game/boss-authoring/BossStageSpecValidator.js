@@ -33,6 +33,19 @@ const EDITABLE_ROOTS = Object.freeze([
 ]);
 const ARENA_ENTRY_MAX_SUPPORT_DROP = 96;
 const SCANNER_CYCLE_KEYS = Object.freeze(["available", "warning", "locked", "reset"]);
+const CONTINUITY_WARDEN_POSITIVE_PARAMETERS = Object.freeze([
+    "jumpGravity",
+    "jumpDurationSeconds",
+    "jumpTelegraphSeconds",
+    "landingActiveSeconds",
+    "landingRecoverySeconds",
+    "landingBurstRadius",
+    "missileSpeed",
+    "missileDamage",
+    "missileRadius",
+    "missileLifetimeSeconds",
+    "missileTurnRateRadiansPerSecond"
+]);
 
 function issue(issues, file, code, details = {}) {
     issues.push({ file, code, ...details });
@@ -145,6 +158,16 @@ function validateArena(spec, issues, file) {
         if (anchor.role !== BOSS_ANCHOR_ROLE.SWING_ATTACK) continue;
         if (typeof anchor.surfaceId !== "string" || !surfaceIds.has(anchor.surfaceId)) {
             issue(issues, file, "arena-anchor-surface-reference-invalid", { id: anchor.id ?? null });
+            continue;
+        }
+        const surface = surfaceById[anchor.surfaceId];
+        if (
+            surface.bounds.width !== 24 ||
+            surface.bounds.height !== 24 ||
+            surface.bounds.x + 12 !== anchor.x ||
+            surface.bounds.y + 12 !== anchor.y
+        ) {
+            issue(issues, file, "arena-anchor-surface-position-mismatch", { id: anchor.id ?? null });
         }
     }
     if (!positive(arena?.baseHookReach)) issue(issues, file, "arena-hook-reach-invalid");
@@ -185,6 +208,7 @@ function validateArena(spec, issues, file) {
             issue(issues, file, "arena-route-edges-invalid");
         } else {
             const anchorIds = new Set((arena.anchors ?? []).map(({ id }) => id));
+            const anchorById = Object.fromEntries((arena.anchors ?? []).map((anchor) => [anchor.id, anchor]));
             const edgeIds = validateIds(arena.routeEdges, issues, file, "arena-route-edge");
             for (const edge of arena.routeEdges) {
                 if (
@@ -194,6 +218,12 @@ function validateArena(spec, issues, file) {
                     edge.from === edge.to
                 ) {
                     issue(issues, file, "arena-route-edge-reference-invalid", { id: edge.id ?? null });
+                    continue;
+                }
+                const from = anchorById[edge.from];
+                const to = anchorById[edge.to];
+                if (Math.hypot(to.x - from.x, to.y - from.y) > arena.baseHookReach) {
+                    issue(issues, file, "arena-route-edge-reach-invalid", { id: edge.id ?? null });
                 }
             }
         }
@@ -269,6 +299,46 @@ function validateMechanics(spec, issues, file) {
             issue(issues, file, "mechanic-bounds-invalid", { id: mechanic.id });
         }
         if (!isObject(mechanic.parameters)) issue(issues, file, "mechanic-parameters-invalid", { id: mechanic.id });
+        if (mechanic.type === BOSS_MECHANIC_TYPE.CONTINUITY_WARDEN && isObject(mechanic.parameters)) {
+            for (const key of CONTINUITY_WARDEN_POSITIVE_PARAMETERS) {
+                if (!positive(mechanic.parameters[key])) {
+                    issue(issues, file, "continuity-warden-parameter-invalid", { id: mechanic.id, key });
+                }
+            }
+            const fanAngles = mechanic.parameters.missileFanAnglesDegrees;
+            if (
+                !Array.isArray(fanAngles) ||
+                fanAngles.length !== 5 ||
+                !fanAngles.every(Number.isFinite) ||
+                fanAngles.some((angle, index) => index > 0 && angle <= fanAngles[index - 1]) ||
+                fanAngles[0] >= 0 ||
+                fanAngles[fanAngles.length - 1] <= 0
+            ) {
+                issue(issues, file, "continuity-warden-missile-fan-invalid", { id: mechanic.id });
+            }
+            const summonConfigured = [
+                "minionSummonCount",
+                "minionSummonSkipAliveCount",
+                "minionSummonCooldownSeconds",
+                "summonLeft",
+                "summonRight"
+            ].some((key) => mechanic.parameters[key] !== undefined);
+            if (
+                summonConfigured &&
+                (!Number.isSafeInteger(mechanic.parameters.minionSummonCount) ||
+                    mechanic.parameters.minionSummonCount !== 2 ||
+                    !Number.isSafeInteger(mechanic.parameters.minionSummonSkipAliveCount) ||
+                    mechanic.parameters.minionSummonSkipAliveCount !== 6 ||
+                    !positive(mechanic.parameters.minionSummonCooldownSeconds) ||
+                    mechanic.parameters.minionSummonCooldownSeconds < 15 ||
+                    !finitePoint(mechanic.parameters.summonLeft) ||
+                    !finitePoint(mechanic.parameters.summonRight) ||
+                    !pointInside(spec.arena.bounds, mechanic.parameters.summonLeft) ||
+                    !pointInside(spec.arena.bounds, mechanic.parameters.summonRight))
+            ) {
+                issue(issues, file, "continuity-warden-summon-parameters-invalid", { id: mechanic.id });
+            }
+        }
     }
     return ids;
 }
