@@ -30,11 +30,11 @@ Hardpoint Jammer의 공용 이동 상태 `jammer-roam`은 별도 pose를 만들�
 
 ## Runtime과 fallback
 
-게임 bootstrap은 `EnemySpriteCatalog`의 고정 `sectorId → package` 대응표에 등록된 manifest를 player와 독립적으로 읽고 `SpriteSceneResourceBundle.prepare()`에서 모든 선택 package atlas의 load·decode를 gameplay 시작 전에 끝낸다. 준비된 bundle은 싱글·멀티가 공유한다. `SpriteEnemyRenderer`는 Area Preview의 `enemy.areaId → world.areas[].sectorId`와 연속 Sector Runtime의 `enemy.objectId → world.enemySpawns[].sectorId`를 하나의 저작 identity index로 해석하고, snapshot에 `sectorId`가 직접 있으면 이를 우선해 해당 package를 자동 선택한다. 카메라나 Player 위치로 package를 바꾸지 않으므로 Sector 경계에서도 한 몹의 외형이 이동 중 바뀌지 않는다.
+게임 bootstrap은 `EnemySpriteCatalog`의 고정 `sectorId → package` 대응표에 등록된 manifest를 player와 독립적으로 읽는다. `SpriteSceneResourceBundle.prepareArea()`는 실제 시작 `sectorId` package와 타입 fallback에 필요한 기본 package만 gameplay 전에 기다리고, 나머지 Sector package는 독립 promise로 background 준비한다. 준비된 bundle은 싱글·멀티가 공유한다. `SpriteEnemyRenderer`는 Area Preview의 `enemy.areaId → world.areas[].sectorId`와 연속 Sector Runtime의 `enemy.objectId → world.enemySpawns[].sectorId`를 하나의 저작 identity index로 해석하고, snapshot에 `sectorId`가 직접 있으면 이를 우선해 해당 package를 자동 선택한다. 카메라나 Player 위치로 package를 바꾸지 않으므로 Sector 경계에서도 한 몹의 외형이 이동 중 바뀌지 않는다.
 
 Map Editor와 Scenario source는 gameplay `enemyType` 또는 `allowedEnemyTypes`만 저작한다. 섹터별 skin·palette·package 필드를 추가하거나 선택 목록을 복제하지 않으며, 실제 게임과 Editor Preview는 같은 `EnemySpritePackageCatalog` resolver를 사용한다. 새 package는 `assets/runtime/characters/sector-<nn>-enemies/`에 두고 validator를 통과시킨 뒤 `ENEMY_SPRITE_SELECTION_BY_SECTOR_ID`의 immutable selection에 등록한다.
 
-섹터 package가 해당 타입을 지원하고 atlas가 준비됐으면 첫 gameplay frame부터 그 표현을 사용한다. package가 없거나 atlas가 terminal failed이거나 타입을 지원하지 않으면 Sector 01 기본 package, 그마저 사용할 수 없으면 적 단위 built-in pixel mock 순으로 복구한다. pending 상태는 정상 gameplay에 진입하지 않는다. 이 fallback은 package를 대표 몹부터 점진적으로 납품할 수 있게 하며 Player나 Environment renderer를 polygon profile로 내리지 않는다.
+현재 Sector package가 해당 타입을 지원하고 atlas가 준비됐으면 첫 gameplay frame부터 그 표현을 사용한다. package가 없거나 atlas가 terminal failed이거나 타입을 지원하지 않으면 준비된 Sector 01 기본 package, 그마저 사용할 수 없으면 적 단위 built-in pixel mock 순으로 복구한다. 다른 Sector package의 idle·pending·failed는 현재 package 선택에 참여하지 않는다. 시작 Sector의 pending 상태는 정상 gameplay에 진입하지 않는다. 이 fallback은 package를 대표 몹부터 점진적으로 납품할 수 있게 하며 Player나 Environment renderer를 polygon profile로 내리지 않는다.
 
 섹터별 색상 변형은 제작 단계에서 팔레트를 바꾼 투명 PNG atlas로 export한다. 런타임 color filter나 indexed palette swap은 기본 계약이 아니며, 역할을 구분하는 포구·방패·센서와 gameplay telegraph 색을 단순 색조 변환으로 훼손하지 않는다.
 

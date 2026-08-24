@@ -1,13 +1,13 @@
 import { ImageAsset } from "../assets/ImageAsset.js";
 
 export class EnvironmentImageAsset extends ImageAsset {
-    constructor({ source, expectedSize = null, ImageClass = globalThis.Image } = {}) {
-        super({ source, expectedSize, ImageClass, assetLabel: "Environment" });
+    constructor({ source, expectedSize = null, ImageClass = globalThis.Image, autoStart = true } = {}) {
+        super({ source, expectedSize, ImageClass, assetLabel: "Environment", autoStart });
     }
 }
 
 export class EnvironmentAssetSet {
-    constructor({ atlases, ImageClass = globalThis.Image } = {}) {
+    constructor({ atlases, ImageClass = globalThis.Image, autoStart = true } = {}) {
         if (!atlases || Array.isArray(atlases) || typeof atlases !== "object" || !Object.keys(atlases).length) {
             throw new Error("EnvironmentAssetSet requires atlas definitions");
         }
@@ -18,7 +18,8 @@ export class EnvironmentAssetSet {
                     new EnvironmentImageAsset({
                         source: atlas.source,
                         expectedSize: atlas.size,
-                        ImageClass
+                        ImageClass,
+                        autoStart
                     })
                 ])
             )
@@ -29,21 +30,29 @@ export class EnvironmentAssetSet {
         const assets = Object.values(this.assets);
         if (assets.some((asset) => asset.status === "failed")) return "failed";
         if (assets.every((asset) => asset.status === "ready")) return "ready";
-        return "pending";
+        if (assets.some((asset) => asset.status === "pending")) return "pending";
+        return "idle";
     }
 
     get error() {
         return Object.values(this.assets).find((asset) => asset.error)?.error ?? null;
     }
 
-    async prepare() {
-        await Promise.all(Object.values(this.assets).map((asset) => asset.prepare()));
-        return this.status;
+    statusFor(atlasIds = Object.keys(this.assets)) {
+        const assets = atlasIds.map((atlasId) => this.assetFor(atlasId));
+        if (assets.some((asset) => asset.status === "failed")) return "failed";
+        if (assets.every((asset) => asset.status === "ready")) return "ready";
+        if (assets.some((asset) => asset.status === "pending")) return "pending";
+        return "idle";
+    }
+
+    async prepare(atlasIds = Object.keys(this.assets)) {
+        await Promise.all(atlasIds.map((atlasId) => this.assetFor(atlasId).prepare()));
+        return this.statusFor(atlasIds);
     }
 
     imageFor(atlasId) {
-        if (!Object.hasOwn(this.assets, atlasId)) throw new Error(`Unknown environment atlas '${atlasId}'`);
-        const asset = this.assets[atlasId];
+        const asset = this.assetFor(atlasId);
         if (asset.status !== "ready") throw new Error(`Environment atlas '${atlasId}' is not ready`);
         return asset.image;
     }
@@ -51,5 +60,10 @@ export class EnvironmentAssetSet {
     isReady(atlasId) {
         if (!Object.hasOwn(this.assets, atlasId)) return false;
         return this.assets[atlasId].status === "ready";
+    }
+
+    assetFor(atlasId) {
+        if (!Object.hasOwn(this.assets, atlasId)) throw new Error(`Unknown environment atlas '${atlasId}'`);
+        return this.assets[atlasId];
     }
 }

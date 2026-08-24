@@ -126,7 +126,7 @@ Authored backdrop은 `imageSmoothingEnabled = false`를 유지하고 layer의 de
 
 atlas 준비와 실패는 backdrop, terrain, decoration이 각각 판단한다.
 
-bootstrap의 `SpriteSceneResourceBundle.prepare()`는 선택된 모든 Environment atlas의 load·decode·크기 검증을 startup loading 안에서 끝낸다. 정상 gameplay은 environment asset이 terminal ready/failed인 뒤에만 시작하므로 pending polygon 표현이 첫 frame에 보였다가 교체되는 흐름을 허용하지 않는다. 준비된 asset set은 싱글·멀티·디버그 재시작이 공유한다.
+bootstrap의 `SpriteSceneResourceBundle.prepareArea()`는 실제 시작 Area definition이 참조하는 Environment atlas만 load·decode·크기 검증까지 기다린다. 다른 Sector package는 같은 lazy asset set 안에서 독립 promise로 background 준비하며 current Area component readiness에 포함되지 않는다. terrain·decoration은 current Area definition만, Sector backdrop crossfade는 실제 from/to 두 definition만 readiness에 포함한다. 정상 gameplay은 current Area asset이 terminal ready/failed인 뒤에만 시작하므로 pending polygon 표현이 첫 frame에 보였다가 교체되는 흐름을 허용하지 않는다. 준비된 asset set은 싱글·멀티·디버그 재시작이 공유한다.
 
 - backdrop atlas만 실패하면 기존 polygon backdrop만 대신 그리고 terrain·decoration은 계속 도트로 그린다.
 - terrain atlas만 실패하면 기존 collision geometry만 대신 그린다.

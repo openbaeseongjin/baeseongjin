@@ -27,6 +27,7 @@ import { DebugPanel } from "./game/ui/DebugPanel.js";
 import { DebugEnemyTrainingControls } from "./game/ui/DebugEnemyTrainingControls.js";
 import { HelpDialog } from "./game/ui/HelpDialog.js";
 import { AUTHORED_SECTOR_CATALOG } from "./game/world/sectors/AuthoredSectorCatalog.js";
+import { authoredRegionForPosition } from "./game/world/AuthoredLandmarkResolver.js";
 import { loadDefaultPlayerSpriteDefinition } from "./render/sprites/PlayerSpriteCatalog.js";
 import { DEFAULT_ENEMY_SPRITE_SECTOR_ID, loadEnemySpriteDefinitions } from "./render/sprites/EnemySpriteCatalog.js";
 import { loadAuthoredAreaEnvironmentDefinitions } from "./render/environment/AuthoredAreaEnvironmentCatalog.js";
@@ -91,6 +92,18 @@ hudToggle.addEventListener("click", () => applyHudVisibility(!hudVisible));
 const debugAreaIds = AUTHORED_SECTOR_CATALOG.stageIdentities
     .filter(({ runtimePreview }) => runtimePreview)
     .map(({ stageId }) => stageId);
+const GRAPHICS_RESOURCE_IDENTITY_BY_STAGE_ID = Object.freeze(
+    Object.fromEntries(
+        AUTHORED_SECTOR_CATALOG.stageIdentities
+            .filter(({ runtimePreview }) => runtimePreview)
+            .map(({ stageId, sectorId }) => {
+                const stageOrder = String(stageId).split("-")[1]?.padStart(2, "0");
+                return [stageId, Object.freeze({ areaId: `${sectorId}-${stageOrder}`, sectorId })];
+            })
+    )
+);
+const DEFAULT_GRAPHICS_RESOURCE_IDENTITY =
+    GRAPHICS_RESOURCE_IDENTITY_BY_STAGE_ID[debugAreaIds[0]] ?? Object.freeze({ areaId: null, sectorId: "sector-01" });
 const debugSettings = new DebugSettings({ storage: audioStorage, validAreaIds: debugAreaIds });
 let debugTabRegistered = false;
 const debugPanel = new DebugPanel({
@@ -191,6 +204,31 @@ function createRuntimeGameRenderer() {
     });
 }
 
+function graphicsResourceIdentityForStage(stageId) {
+    if (stageId === null || stageId === undefined) return DEFAULT_GRAPHICS_RESOURCE_IDENTITY;
+    const identity = GRAPHICS_RESOURCE_IDENTITY_BY_STAGE_ID[stageId];
+    if (!identity) throw new Error(`알 수 없는 그래픽 시작 Stage입니다: ${stageId}`);
+    return identity;
+}
+
+function graphicsResourceIdentityForAuthority(authority) {
+    const region = authoredRegionForPosition(authority.worldSnapshot(), authority.presentationState()?.position);
+    if (!region?.areaId || !region?.sectorId) {
+        throw new Error("멀티플레이 시작 Area의 그래픽 package를 확인할 수 없습니다.");
+    }
+    return Object.freeze({
+        areaId: region.areaId,
+        sectorId: region.sectorId
+    });
+}
+
+async function prepareGraphicsResources(identity) {
+    if (!spriteSceneResources) return null;
+    const status = await spriteSceneResources.prepareArea(identity);
+    void spriteSceneResources.prepareRemaining(identity);
+    return status;
+}
+
 async function refreshMultiplayerAvailability() {
     const sequence = ++multiplayerProbeSequence;
     const serverUrl = configuredMultiplayerServer();
@@ -277,6 +315,7 @@ async function launch() {
                 debugPanel.setRopeTuningEnabled(true);
                 debugEnemyTrainingControls.setEnabled(true);
                 const debug = debugSettings.snapshot();
+                await prepareGraphicsResources(graphicsResourceIdentityForStage(debug.startAreaId));
                 app = createSingleGameApp(debug);
             } else {
                 debugPanel.setRopeTuningEnabled(false);
@@ -287,6 +326,7 @@ async function launch() {
                 await authority.connect();
                 activeChannelId = authority.channelId;
                 const debug = debugSettings.snapshot();
+                await prepareGraphicsResources(graphicsResourceIdentityForAuthority(authority));
                 app = new MultiplayerGameApp({
                     canvas,
                     renderer: createRuntimeGameRenderer(),
@@ -349,7 +389,7 @@ async function bootstrap() {
             enemyDefinitionsBySectorId,
             authoredAreaEnvironmentDefinitions
         });
-        await spriteSceneResources.prepare();
+        await prepareGraphicsResources(DEFAULT_GRAPHICS_RESOURCE_IDENTITY);
     }
     if (pageClosing) return;
     await refreshMultiplayerAvailability();
