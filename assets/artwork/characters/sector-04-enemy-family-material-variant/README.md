@@ -3,25 +3,28 @@
 - Asset ID: `sector-04-enemy-family-material-variant`
 - Category: `characters`
 - Status: `USER APPROVED / RUNTIME INTEGRATED FOR SECTOR 04`
-- Target: the current Sector 01 approved seven-enemy family, adapted lightly for Sector 04
+- Target: the current Sector 01 approved seven-enemy family, adapted to the user-approved overgrown Sector 04 treatment
 - Source: repository Runtime atlases copied without resampling from `assets/runtime/characters/sector-01-enemies/`
 - Visual reference: approved Sector 04 Upper Residential master at `assets/artwork/environments/sector-04-upper-residential-background/source/far-mid-near-v3-open-ascent-attached-master/sector-04-upper-residential-master.png`
-- Tool chain: OpenAI built-in ImageGen material-reference edit plus deterministic Pillow palette normalization
+- User reference: `source/user-reference/sector-04-overgrown-enemies-user-reference-v2.png`
+- Tool chain: user-supplied concept reference, built-in ImageGen placement review and deterministic Pillow palette, surface-wear and hanging-vine normalization
 - Source/license: repository-owned approved project assets; no external artwork
 
 ## Scope
 
-This is an identity-preserving image-to-image authoring pass. Every source silhouette, proportion, equipment shape, facing, pose, cell, atlas dimension, frame order, anchor intent, transparent padding and binary alpha stays unchanged. Neutral exterior metal moves slightly toward the maintained Sector 04 residential reference: blue-green graphite, cool architectural gray, pale alloy and restrained olive-gray lichen staining. The user-approved follow-up adds short two-tone vines by replacing only existing neutral plate pixels, so no loose grass, alpha expansion or protruding plant shape is introduced.
+This is an identity-preserving image-to-image authoring pass. Every source proportion, equipment shape, facing, pose, cell, atlas dimension, frame order, anchor intent and binary-alpha rule stays unchanged. Neutral exterior metal follows the attached Sector 04 concept with charcoal recesses, oxidized architectural gray, worn pale alloy, rust spotting, muted moss and long hanging vines. Existing opaque sprite pixels are never removed. The latest user decision intentionally allows vine pixels to extend the visible silhouette inside each unchanged `32x32` cell's transparent padding so every monster shows the reference's growth at actual game size.
 
 Role and behavior colors remain exact source RGB values: Shield blue; Support green; Swarm purple; Patrol red/orange; Artillery orange/red warning colors; Sentry and Pursuit sensors, exhaust and warning highlights. No sector marking is added because a new one-pixel mark would compete with the existing role cues at the `32x32` cell scale.
 
 ## Deliverables
 
 - `source/approved-sector-01/`: untouched copies of the eight source atlases
-- `source/imagegen/enemy-family-material-reference.png`: generated material-treatment reference; not an atlas input
+- `source/user-reference/sector-04-overgrown-enemies-user-reference-v2.png`: latest user-approved material and hanging-vine authority; not an atlas input
+- `source/user-reference/sector-04-overgrown-enemies-user-reference.jpg`: earlier user reference retained for provenance
+- `source/imagegen/enemy-family-material-reference.png`: earlier generated material-treatment reference; not an atlas input
 - `preview/test/sector-04-enemy-vine-test-v1.png`: user-approved vine feasibility reference; not an atlas input
 - `source/generation-prompt.md`: ImageGen edit contract and reference roles
-- `source/build_sector04_variant.py`: deterministic palette-only normalization, validation and preview builder
+- `source/build_sector04_variant.py`: deterministic palette, surface-wear, body-relative hanging-vine, validation and preview builder
 - `export/`: eight transparent PNG atlases with the same dimensions as their sources
 - `preview/sector-01-vs-sector-04-comparison.png`: side-by-side representative comparison
 - `preview/sector-04-runtime-size-comparison.png`: exact intended world-output comparison on the approved Sector 04 backdrop
@@ -41,16 +44,16 @@ Role and behavior colors remain exact source RGB values: Shield blue; Support gr
 
 ## Approval and non-scope
 
-The user approved the vine feasibility image and requested Sector 04-only Runtime and GitHub integration in Issue #925. The eight deterministic exports are promoted byte-for-byte to `assets/runtime/characters/sector-04-enemies/`; Sector 01~03 packages remain unchanged. This approval covers only the existing material and restrained vine treatment. It does not authorize new equipment, animation, timing, gameplay, collision or networking changes.
+The user supplied the final overgrown concept and requested Sector 04-only Runtime and GitHub integration in Issue #983. The eight deterministic exports are promoted byte-for-byte to `assets/runtime/characters/sector-04-enemies/`; Sector 01~03 packages remain unchanged. The latest request supersedes the earlier alpha-equality restriction only for hanging vines inside existing cell padding. It does not authorize cell or atlas resizing, new equipment, animation, timing, gameplay, collision or networking changes.
 
 ## Validation
 
 - Deterministic build: `PASS` with Python `3.14.3` and Pillow `12.1.1`.
 - Source identity: `PASS` — all eight authoring source copies match the current approved Runtime atlases by SHA-256.
 - Atlas contract: `PASS` — 8 RGBA PNGs, exact source dimensions, unchanged `32x32` cell grids and frame/layer order.
-- Pixel contract: `PASS` — source alpha bytes and opaque masks are identical; output alpha values are only `0` and `255`.
+- Pixel contract: `PASS` — existing opaque pixels are preserved; newly opaque padding pixels are vine colors only; output alpha values are only `0` and `255`.
 - Role-color contract: `PASS` — protected role, sensor, exhaust, telegraph and healing RGB counts are identical to the approved source atlases.
-- Vine contract: `PASS` — every populated atlas cell receives the same cell-local neutral-plate treatment while Shield role-blue body pixels remain unchanged.
-- Visual review: `PASS` for all long atlases at enlarged nearest-neighbor scale and exact `56x56`, `60x60` and `18x18` world-output sizes on the approved Sector 04 backdrop.
+- Surface-wear contract: `PASS` — every populated body frame receives deterministic body-relative moss/rust treatment and hanging strands; Shield role-blue pixels remain unchanged.
+- Visual review: `PASS` — every visible body frame retains vine pixels after nearest-neighbor conversion to exact `56x56`, `60x60` or `18x18` world output.
 - Runtime promotion: `PASS` — all eight Runtime PNGs are byte-identical to the approved exports and the enemy manifest validator reports 8 atlases, 7 enemies and 48 states.
-- Browser review: `PASS` — production Gameplay View rendered Sector 04 Stage 4-1 on desktop and `390x844` mobile without console warnings or errors.
+- Browser review: `PASS` — Stage 4-6 Gameplay View에서 추격 드론의 외장 밖으로 이어진 덩굴과 주황 배기·빨강 센서를 데스크톱 1280×720 및 모바일 844×390으로 확인했고, browser warning/error는 0건이었다. 나머지 6종과 전체 48상태는 실제 출력 크기 시트 및 atlas validator로 확인했다.

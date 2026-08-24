@@ -3,8 +3,8 @@
     "formatVersion": 4,
     "id": "sector-04-enemies",
     "generator": {
-        "tool": "Codex built-in ImageGen + Pillow normalization",
-        "exportVersion": "2026-08-23",
+        "tool": "User concept reference + Pillow normalization",
+        "exportVersion": "2026-08-24-vine-silhouette-v2",
         "sourceExport": "../../../artwork/characters/sector-04-enemy-family-material-variant/export/artillery-acquisition-motion.png"
     },
     "atlases": {

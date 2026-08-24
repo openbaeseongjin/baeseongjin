@@ -1,25 +1,30 @@
-# Built-in ImageGen edit prompt
+# Sector 04 overgrown enemy reference contract
 
 ## Input roles
 
-- Image 1: edit target — the comparison board whose `CURRENT APPROVED` column contains the seven approved enemy identities.
-- Image 2: material and mood reference — the approved Sector 04 Upper Residential / Amenity District master.
-- Use case: `precise identity-preserving pixel-art material edit`.
+- Latest user authority: `source/user-reference/sector-04-overgrown-enemies-user-reference-v2.png`
+- Earlier user reference: `source/user-reference/sector-04-overgrown-enemies-user-reference.jpg`
+- Approved animation source: `source/approved-sector-01/*.png`
+- Sector mood reference: the approved Sector 04 Upper Residential master
+- Use case: `precise identity-preserving pixel-art material edit`
 
-## Edit contract
+## Visual target
 
-Create a clean material-reference board for the same seven monsters. Preserve exact silhouettes, proportions, equipment, facing, pose, pixel-art scale and role identity. Preserve role and behavior colors exactly: Shield blue, Support green, Swarm purple, Patrol red/orange, Artillery orange/red warning colors, and Sentry/Pursuit sensors and exhaust.
+Apply the latest user's oxidized gray metal, rust, moss and long hanging-vine treatment to all seven approved enemies. Match the reference's distribution: moss accumulates on upward-facing plates, thin olive strands descend from side housings and lower edges, and every monster has visible growth at its real game output size.
 
-Change only neutral exterior metal toward maintained Sector 04 cool gray, blue-green graphite, pale architectural alloy and restrained olive-gray weathering. Moss or lichen may appear only as sparse flat discoloration inside existing neutral plate shapes. Do not add grass blades, leaves, vines, protrusions, weapons, limbs, accessories, text on bodies or new micro-details. The district is maintained and unusually normal, not ruined; use minimal dust and oxidation with no heavy rust.
+Preserve exact proportions, equipment, facing, pose, role identity and role/behavior colors: Shield blue, Support green, Swarm purple, Patrol red/orange, Artillery orange/red warnings, and Sentry/Pursuit sensors and exhaust. Do not add weapons, limbs, flowers, thick bushes, antialiasing, blur, glow, translucent edges, text or watermarks.
 
-Keep hard-edged low-resolution pixel art, integer pixels and nearest-neighbor appearance. Do not use antialiasing, blur, translucent edges, background inside sprite bounds or watermarks. The built-in output is retained only as a material-treatment reference. Final atlases are rebuilt deterministically from approved source pixels so atlas geometry and binary alpha cannot drift.
+## Runtime normalization
 
-## User-approved vine feasibility edit
+Built-in ImageGen is used only to review material and vine placement. The final eight atlases are rebuilt deterministically from the approved Sector 01 pixels.
 
-- Edit target: `source/imagegen/enemy-family-material-reference.png`
-- Saved result: `preview/test/sector-04-enemy-vine-test-v1.png`
-- Use case: `precise-object-edit`
+- Keep every atlas dimension, `32x32` cell, frame count, order, timing and anchor unchanged.
+- Preserve every approved opaque pixel and every protected role-color count.
+- Use hard binary alpha and integer pixels only.
+- Moss and rust may replace eligible neutral-metal pixels.
+- Hanging vines may add binary-alpha pixels only inside existing transparent cell padding; they may not touch a cell boundary.
+- Resolve fixed strand shapes from each frame's body-relative lower edge so animation does not swim in atlas coordinates.
+- Sentry base and Shield body own hanging vines; their rotating aim and direction overlay layers do not.
+- Verify that vine pixels survive nearest-neighbor conversion to `56x56`, `60x60` and Swarm's `18x18` world output.
 
-Add restrained creeping vines only to the seven monsters in the Sector 04 variant column while keeping the Current Approved column unchanged. Use one or two thin dark-green strands on larger neutral metal housings with two to four small blocky leaves; use one short trace with at most two leaves on Swarm. Preserve identity, silhouette, equipment, facing, pose, role colors, sensors, cores, barrels, exhausts, warning panels and moving joints. Do not add weapons, limbs, flowers, thick bushes, long hanging growth, dirt clumps, antialiasing, blur, glow or translucent edges.
-
-The approved ImageGen result is a visual target only. Runtime atlases use deterministic cell-local masks that replace existing neutral metal pixels and preserve every source alpha byte.
+The attached contact sheet is a visual authority, not a runtime atlas or layout input.
