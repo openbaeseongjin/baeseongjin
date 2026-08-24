@@ -233,6 +233,7 @@ class Player extends RopeAttachable(GameObject) {}
 ### DOM UI 컴포넌트
 
 - Alpine.js의 반응형 상태와 선언형 binding을 사용하고 문자열 `innerHTML` 조립을 금지한다.
+- definition·catalog 개수에 따라 반복되는 입력·선택 컨트롤은 HTML에 개수를 복제하지 않는다. HTML은 컨테이너와 한 개의 구조 template만 소유하고, 컴포넌트가 같은 definition·catalog에서 개수·option을 함께 생성한다. catalog가 늘거나 줄 때 별도 HTML 수정 없이 Runtime과 디버그 UI가 같은 항목을 노출해야 한다.
 - 로컬 표시 상태, DOM 구조, 사용자 상호작용, `attach()`/`detach()` 수명주기만 소유한다.
 - 게임 상태는 읽기 전용 view model로 받고, 사용자 행동은 intent나 공개 명령으로 밖에 전달한다.
 - 물리, 전투, 보상 계산을 UI 이벤트 핸들러나 template 안에 넣지 않는다.

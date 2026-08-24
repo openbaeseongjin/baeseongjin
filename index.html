@@ -977,54 +977,15 @@
                             </p>
                             <fieldset class="debug-augment-fieldset" data-debug-augment-loadout>
                                 <legend>획득 증강 테스트</legend>
-                                <label class="debug-augment-row">
-                                    <span>획득 1</span>
-                                    <select data-debug-augment-slot>
-                                        <option value="">비어 있음</option>
-                                    </select>
-                                </label>
-                                <label class="debug-augment-row">
-                                    <span>획득 2</span>
-                                    <select data-debug-augment-slot>
-                                        <option value="">비어 있음</option>
-                                    </select>
-                                </label>
-                                <label class="debug-augment-row">
-                                    <span>획득 3</span>
-                                    <select data-debug-augment-slot>
-                                        <option value="">비어 있음</option>
-                                    </select>
-                                </label>
-                                <label class="debug-augment-row">
-                                    <span>획득 4</span>
-                                    <select data-debug-augment-slot>
-                                        <option value="">비어 있음</option>
-                                    </select>
-                                </label>
-                                <label class="debug-augment-row">
-                                    <span>획득 5</span>
-                                    <select data-debug-augment-slot>
-                                        <option value="">비어 있음</option>
-                                    </select>
-                                </label>
-                                <label class="debug-augment-row">
-                                    <span>획득 6</span>
-                                    <select data-debug-augment-slot>
-                                        <option value="">비어 있음</option>
-                                    </select>
-                                </label>
-                                <label class="debug-augment-row">
-                                    <span>획득 7</span>
-                                    <select data-debug-augment-slot>
-                                        <option value="">비어 있음</option>
-                                    </select>
-                                </label>
-                                <label class="debug-augment-row">
-                                    <span>획득 8</span>
-                                    <select data-debug-augment-slot>
-                                        <option value="">비어 있음</option>
-                                    </select>
-                                </label>
+                                <div data-debug-augment-slots></div>
+                                <template data-debug-augment-slot-template>
+                                    <label class="debug-augment-row">
+                                        <span data-debug-augment-slot-label></span>
+                                        <select data-debug-augment-slot>
+                                            <option value="">비어 있음</option>
+                                        </select>
+                                    </label>
+                                </template>
                                 <div class="rope-tuning-actions">
                                     <button class="audio-reset" type="button" data-debug-augment-reset>
                                         증강 기본값 복원

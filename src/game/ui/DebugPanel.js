@@ -55,6 +55,8 @@ export class DebugPanel {
         this.ropeFlightOutput = null;
         this.ropeModeOutput = null;
         this.augmentFieldset = null;
+        this.augmentSlotsRoot = null;
+        this.augmentSlotTemplate = null;
         this.augmentSelects = [];
         this.augmentResetButton = null;
         this.augmentModeOutput = null;
@@ -121,7 +123,8 @@ export class DebugPanel {
         this.ropeFlightOutput = this.documentTarget.querySelector("[data-debug-rope-flight]");
         this.ropeModeOutput = this.documentTarget.querySelector("[data-debug-rope-mode]");
         this.augmentFieldset = this.documentTarget.querySelector("[data-debug-augment-loadout]");
-        this.augmentSelects = [...this.documentTarget.querySelectorAll("[data-debug-augment-slot]")];
+        this.augmentSlotsRoot = this.augmentFieldset?.querySelector("[data-debug-augment-slots]");
+        this.augmentSlotTemplate = this.augmentFieldset?.querySelector("[data-debug-augment-slot-template]");
         this.augmentResetButton = this.documentTarget.querySelector("[data-debug-augment-reset]");
         this.augmentModeOutput = this.documentTarget.querySelector("[data-debug-augment-mode]");
         if (
@@ -135,11 +138,17 @@ export class DebugPanel {
             !this.ropeFlightOutput ||
             !this.ropeModeOutput ||
             !this.augmentFieldset ||
-            this.augmentSelects.length !== MAX_DEBUG_AUGMENT_COUNT ||
+            !this.augmentSlotsRoot ||
+            !this.augmentSlotTemplate ||
             !this.augmentResetButton ||
             !this.augmentModeOutput
         ) {
             throw new Error("DebugPanel is missing panel controls");
+        }
+        this.renderAugmentSlotControls();
+        this.augmentSelects = [...this.augmentSlotsRoot.querySelectorAll("[data-debug-augment-slot]")];
+        if (this.augmentSelects.length !== MAX_DEBUG_AUGMENT_COUNT) {
+            throw new Error("DebugPanel could not create Augment controls");
         }
         for (const input of this.ropeInputs) {
             const field = ROPE_TUNING_FIELDS.find(({ path }) => path === input.dataset.debugRopeField);
@@ -159,7 +168,6 @@ export class DebugPanel {
         for (const select of this.augmentSelects) {
             const existingAugmentIds = new Set([...select.options].map(({ value }) => value));
             for (const augment of AUGMENT_CATALOG) {
-                if (augment.category !== "rope" && augment.category !== "spell") continue;
                 if (existingAugmentIds.has(augment.id)) continue;
                 const option = this.documentTarget.createElement("option");
                 option.value = augment.id;
@@ -210,6 +218,17 @@ export class DebugPanel {
         this.renderAugmentLoadout(value.debugAugmentIds);
     }
 
+    renderAugmentSlotControls() {
+        this.augmentSlotsRoot.replaceChildren();
+        for (let index = 0; index < MAX_DEBUG_AUGMENT_COUNT; index += 1) {
+            const slot = this.augmentSlotTemplate.content.cloneNode(true);
+            const label = slot.querySelector("[data-debug-augment-slot-label]");
+            if (!label) throw new Error("DebugPanel Augment template is missing a label");
+            label.textContent = `획득 ${index + 1}`;
+            this.augmentSlotsRoot.append(slot);
+        }
+    }
+
     ropeTuningFromInputs() {
         const tuning = {};
         for (const input of this.ropeInputs) {
@@ -254,7 +273,7 @@ export class DebugPanel {
             }
         }
         this.augmentModeOutput.textContent = this.ropeTuningEnabled
-            ? `선택 ${selected.length}/${MAX_DEBUG_AUGMENT_COUNT} · 로프 패시브와 마법 슬롯 교체 카드만 선택할 수 있습니다.`
+            ? `선택 ${selected.length}/${MAX_DEBUG_AUGMENT_COUNT} · 로프·이동 패시브와 마법 카드를 선택할 수 있습니다.`
             : "멀티 세션에서는 비활성 · 공유 증강 loadout 프로토콜 미구현";
     }
 
