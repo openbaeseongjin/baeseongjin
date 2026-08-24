@@ -3,8 +3,8 @@
   "formatVersion": 1,
   "id": "environment-sector-05-continuity-control",
   "generator": {
-    "tool": "openai-imagegen-manual-far-mid-near",
-    "exportVersion": null,
+    "tool": "openai-imagegen-manual-far-mid-near-and-sector-terrain-normalization",
+    "exportVersion": "2026-08-24-continuity-control-terrain-v2",
     "sourceExport": "assets/artwork/environments/sector-05-continuity-control-vertical-master/export/layer-split-dense-city-transition"
   },
   "atlases": {
@@ -25,13 +25,13 @@
     },
     "sector-05-continuity-control-terrain-fill": {
       "image": "terrain-fill.png",
-      "size": { "width": 48, "height": 48 },
-      "frameSize": { "width": 24, "height": 24 }
+      "size": { "width": 32, "height": 32 },
+      "frameSize": { "width": 32, "height": 32 }
     },
     "sector-05-continuity-control-terrain-edge": {
       "image": "terrain-edge.png",
-      "size": { "width": 48, "height": 24 },
-      "frameSize": { "width": 24, "height": 24 }
+      "size": { "width": 32, "height": 8 },
+      "frameSize": { "width": 32, "height": 8 }
     },
     "sector-05-continuity-control-decoration": {
       "image": "decoration.png",
@@ -50,10 +50,10 @@
         "silhouetteFar": "#292c50",
         "silhouetteMid": "#343850",
         "silhouetteNear": "#0b0e1b",
-        "terrainFill": "#30313d",
-        "terrainEdge": "#686a82",
-        "oneWayEdge": "#86d7ee",
-        "accent": "#879cff"
+        "terrainFill": "#5c6065",
+        "terrainEdge": "#b7b7b1",
+        "oneWayEdge": "#92969a",
+        "accent": "#6f687f"
       },
       "backdropVariant": "sector-05-reception",
       "terrainMaterial": "sector-05-corporate",
@@ -69,10 +69,10 @@
         "silhouetteFar": "#2e3258",
         "silhouetteMid": "#3a3e59",
         "silhouetteNear": "#0d1020",
-        "terrainFill": "#343541",
-        "terrainEdge": "#6f7189",
-        "oneWayEdge": "#8edcf1",
-        "accent": "#8da4ff"
+        "terrainFill": "#61656a",
+        "terrainEdge": "#bebeb7",
+        "oneWayEdge": "#979b9f",
+        "accent": "#736b84"
       },
       "backdropVariant": "sector-05-atrium",
       "terrainMaterial": "sector-05-corporate",
@@ -88,10 +88,10 @@
         "silhouetteFar": "#343960",
         "silhouetteMid": "#414562",
         "silhouetteNear": "#0f1224",
-        "terrainFill": "#383946",
-        "terrainEdge": "#777991",
-        "oneWayEdge": "#96e1f4",
-        "accent": "#9a8cff"
+        "terrainFill": "#666a6f",
+        "terrainEdge": "#c5c5bd",
+        "oneWayEdge": "#9ca0a4",
+        "accent": "#776f89"
       },
       "backdropVariant": "sector-05-archive",
       "terrainMaterial": "sector-05-corporate",
@@ -107,10 +107,10 @@
         "silhouetteFar": "#3b4069",
         "silhouetteMid": "#494d6c",
         "silhouetteNear": "#111529",
-        "terrainFill": "#3d3e4b",
-        "terrainEdge": "#7f8199",
-        "oneWayEdge": "#9ee6f7",
-        "accent": "#a894ff"
+        "terrainFill": "#6b6f74",
+        "terrainEdge": "#ccccc3",
+        "oneWayEdge": "#a1a5a9",
+        "accent": "#7b738e"
       },
       "backdropVariant": "sector-05-core",
       "terrainMaterial": "sector-05-corporate",
@@ -126,10 +126,10 @@
         "silhouetteFar": "#424871",
         "silhouetteMid": "#515577",
         "silhouetteNear": "#14182e",
-        "terrainFill": "#424350",
-        "terrainEdge": "#888aa2",
-        "oneWayEdge": "#a7eafa",
-        "accent": "#b29cff"
+        "terrainFill": "#707479",
+        "terrainEdge": "#d3d3c9",
+        "oneWayEdge": "#a6aaae",
+        "accent": "#7f7793"
       },
       "backdropVariant": "sector-05-command",
       "terrainMaterial": "sector-05-corporate",
@@ -179,9 +179,9 @@
   "terrain": {
     "materials": {
       "sector-05-corporate": {
-        "fill": { "atlas": "sector-05-continuity-control-terrain-fill", "cell": { "column": 1, "row": 0 } },
+        "fill": { "atlas": "sector-05-continuity-control-terrain-fill", "cell": { "column": 0, "row": 0 } },
         "edge": { "atlas": "sector-05-continuity-control-terrain-edge", "cell": { "column": 0, "row": 0 } },
-        "oneWayColor": "#9ee6f7"
+        "oneWayColor": "#a2a5a8"
       }
     },
     "blockPool": {
