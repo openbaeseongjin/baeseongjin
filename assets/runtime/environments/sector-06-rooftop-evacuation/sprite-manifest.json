@@ -3,8 +3,8 @@
     "formatVersion": 1,
     "id": "environment-sector-06-rooftop-evacuation",
     "generator": {
-        "tool": "openai-imagegen-depth-island-normalization",
-        "exportVersion": null,
+        "tool": "openai-imagegen-depth-island-and-sector-terrain-normalization",
+        "exportVersion": "2026-08-24-rooftop-evacuation-terrain-v1",
         "sourceExport": "assets/artwork/environments/sector-06-rooftop-evacuation-background/export/depth-islands-v4-contract"
     },
     "atlases": {
@@ -25,13 +25,13 @@
         },
         "sector-06-rooftop-evacuation-terrain-fill": {
             "image": "terrain-fill.png",
-            "size": { "width": 48, "height": 48 },
-            "frameSize": { "width": 24, "height": 24 }
+            "size": { "width": 32, "height": 32 },
+            "frameSize": { "width": 32, "height": 32 }
         },
         "sector-06-rooftop-evacuation-terrain-edge": {
             "image": "terrain-edge.png",
-            "size": { "width": 48, "height": 24 },
-            "frameSize": { "width": 24, "height": 24 }
+            "size": { "width": 32, "height": 8 },
+            "frameSize": { "width": 32, "height": 8 }
         },
         "sector-06-rooftop-evacuation-decoration": {
             "image": "decoration.png",
@@ -50,10 +50,10 @@
                 "silhouetteFar": "#263f6a",
                 "silhouetteMid": "#182c50",
                 "silhouetteNear": "#081424",
-                "terrainFill": "#283545",
-                "terrainEdge": "#60738a",
-                "oneWayEdge": "#8ee8ff",
-                "accent": "#79b8ff"
+                "terrainFill": "#283a4d",
+                "terrainEdge": "#b4bdc0",
+                "oneWayEdge": "#969fa4",
+                "accent": "#71869a"
             },
             "backdropVariant": "sector-06-skybreak",
             "terrainMaterial": "sector-06-rooftop",
@@ -69,10 +69,10 @@
                 "silhouetteFar": "#2c4976",
                 "silhouetteMid": "#1b3157",
                 "silhouetteNear": "#09172a",
-                "terrainFill": "#2d3a4b",
-                "terrainEdge": "#687c93",
-                "oneWayEdge": "#96ebff",
-                "accent": "#82bdff"
+                "terrainFill": "#2d4053",
+                "terrainEdge": "#bac2c4",
+                "oneWayEdge": "#9ca5aa",
+                "accent": "#778c9f"
             },
             "backdropVariant": "sector-06-masts",
             "terrainMaterial": "sector-06-rooftop",
@@ -88,10 +88,10 @@
                 "silhouetteFar": "#365784",
                 "silhouetteMid": "#203962",
                 "silhouetteNear": "#0b1a2f",
-                "terrainFill": "#334153",
-                "terrainEdge": "#70869e",
-                "oneWayEdge": "#9eedff",
-                "accent": "#8fc5ff"
+                "terrainFill": "#32465a",
+                "terrainEdge": "#c0c7c8",
+                "oneWayEdge": "#a2abb0",
+                "accent": "#8295a6"
             },
             "backdropVariant": "sector-06-approach",
             "terrainMaterial": "sector-06-rooftop",
@@ -107,10 +107,10 @@
                 "silhouetteFar": "#40658f",
                 "silhouetteMid": "#27436d",
                 "silhouetteNear": "#0d1e35",
-                "terrainFill": "#39485a",
-                "terrainEdge": "#788ea6",
-                "oneWayEdge": "#a7f0ff",
-                "accent": "#9bcaff"
+                "terrainFill": "#384c60",
+                "terrainEdge": "#c6cccd",
+                "oneWayEdge": "#a8b1b5",
+                "accent": "#899ba9"
             },
             "backdropVariant": "sector-06-beacon",
             "terrainMaterial": "sector-06-rooftop",
@@ -126,10 +126,10 @@
                 "silhouetteFar": "#5277a0",
                 "silhouetteMid": "#31517a",
                 "silhouetteNear": "#10233d",
-                "terrainFill": "#405061",
-                "terrainEdge": "#8399b1",
-                "oneWayEdge": "#b0f3ff",
-                "accent": "#ffd08a"
+                "terrainFill": "#3e5266",
+                "terrainEdge": "#ccd1d1",
+                "oneWayEdge": "#aeb7ba",
+                "accent": "#b9a36f"
             },
             "backdropVariant": "sector-06-pad-03",
             "terrainMaterial": "sector-06-rooftop",
@@ -175,9 +175,9 @@
     "terrain": {
         "materials": {
             "sector-06-rooftop": {
-                "fill": { "atlas": "sector-06-rooftop-evacuation-terrain-fill", "cell": { "column": 1, "row": 0 } },
+                "fill": { "atlas": "sector-06-rooftop-evacuation-terrain-fill", "cell": { "column": 0, "row": 0 } },
                 "edge": { "atlas": "sector-06-rooftop-evacuation-terrain-edge", "cell": { "column": 0, "row": 0 } },
-                "oneWayColor": "#a7f0ff"
+                "oneWayColor": "#aeb7ba"
             }
         },
         "blockPool": {
