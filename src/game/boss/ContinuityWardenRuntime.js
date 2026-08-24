@@ -45,6 +45,8 @@ const PATTERN = Object.freeze({
     SECURITY: "security"
 });
 const INTENSITY = Object.freeze({ EARLY: "early", MID: "mid", LATE: "late" });
+const CHAIN_MAX = Object.freeze({ [INTENSITY.EARLY]: 0, [INTENSITY.MID]: 1, [INTENSITY.LATE]: 2 });
+const CHAIN_TRANSITION_SECONDS = 0.15;
 const PATTERN_ORDER = Object.freeze({
     [INTENSITY.EARLY]: Object.freeze([
         PATTERN.BATON,
@@ -129,6 +131,15 @@ const PRESENTED_PAD_SURFACE_KIND = Object.freeze({
     "recovery-deck": true,
     "departure-deck": true
 });
+const OPENING_DIALOGUE = Object.freeze([
+    Object.freeze({
+        speakerId: "continuity-warden",
+        text: "Maintenance worker. Your evacuation clearance has been revoked."
+    }),
+    Object.freeze({ speakerId: "local-player", text: "I know." }),
+    Object.freeze({ speakerId: "continuity-warden", text: "Then leave the pad." }),
+    Object.freeze({ speakerId: "local-player", text: "Open the gate." })
+]);
 const TARGET_ID = "boss-06:continuity-warden:body";
 const DEFAULT = Object.freeze({
     bodyWidth: 96,
@@ -142,10 +153,16 @@ const DEFAULT = Object.freeze({
     chargeRecoverySeconds: 1.8,
     guardSeconds: 1.5,
     counterSeconds: 1.2,
+    comboRange: 260,
     securityTelegraphSeconds: 1,
     beamSeconds: 0.8,
     beamGapSeconds: 0.3,
     securityRecoverySeconds: 0.8,
+    victoryBatonDropSeconds: 0.35,
+    victoryShieldFallSeconds: 0.35,
+    victoryUnconsciousSeconds: 0.3,
+    victorySecurityOffSeconds: 0.3,
+    victoryGateLightSeconds: 0.3,
     victoryCameraSeconds: 2,
     damage: 25,
     groundDashDistance: 420,
@@ -230,6 +247,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.recoveries = Object.create(null);
         this.boardingReadyPlayerIds = new Set();
         this.victoryCameraRemaining = 0;
+        this.chainDepth = 0;
+        this.pendingChainPattern = null;
         this.resetAttempt({ preserveCompleted: false });
         this.body = new KinematicPhysicsBody({
             id: TARGET_ID,
@@ -244,6 +263,14 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             canGroundActors: false
         });
         if (snapshot) this.restore(snapshot);
+    }
+
+    start({ participantIds }) {
+        const outcome = super.start({ participantIds });
+        if (outcome.accepted) {
+            this.emit("boss-dialogue", { channel: "player-bark", lines: OPENING_DIALOGUE });
+        }
+        return outcome;
     }
 
     #configuration() {
@@ -271,10 +298,22 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             chargeRecoverySeconds: positive(parameters.chargeRecoverySeconds, DEFAULT.chargeRecoverySeconds),
             guardSeconds: positive(parameters.guardSeconds, DEFAULT.guardSeconds),
             counterSeconds: positive(parameters.counterSeconds, DEFAULT.counterSeconds),
+            comboRange: positive(parameters.comboRange, DEFAULT.comboRange),
             securityTelegraphSeconds: positive(parameters.securityTelegraphSeconds, DEFAULT.securityTelegraphSeconds),
             beamSeconds: positive(parameters.beamSeconds, DEFAULT.beamSeconds),
             beamGapSeconds: positive(parameters.beamGapSeconds, DEFAULT.beamGapSeconds),
             securityRecoverySeconds: positive(parameters.securityRecoverySeconds, DEFAULT.securityRecoverySeconds),
+            victoryBatonDropSeconds: positive(parameters.victoryBatonDropSeconds, DEFAULT.victoryBatonDropSeconds),
+            victoryShieldFallSeconds: positive(parameters.victoryShieldFallSeconds, DEFAULT.victoryShieldFallSeconds),
+            victoryUnconsciousSeconds: positive(
+                parameters.victoryUnconsciousSeconds,
+                DEFAULT.victoryUnconsciousSeconds
+            ),
+            victorySecurityOffSeconds: positive(
+                parameters.victorySecurityOffSeconds,
+                DEFAULT.victorySecurityOffSeconds
+            ),
+            victoryGateLightSeconds: positive(parameters.victoryGateLightSeconds, DEFAULT.victoryGateLightSeconds),
             victoryCameraSeconds: positive(parameters.victoryCameraSeconds, DEFAULT.victoryCameraSeconds),
             damage: positive(parameters.damage, DEFAULT.damage)
         });
@@ -310,6 +349,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.recoveries = Object.create(null);
         this.boardingReadyPlayerIds = new Set();
         this.victoryCameraRemaining = 0;
+        this.chainDepth = 0;
+        this.pendingChainPattern = null;
         this.body?.setKinematicPosition(this.bodyPosition, 0);
         this.body?.holdKinematicPosition();
     }
@@ -375,15 +416,35 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             this._beginNeutral();
             return;
         }
-        const order = PATTERN_ORDER[this.#intensity()];
-        let pattern = order[this.patternIndex % order.length];
-        this.patternIndex += 1;
+        let pattern;
+        if (this.pendingChainPattern) {
+            pattern = this.pendingChainPattern;
+            this.pendingChainPattern = null;
+        } else {
+            this.chainDepth = 0;
+            const order = PATTERN_ORDER[this.#intensity()];
+            pattern = order[this.patternIndex % order.length];
+            this.patternIndex += 1;
+        }
         if ((pattern === PATTERN.GUARD || pattern === PATTERN.COUNTER) && !this.#guardPositionAvailable()) {
             pattern = PATTERN.GROUND_DASH;
         }
         const handler = PATTERN_START_HANDLER[pattern];
         if (!handler || typeof this[handler] !== "function") throw new Error(`Unsupported Warden pattern: ${pattern}`);
         this[handler](target);
+    }
+
+    #endWithChain(recoverySeconds, followupPattern) {
+        const cap = CHAIN_MAX[this.#intensity()] ?? 0;
+        if (followupPattern && this.chainDepth < cap) {
+            this.chainDepth += 1;
+            this.pendingChainPattern = followupPattern;
+            this._beginNeutral(Math.min(recoverySeconds, CHAIN_TRANSITION_SECONDS));
+            return;
+        }
+        this.chainDepth = 0;
+        this.pendingChainPattern = null;
+        this._beginNeutral(recoverySeconds);
     }
 
     _beginNeutral(seconds = DEFAULT.neutralSeconds) {
@@ -510,7 +571,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.emit("boss-attack-started", { kind: this.state, sequence: this.hazardSequence });
     }
 
-    _advanceBaton() {
+    #comboTargetInRange(context) {
+        const target = this.#combatPlayers(context).find(({ id }) => id === this.targetPlayerId);
+        if (!target) return false;
+        return compositeDistance(target.position, this.bodyPosition) <= this.config.comboRange;
+    }
+
+    _advanceBaton(dt, context = {}) {
         if (this.actionPhase === ACTION_PHASE.TELEGRAPH) {
             this.#activateAttack();
             return;
@@ -520,7 +587,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             return;
         }
         const nextState = BATON_NEXT_STATE[this.state];
-        if (!nextState) {
+        if (!nextState || !this.#comboTargetInRange(context)) {
             this._beginNeutral(this.config.meleeRecoverySeconds);
             return;
         }
@@ -563,7 +630,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         }
         this.bodyPosition = { ...this.motionTarget };
         this.body.setKinematicPosition(this.bodyPosition, dt);
-        this._beginNeutral(this.config.meleeRecoverySeconds);
+        this.#endWithChain(this.config.meleeRecoverySeconds, PATTERN.BATON);
     }
 
     _advanceCharge(dt) {
@@ -585,7 +652,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         }
         this.bodyPosition = { ...this.motionTarget };
         this.body.setKinematicPosition(this.bodyPosition, dt);
-        this._beginNeutral(this.config.chargeRecoverySeconds);
+        this._beginNeutral(this.#chargeRecoverySeconds());
+    }
+
+    #chargeRecoverySeconds() {
+        const intensity = this.#intensity();
+        const scale = intensity === INTENSITY.LATE ? 0.65 : intensity === INTENSITY.MID ? 0.85 : 1;
+        return this.config.chargeRecoverySeconds * scale;
     }
 
     _advanceGuard() {
@@ -616,9 +689,11 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             return;
         }
         if (this.actionPhase === ACTION_PHASE.ACTIVE) {
+            const finishedBand = this.securitySequence[this.securityIndex];
             this.securityIndex += 1;
             if (this.securityIndex >= this.securitySequence.length) {
-                this._beginNeutral(this.config.securityRecoverySeconds);
+                const followup = finishedBand === SECURITY_BAND.HIGH ? PATTERN.GROUND_DASH : PATTERN.CHARGE;
+                this.#endWithChain(this.config.securityRecoverySeconds, followup);
                 return;
             }
             this.actionPhase = ACTION_PHASE.GAP;
@@ -673,6 +748,48 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
     #impactFromFront(impactPosition) {
         if (!Number.isFinite(impactPosition?.x)) return true;
         return (impactPosition.x - this.bodyPosition.x) * this.facing >= 0;
+    }
+
+    #victoryOffsets() {
+        const c = this.config;
+        const batonDropAt = 0;
+        const shieldFallAt = batonDropAt + c.victoryBatonDropSeconds;
+        const unconsciousAt = shieldFallAt + c.victoryShieldFallSeconds;
+        const securityOffAt = unconsciousAt + c.victoryUnconsciousSeconds;
+        const gateLightAt = securityOffAt + c.victorySecurityOffSeconds;
+        const gateOpenAt = gateLightAt + c.victoryGateLightSeconds;
+        const cameraPanSeconds = Math.max(0.4, c.victoryCameraSeconds);
+        const shuttleRevealAt = gateOpenAt + Math.max(0, cameraPanSeconds - 0.4);
+        const playerControlAt = gateOpenAt + cameraPanSeconds;
+        return {
+            batonDropAt,
+            shieldFallAt,
+            unconsciousAt,
+            securityOffAt,
+            gateLightAt,
+            gateOpenAt,
+            shuttleRevealAt,
+            playerControlAt
+        };
+    }
+
+    #victoryElapsed() {
+        const { playerControlAt } = this.#victoryOffsets();
+        return Math.max(0, playerControlAt - this.victoryCameraRemaining);
+    }
+
+    #victoryStage() {
+        if (this.status !== "completed") return null;
+        const offsets = this.#victoryOffsets();
+        const elapsed = this.#victoryElapsed();
+        if (elapsed < offsets.shieldFallAt) return "baton-drop";
+        if (elapsed < offsets.unconsciousAt) return "shield-fall";
+        if (elapsed < offsets.securityOffAt) return "unconscious";
+        if (elapsed < offsets.gateLightAt) return "security-off";
+        if (elapsed < offsets.gateOpenAt) return "gate-light";
+        if (elapsed < offsets.shuttleRevealAt) return "gate-open";
+        if (elapsed < offsets.playerControlAt) return "shuttle-reveal";
+        return "player-control";
     }
 
     #beginCounterBash() {
@@ -756,7 +873,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             this.actionPhase = ACTION_PHASE.RECOVERY;
             this.timer = 0;
             this.securitySequence = [];
-            this.victoryCameraRemaining = this.config.victoryCameraSeconds;
+            this.victoryCameraRemaining = this.#victoryOffsets().playerControlAt;
             this.body.holdKinematicPosition();
             this.emit("boss-encounter-completed", { targetId, sourcePlayerId });
         }
@@ -871,8 +988,14 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         ]);
     }
 
+    #victoryGateOpen() {
+        if (this.status !== "completed") return false;
+        const stage = this.#victoryStage();
+        return stage === "gate-open" || stage === "shuttle-reveal" || stage === "player-control";
+    }
+
     dynamicCollisionSurfaces(worldOffset = { x: 0, y: 0 }) {
-        if (this.status === "completed") {
+        if (this.#victoryGateOpen()) {
             return Object.freeze([
                 collisionSurface(
                     `${this.definition.id}:threshold-bridge`,
@@ -954,6 +1077,10 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
 
     presentationObjects(worldOffset = { x: 0, y: 0 }) {
         const completed = this.status === "completed";
+        const victoryStage = completed ? this.#victoryStage() : null;
+        const gateOpen = this.#victoryGateOpen();
+        const gateLit = completed && (gateOpen || victoryStage === "gate-light");
+        const shuttleRevealed = completed && (victoryStage === "shuttle-reveal" || victoryStage === "player-control");
         const beamBand =
             this.state === CONTINUITY_WARDEN_STATE.SECURITY_ACTIVE ? this.securitySequence[this.securityIndex] : null;
         const objects = [
@@ -964,6 +1091,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 position: compositeWorldPoint(this.bodyPosition, worldOffset),
                 size: { width: DEFAULT.bodyWidth, height: DEFAULT.bodyHeight },
                 state: this.state,
+                defeatStage: victoryStage,
                 actionState: this.actionPhase,
                 direction: this.facing,
                 physicsBody: true,
@@ -1001,7 +1129,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                     worldOffset
                 ),
                 size: { width: this.config.gateBounds.width, height: this.config.gateBounds.height },
-                state: completed ? "open" : "locked",
+                state: gateOpen ? "open" : gateLit ? "light" : "locked",
                 active: true
             },
             {
@@ -1015,16 +1143,16 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                     worldOffset
                 ),
                 size: { width: this.config.bridgeBounds.width, height: this.config.bridgeBounds.height },
-                state: completed ? "active" : "stored",
-                active: completed
+                state: gateOpen ? "active" : "stored",
+                active: gateOpen
             },
             {
                 id: "boss-06:maintenance-shuttle",
                 kind: OBJECT_KIND.SHUTTLE,
                 position: compositeWorldPoint(this.config.shuttlePosition, worldOffset),
                 size: { width: 500, height: 390 },
-                state: completed ? "boarding" : "hidden",
-                active: completed
+                state: shuttleRevealed ? "boarding" : "hidden",
+                active: shuttleRevealed
             }
         ];
         if (
@@ -1170,6 +1298,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             recoveries: this.recoveries,
             boardingReadyPlayerIds: [...this.boardingReadyPlayerIds].sort(),
             victoryCameraRemaining: this.victoryCameraRemaining,
+            chainDepth: this.chainDepth,
+            pendingChainPattern: this.pendingChainPattern,
             body: this.body.snapshot()
         });
     }
@@ -1199,6 +1329,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         );
         this.boardingReadyPlayerIds = new Set(snapshot.boardingReadyPlayerIds ?? []);
         this.victoryCameraRemaining = snapshot.victoryCameraRemaining ?? 0;
+        this.chainDepth = snapshot.chainDepth ?? 0;
+        this.pendingChainPattern = snapshot.pendingChainPattern ?? null;
         this.body.restore(snapshot.body);
         this.bodyPosition = { x: this.body.position.x, y: this.body.position.y };
         return this;

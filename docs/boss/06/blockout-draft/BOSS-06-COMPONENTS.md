@@ -145,7 +145,7 @@ CHARGE   = long / committed / punishable attack
 - Return Hardpoint RR1/RR3 — actual `role:swing-attack`
 - Departure Gate
 - Departure / Boarding Deck
-- Victory Threshold Bridge (combat 중 비활성 / victory 후 180px gap 연결)
+- Victory Threshold Bridge (combat 중 비활성 / victory 후 240px gap 연결)
 - post-victory Maintenance Shuttle reveal object
 
 ## 9. Upper Hardpoint Route
@@ -169,7 +169,7 @@ Base Reach 400px 기준 인접 거리는 약 295~314px. U1/U8은 Main floor edge
 
 주의:
 
-> 최신 main은 `role: swing-attack` Boss anchor를 24×24 `grapple-target` surface로 자동 materialize한다. U1~U8은 이 공용 계약을 사용한다. Main/Ledge/Gate/Emitter는 `grappleable:false`로 유지하고 final QA는 모든 실제 grappleable surface를 포함한다.
+> 최신 main은 `role: swing-attack` Boss anchor를 24×24 `grapple-target` surface로 자동 materialize한다. U1~U8은 이 공용 계약을 사용한다. Main/Ledge/Gate는 엔진의 공용 지형 규칙에 따라 다른 solid surface와 마찬가지로 `grappleable:true`이며(Emitter는 solid collision이 없어 부착 대상이 아니다), final QA는 U1~U8/RR1/RR3의 `swing-attack` 부착과 나머지 solid surface의 일반 부착을 모두 포함한다.
 
 ## 10. Security Beam Components
 
@@ -234,7 +234,7 @@ Recovery Deck은 visible / safe / non-offensive.
 - camera pan
 - Shuttle reveal
 - Departure / Boarding Deck
-- Victory Threshold Bridge (combat 중 비활성 / victory 후 180px gap 연결) 위 Player-controlled walk
+- Victory Threshold Bridge (combat 중 비활성 / victory 후 240px gap 연결) 위 Player-controlled walk
 
 ## 14. Victory Presentation
 

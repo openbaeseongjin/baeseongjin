@@ -22,7 +22,7 @@ x=1000
 y=1900
 width=3120
 height=115
-grappleable=false
+grappleable=true
 ```
 
 하나의 평평한 collision deck만 사용한다.
@@ -109,13 +109,13 @@ Guard/Counter:
 
 ## 6. Grapple 집합
 
-실제 Boss06 grapple target은 정확히:
+`role:swing-attack` 전용 grapple-target(공중 Rope 이동선)은 정확히:
 
 ```text
 U1 U2 U3 U4 U5 U6 U7 U8 RR1 RR3
 ```
 
-그 외 Main/Ledge/Emitter/Gate/Boarding/Warden은 `grappleable:false`.
+Main/Ledge/Gate/Boarding은 공용 지형 규칙에 따라 `grappleable:true`인 일반 solid surface다. Emitter(solid collision 없음)와 Warden은 grappleable 대상이 아니다.
 
 ## 7. Runtime에서 반드시 다시 검증
 

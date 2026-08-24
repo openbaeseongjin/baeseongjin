@@ -43,8 +43,8 @@ Warden은 Rope를 사용하지 않는다. Shield, Baton, Thruster Dash와 Pad Se
 - Warden 전용 Raised Ledge 좌/우 2개
 - Open Sky
 - R1/R3 actual catch + actual swing-attack return anchors; deeper miss uses Runtime fallback
-- 오른쪽 Main edge와 Gate 사이 180px 실제 fall lane
-- Victory 시 180px threshold bridge가 열려 Boarding Deck과 연결
+- 오른쪽 Main edge와 Gate 사이 240px 실제 fall lane
+- Victory 시 240px threshold bridge가 열려 Boarding Deck과 연결
 - Shuttle은 전투 중 숨김
 - Warden 패배 후 Gate light → Gate open → camera pan → Shuttle 최초 Reveal
 
