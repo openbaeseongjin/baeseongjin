@@ -151,7 +151,7 @@ Main Runway
 
 전투장에 보이는 Rope Anchor는 실제 게임에서도 전부 잡혀야 한다.
 
-`role: swing-attack` 전용 grapple-target인 상부 Anchor(U1~U8)와 복구 Anchor(RR1/RR3)는 물론, Main Runway·보조 발판·출발 게이트·탑승 발판을 포함한 모든 solid collision surface도 엔진의 공용 지형 부착 규칙(모든 solid surface는 `grappleable:true`)에 따라 Rope로 부착 가능하다. 이는 이미 배포된 다른 보스(Boss03 등)와 동일한 공용 계약이며, Boss06만 예외로 좁히지 않는다.
+`role: swing-attack` 전용 grapple-target인 상부 Anchor(U1~U8)와 복구 Anchor(RR1/RR3)는 물론, Main Runway·보조 발판·출발 게이트·탑승 발판을 포함한 모든 solid collision surface도 엔진의 공용 지형 부착 규칙(모든 solid surface는 `grappleable:true`)에 따라 Rope로 부착 가능하다. Boss06도 이 공용 계약의 예외가 아니다.
 
 ```text
 상부 Anchor (swing-attack)

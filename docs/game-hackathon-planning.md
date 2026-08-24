@@ -116,7 +116,7 @@
 ### 월드와 진행 영역 기준
 
 - `SectorDefinition`과 Sector validator는 canonical `stageId`를 landmark·encounter authoring 경계로 사용한다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`, `stageId`이며 별도 legacy Stage alias나 preview adapter를 권위로 두지 않는다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
-- 현재 `authored-continuous-stage-runtime-v17-two-boss-dynamic-jammer-stage`는 Sector 01~~06의 canonical v2/generated Stage 48개를 Bounds edge가 맞닿는 연속 authored 월드로 배치한다. `1-8→2-1`, `2-8→3-1`, `4-8→5-1`, `5-8→6-1`은 source Gate→target Entry portal로 직접 전환하고, `3-8`과 `6-8` 뒤에만 독립 Boss Stage를 둔다. 일반 Stage derived geometry와 legacy fallback은 없다. Hardpoint Jammer는 전용 Anchor 목록 없이 일반 Rope surface를 공간 질의해 다음 후보를 고르고, 부착 시 owner-first 감전·절단을 시작한다.
+- 현재 `authored-continuous-stage-runtime-v18-boss06-direct-sector-portals`는 Sector 01~~06의 canonical v2/generated Stage 48개를 Bounds edge가 맞닿는 연속 authored 월드로 배치한다. `1-8→2-1`, `2-8→3-1`, `3-8→4-1`, `4-8→5-1`, `5-8→6-1`은 source Gate→target Entry portal로 직접 전환하고, `6-8` 뒤에만 독립 Boss Stage를 둔다. 일반 Stage derived geometry와 legacy fallback은 없다. Hardpoint Jammer는 전용 Anchor 목록 없이 일반 Rope surface를 공간 질의해 다음 후보를 고르고, 부착 시 owner-first 감전·절단을 시작한다.
 - Sector 01~03은 각 Sector의 정확히 세 Carrier를 모두 처리해 Access Module 3/3을 모은 뒤 outgoing authored Gate portal을 연다. 별도 transit barrier geometry는 없으며 개인·전원 사망 뒤에도 module·objective 진행을 보존한다.
 - 0.32.0은 Sector 01~03을 authored safe slot과 결정적 enemy pool로 채운다. 1-1·1-2는 비전투, 이후는 화면당 약 1기와 후반 역할 중첩을 기준으로 하며 exact slot 예산과 보존 계약은 [`enemy-density-composition.md`](./enemy-density-composition.md)를 따른다.
 - 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.
@@ -127,8 +127,8 @@
 - 각 Sector의 일반 구간은 `60초`를 공유하고 진행 보상은 한 번에 `+10초`, cap은 `60초`다. 같은 Sector 안에서 landmark가 바뀌어도 시간을 초기화하지 않는다.
 - Timer 0초부터 `CONTAINMENT PURGE FIELD`가 `240px/s`로 상승한다. 시간 보상 중에는 현재 높이에서 멈추고 다음 0초부터 같은 위치에서 재상승하며 후퇴·Player 추적·순간이동은 없다.
 - Purge 접촉은 lethal이고 전멸은 current Sector objective·route·enemy·Timer·Field만 reset한다. Player별 증강과 이전 Sector 진행은 보존한다.
-- Boss는 Sector 03·06의 마지막에만 둔다. Boss03은 공간을 이동하며 싸우는 보스몹으로 재기획 중이고, 새 기획 전까지 Scanner·Arm Runtime을 임시 유지한다. Boss06 `CONTINUITY WARDEN`과 terminal Boarding은 현행 계약을 유지한다.
-- Boss03·06 진입에서만 일반 Timer·Purge와 잔여 시간을 끝낸다. 별도 **보스 전투 타이머**와 Arena 위험은 후속 작업으로 남긴다.
+- Boss는 Sector 06 마지막의 Boss06 하나만 둔다. Boss06 `CONTINUITY WARDEN`과 terminal Boarding은 현행 계약을 유지한다.
+- Boss06 진입에서만 일반 Timer·Purge와 잔여 시간을 끝낸다. 별도 **보스 전투 타이머**와 Arena 위험은 후속 작업으로 남긴다.
 - 수치와 core 의미는 확정됐지만 seamless topology의 정확한 `+10초` trigger, 최초 Field origin과 개인 Purge 사망 복귀는 후속 결정 전 구현 금지 HOLD다. 상세 계약은 [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md)를 따른다.
 - 현재 시드 기반 48단계 절차 생성 월드는 코어 조작을 검증한 프로토타입이다. 목표 시나리오 월드는 저자가 정한 48개 진행 영역을 기본으로 하며, 영역 내부의 시드 변형 허용 범위는 경로·완료 조건·출구를 훼손하지 않는 별도 기획으로 확정한다.
 
@@ -175,7 +175,7 @@
 
 ### 제외
 
-- 신규 Boss03 전투 구현과 보스 전투 타이머
+- Boss06 전투 검증과 보스 전투 타이머
 - 영구 성장과 자동 자원 생산
 - 수집 도감
 - 완성형 아트와 픽셀 애니메이션
@@ -232,7 +232,7 @@
 - [ ] **후속** Boss Timer·시간 만료 Arena collapse
 - [x] Sector 03·06 끝의 Boss 두 개
 - [ ] Timer/Purge의 재접속과 최종 UI/오디오 cue
-- [x] 3-8→Boss03→4-1, 6-8→Boss06→Boarding
+- [x] 3-8→4-1, 6-8→Boss06→Boarding
 - [x] 증강 v1 22장과 Player별 결정적 3장 offer·최대 6장 loadout
 - [x] 적 행동과 공격 방식: 플레이어를 향한 투사체, 로프 절단 우선 판정, 본체 피해. 위치 넉백은 직접 플레이어를 추격·돌진하는 적만 받고 고정·고정경로 적은 authored 위치를 유지한다.
 - [x] 적 roster 기본형: 기존 `경계 포탑`·`순찰 드론`, 경계 포탑 확장형 `절단 포탑`, 신규 `추격 드론`·`방패 드론`·`포격 드론`·`지원 드론`·`군집 드론`
@@ -249,7 +249,6 @@
 
 - 어떤 physical landmark/objective transition이 +10초를 지급하는가?
 - 연속 Sector에서 최초 Field origin과 개인 Purge 사망 복귀를 어떻게 정하는가?
-- 이동형 보스몹 Boss03의 정체성·공간·공격·수치 계약은 무엇인가?
 - 타이머와 탈락 상태의 네트워크 권위·이탈·재접속은 어떻게 처리하는가?
 - 최소 관전 HUD와 타이머·붕괴 경고의 최종 그래픽·오디오 cue는 무엇인가?
 - `SECTOR 06` 보스 이후 최종 런 종료를 어떤 장면으로 표현할 것인가?

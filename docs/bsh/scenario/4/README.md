@@ -10,7 +10,7 @@
 > - Runtime authority: canonical `AREA-SPEC.v2.json` + `AREA-CATALOG.sector04.json`
 > - Authoring snapshot: `cb4f690ac180a04868322e9c4cfe1384897c348b`
 > - Stage Direction Runtime v1: **VERIFIED AVAILABLE**
-> - Post-Sector03 Boss / Transition → Sector04 entry: **TEMPORARY RUNTIME / BOSS03 REDESIGN PENDING**
+> - Post-Sector03 transition → Sector04 entry: **DIRECT AUTHORED PORTAL — 3-8 → 4-1**
 
 ## Runtime promotion reconciliation
 
@@ -1259,14 +1259,12 @@ Its design documents remain implementation history, not new Sector04 design auth
 
 # 26. SECTOR03 → 04 HANDOFF
 
-Do not direct-wire:
+The Sector03 boundary uses the existing direct authored portal:
 
 ```text
 3-8
 → 4-1
 ```
-
-Boss03의 Scanner·Arm 임시 Runtime이 전환을 소유한다. 신규 이동형 Boss03 기획이 확정될 때까지 3-8→4-1을 직접 연결하지 않는다.
 
 Narrative continuity:
 
@@ -1274,10 +1272,6 @@ Narrative continuity:
 3-8
 GROUP C SUSPENDED
 PRIORITY ROUTE ACTIVE
-
-↓
-
-POST-SECTOR03 BOSS03 / TEMPORARY RUNTIME
 
 ↓
 

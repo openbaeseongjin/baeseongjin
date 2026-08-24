@@ -8,11 +8,11 @@
 node scripts/map-editor/serveMapEditor.mjs --port=4178
 ```
 
-브라우저에서 `http://127.0.0.1:4178/map-editor/`을 연다. 서버는 loopback 주소만 수신하며 Sector 01~06의 48개 일반 Stage와 독립 Boss03·06 Stage를 표시한다. Stage 이름 뒤의 상태가 저장 적용의 범위를 알려 준다.
+브라우저에서 `http://127.0.0.1:4178/map-editor/`을 연다. 서버는 loopback 주소만 수신하며 Sector 01~06의 48개 일반 Stage와 독립 Boss06 Stage를 표시한다. Stage 이름 뒤의 상태가 저장 적용의 범위를 알려 준다.
 
 - `Runtime 적용`: Sector 01~06의 48개 Stage다. 저장 적용은 canonical v2 JSON과 generated JS를 갱신하고, manifest가 선택하는 현재 Sector Catalog에도 반영된다.
 - `시나리오 전용`: 현재 0개다. 향후 Runtime 계약이 완결되지 않은 Stage를 추가할 때만 이 mode를 사용한다.
-- `boss-03`, `boss-06`: `specType: "boss-stage"`인 독립 Boss Stage다. 일반 Area와 섞지 않고 Boss 전용 JSON과 generated 정의를 함께 갱신한다. Boss03은 신규 이동형 보스몹 기획 전까지 임시 Runtime이며 Boss06은 regular next Area가 없는 terminal boarding 전환이다.
+- `boss-06`: `specType: "boss-stage"`인 독립 Boss Stage다. 일반 Area와 섞지 않고 Boss 전용 JSON과 generated 정의를 함께 갱신한다. Boss06은 regular next Area가 없는 terminal boarding 전환이다.
 
 ## 저작 흐름
 
@@ -29,7 +29,7 @@ Boss Stage에서는 Arena·Entry/Exit·표면·Rope 경로·Recovery·Boss Actor
 
 Boss의 Arena 경계는 캔버스 드래그와 Inspector X/Y로 이동할 수 있다. 표면·앵커·Recovery·Phase 구역은 데이터형 기본 요소이므로 추가·삭제할 수 있다. 새 Mechanic 종류·Boss 행동·전환 조건처럼 Runtime 코드 Registry가 필요한 개념은 에디터에서 생성하지 않고 코드에 등록된 선택지만 조합한다. 일반 Area Bounds는 원점 고정 크기 계약이므로 위치 입력을 표시하지 않고 너비·높이만 편집한다.
 
-Boss의 MAP HTML이 catalog의 `mapReferencePath`로 등록되면 `시나리오 비교`가 그 HTML을 실제 Gameplay View의 공간 기준으로 읽기 전용 대조한다. Boss03·06의 현행 MAP HTML은 각각 임시 Atrium Scanner/Arm과 Pad Security Court의 발판·위협·Recovery·탈출 관계 기준이다. Ropeable은 중심점 Anchor가 아니라 collision surface의 `grappleable: true` capability다. 움직이는 Boss Polygon은 Hook 손→조준 방향의 첫 surface 교점과 body-local anchor를 사용하며, 표시 `ropeAttachable`도 같은 capability에서 파생한다. Anchor는 route 설명과 surface ID 참조만 소유하며 별도 non-collision grapple target을 생성하지 않는다.
+Boss의 MAP HTML이 catalog의 `mapReferencePath`로 등록되면 `시나리오 비교`가 그 HTML을 실제 Gameplay View의 공간 기준으로 읽기 전용 대조한다. Boss06의 현행 MAP HTML은 Pad Security Court의 발판·위협·Recovery·탈출 관계 기준이다. Ropeable은 중심점 Anchor가 아니라 collision surface의 `grappleable: true` capability다. 움직이는 Boss Polygon은 Hook 손→조준 방향의 첫 surface 교점과 body-local anchor를 사용하며, 표시 `ropeAttachable`도 같은 capability에서 파생한다. Anchor는 route 설명과 surface ID 참조만 소유하며 별도 non-collision grapple target을 생성하지 않는다.
 
 왼쪽 레이어 목록은 `실게임 요소`, `표시형 오브젝트`, `규칙 / 설정`으로 구분한다. 일반 Area의 `표시 / 상호작용 오브젝트`는 Story display·Augment Node 등 실제 renderer가 그리는 authored object를 포함하고 위치를 편집한다. 맵 경계·복구/예상 경로·카메라 구역은 비게임플레이 안내 레이어다.
 
@@ -84,11 +84,11 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 
 - `진행 Gate 미저작`: Runtime Area가 요구하는 exit trigger·조건이 없다.
 - `다음 스테이지 전환 미정`: `nextAreaId`와 연결 계약이 확정되지 않았다.
-- `콘텐츠 경계 전환 오류`: 3-8·4-8·5-8·6-8은 `nextAreaId: null`과 `completionMode: "content-boundary"`를 함께 소유해야 한다. compiler는 3-8을 Boss03 entry·완료 뒤 4-1로 연결하고 4-8·5-8은 각각 5-1·6-1 Entry로 직접 연결한다. 6-8은 terminal Boss06 진입만 소유한다.
+- `콘텐츠 경계 전환 오류`: 3-8·4-8·5-8·6-8은 `nextAreaId: null`과 `completionMode: "content-boundary"`를 함께 소유해야 한다. compiler는 3-8·4-8·5-8을 각각 4-1·5-1·6-1 Entry로 직접 연결한다. 6-8은 terminal Boss06 진입만 소유한다.
 - `충돌 지형 미저작`: 좌표 없는 기획 설명을 collision으로 추정하지 않는다.
 - `적 Runtime 타입 미연결`: 기획용 적 ID가 Runtime Registry에 없다.
 
-현재 Sector 01~~06의 48개 Stage는 모두 canonical v2/generated Runtime source이며 scenario-only Stage는 없다. Apply는 먼저 canonical `AREA-SPEC.v2.json`을 갱신하고 같은 transaction에서 generated output을 다시 만들며, generated 파일을 먼저 수기 편집하지 않는다. 일반 연결은 source Gate→target authored Entry의 개별 Player portal이다. 3-8만 Boss03 완료 전에는 Boss 입구, 완료 뒤에는 4-1 Entry로 연결한다. 4-8·5-8은 다음 Sector Entry로 직접 연결하고 6-8은 terminal Boss06 입구다.
+현재 Sector 01~~06의 48개 Stage는 모두 canonical v2/generated Runtime source이며 scenario-only Stage는 없다. Apply는 먼저 canonical `AREA-SPEC.v2.json`을 갱신하고 같은 transaction에서 generated output을 다시 만들며, generated 파일을 먼저 수기 편집하지 않는다. 일반 연결은 source Gate→target authored Entry의 개별 Player portal이다. 3-8·4-8·5-8은 다음 Sector Entry로 직접 연결하고 6-8은 terminal Boss06 입구다.
 
 Sector의 Access 해제 요구 수는 manifest의 `accessModuleRequirement`가 소유한다. 개별 module은 authored enemy의 `enemy-defeat` 또는 authored objective의 `objective-completion` source를 사용하며, 같은 module ID를 두 source가 가리켜도 shared progress에는 한 번만 수집된다. Sector 01~~03은 기존 3-of-3 enemy-defeat, Sector 04는 세 Resident Security Override objective 중 두 개를 요구하는 2-of-3, Sector 05~~06은 Access Module 없음이 현재 계약이다.
 

@@ -7,19 +7,14 @@ export const BOSS_ANCHOR_ROLE = Object.freeze({
 });
 
 export const BOSS_MECHANIC_TYPE = Object.freeze({
-    CENTRAL_EXCHANGE_MAINTENANCE: "central-exchange-maintenance-system",
     CONTINUITY_WARDEN: "continuity-warden"
 });
 
 export const BOSS_VISUAL_PRESET_ID = Object.freeze({
-    CENTRAL_EXCHANGE_MAINTENANCE: "central-exchange-maintenance-system",
     CONTINUITY_WARDEN: "continuity-warden"
 });
 
 export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
-    EXCHANGE_LEFT_MODULE: "boss-03:left-inspection-module",
-    EXCHANGE_RIGHT_MODULE: "boss-03:right-inspection-module",
-    EXCHANGE_CENTRAL_CORE: "boss-03:central-core",
     CONTINUITY_WARDEN_BODY: "boss-06:continuity-warden:body"
 });
 
@@ -38,7 +33,6 @@ export const BOSS_TERMINAL_COMPLETION = Object.freeze({
 });
 
 export const BOSS_VICTORY_PRESENTATION_ID = Object.freeze({
-    EXCHANGE_MAINTENANCE_OFFLINE: "boss-03:maintenance-override-offline",
     CONTINUITY_WARDEN_DEFEATED: "boss-06:continuity-warden-defeated"
 });
 

@@ -5,7 +5,6 @@ export const BOSS_CAMERA_ZOOM_RATIO = 0.55;
 
 const BOSS_CAMERA_FOCUS_STATUS = Object.freeze({ active: true, completed: true });
 const BOSS_CAMERA_FOCUS_KIND = Object.freeze({
-    "boss-exchange-maintenance-body": true,
     "boss-continuity-warden": true,
     "boss-victory-camera": true
 });

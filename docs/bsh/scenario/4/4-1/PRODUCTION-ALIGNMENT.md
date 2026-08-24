@@ -38,4 +38,4 @@ The new Upper Residential 4-1 is generated from canonical `AREA-SPEC.v2.json`.
 Do not interpret this documentation package as an already migrated Runtime.
 
 `AREA-SPEC.v2.json` is the production geometry authority and is registered through the Sector04 manifest.
-Post-Sector03 Boss/Transition remains TBD, so do not directly wire 3-8 into this Stage without the transition contract.
+The existing 3-8 Gate, after its source objective and Sector03 Access 3-of-3 condition, directly transfers each Player to this Stage's authored Entry. Do not add separate transition geometry or a Boss-stage detour.

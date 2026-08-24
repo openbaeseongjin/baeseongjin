@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-24 — Boss03을 제거하고 Sector03→04를 직접 연결한다
+
+- 맥락: Boss03의 임시 Scanner·Arm Runtime이 3-8과 4-1 사이의 이미 authored된 수직 portal을 점유해, 별도 보스 콘텐츠 유지 비용과 Sector 연결을 함께 막고 있었다.
+- 결정: 제품 Boss는 terminal Boss06 하나만 유지한다. Boss03 authoring·Runtime·editor entry를 제거하고, 3-8 source objective와 Sector03 Access 3-of-3을 만족한 Player만 4-1 authored Entry로 직접 이동한다.
+- 영향: Boss03 전용 mechanic·renderer·spec·Map Editor catalog는 제거한다. 3-8과 4-1의 canonical geometry·objective·Entry는 바꾸지 않으며, Boss06 terminal Boarding 계약은 유지한다.
+- 대체: Sector03과 Sector04 사이의 `3-8→Boss03→4-1` 독립 Boss transition.
+- 검증 상태: `validateProductionMapParity`가 Boss06-only catalog와 3-8→4-1 direct route를, `validateBossStageSpecs`가 retained Boss06 spec을 검증한다.
+
 ## [L1] 2026-08-23 — 모든 Sector 뒤에 독립 Boss를 둔다
 
 - 맥락: 여섯 Sector의 마지막 Stage마다 별도 Boss Stage를 연결해 `Boss01~~06` 전투를 제공하는 구조를 구현했다.

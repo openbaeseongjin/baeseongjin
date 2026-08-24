@@ -39,5 +39,5 @@
 
 ## 미검증
 
-- Sector 03→04 전체 수동 등반: 현재 canonical Runtime에는 Boss 03과 Sector 03→04 gameplay connector가 없어 실제 이동 경로가 열려 있지 않다. 이번 변경은 기존 경계 함수의 표현 package pair만 추가하며 collision·Gate·Camera·gameplay connector를 만들지 않는다.
+- Sector 03→04 전체 수동 등반: **이 Issue #897 검증 시점에는** canonical Runtime에 Sector 03→04 gameplay connector가 없어 실제 이동 경로가 열려 있지 않았다. 이후 Boss03 제거 변경에서 existing 3-8 Gate→4-1 authored Entry direct portal이 별도로 연결됐으며, 이 ledger의 표현 package pair 검증 범위에는 collision·Gate·Camera·gameplay connector가 포함되지 않는다.
 - 모바일 실기기 GPU와 멀티플레이: 요청된 in-app Browser mobile landscape viewport와 로컬 단일 플레이 표현 범위 밖이므로 미검증
