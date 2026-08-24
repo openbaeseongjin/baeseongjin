@@ -1,7 +1,6 @@
 import {
-    actionParticlePreset,
+    spellParticlePreset,
     augmentEffectLifetime,
-    CLIENT_FEEDBACK_ACTION_ID,
     CLIENT_FEEDBACK_EVENT_CONFIG,
     CLIENT_FEEDBACK_KEY,
     createClientFeedbackEvent,
@@ -35,8 +34,6 @@ export class ClientFeedbackEventInterpreter {
         this.impact = null;
         this.ropeCutFeedback = null;
         this.augmentEffects = [];
-        this.actionAfterimages = [];
-        this.seenActionActivationIds = new Set();
         this.seenParticleCausalIds = new Set();
     }
 
@@ -44,7 +41,6 @@ export class ClientFeedbackEventInterpreter {
         const feedbackEvents = [];
         const context = {
             suppressDetach,
-            appendActionAfterimage: (event) => this.appendActionAfterimage(event),
             appendAugmentEffect: (event) => this.appendAugmentEffect(event),
             appendParticle: (event, request) => this.appendParticle(event, request, effectBuffer, visibleWorldBounds),
             appendCombatEvent: (event, resolution) =>
@@ -57,22 +53,6 @@ export class ClientFeedbackEventInterpreter {
         }
         this.appendSharedFeedback(feedbackEvents, effectBuffer, visibleWorldBounds);
         this.appendPersonalFeedback(feedbackEvents);
-    }
-
-    appendActionAfterimage(event) {
-        const activationId = event.activationId ?? event.parameters?.activationId;
-        const ownerId = event.playerId ?? event.ownerId ?? event.parameters?.playerId ?? this.viewerId;
-        const id = activationId ? CLIENT_FEEDBACK_KEY.actionPresentation(ownerId, activationId) : null;
-        if (!rememberBounded(this.seenActionActivationIds, id, this.config.CAUSAL_LIMIT)) return;
-        this.actionAfterimages.push({
-            id,
-            actionId: event.actionId ?? event.parameters?.actionId ?? CLIENT_FEEDBACK_ACTION_ID.DEFAULT_PUNCH,
-            playerId: event.playerId ?? event.ownerId ?? event.parameters?.playerId ?? null,
-            position: event.position ?? event.parameters?.position,
-            direction: event.direction ?? event.parameters?.direction ?? this.config.DEFAULT_DIRECTION,
-            age: this.config.INITIAL_AGE,
-            lifetime: this.config.ACTION_AFTERIMAGE_LIFETIME
-        });
     }
 
     appendAugmentEffect(event) {
@@ -102,7 +82,7 @@ export class ClientFeedbackEventInterpreter {
         rememberBounded(this.seenParticleCausalIds, causalId, this.config.CAUSAL_LIMIT);
         const targetPosition = request.targetPosition ?? null;
         effectBuffer.appendParticle({
-            presetId: request.presetId ?? actionParticlePreset(event.actionId ?? event.parameters?.actionId),
+            presetId: request.presetId ?? spellParticlePreset(event.spellId ?? event.parameters?.spellId),
             position,
             direction:
                 request.direction ??
@@ -153,8 +133,6 @@ export class ClientFeedbackEventInterpreter {
     update(dt) {
         for (const effect of this.augmentEffects) effect.age += dt;
         this.augmentEffects = this.augmentEffects.filter(({ age, lifetime }) => age < lifetime);
-        for (const effect of this.actionAfterimages) effect.age += dt;
-        this.actionAfterimages = this.actionAfterimages.filter(({ age, lifetime }) => age < lifetime);
         if (this.impact) {
             this.impact.age += dt;
             if (this.impact.age >= this.impact.lifetime) this.impact = null;
@@ -169,7 +147,6 @@ export class ClientFeedbackEventInterpreter {
         return {
             impact: this.impact,
             augmentEffects: this.augmentEffects,
-            actionAfterimages: this.actionAfterimages,
             ...(this.ropeCutFeedback ? { eventFlash: this.ropeCutFeedback } : {})
         };
     }

@@ -49,13 +49,17 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
 
     step(dt, input, surfaces, rope, collision = {}) {
         const wasGrounded = this.isGrounded;
+        const movementMultiplier = Number.isFinite(input.movementMultiplier)
+            ? Math.max(PHYSICS.MINIMUM_GRAVITY_SCALE, input.movementMultiplier)
+            : PHYSICS.DEFAULT_GRAVITY_SCALE;
         if (!rope.isAttached) {
-            const acceleration = this.isGrounded ? this.config.groundAcceleration : this.config.airAcceleration;
+            const acceleration =
+                (this.isGrounded ? this.config.groundAcceleration : this.config.airAcceleration) * movementMultiplier;
             this.applyAcceleration({ x: input.horizontal * acceleration, y: PHYSICS.ZERO_VECTOR.y }, dt);
             if (
                 input.horizontal === PLAYER_PHYSICS.IDLE_HORIZONTAL_INPUT &&
                 this.isGrounded &&
-                !input.preserveActionImpulse
+                !input.preserveMovementImpulse
             ) {
                 const stepVelocity = this.physicsStepVelocity();
                 this.applyImpulse({
@@ -63,11 +67,11 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
                     y: PHYSICS.ZERO_VECTOR.y
                 });
             }
-            if (!input.preserveActionImpulse) {
+            if (!input.preserveMovementImpulse) {
                 const stepVelocity = this.physicsStepVelocity();
                 const limitedVelocityX = Math.max(
-                    -this.config.maxHorizontalSpeed,
-                    Math.min(this.config.maxHorizontalSpeed, stepVelocity.x)
+                    -this.config.maxHorizontalSpeed * movementMultiplier,
+                    Math.min(this.config.maxHorizontalSpeed * movementMultiplier, stepVelocity.x)
                 );
                 this.applyImpulse({ x: limitedVelocityX - stepVelocity.x, y: PHYSICS.ZERO_VECTOR.y });
             }
@@ -77,7 +81,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
             const stepVelocity = this.physicsStepVelocity();
             this.applyImpulse({
                 x: PHYSICS.ZERO_VECTOR.x,
-                y: -this.config.jumpSpeed - stepVelocity.y
+                y: -this.config.jumpSpeed * movementMultiplier - stepVelocity.y
             });
             this.isGrounded = false;
         }

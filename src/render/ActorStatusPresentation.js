@@ -1,11 +1,18 @@
 import { circleBounds, isVisible } from "./RenderViewport.js";
-import { drawElectricArc } from "./effects/ElectricArc.js";
+import { CombatStatusEffectPool } from "../game/status-effects/CombatStatusEffectPool.js";
 
 const HEALTH_SAFE = "#22c55e";
 const HEALTH_DANGER = "#fb7185";
-const ACTION_READY = "#67e8f9";
 const TRACK = "rgba(15, 23, 42, 0.88)";
 const EDGE = "rgba(226, 232, 240, 0.72)";
+const STATUS_PARTICLE_PRESENTATION = Object.freeze({
+    progressPhaseRatio: 0.5,
+    indexAngleOffset: 1.618,
+    opacityBase: 0.45,
+    opacityWave: 0.5,
+    sizeBaseRatio: 0.82,
+    sizeStepRatio: 0.12
+});
 
 function clampRatio(value) {
     return Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
@@ -24,16 +31,6 @@ export function resolveHealthStatus(health, maxHealth) {
     const maximum = Math.max(1, Number.isFinite(maxHealth) ? maxHealth : 1);
     const current = Math.max(0, Math.min(maximum, Number.isFinite(health) ? health : 0));
     return Object.freeze({ current, maximum, ratio: current / maximum });
-}
-
-export function resolveActionCooldownStatus(actionState) {
-    const modifierIds = actionState?.loadout?.modifierIds ?? [];
-    const maximum = modifierIds.includes("extra-charge") ? 2 : 1;
-    const charges = Math.max(0, Math.min(maximum, actionState?.chargesRemaining ?? maximum));
-    const remaining = Math.max(0, actionState?.rechargeRemaining ?? 0);
-    const duration = Math.max(0, actionState?.rechargeDuration ?? remaining);
-    const ratio = duration > 0 ? clampRatio(1 - remaining / duration) : 1;
-    return Object.freeze({ charges, maximum, remaining, duration, ratio });
 }
 
 export function drawStatusBar(context, { x, y, width, height, ratio, fill, label = null }) {
@@ -60,7 +57,6 @@ function drawPlayerStatus(context, actor) {
     const x = actor.position.x - width * 0.5;
     const y = actor.position.y - radius - 23;
     const health = resolveHealthStatus(actor.health, actor.maxHealth);
-    const cooldown = resolveActionCooldownStatus(actor.actionState);
     drawStatusBar(context, {
         x,
         y,
@@ -68,15 +64,6 @@ function drawPlayerStatus(context, actor) {
         height,
         ratio: health.ratio,
         fill: health.ratio > 0.35 ? HEALTH_SAFE : HEALTH_DANGER
-    });
-    drawStatusBar(context, {
-        x,
-        y: y + height + 2,
-        width,
-        height,
-        ratio: cooldown.ratio,
-        fill: ACTION_READY,
-        label: `${cooldown.charges}/${cooldown.maximum}`
     });
 }
 
@@ -102,55 +89,130 @@ function scenePlayers(scene) {
         ? {
               ...scene.player,
               health: scene.playerHealth,
-              maxHealth: scene.playerMaxHealth,
-              actionState: scene.actionState
+              maxHealth: scene.playerMaxHealth
           }
         : null;
     return [localActor, ...(scene.otherPlayers ?? [])].filter(Boolean);
 }
 
-function drawElectrifiedStatus(context, player, time) {
-    const radius = colliderRadius(player) + 9;
-    for (let arc = 0; arc < 3; arc += 1) {
-        const startAngle = time * 9 + (arc * Math.PI * 2) / 3;
-        const endAngle = startAngle + Math.PI * 0.72;
-        drawElectricArc(
-            context,
-            {
-                x: player.position.x + Math.cos(startAngle) * radius,
-                y: player.position.y + Math.sin(startAngle) * radius
-            },
-            {
-                x: player.position.x + Math.cos(endAngle) * radius,
-                y: player.position.y + Math.sin(endAngle) * radius
-            },
-            { time: time + arc * 0.17 }
-        );
+function drawStatusParticle(context, particle) {
+    context.save();
+    context.globalAlpha = particle.opacity;
+    context.fillStyle = particle.color;
+    context.globalCompositeOperation = particle.glow > 0 ? "lighter" : "source-over";
+    if (particle.glow > 0) {
+        context.shadowColor = particle.color;
+        context.shadowBlur = particle.glow * 12;
+    }
+    context.translate(particle.position.x, particle.position.y);
+    context.rotate(particle.rotation);
+    if (particle.shape === "streak") {
+        context.fillRect(-particle.size * 2.4, -particle.size * 0.35, particle.size * 4.8, particle.size * 0.7);
+    } else if (particle.shape === "dot") {
+        context.beginPath();
+        context.arc(0, 0, particle.size, 0, Math.PI * 2);
+        context.fill();
+    } else {
+        context.beginPath();
+        context.moveTo(0, -particle.size * 1.45);
+        context.lineTo(particle.size * 0.72, 0);
+        context.lineTo(0, particle.size * 1.45);
+        context.lineTo(-particle.size * 0.72, 0);
+        context.closePath();
+        context.fill();
+    }
+    context.restore();
+}
+
+function sceneBoss(scene) {
+    const boss = scene.bossStage ?? scene.bossRuntime ?? null;
+    return boss?.body && boss?.statusEffects
+        ? { ...boss.body, statusEffects: boss.statusEffects, health: boss.health, maxHealth: boss.maxHealth }
+        : null;
+}
+
+class StatusParticleSink {
+    constructor(context, time) {
+        this.context = context;
+        this.time = time;
+    }
+
+    appendStatusParticles({ effectId, spec, position, radius, remainingSeconds, durationSeconds }) {
+        if (!spec) return 0;
+        const progress = 1 - remainingSeconds / durationSeconds;
+        for (let index = 0; index < spec.count; index += 1) {
+            const phase =
+                (this.time / spec.lifetime +
+                    index / spec.count +
+                    progress * STATUS_PARTICLE_PRESENTATION.progressPhaseRatio) %
+                1;
+            const angle = phase * Math.PI * 2 + index * STATUS_PARTICLE_PRESENTATION.indexAngleOffset;
+            const distance = radius + spec.size * 2 + (index % 3) * spec.size;
+            const particlePosition = STATUS_PARTICLE_POSITION[spec.motion]?.({
+                angle,
+                distance,
+                index,
+                phase,
+                position,
+                radius,
+                spec
+            });
+            if (!particlePosition) throw new Error(`unsupported status particle motion: ${spec.motion}`);
+            drawStatusParticle(this.context, {
+                effectId,
+                shape: spec.shape,
+                color: spec.palette[index % spec.palette.length],
+                glow: spec.glow ?? 0,
+                opacity:
+                    STATUS_PARTICLE_PRESENTATION.opacityBase +
+                    Math.sin(phase * Math.PI) * STATUS_PARTICLE_PRESENTATION.opacityWave,
+                size:
+                    spec.size *
+                    (STATUS_PARTICLE_PRESENTATION.sizeBaseRatio +
+                        (index % 3) * STATUS_PARTICLE_PRESENTATION.sizeStepRatio),
+                rotation: angle + Math.PI * 0.5,
+                position: particlePosition
+            });
+        }
+        return spec.count;
     }
 }
 
-export class ElectrifiedStatusRenderer {
-    draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
-        const actors = [...scenePlayers(scene), ...(scene.enemies ?? [])];
-        let drawn = 0;
-        for (const actor of actors) {
-            if (actor.statusEffects?.electrified?.active !== true) continue;
-            const radius = colliderRadius(actor) + 28;
-            if (viewport && !isVisible(viewport, circleBounds(actor.position, radius))) continue;
-            drawElectrifiedStatus(context, actor, presentationTimeSeconds);
-            drawn += 1;
-        }
-        renderStats?.recordCollection("electrifiedActors", actors.length, drawn);
-    }
+const STATUS_PARTICLE_POSITION = Object.freeze({
+    orbit: ({ angle, distance, position }) => ({
+        x: position.x + Math.cos(angle) * distance,
+        y: position.y + Math.sin(angle) * distance
+    }),
+    drift: ({ angle, phase, position, radius, spec }) => ({
+        x: position.x + Math.sin(angle) * radius * spec.driftWidthRatio,
+        y:
+            position.y +
+            radius * spec.driftWidthRatio -
+            phase * (radius * spec.driftHeightRatio + spec.speed * spec.lifetime)
+    })
+});
+
+function drawActorStatusEffects(context, actor, presentationTimeSeconds) {
+    if (!actor.statusEffects?.effects?.some(({ active }) => active)) return 0;
+    const pool = new CombatStatusEffectPool();
+    pool.restore(actor.statusEffects);
+    return pool.draw({
+        position: actor.position,
+        radius: colliderRadius(actor),
+        velocity: actor.velocity,
+        angle: actor.angle ?? 0,
+        particles: new StatusParticleSink(context, presentationTimeSeconds)
+    });
 }
 
 export class ActorStatusRenderer {
-    draw({ context, scene, viewport, renderStats }) {
+    draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
         const players = scenePlayers(scene);
         let drawnPlayers = 0;
         for (const player of players) {
             const radius = colliderRadius(player) + 36;
             if (viewport && !isVisible(viewport, circleBounds(player.position, radius))) continue;
+            drawActorStatusEffects(context, player, presentationTimeSeconds);
             drawPlayerStatus(context, player);
             drawnPlayers += 1;
         }
@@ -159,16 +221,20 @@ export class ActorStatusRenderer {
         for (const enemy of enemies) {
             const radius = colliderRadius(enemy, 20) + 28;
             if (viewport && !isVisible(viewport, circleBounds(enemy.position, radius))) continue;
+            drawActorStatusEffects(context, enemy, presentationTimeSeconds);
             drawEnemyStatus(context, enemy);
             drawnEnemies += 1;
         }
         renderStats?.recordCollection("playerStatusBars", players.length, drawnPlayers);
         renderStats?.recordCollection("enemyStatusBars", enemies.length, drawnEnemies);
+        const boss = sceneBoss(scene);
+        if (boss && (!viewport || isVisible(viewport, circleBounds(boss.position, colliderRadius(boss) + 28)))) {
+            drawActorStatusEffects(context, boss, presentationTimeSeconds);
+        }
     }
 }
 
 export const ACTOR_STATUS_COLORS = Object.freeze({
     healthSafe: HEALTH_SAFE,
-    healthDanger: HEALTH_DANGER,
-    actionReady: ACTION_READY
+    healthDanger: HEALTH_DANGER
 });

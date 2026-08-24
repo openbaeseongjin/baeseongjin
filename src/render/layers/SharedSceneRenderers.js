@@ -922,62 +922,6 @@ export class AuthoredWorldObjectRenderer {
         }
     }
 
-    drawAugmentNode(context, style, bounds, consumed) {
-        const width = bounds.width;
-        const height = bounds.height;
-        const left = -width * 0.5;
-        const top = -height * 0.5;
-
-        context.fillStyle = "#111827";
-        context.strokeStyle = consumed ? "#334155" : style.color;
-        context.lineWidth = 3;
-        context.fillRect(left, top, width, height);
-        context.strokeRect(left, top, width, height);
-
-        context.fillStyle = "#0b1220";
-        context.fillRect(left + 14, top + 13, width - 28, 39);
-        context.strokeStyle = consumed ? "#263746" : "rgba(103, 232, 249, 0.72)";
-        context.lineWidth = 2;
-        context.strokeRect(left + 14, top + 13, width - 28, 39);
-        context.fillStyle = consumed ? "#64748b" : "#e9d5ff";
-        context.font = "900 10px ui-monospace, monospace";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillText(consumed ? "CONSUMED" : "AUGMENT READY", 0, top + 27);
-        context.fillStyle = consumed ? "#475569" : "#94a3b8";
-        context.font = "800 8px ui-monospace, monospace";
-        context.fillText(consumed ? "NODE OFFLINE" : "3 OPTIONS AVAILABLE", 0, top + 42);
-
-        const slots = [
-            { label: "OPTION 1", color: "#fbbf24" },
-            { label: "OPTION 2", color: "#67e8f9" },
-            { label: "OPTION 3", color: "#a3e635" }
-        ];
-        for (const [index, slot] of slots.entries()) {
-            const slotWidth = 42;
-            const x = -slotWidth * 1.5 - 5 + index * (slotWidth + 5);
-            context.fillStyle = consumed ? "#0f172a" : `${slot.color}22`;
-            context.fillRect(x, top + 62, slotWidth, 30);
-            context.strokeStyle = consumed ? "#263746" : slot.color;
-            context.lineWidth = 2;
-            context.strokeRect(x, top + 62, slotWidth, 30);
-            context.fillStyle = consumed ? "#475569" : slot.color;
-            context.font = "900 7px ui-monospace, monospace";
-            context.fillText(slot.label, x + slotWidth * 0.5, top + 78);
-        }
-
-        context.strokeStyle = "#475569";
-        context.lineWidth = 5;
-        context.beginPath();
-        context.moveTo(left + 18, height * 0.5);
-        context.lineTo(left + 8, height * 0.72);
-        context.moveTo(-left - 18, height * 0.5);
-        context.lineTo(-left - 8, height * 0.72);
-        context.stroke();
-        context.fillStyle = consumed ? "#334155" : "#fbbf24";
-        context.fillRect(-5, top + 101, 10, 7);
-    }
-
     drawTestTarget(context, style, { contactRegistered = false, age = 0 } = {}) {
         const radius = style.radius;
         context.fillStyle = contactRegistered ? "rgba(163, 230, 53, 0.42)" : "#111827";
@@ -1164,15 +1108,11 @@ export class CombatEffectRenderer {
 const LARGE_AUGMENT_EFFECTS = Object.freeze({
     "collision-explosion-direct": true,
     "collision-explosion-splash": true,
-    "push-away": true,
-    "wall-impact": true,
-    "end-wave": true,
-    "explosive-trail": true
+    "meteor-splash": true
 });
 
 export class EventEffectRenderer {
     draw({ context, scene }) {
-        for (const effect of scene.actionAfterimages ?? []) this.drawActionAfterimage(context, effect);
         for (const effect of scene.augmentEffects ?? []) this.drawAugmentEffect(context, effect);
         const event = scene.eventFlash;
         if (event?.type !== "rope-cut" || !event.position || event.age >= 0.6) return;
@@ -1191,40 +1131,6 @@ export class EventEffectRenderer {
         context.restore();
     }
 
-    drawActionAfterimage(context, effect) {
-        if (!effect.position) return;
-        const length = Math.hypot(effect.direction?.x ?? 0, effect.direction?.y ?? 0) || 1;
-        const direction = {
-            x: (effect.direction?.x ?? 1) / length,
-            y: (effect.direction?.y ?? 0) / length
-        };
-        const progress = Math.min(1, effect.age / effect.lifetime);
-        const color = effect.actionId === "default-punch" || effect.actionId === "dash-strike" ? "#fef08a" : "#67e8f9";
-        const angle = Math.atan2(direction.y, direction.x);
-        context.save();
-        context.globalCompositeOperation = "lighter";
-        context.translate(effect.position.x, effect.position.y);
-        context.rotate(angle);
-        for (let index = 2; index >= 0; index -= 1) {
-            const distance = 18 + progress * 48 - index * 11;
-            context.globalAlpha = Math.max(0, (1 - progress) * (0.28 + (2 - index) * 0.22));
-            context.fillStyle = color;
-            context.strokeStyle = "#f8fafc";
-            context.lineWidth = 2;
-            context.fillRect(distance, -8, 18, 16);
-            context.strokeRect(distance, -8, 18, 16);
-            context.fillStyle = "rgba(255, 255, 255, 0.32)";
-            for (let knuckle = 0; knuckle < 3; knuckle += 1) context.fillRect(distance + 5 + knuckle * 4, -6, 3, 4);
-            context.beginPath();
-            context.moveTo(distance - 16, -6);
-            context.lineTo(distance, -4);
-            context.lineTo(distance, 4);
-            context.lineTo(distance - 16, 6);
-            context.stroke();
-        }
-        context.restore();
-    }
-
     drawAugmentEffect(context, effect) {
         if (!effect.position) return;
         const progress = Math.min(1, effect.age / effect.lifetime);
@@ -1232,26 +1138,15 @@ export class EventEffectRenderer {
         context.save();
         context.globalAlpha = alpha;
         context.globalCompositeOperation = "lighter";
-        if (effect.type === "damage-reflect" && effect.sourcePosition) {
-            context.strokeStyle = "#f4fdff";
-            context.shadowColor = "#67e8f9";
-            context.shadowBlur = 10;
-            context.lineWidth = 3;
-            context.beginPath();
-            context.moveTo(effect.sourcePosition.x, effect.sourcePosition.y);
-            context.lineTo(effect.position.x, effect.position.y);
-            context.stroke();
-        } else {
-            const large = Boolean(LARGE_AUGMENT_EFFECTS[effect.type]);
-            const radius = (large ? 18 : 6) + progress * (large ? 92 : 24);
-            context.strokeStyle = effect.type === "electrified-rope" ? "#a8e6ff" : "#fbbf24";
-            context.shadowColor = context.strokeStyle;
-            context.shadowBlur = large ? 12 : 7;
-            context.lineWidth = Math.max(1, 5 * (1 - progress));
-            context.beginPath();
-            context.arc(effect.position.x, effect.position.y, radius, 0, Math.PI * 2);
-            context.stroke();
-        }
+        const large = Boolean(LARGE_AUGMENT_EFFECTS[effect.type]);
+        const radius = (large ? 18 : 6) + progress * (large ? 92 : 24);
+        context.strokeStyle = effect.type === "electrified-rope" ? "#a8e6ff" : "#fbbf24";
+        context.shadowColor = context.strokeStyle;
+        context.shadowBlur = large ? 12 : 7;
+        context.lineWidth = Math.max(1, 5 * (1 - progress));
+        context.beginPath();
+        context.arc(effect.position.x, effect.position.y, radius, 0, Math.PI * 2);
+        context.stroke();
         context.restore();
     }
 }

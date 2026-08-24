@@ -1,10 +1,7 @@
 import { createAugmentImpactClaim, serializeAugmentImpactClaim } from "../network/AugmentImpactClaim.js";
-import { createAugmentOfferClaim, serializeAugmentOfferClaim } from "../network/AugmentOfferClaim.js";
+import { SPELL_SOURCE_KIND } from "../spells/SpellRuntimeDefinition.js";
 import { createCheckpointClaim, serializeCheckpointClaim } from "../network/CheckpointClaim.js";
-import {
-    createFoundationSelectionClaim,
-    serializeFoundationSelectionClaim
-} from "../network/FoundationSelectionClaim.js";
+import { createAugmentSelectionClaim, serializeAugmentSelectionClaim } from "../network/AugmentSelectionClaim.js";
 import { serializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { createSummitClaim, serializeSummitClaim } from "../network/SummitClaim.js";
 import { createProjectileHitClaim, serializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
@@ -62,7 +59,7 @@ export class RemoteGameAuthority {
         this.sentSequenceOrder = [];
         this.processedReceiptSequences = new Set();
         this.processedReceiptOrder = [];
-        this.foundationSelectionReceipts = [];
+        this.augmentSelectionReceipts = [];
         this.hitClaimReceipts = [];
         this.projectileSpawnClaimReceipts = [];
         this.impactClaimReceipts = [];
@@ -71,7 +68,6 @@ export class RemoteGameAuthority {
         this.ropeImpactReceipts = [];
         this.augmentImpactReceipts = [];
         this.pendingAugmentImpactClaims = new Map();
-        this.augmentOfferReceipts = [];
         this.locallyPredictedAugmentImpactIds = new Set();
         this.locallyPredictedAugmentImpactOrder = [];
         this.locallyPredictedRopeImpactIds = new Set();
@@ -424,6 +420,16 @@ export class RemoteGameAuthority {
     submitAugmentImpact(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
         if (!this.submitOwnerMotion()) return false;
+        return this.submitAugmentImpactEvent(event);
+    }
+
+    submitIncomingSpellImpact(event) {
+        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
+        if (event.targetId !== this.playerId || event.sourcePlayerId === this.playerId) return false;
+        return this.submitAugmentImpactEvent(event);
+    }
+
+    submitAugmentImpactEvent(event) {
         const claim = createAugmentImpactClaim({
             eventId: event.eventId,
             predictionId: event.predictionId ?? event.eventId,
@@ -432,7 +438,7 @@ export class RemoteGameAuthority {
             clientTick: event.clientTick ?? event.tick,
             authorityTick: this.tickProjection.project(event.clientTick ?? event.tick),
             effectId: event.effectId,
-            sourceKind: event.sourceKind ?? "augment-action",
+            sourceKind: event.sourceKind ?? SPELL_SOURCE_KIND.CAST,
             sourcePosition: event.sourcePosition,
             contactPosition: event.contactPosition ?? event.position,
             damage: event.damage,
@@ -479,12 +485,12 @@ export class RemoteGameAuthority {
         return true;
     }
 
-    applyPredictedFoundationSelection(selection) {
-        return this.ownerRuntime?.applyPredictedFoundationSelection(selection) ?? false;
+    applyPredictedAugmentSelection(selection) {
+        return this.ownerRuntime?.applyPredictedAugmentSelection(selection) ?? false;
     }
 
-    rejectPredictedFoundationSelection(sourceId) {
-        return this.ownerRuntime?.rejectPredictedFoundationSelection(sourceId, this.latestSnapshot) ?? false;
+    rejectPredictedAugmentSelection(sourceId) {
+        return this.ownerRuntime?.rejectPredictedAugmentSelection(sourceId, this.latestSnapshot) ?? false;
     }
 
     releasePredictedRope() {
@@ -502,19 +508,19 @@ export class RemoteGameAuthority {
         return true;
     }
 
-    submitFoundationSelection({ sourceId, foundationId }) {
+    submitAugmentSelection({ sourceId, augmentId }) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
         if (!this.submitOwnerMotion()) return false;
-        const claim = createFoundationSelectionClaim({
+        const claim = createAugmentSelectionClaim({
             sourceId,
-            foundationId,
+            augmentId,
             clientTick: this.ownerRuntime.state().tick,
             authorityTick: this.tickProjection.project(this.ownerRuntime.state().tick)
         });
         this.socket.send(
             JSON.stringify({
-                type: MULTIPLAYER_MESSAGE_TYPE.FOUNDATION_SELECTION,
-                payload: serializeFoundationSelectionClaim(claim)
+                type: MULTIPLAYER_MESSAGE_TYPE.AUGMENT_SELECTION,
+                payload: serializeAugmentSelectionClaim(claim)
             })
         );
         return true;
@@ -560,9 +566,9 @@ export class RemoteGameAuthority {
         return candidate;
     }
 
-    drainFoundationSelectionReceipts() {
-        const receipts = Object.freeze(this.foundationSelectionReceipts);
-        this.foundationSelectionReceipts = [];
+    drainAugmentSelectionReceipts() {
+        const receipts = Object.freeze(this.augmentSelectionReceipts);
+        this.augmentSelectionReceipts = [];
         return receipts;
     }
 
@@ -663,7 +669,7 @@ export class RemoteGameAuthority {
             state: this.buffer.sample({ now: this.now(), localPlayerId: this.playerId }),
             predicted: this.ownerRuntime?.presentationState() ?? null,
             owner: this.ownerRuntime?.state() ?? null,
-            ownerFoundationReward: this.ownerRuntime?.foundationReward() ?? null,
+            ownerAugmentReward: this.ownerRuntime?.augmentReward() ?? null,
             serverTick: this.latestSnapshot?.serverTick ?? null,
             connected: !this.closed
         };
@@ -706,26 +712,6 @@ export class RemoteGameAuthority {
         const receipts = Object.freeze([...this.ropeImpactReceipts]);
         this.ropeImpactReceipts.length = 0;
         return receipts;
-    }
-
-    drainAugmentOfferReceipts() {
-        const receipts = Object.freeze([...this.augmentOfferReceipts]);
-        this.augmentOfferReceipts.length = 0;
-        return receipts;
-    }
-
-    submitAugmentOfferOpen({ sourceId }) {
-        if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
-        if (!this.submitOwnerMotion()) return false;
-        const claim = createAugmentOfferClaim({
-            sourceId,
-            clientTick: this.ownerRuntime.state().tick,
-            authorityTick: this.tickProjection.project(this.ownerRuntime.state().tick)
-        });
-        this.socket.send(
-            JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.AUGMENT_OFFER, payload: serializeAugmentOfferClaim(claim) })
-        );
-        return true;
     }
 
     drainAugmentImpactReceipts() {

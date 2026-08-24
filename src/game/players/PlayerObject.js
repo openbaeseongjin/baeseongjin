@@ -7,9 +7,10 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         id,
         physics,
         ropeObject,
-        foundation,
+        augmentLoadout,
         augmentCombat,
         statusEffects,
+        experience,
         weapon,
         ropeImpactAttack,
         ropeImpactState,
@@ -19,9 +20,10 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         super({ id, ownerId: id });
         this.physics = physics;
         this.ropeObject = ropeObject;
-        this.foundation = foundation;
+        this.augmentLoadout = augmentLoadout;
         this.augmentCombat = augmentCombat;
         this.statusEffects = statusEffects;
+        this.experience = experience;
         this.weapon = weapon;
         this.ropeImpactAttack = ropeImpactAttack;
         this.ropeImpactState = ropeImpactState;
@@ -31,7 +33,6 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         this.ropeDisabledRemaining = 0;
         this.lifeState = "active";
         this.respawnAnchorId = respawnAnchorId;
-        this.calibrationVerifiedSourceIds = [];
     }
 
     get position() {

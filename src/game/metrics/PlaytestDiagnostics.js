@@ -34,7 +34,7 @@ export function formatPlaytestDiagnostics({
         `damageTaken: ${metrics.damageTaken}`,
         `ropeCuts: ${metrics.ropeCuts}`,
         `defeats: ${metrics.defeats}`,
-        `firstFoundationSeconds: ${valueOrDash(metrics.firstFoundationSeconds, (value) => value.toFixed(1))}`,
+        `firstAugmentSeconds: ${valueOrDash(metrics.firstAugmentSeconds, (value) => value.toFixed(1))}`,
         `progressKind: ${metrics.progressKind ?? "area"}`,
         `currentProgress: ${currentProgressId ?? "-"}`,
         `currentProgressSeconds: ${valueOrDash(currentProgressSeconds, (value) => value.toFixed(1))}`,

@@ -1,16 +1,6 @@
 import { Vector2 } from "../../game-kit/index.js";
-import { FOUNDATION_AUGMENT_CATALOG, foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
+import { AUGMENT_CATALOG, MAX_AUGMENT_SELECTIONS, augmentById } from "../augments/AugmentCatalog.js";
 import { augmentImpactFormula, validateAugmentImpactFormula } from "../augments/AugmentImpactFormula.js";
-import {
-    ACTION_EVENT_TYPE,
-    ACTION_KEY,
-    ACTION_MODIFIER_ID,
-    ACTION_PREDICTED_RESOLUTION,
-    ACTION_SIGNATURE_ID,
-    ACTION_SOURCE_KIND,
-    ACTION_STATE_CONFIG,
-    BASE_ACTION_ID
-} from "../augments/actions/ActionAugmentDefinition.js";
 import { BOSS_STAGE_CATALOG } from "../boss-authoring/BossStageCatalog.js";
 import { createBossEncounterRuntime } from "../boss/BossEncounterRuntimeFactory.js";
 import { BOSS_ANCHOR_ROLE } from "../boss-authoring/BossStageSpec.js";
@@ -25,6 +15,7 @@ import {
 import {
     createEnemyArchetype,
     enemyDisplayName,
+    enemyExperienceReward,
     enemyInitialHealth,
     enemyInitialRadius,
     enemySpawnMembers,
@@ -78,14 +69,16 @@ import { rotateVector } from "../physics/AngularMotion.js";
 import { CollisionBroadPhase } from "../physics/spatial/CollisionBroadPhase.js";
 import { createPlayerRuntime } from "../players/PlayerRuntimeFactory.js";
 import { ELECTRIFIED_STATUS_ID } from "../status-effects/ElectrifiedStatusEffect.js";
+import { SPELL_STATUS_EFFECT } from "../spells/SpellDefinition.js";
 import { releaseRopeFromBody, ropeAnchorState } from "../rope/RopeAttachment.js";
 import { hookReach } from "../rope/RopeLauncher.js";
 import { ROPE_AUGMENT_PERCENTAGES } from "../augments/rope/RopeAugmentTuning.js";
 import {
-    advanceFoundationRewardSelection,
-    createDeterministicFoundationRewardSelection,
-    createFoundationRewardSelection
-} from "../rewards/FoundationRewardSelection.js";
+    advanceAugmentRewardSelection,
+    createExperienceAugmentRewardSelection,
+    createAugmentRewardSelection,
+    EXPERIENCE_REWARD_KEY
+} from "../rewards/AugmentRewardSelection.js";
 import { closestPointOnSurface, generateWorld, WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
 import { assembleAuthoredWorld } from "../world/AuthoredWorldAssembler.js";
@@ -182,6 +175,18 @@ function clamp(value, minimum, maximum) {
     return Math.min(maximum, Math.max(minimum, value));
 }
 
+function applyPlayerSpellKnockback(player, knockback) {
+    if (!knockback || !(knockback.distance > 0)) return false;
+    const duration = knockback.duration ?? knockback.durationSeconds;
+    const magnitude = Math.hypot(knockback.direction?.x ?? 0, knockback.direction?.y ?? 0);
+    if (!(duration > 0) || !(magnitude > 0)) return false;
+    player.physics.applyImpulse(
+        { x: knockback.direction.x / magnitude, y: knockback.direction.y / magnitude },
+        knockback.distance / duration
+    );
+    return true;
+}
+
 const ENEMY_BEHAVIOR_PLAYER_TARGETS = Object.freeze({
     [ENEMY_BEHAVIOR_EVENT_TYPE.ARTILLERY_STRIKE]: ({ players, result }) =>
         players.filter(
@@ -195,11 +200,19 @@ const ENEMY_BEHAVIOR_PLAYER_TARGETS = Object.freeze({
 });
 
 function createEnemyRuntime(properties) {
-    if (isEnemyArchetype(properties.enemyType)) return createEnemyArchetype(properties);
+    const { statusEffects = null, ...runtimeProperties } = properties;
+    let enemy;
+    if (isEnemyArchetype(runtimeProperties.enemyType)) enemy = createEnemyArchetype(runtimeProperties);
     if (isKnownEnemyType(properties.enemyType)) {
-        return createEnemyObject({ ...properties, displayName: enemyDisplayName(properties.enemyType) });
+        enemy ??= createEnemyObject({
+            ...runtimeProperties,
+            displayName: enemyDisplayName(runtimeProperties.enemyType),
+            experienceReward: enemyExperienceReward(runtimeProperties.enemyType)
+        });
     }
-    throw new Error(`unknown enemy type: ${properties.enemyType}`);
+    if (!enemy) throw new Error(`unknown enemy type: ${runtimeProperties.enemyType}`);
+    if (statusEffects) enemy.statusEffects.restore(statusEffects);
+    return enemy;
 }
 
 function resolveEnemySpawnDefinition(spawn, context) {
@@ -369,12 +382,9 @@ export class GameSimulation {
         this.#primaryPlayerId = playerRuntime.entity.id;
         this.debugAugmentPlayerId = debugAugmentIds.length > 0 ? playerRuntime.entity.id : null;
         if (this.debugAugmentPlayerId) {
-            playerRuntime.foundation.restore(null, {
-                selectedAugmentIds: debugAugmentIds,
-                consumedSourceIds: []
-            });
-            playerRuntime.augmentCombat.syncLoadout(playerRuntime.foundation, playerRuntime.entity.maxHealth);
-            playerRuntime.ropeObject.rope.config = playerRuntime.foundation.effectiveRopeConfig(this.ropeConfig);
+            playerRuntime.augmentLoadout.restore({ selectedAugmentIds: debugAugmentIds });
+            playerRuntime.augmentCombat.syncLoadout(playerRuntime.augmentLoadout, playerRuntime.entity.maxHealth);
+            playerRuntime.ropeObject.rope.config = playerRuntime.augmentLoadout.effectiveRopeConfig(this.ropeConfig);
         }
         this.enemyRuntimeCreations = 0;
         this.enemyRuntimeReconciliations = 0;
@@ -392,7 +402,7 @@ export class GameSimulation {
               this.world.checkpoints[0] ??
               null);
         this.contentBoundaryAnnounced = false;
-        this.foundationRewards = new Map();
+        this.augmentRewards = new Map();
         this.tick = 0;
         this.replicationEvents = [];
     }
@@ -455,7 +465,7 @@ export class GameSimulation {
             playerId,
             respawnAnchorId: initialRespawnAnchorId
         });
-        runtime.entity.augmentCombat.syncLoadout(runtime.entity.foundation, runtime.entity.maxHealth);
+        runtime.entity.augmentCombat.syncLoadout(runtime.entity.augmentLoadout, runtime.entity.maxHealth);
         this.objects.addPlayerRuntime(runtime);
         this.collisionBroadPhase.invalidateFrame();
         return runtime;
@@ -466,11 +476,9 @@ export class GameSimulation {
         if (!removed) return false;
         if (this.bossRuntime?.status === "active") this.bossRuntime.removeParticipant(playerId);
         this.portalTransitions.delete(playerId);
-        this.foundationRewards.delete(playerId);
+        this.augmentRewards.delete(playerId);
         if (removed.id === this.#primaryPlayerId) this.#primaryPlayerId = this.players[0]?.id ?? null;
         this.collisionBroadPhase.invalidateFrame();
-        this.#advanceCalibrationVerification();
-        this.#completeEligibleAugmentObjectivesForCurrentRoster();
         return true;
     }
 
@@ -890,7 +898,7 @@ export class GameSimulation {
                 (currentRope.anchorLocalOffset?.y ?? 0) - localAnchor.y
             ) <= ACTOR_ROPE_ANCHOR_MATCH_TOLERANCE;
         if (!continuingAttachment) {
-            const ropeConfig = player.foundation.effectiveRopeConfig(this.ropeConfig);
+            const ropeConfig = player.augmentLoadout.effectiveRopeConfig(this.ropeConfig);
             const hand = launchHandPosition(player, ropeConfig, anchor.position);
             if (Math.hypot(anchor.position.x - hand.x, anchor.position.y - hand.y) > hookReach(ropeConfig)) {
                 return Object.freeze({ accepted: false, reason: ROPE_ANCHOR_RELEASE_REASON.POINT_OUT_OF_REACH });
@@ -1513,8 +1521,8 @@ export class GameSimulation {
         });
     }
 
-    getFoundationReward(playerId) {
-        return this.foundationRewards.get(playerId) ?? null;
+    getAugmentReward(playerId) {
+        return this.augmentRewards.get(playerId) ?? null;
     }
 
     #setActiveCollisionSurfaces(surfaces) {
@@ -1564,7 +1572,7 @@ export class GameSimulation {
         if (!target) return false;
         this.worldProgress = new WorldProgressState(this.worldCatalog);
         this.portalTransitions.clear();
-        this.foundationRewards.clear();
+        this.augmentRewards.clear();
         for (const area of this.world.areas) {
             if (area.id === areaId) break;
             for (const objectiveId of area.objectiveIds) this.worldProgress.completeObjective(objectiveId);
@@ -1583,7 +1591,7 @@ export class GameSimulation {
         this.worldProgress = new SectorProgressState(this.world);
         this.contentBoundaryAnnounced = false;
         this.portalTransitions?.clear();
-        this.foundationRewards?.clear();
+        this.augmentRewards?.clear();
         for (const source of this.world.landmarks) {
             if (source.order >= target.order) break;
             for (const objectiveId of source.objectiveIds) {
@@ -1782,7 +1790,7 @@ export class GameSimulation {
             player.ropeObject.launcher.clear();
         }
         if (state.augmentRuntimeState?.combat) {
-            player.augmentCombat.restore(state.augmentRuntimeState.combat, player.foundation, player.maxHealth);
+            player.augmentCombat.restore(state.augmentRuntimeState.combat, player.augmentLoadout, player.maxHealth);
         }
         if (motionOutcome.ropeReleased) player.ropeImpactState.reset();
         else player.ropeImpactState.restore(state.ropeImpactState ?? null);
@@ -1870,12 +1878,12 @@ export class GameSimulation {
         return this.elapsedSeconds;
     }
 
-    synchronizePredictionProgress(playerId, { foundationReward = null } = {}) {
+    synchronizePredictionProgress(playerId, { augmentReward = null } = {}) {
         this.#requirePlayer(playerId);
-        const hadOpenReward = this.foundationRewards.has(playerId);
-        this.foundationRewards.clear();
-        if (foundationReward) {
-            this.foundationRewards.set(playerId, createFoundationRewardSelection(foundationReward));
+        const hadOpenReward = this.augmentRewards.has(playerId);
+        this.augmentRewards.clear();
+        if (augmentReward) {
+            this.augmentRewards.set(playerId, createAugmentRewardSelection(augmentReward));
             if (!hadOpenReward) {
                 const player = this.#findPlayer(playerId);
                 player.ropeObject.rope.detach();
@@ -1883,7 +1891,7 @@ export class GameSimulation {
                 player.ropeImpactState.reset();
             }
         }
-        return this.getFoundationReward(playerId);
+        return this.getAugmentReward(playerId);
     }
 
     predictionProgressState(playerId) {
@@ -1891,7 +1899,7 @@ export class GameSimulation {
         return Object.freeze({
             activeCheckpointId: this.activeCheckpoint?.id ?? null,
             respawnAnchorId: this.#findPlayer(playerId)?.respawnAnchorId ?? null,
-            foundationReward: this.getFoundationReward(playerId)
+            augmentReward: this.getAugmentReward(playerId)
         });
     }
 
@@ -1906,7 +1914,7 @@ export class GameSimulation {
         ownerId,
         shared,
         predictionTick,
-        { preservePendingImpact = false, preservePendingFoundation = false } = {}
+        { preservePendingImpact = false, preservePendingAugment = false } = {}
     ) {
         const player = this.#requirePlayer(ownerId);
         if (!preservePendingImpact) {
@@ -1916,13 +1924,13 @@ export class GameSimulation {
             player.weapon.fireInterval = shared.weapon.fireInterval;
         }
         if (
-            !preservePendingFoundation &&
-            JSON.stringify(shared.selectedAugmentIds ?? []) !== JSON.stringify(player.foundation.selectedAugmentIds)
+            !preservePendingAugment &&
+            JSON.stringify(shared.selectedAugmentIds ?? []) !== JSON.stringify(player.augmentLoadout.selectedAugmentIds)
         ) {
-            player.foundation.restore(shared.foundationAugment, shared.augmentRuntimeState);
+            player.augmentLoadout.restore(shared.augmentRuntimeState);
             player.augmentCombat.restore(
                 shared.augmentRuntimeState?.combat ?? null,
-                player.foundation,
+                player.augmentLoadout,
                 player.maxHealth
             );
         }
@@ -1948,7 +1956,7 @@ export class GameSimulation {
         const ropeImpactOutcome = this.#advanceRopeImpactAttacks(player, { commit: false });
         const collisionExplosionEvents = player.augmentCombat.collisionExplosionEvents({
             player,
-            foundation: player.foundation,
+            loadout: player.augmentLoadout,
             baseImpactEvents: ropeImpactOutcome.impacts,
             enemies: this.#combatImpactTargets(),
             tick
@@ -1964,13 +1972,13 @@ export class GameSimulation {
         this.objects.playerProjectiles.clear();
         return Object.freeze({
             projectile,
-            foundationEvents: inputOutcome.foundationEvents,
+            ropeAugmentEvents: inputOutcome.ropeAugmentEvents,
             fallImpactEvents: inputOutcome.fallImpactEvents,
             jammerImpactEvents: inputOutcome.jammerImpactEvents,
             bossImpactEvents,
             ropeImpactEvents: collisionExplosionEvents === null ? ropeImpactOutcome.impacts : Object.freeze([]),
             augmentImpactEvents,
-            augmentEvents: inputOutcome.augmentEvents,
+            spellEvents: inputOutcome.spellEvents,
             stageSavepointEvent
         });
     }
@@ -1993,7 +2001,7 @@ export class GameSimulation {
             player.ropeObject.attachBufferRemaining = 0;
             player.ropeObject.launcher.clear();
             player.ropeDisabledRemaining = this.ropeDisabledSeconds;
-            player.statusEffects.applyElectrified({ sourceId: event.parameters?.sourceId ?? null });
+            player.statusEffects.apply(ELECTRIFIED_STATUS_ID, { sourceId: event.parameters?.sourceId ?? null });
             return true;
         }
         if (event.resolution === "rope-cut") {
@@ -2040,6 +2048,30 @@ export class GameSimulation {
         return this.#requirePlayer(ownerId).augmentCombat.drainQueuedImpactEvents();
     }
 
+    applyPredictedIncomingSpellImpact(ownerId, event) {
+        const player = this.#requirePlayer(ownerId);
+        if (
+            player.lifeState !== "active" ||
+            event.targetId !== ownerId ||
+            event.sourcePlayerId === ownerId ||
+            player.hitInvulnerabilityRemaining > 0
+        ) {
+            return false;
+        }
+        const protection = player.augmentCombat.absorbPlayerDamage({
+            amount: event.damage,
+            type: "combat-hp",
+            sourceKind: event.effectId,
+            attackerId: event.sourcePlayerId
+        });
+        player.health = Math.max(0, player.health - protection.appliedDamage);
+        const statusEffectId = SPELL_STATUS_EFFECT[event.effectId] ?? null;
+        if (statusEffectId) player.statusEffects.apply(statusEffectId, { sourceId: event.sourcePlayerId });
+        applyPlayerSpellKnockback(player, event.knockback);
+        if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, event.effectId, event.sourcePlayerId);
+        return true;
+    }
+
     resolveOwnerCollisions(ownerId, otherPlayers) {
         return resolvePlayerCollisions(this.#requirePlayer(ownerId), otherPlayers);
     }
@@ -2066,9 +2098,9 @@ export class GameSimulation {
             launcher: state.launcher,
             weaponCooldown: state.weapon.cooldown,
             selectedAugmentIds: state.selectedAugmentIds,
-            foundationAugment: state.foundationAugment,
             augmentRuntimeState: state.augmentRuntimeState,
-            statusEffects: state.statusEffects
+            statusEffects: state.statusEffects,
+            experience: state.experience
         };
     }
 
@@ -2132,10 +2164,15 @@ export class GameSimulation {
         player.weapon.damage = state.weapon.damage;
         player.weapon.fireInterval = state.weapon.fireInterval;
         player.weapon.cooldown = state.weapon.cooldown;
-        player.foundation.restore(state.foundationAugment ?? null, state.augmentRuntimeState);
-        player.augmentCombat.restore(state.augmentRuntimeState?.combat ?? null, player.foundation, player.maxHealth);
+        player.augmentLoadout.restore(state.augmentRuntimeState);
+        player.augmentCombat.restore(
+            state.augmentRuntimeState?.combat ?? null,
+            player.augmentLoadout,
+            player.maxHealth
+        );
         player.statusEffects.restore(state.statusEffects ?? null);
-        const effectiveRopeConfig = player.foundation.effectiveRopeConfig(this.ropeConfig);
+        player.experience.restore(state.augmentRuntimeState.experience);
+        const effectiveRopeConfig = player.augmentLoadout.effectiveRopeConfig(this.ropeConfig);
         player.ropeObject.rope.config = effectiveRopeConfig;
         player.ropeObject.launcher.ropeConfig = effectiveRopeConfig;
         if (player.ropeDisabledRemaining > 0) {
@@ -2145,7 +2182,7 @@ export class GameSimulation {
         }
         const launchOrigin = launchHandPosition(player, effectiveRopeConfig, player.ropeObject.aimWorld);
         const maxAttachDistance = hookReach(effectiveRopeConfig);
-        const aimTolerance = player.foundation.ropeInputModifiers(this.ropeConfig).aimTolerance;
+        const aimTolerance = player.augmentLoadout.ropeInputModifiers(this.ropeConfig).aimTolerance;
         player.ropeObject.attachmentCandidate = findRopeAttachment({
             aimPoint: player.ropeObject.aimWorld,
             origin: launchOrigin,
@@ -2176,8 +2213,7 @@ export class GameSimulation {
             resolvePlayerProjectileHits = true,
             spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
-            advanceInputDrivenObjects = true,
-            resolveInteractChoice = true
+            advanceInputDrivenObjects = true
         } = {}
     ) {
         const expectedTick = this.tick + 1;
@@ -2195,8 +2231,7 @@ export class GameSimulation {
             resolvePlayerProjectileHits,
             spawnPlayerProjectiles,
             recoverPlayerDeaths,
-            advanceInputDrivenObjects,
-            resolveInteractChoice
+            advanceInputDrivenObjects
         });
     }
 
@@ -2210,8 +2245,7 @@ export class GameSimulation {
             resolvePlayerProjectileHits = true,
             spawnPlayerProjectiles = true,
             recoverPlayerDeaths = true,
-            advanceInputDrivenObjects = true,
-            resolveInteractChoice = true
+            advanceInputDrivenObjects = true
         } = {}
     ) {
         this.tick += 1;
@@ -2225,8 +2259,9 @@ export class GameSimulation {
         }
         if (resolveSummitProgress && this.updateSummitProgress()) return;
         if (resolveCheckpointProgress && !this.isSeamlessSectorWorld) this.updateCheckpointProgress();
-        const choosingRewardPlayerIds = new Set([...this.foundationRewards.keys()]);
-        this.updateFoundationRewards(commandsByPlayerId);
+        this.#openPendingExperienceRewards();
+        const choosingRewardPlayerIds = new Set([...this.augmentRewards.keys()]);
+        this.updateAugmentRewards(commandsByPlayerId);
         const gameplayCommands = new Map(commandsByPlayerId);
         for (const playerId of choosingRewardPlayerIds) {
             const player = this.players.find(({ id }) => id === playerId);
@@ -2253,11 +2288,11 @@ export class GameSimulation {
                 this.#applyWorldForce(player, dt);
                 const inputOutcome = this.dispatchOwnerInput(player.id, playerCommand, dt);
                 this.#commitHardpointJammerImpacts(inputOutcome.jammerImpactEvents);
-                this.commitFoundationEvents(inputOutcome.foundationEvents);
+                this.commitAugmentEvents(inputOutcome.ropeAugmentEvents);
                 const ropeImpactOutcome = this.#advanceRopeImpactAttacks(player, { commit: false });
                 const collisionExplosionEvents = player.augmentCombat.collisionExplosionEvents({
                     player,
-                    foundation: player.foundation,
+                    loadout: player.augmentLoadout,
                     baseImpactEvents: ropeImpactOutcome.impacts,
                     enemies: this.#combatImpactTargets(),
                     tick: this.tick
@@ -2269,16 +2304,17 @@ export class GameSimulation {
                     ...inputOutcome.augmentImpactEvents,
                     ...(collisionExplosionEvents ?? [])
                 ]);
-                this.commitAugmentPresentationEvents(inputOutcome.augmentEvents);
+                this.commitAugmentPresentationEvents(inputOutcome.spellEvents);
             }
             const projectile = this.#advanceAutomaticWeapon(player, dt, spawnPlayerProjectiles);
             if (projectile) this.recordProjectileSpawn(projectile);
         }
         if (this.worldProgress) {
-            this.#advanceAuthoredWorldProgress(gameplayCommands, { dt, resolveInteractChoice });
+            this.#advanceAuthoredWorldProgress(gameplayCommands, { dt });
             if (this.isSeamlessSectorWorld) this.#advanceBossStage();
         }
         this.#resolveBossHazardContacts();
+        this.#advanceEnemyStatusEffects(dt);
         if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
         const wallImpactEvents = this.#advanceEnemyImpactKnockbacks(dt, {
             emitWallImpacts: advanceInputDrivenObjects
@@ -2335,6 +2371,11 @@ export class GameSimulation {
             });
         }
         const combatEvents = playerProjectileEvents.hits;
+        for (const event of combatEvents) {
+            if (event.type !== "enemy-defeated") continue;
+            const enemy = this.objects.enemies.find(event.targetId);
+            if (enemy) enemy.defeatedByPlayerId = event.sourcePlayerId;
+        }
         const hitByProjectileId = new Map(combatEvents.map((event) => [event.projectileId, event]));
         for (const resolution of playerProjectileEvents.resolutions) {
             this.recordProjectileResolution(resolution, hitByProjectileId.get(resolution.projectileId));
@@ -2399,7 +2440,7 @@ export class GameSimulation {
                 vertical: 0,
                 interact: false,
                 interactSequence: 0,
-                action: false,
+                spellCommand: { commandSequence: 0, commandKey: null },
                 pointer: player.ropeObject.lastPointer,
                 viewport: player.ropeObject.lastViewport,
                 aimWorld: player.ropeObject.aimWorld
@@ -2413,7 +2454,6 @@ export class GameSimulation {
             horizontal: 0,
             vertical: 0,
             interact: false,
-            action: false,
             pointer: { ...command.pointer, down: false, pressed: false, released: false },
             aimWorld: command.aimWorld ?? player.ropeObject.aimWorld
         };
@@ -2423,24 +2463,32 @@ export class GameSimulation {
         const player = this.#requirePlayer(ownerId);
         if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
         const collisionEnemies = this.#playerCollisionActors();
-        const foundationEvents = [];
+        const spellTargets = [
+            ...this.#combatImpactTargets(),
+            ...this.players.filter((target) => target.id !== player.id && target.lifeState === "active")
+        ];
+        const ropeAugmentEvents = [];
         const fallImpactEvents = [];
         const augmentImpactEvents = [];
-        const augmentEvents = [];
+        const spellEvents = [];
         const jammerImpactEvents = [];
-        const canControl = player.lifeState === "active";
+        const activePlayer = player.lifeState === "active";
+        const canControl = activePlayer && player.statusEffects.canAct();
         const effectiveCommand = canControl
-            ? player.augmentCombat.prepareCommand(player, player.foundation, command)
+            ? player.augmentCombat.prepareCommand(player, player.augmentLoadout, command)
             : {
                   horizontal: 0,
                   vertical: 0,
                   interact: false,
                   interactSequence: command.interactSequence ?? 0,
-                  action: false,
-                  pointer: { x: 0, y: 0, down: false },
+                  spellCommand: {
+                      commandSequence: command.spellCommand?.commandSequence ?? 0,
+                      commandKey: null
+                  },
+                  pointer: activePlayer ? { ...player.ropeObject.lastPointer } : { x: 0, y: 0, down: false },
                   aimWorld: player.ropeObject.aimWorld
               };
-        const effectiveRopeConfig = player.foundation.effectiveRopeConfig(this.ropeConfig);
+        const effectiveRopeConfig = player.augmentLoadout.effectiveRopeConfig(this.ropeConfig);
         player.ropeObject.rope.config = effectiveRopeConfig;
         player.ropeObject.launcher.ropeConfig = effectiveRopeConfig;
         this.#inputDispatcher.dispatch({
@@ -2460,7 +2508,7 @@ export class GameSimulation {
                 collisionBroadPhase: this.collisionBroadPhase,
                 canAttachToSurface: this.#accessScanPredicate(),
                 createAttachmentId: () => ROPE_ATTACHMENT_ID.forOwnerTick(player.id, this.tick),
-                getRopeInputModifiers: () => player.foundation.ropeInputModifiers(effectiveRopeConfig),
+                getRopeInputModifiers: () => player.augmentLoadout.ropeInputModifiers(effectiveRopeConfig),
                 onAttach: ({ surfaceId, position, attachmentId }) => {
                     player.ropeImpactState.beginAttachment();
                     const impact = this.hardpointJammers.activeImpactForSurface(surfaceId, {
@@ -2494,29 +2542,18 @@ export class GameSimulation {
                 },
                 onRelease: () => {
                     player.ropeImpactState.beginReleaseCarry();
-                    if (player.foundation.has("release-propulsion")) {
+                    if (player.augmentLoadout.has("release-propulsion")) {
                         const velocity = player.physics.physicsStepVelocity();
                         player.physics.applyImpulse(
                             velocity.clone().scale(ROPE_AUGMENT_PERCENTAGES.releasePropulsionVelocity)
                         );
-                        foundationEvents.push(
+                        ropeAugmentEvents.push(
                             Object.freeze({
                                 eventType: "augment-release-propulsion",
                                 playerId: player.id,
                                 augmentId: "release-propulsion",
                                 position: vectorState(player.physics.position),
                                 velocity: vectorState(player.physics.physicsStepVelocity())
-                            })
-                        );
-                    }
-                    if (player.augmentCombat.onRopeReleased()) {
-                        foundationEvents.push(
-                            Object.freeze({
-                                eventType: ACTION_EVENT_TYPE.ROPE_LINK_READY,
-                                playerId: player.id,
-                                augmentId: ACTION_MODIFIER_ID.ROPE_LINK,
-                                position: vectorState(player.physics.position),
-                                duration: ACTION_STATE_CONFIG.ROPE_LINK_WINDOW_SECONDS
                             })
                         );
                     }
@@ -2535,10 +2572,11 @@ export class GameSimulation {
         });
         const augmentOutcome = player.augmentCombat.advance({
             player,
-            foundation: player.foundation,
+            loadout: player.augmentLoadout,
             command: effectiveCommand,
             dt,
             enemies: collisionEnemies,
+            targets: spellTargets,
             surfaces: this.activeCollisionSurfaces,
             collisionBroadPhase: this.collisionBroadPhase,
             tick: this.tick
@@ -2546,20 +2584,20 @@ export class GameSimulation {
         augmentImpactEvents.push(
             ...player.augmentCombat.observeAttachedRope({
                 player,
-                foundation: player.foundation,
+                loadout: player.augmentLoadout,
                 enemies: collisionEnemies,
                 dt,
                 tick: this.tick
             }),
             ...augmentOutcome.impactEvents
         );
-        augmentEvents.push(...augmentOutcome.presentationEvents);
+        spellEvents.push(...augmentOutcome.presentationEvents);
         return Object.freeze({
-            foundationEvents: Object.freeze(foundationEvents),
+            ropeAugmentEvents: Object.freeze(ropeAugmentEvents),
             fallImpactEvents: Object.freeze(fallImpactEvents),
             jammerImpactEvents: Object.freeze(jammerImpactEvents),
             augmentImpactEvents: Object.freeze(augmentImpactEvents),
-            augmentEvents: Object.freeze(augmentEvents)
+            spellEvents: Object.freeze(spellEvents)
         });
     }
 
@@ -2703,6 +2741,7 @@ export class GameSimulation {
         const resolution = result.resolution;
         if (resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(event.targetId)) {
             this.metrics.enemyDefeats += 1;
+            if (target) target.defeatedByPlayerId = event.sourcePlayerId;
         }
         this.recordReplicationEvent("resolve", {
             objectId: event.predictionId,
@@ -2731,61 +2770,17 @@ export class GameSimulation {
     }
 
     #advanceEnemyImpactKnockbacks(dt, { emitWallImpacts = false } = {}) {
-        const events = [];
-        const wallImpactDamage = augmentImpactFormula(ACTION_SIGNATURE_ID.WALL_IMPACT).damage;
         for (const enemy of this.activeSimulationEnemies) {
             if (!this.debugTrainingDummy.canSimulate(enemy)) continue;
-            const state = enemy.knockbackSnapshot();
-            if (!state) continue;
-            const previousPosition = enemy.position.clone();
-            const movement = enemy.advanceImpactKnockback(
+            if (!enemy.knockbackSnapshot()) continue;
+            enemy.advanceImpactKnockback(
                 dt,
                 this.activeCollisionSurfaces,
                 this.activeSimulationEnemies,
                 this.collisionBroadPhase
             );
-            const collided = movement.collided;
-            if (
-                !emitWallImpacts ||
-                !collided ||
-                !state.wallImpactEligible ||
-                state.wallImpactTriggered ||
-                !state.sourcePlayerId
-            ) {
-                continue;
-            }
-            if (enemy.knockbackState) enemy.knockbackState.wallImpactTriggered = true;
-            events.push(
-                Object.freeze({
-                    eventId: ACTION_KEY.impact(
-                        state.sourcePlayerId,
-                        ACTION_SIGNATURE_ID.WALL_IMPACT,
-                        this.tick,
-                        enemy.id
-                    ),
-                    predictionId: ACTION_KEY.impact(
-                        state.sourcePlayerId,
-                        ACTION_SIGNATURE_ID.WALL_IMPACT,
-                        this.tick,
-                        enemy.id
-                    ),
-                    sourcePlayerId: state.sourcePlayerId,
-                    targetId: enemy.id,
-                    clientTick: this.tick,
-                    effectId: ACTION_SIGNATURE_ID.WALL_IMPACT,
-                    sourceKind: ACTION_SOURCE_KIND.KNOCKBACK_WALL_CONTACT,
-                    sourcePosition: vectorState(previousPosition),
-                    contactPosition: vectorState(enemy.position),
-                    position: vectorState(enemy.position),
-                    damage: wallImpactDamage,
-                    predictedResolution:
-                        enemy.health <= wallImpactDamage
-                            ? ACTION_PREDICTED_RESOLUTION.ENEMY_DEFEATED
-                            : ACTION_PREDICTED_RESOLUTION.ENEMY_HIT
-                })
-            );
         }
-        return Object.freeze(events);
+        return Object.freeze([]);
     }
 
     #advanceEnemyBehaviorSimulation(dt) {
@@ -2908,19 +2903,82 @@ export class GameSimulation {
         });
     }
 
-    resolveAugmentImpactClaim(authenticatedPlayerId, claim, { positionTolerance = 40, replicate = true } = {}) {
-        const player = this.#findPlayer(authenticatedPlayerId);
-        if (!player || player.lifeState !== "active") {
+    resolveAugmentImpactClaim(
+        authenticatedPlayerId,
+        claim,
+        { positionTolerance = 40, replicate = true, allowSourcePlayerTargetClaim = false } = {}
+    ) {
+        const sourcePlayer = this.#findPlayer(claim.sourcePlayerId);
+        if (!sourcePlayer || sourcePlayer.lifeState !== "active") {
             return Object.freeze({ accepted: false, reason: "invalid" });
         }
-        if (claim.sourcePlayerId !== authenticatedPlayerId || !claim.eventId.startsWith(`${authenticatedPlayerId}:`)) {
+        if (!claim.eventId.startsWith(`${claim.sourcePlayerId}:`)) {
             return Object.freeze({ accepted: false, reason: "invalid" });
+        }
+        const playerTarget = this.#findPlayer(claim.targetId);
+        if (playerTarget) {
+            const victimClaim = authenticatedPlayerId === playerTarget.id;
+            const authoritativeSourceClaim =
+                allowSourcePlayerTargetClaim && authenticatedPlayerId === claim.sourcePlayerId;
+            if (
+                playerTarget.id === claim.sourcePlayerId ||
+                playerTarget.lifeState !== "active" ||
+                (!victimClaim && !authoritativeSourceClaim)
+            ) {
+                return Object.freeze({ accepted: false, reason: "invalid" });
+            }
+            if (!validateAugmentImpactFormula(sourcePlayer, claim, playerTarget, { positionTolerance }).valid) {
+                return Object.freeze({ accepted: false, reason: "invalid" });
+            }
+            const blockedByInvulnerability = playerTarget.hitInvulnerabilityRemaining > 0;
+            const protection = blockedByInvulnerability
+                ? { appliedDamage: 0 }
+                : playerTarget.augmentCombat.absorbPlayerDamage({
+                      amount: claim.damage,
+                      type: "combat-hp",
+                      sourceKind: claim.effectId,
+                      attackerId: claim.sourcePlayerId
+                  });
+            playerTarget.health = Math.max(0, playerTarget.health - protection.appliedDamage);
+            const statusEffectId = SPELL_STATUS_EFFECT[claim.effectId] ?? null;
+            if (!blockedByInvulnerability && statusEffectId) {
+                playerTarget.statusEffects.apply(statusEffectId, { sourceId: claim.sourcePlayerId });
+            }
+            const knockbackApplied =
+                !blockedByInvulnerability && applyPlayerSpellKnockback(playerTarget, claim.knockback);
+            const resolution = Object.freeze({
+                accepted: true,
+                resolution: blockedByInvulnerability ? "duplicate" : "applied",
+                damage: protection.appliedDamage,
+                knockbackApplied
+            });
+            if (replicate) {
+                this.recordReplicationEvent("augment-impact-resolved", {
+                    predictionId: claim.predictionId,
+                    effectId: claim.effectId,
+                    effectSourceKind: claim.sourceKind,
+                    sourcePlayerId: claim.sourcePlayerId,
+                    targetId: playerTarget.id,
+                    targetKind: IMPACT_TARGET_KIND.PLAYER,
+                    sourcePosition: claim.sourcePosition,
+                    contactPosition: claim.contactPosition,
+                    damage: protection.appliedDamage,
+                    statusEffectId
+                });
+            }
+            if (playerTarget.health <= 0) {
+                this.respawnPlayerAtCheckpoint(playerTarget, claim.effectId, claim.sourcePlayerId);
+            }
+            return resolution;
         }
         const registeredTarget = this.impactTargetRegistry.find(claim.targetId);
         if (registeredTarget?.kind === IMPACT_TARGET_KIND.BOSS) {
             const targetSnapshot = registeredTarget.snapshot();
             if (!targetSnapshot.active) return Object.freeze({ accepted: false, reason: "target-missing" });
-            if (!validateAugmentImpactFormula(player, claim, targetSnapshot, { positionTolerance }).valid) {
+            if (claim.sourcePlayerId !== authenticatedPlayerId) {
+                return Object.freeze({ accepted: false, reason: "invalid" });
+            }
+            if (!validateAugmentImpactFormula(sourcePlayer, claim, targetSnapshot, { positionTolerance }).valid) {
                 return Object.freeze({ accepted: false, reason: "invalid" });
             }
             const result = this.impactTargetRegistry.resolve(claim.targetId, {
@@ -2930,6 +2988,10 @@ export class GameSimulation {
                 position: claim.contactPosition,
                 causalId: claim.eventId ?? claim.predictionId
             });
+            const statusEffectId = SPELL_STATUS_EFFECT[claim.effectId] ?? null;
+            if (result.accepted && statusEffectId) {
+                this.bossRuntime?.statusEffects?.apply(statusEffectId, { sourceId: authenticatedPlayerId });
+            }
             if (replicate && result.accepted) {
                 this.recordReplicationEvent("augment-impact-resolved", {
                     predictionId: claim.predictionId,
@@ -2959,7 +3021,10 @@ export class GameSimulation {
         const target = this.objects.enemies.findAlive(claim.targetId);
         const isTombstoned = this.enemyImpactTombstones.has(claim.targetId);
         if (!target && !isTombstoned) return Object.freeze({ accepted: false, reason: "target-missing" });
-        if (!validateAugmentImpactFormula(player, claim, target, { positionTolerance }).valid) {
+        if (claim.sourcePlayerId !== authenticatedPlayerId) {
+            return Object.freeze({ accepted: false, reason: "invalid" });
+        }
+        if (!validateAugmentImpactFormula(sourcePlayer, claim, target, { positionTolerance }).valid) {
             return Object.freeze({ accepted: false, reason: "invalid" });
         }
         const result = resolvePlayerEnemyImpact({
@@ -2979,13 +3044,15 @@ export class GameSimulation {
         if (result.knockbackApplied && target?.knockbackState) {
             target.knockbackState.sourcePlayerId = authenticatedPlayerId;
             target.knockbackState.sourceEffectId = claim.effectId;
-            target.knockbackState.wallImpactEligible =
-                claim.effectId === BASE_ACTION_ID.PUSH_AWAY && player.foundation.has(ACTION_SIGNATURE_ID.WALL_IMPACT);
+            target.knockbackState.wallImpactEligible = false;
             target.knockbackState.wallImpactTriggered = false;
         }
         if (!result.accepted || !result.emitEffects) return result;
+        const statusEffectId = SPELL_STATUS_EFFECT[claim.effectId] ?? null;
+        if (statusEffectId && target) target.statusEffects.apply(statusEffectId, { sourceId: authenticatedPlayerId });
         if (result.resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(claim.targetId)) {
             this.metrics.enemyDefeats += 1;
+            if (target) target.defeatedByPlayerId = authenticatedPlayerId;
         }
         if (replicate)
             this.recordReplicationEvent("resolve", {
@@ -3035,7 +3102,7 @@ export class GameSimulation {
                               }
                             : undefined
                     },
-                    { positionTolerance: 0, replicate }
+                    { positionTolerance: 0, replicate, allowSourcePlayerTargetClaim: true }
                 )
             );
         }
@@ -3078,7 +3145,7 @@ export class GameSimulation {
         return events.length;
     }
 
-    commitFoundationEvents(events, { replicate = true } = {}) {
+    commitAugmentEvents(events, { replicate = true } = {}) {
         for (const event of events) {
             const { eventType, ...payload } = event;
             if (replicate) this.recordReplicationEvent(eventType, payload);
@@ -3091,18 +3158,30 @@ export class GameSimulation {
         player.ropeDisabledRemaining = Math.max(0, player.ropeDisabledRemaining - dt);
         player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
         player.ropeImpactState.advance(dt);
-        player.foundation.advance(dt);
-        const electrified = player.statusEffects.advance(dt).electrified;
-        if (electrified.damage <= 0 || player.lifeState !== "active") return;
-        const protection = player.augmentCombat.absorbPlayerDamage({
-            amount: electrified.damage,
-            type: "combat-hp",
-            sourceKind: ELECTRIFIED_STATUS_ID,
-            attackerId: null
-        });
-        player.health = Math.max(0, player.health - protection.appliedDamage);
-        this.metrics.recordPlayerImpact(PLAYER_IMPACT_TYPE.PLAYER_HIT, protection.appliedDamage);
-        if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, ELECTRIFIED_STATUS_ID, electrified.sourceId);
+        player.augmentLoadout.advance(dt);
+        for (const outcome of player.statusEffects.advance(dt)) {
+            if (outcome.type !== "damage" || outcome.damage <= 0 || player.lifeState !== "active") continue;
+            const protection = player.augmentCombat.absorbPlayerDamage({
+                amount: outcome.damage,
+                type: "combat-hp",
+                sourceKind: outcome.effectId,
+                attackerId: outcome.sourceId
+            });
+            player.health = Math.max(0, player.health - protection.appliedDamage);
+            this.metrics.recordPlayerImpact(PLAYER_IMPACT_TYPE.PLAYER_HIT, protection.appliedDamage);
+            if (player.health <= 0) this.respawnPlayerAtCheckpoint(player, outcome.effectId, outcome.sourceId);
+        }
+    }
+
+    #advanceEnemyStatusEffects(dt) {
+        for (const enemy of this.enemies) {
+            if (enemy.health <= 0) continue;
+            for (const outcome of enemy.statusEffects.advance(dt)) {
+                if (outcome.type !== "damage" || outcome.damage <= 0) continue;
+                enemy.health = Math.max(0, enemy.health - outcome.damage);
+                if (enemy.health <= 0) enemy.defeatedByPlayerId = outcome.sourceId;
+            }
+        }
     }
 
     #applyWorldForce(player, dt) {
@@ -3151,7 +3230,7 @@ export class GameSimulation {
         });
     }
 
-    #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0, resolveInteractChoice = true } = {}) {
+    #advanceAuthoredWorldProgress(commandsByPlayerId, { replicate = true, dt = 0 } = {}) {
         const events = this.isSeamlessSectorWorld
             ? advanceSectorProgress({
                   world: this.world,
@@ -3161,26 +3240,18 @@ export class GameSimulation {
                   respawnAnchorIdByPlayerId: new Map(
                       this.players.map(({ id, respawnAnchorId }) => [id, respawnAnchorId])
                   ),
-                  dt,
-                  resolveInteractChoice
+                  dt
               })
             : advanceWorldProgress({
                   world: this.world,
                   progress: this.worldProgress,
                   players: this.players,
                   commandsByPlayerId,
-                  dt,
-                  resolveInteractChoice
+                  dt
               });
         let stageSaveEvent = null;
         for (const event of events) {
             const { type, ...payload } = event;
-            if (type === "objective-choice-requested") {
-                if (event.playerId === this.debugAugmentPlayerId && this.#consumeDebugAugmentSource(event)) continue;
-                if (!this.beginFoundationReward(event.playerId, event.sourceObjectId, event.objectiveId)) continue;
-                this.eventFlash = { type: "foundation-choice-opened", age: 0, ...payload };
-                continue;
-            }
             if (replicate) this.recordReplicationEvent(type, payload);
             this.eventFlash = { type, age: 0, ...payload };
             if (type === "gate-unlocked") {
@@ -3220,8 +3291,6 @@ export class GameSimulation {
                 stageSaveEvent = event;
             }
         }
-        this.#advanceCalibrationVerification();
-        this.#completeEligibleAugmentObjectivesForCurrentRoster();
         if (this.isSeamlessSectorWorld) {
             this.#transferPlayersThroughStagePortals({ replicate });
             if (stageSaveEvent) {
@@ -3247,54 +3316,20 @@ export class GameSimulation {
         if (this.worldProgress.snapshot().completed) this.beginCompletion(events.at(-1)?.playerId);
     }
 
-    #consumeDebugAugmentSource({ playerId, sourceObjectId }) {
-        const player = this.#findPlayer(playerId);
-        const source = this.objects.worldObjects.find(sourceObjectId);
-        if (!player || source?.kind !== "augment-node") return false;
-        if (!player.foundation.consumedSourceIds.includes(source.id)) {
-            player.foundation.restore(player.foundation.selectedId, {
-                ...player.foundation.snapshot(),
-                consumedSourceIds: [...player.foundation.consumedSourceIds, source.id]
-            });
+    #openPendingExperienceRewards() {
+        for (const player of this.players) {
+            if (player.experience.pendingRewardCount <= 0 || this.augmentRewards.has(player.id)) continue;
+            const rewardLevel = player.experience.resolvedRewardLevel + 1;
+            this.augmentRewards.set(
+                player.id,
+                createExperienceAugmentRewardSelection({
+                    runSeed: this.world.seed,
+                    stablePlayerId: player.id,
+                    rewardLevel,
+                    selectedAugmentIds: player.augmentLoadout.selectedAugmentIds
+                })
+            );
         }
-        this.eventFlash = {
-            type: "debug-augment-source-consumed",
-            age: 0,
-            playerId,
-            sourceId: source.id,
-            position: vectorState(player.physics.position)
-        };
-        return true;
-    }
-
-    beginFoundationReward(playerId, sourceId, objectiveId = null) {
-        const player = this.#findPlayer(playerId);
-        const source = this.objects.worldObjects.find(sourceId);
-        if (
-            !player ||
-            player.foundation.selectedAugmentIds.length >= 6 ||
-            player.foundation.consumedSourceIds.includes(sourceId) ||
-            this.foundationRewards.has(playerId) ||
-            source?.kind !== "augment-node" ||
-            player.physics.position.distanceTo(source.position) > source.interactionRadius + 40
-        ) {
-            return false;
-        }
-        this.foundationRewards.set(
-            playerId,
-            createDeterministicFoundationRewardSelection({
-                sourceId,
-                objectiveId: objectiveId ?? source.objectiveId,
-                runSeed: this.world.seed,
-                stablePlayerId: playerId,
-                selectionIndex: player.foundation.selectedAugmentIds.length,
-                selectedAugmentIds: player.foundation.selectedAugmentIds
-            })
-        );
-        player.ropeObject.rope.detach();
-        player.ropeObject.swingDrag = null;
-        player.ropeImpactState.reset();
-        return true;
     }
 
     #transferPlayersThroughOpenPortals({ replicate }) {
@@ -3474,203 +3509,85 @@ export class GameSimulation {
         });
     }
 
-    updateFoundationRewards(commandsByPlayerId) {
-        for (const [playerId, reward] of [...this.foundationRewards]) {
+    updateAugmentRewards(commandsByPlayerId) {
+        for (const [playerId, reward] of [...this.augmentRewards]) {
             const player = this.#findPlayer(playerId);
             if (!player) {
-                this.foundationRewards.delete(playerId);
+                this.augmentRewards.delete(playerId);
                 continue;
             }
-            const outcome = advanceFoundationRewardSelection(reward, this.commandForPlayer(player, commandsByPlayerId));
-            this.foundationRewards.set(playerId, outcome.selection);
-            if (!outcome.confirmedFoundationId) continue;
-            this.resolveFoundationSelection(playerId, {
+            const outcome = advanceAugmentRewardSelection(reward, this.commandForPlayer(player, commandsByPlayerId));
+            this.augmentRewards.set(playerId, outcome.selection);
+            if (!outcome.confirmedAugmentId) continue;
+            this.resolveAugmentSelection(playerId, {
                 sourceId: reward.sourceId,
-                foundationId: outcome.confirmedFoundationId
+                augmentId: outcome.confirmedAugmentId
             });
         }
     }
 
-    resolveFoundationSelection(
+    resolveAugmentSelection(
         playerId,
-        { sourceId, foundationId },
+        { sourceId, augmentId },
         { requireOpenReward = true, positionTolerance = 40, replicate = true } = {}
     ) {
         const player = this.#findPlayer(playerId);
         if (!player || player.lifeState !== "active") {
             return Object.freeze({ accepted: false, reason: "player-ineligible" });
         }
-        const source = this.objects.worldObjects.find(sourceId);
-        if (source?.kind !== "augment-node") {
+        const rewardLevel = player?.experience.resolvedRewardLevel + 1;
+        const experienceSourceId = player ? EXPERIENCE_REWARD_KEY.source(player.id, rewardLevel) : null;
+        if (sourceId !== experienceSourceId) {
             return Object.freeze({ accepted: false, reason: "source-unavailable" });
         }
-        const foundation = foundationAugmentById(foundationId);
-        if (!foundation) {
-            return Object.freeze({ accepted: false, reason: "foundation-unavailable" });
+        const augment = augmentById(augmentId);
+        if (!augment) {
+            return Object.freeze({ accepted: false, reason: "augment-unavailable" });
         }
-        if (player.foundation.selectedAugmentIds.includes(foundation.id)) {
-            return player.foundation.consumedSourceIds.includes(sourceId)
-                ? Object.freeze({ accepted: true, sourceId, foundationId: foundation.id, changed: false })
-                : Object.freeze({ accepted: false, reason: "selection-conflict" });
+        if (player.augmentLoadout.selectedAugmentIds.includes(augment.id)) {
+            return Object.freeze({ accepted: false, reason: "selection-conflict" });
         }
-        const reward = this.foundationRewards.get(playerId);
+        const reward = this.augmentRewards.get(playerId);
         if (requireOpenReward && reward?.sourceId !== sourceId) {
             return Object.freeze({ accepted: false, reason: "reward-unavailable" });
         }
-        if (
-            !reward &&
-            player.physics.position.distanceTo(source.position) > source.interactionRadius + positionTolerance
-        ) {
-            return Object.freeze({ accepted: false, reason: "source-out-of-range" });
-        }
-        if (player.foundation.selectedAugmentIds.length >= 6) {
+        if (player.augmentLoadout.selectedAugmentIds.length >= MAX_AUGMENT_SELECTIONS) {
             return Object.freeze({ accepted: false, reason: "selection-exhausted" });
         }
-        const expectedReward =
-            reward ??
-            createDeterministicFoundationRewardSelection({
-                sourceId,
-                objectiveId: source.objectiveId,
-                runSeed: this.world.seed,
-                stablePlayerId: playerId,
-                selectionIndex: player.foundation.selectedAugmentIds.length,
-                selectedAugmentIds: player.foundation.selectedAugmentIds
-            });
-        if (!expectedReward.choices.some(({ id }) => id === foundation.id)) {
-            return Object.freeze({ accepted: false, reason: "foundation-unavailable" });
+        const expectedReward = reward;
+        if (!expectedReward) return Object.freeze({ accepted: false, reason: "reward-unavailable" });
+        if (!expectedReward.choices.some(({ id }) => id === augment.id)) {
+            return Object.freeze({ accepted: false, reason: "augment-unavailable" });
         }
-        if (!player.foundation.select(foundation.id, { sourceId })) {
+        if (!player.augmentLoadout.select(augment.id)) {
             return Object.freeze({ accepted: false, reason: "selection-conflict" });
         }
-        player.augmentCombat.syncLoadout(player.foundation, player.maxHealth);
-        this.foundationRewards.delete(playerId);
-        if (player.foundation.selectedAugmentIds.length === 1) this.metrics.recordFirstFoundation();
+        player.augmentCombat.syncLoadout(player.augmentLoadout, player.maxHealth);
+        if (!player.experience.resolveNextReward()) {
+            return Object.freeze({ accepted: false, reason: "selection-conflict" });
+        }
+        this.augmentRewards.delete(playerId);
+        if (player.augmentLoadout.selectedAugmentIds.length === 1) this.metrics.recordFirstAugment();
 
-        const objectiveId = reward?.objectiveId ?? source.objectiveId;
         const selectionPayload = Object.freeze({
             playerId,
             sourceId,
-            objectiveId,
-            foundationId: foundation.id,
-            foundation,
-            selectedAugmentIds: Object.freeze([...player.foundation.selectedAugmentIds]),
+            augmentId: augment.id,
+            augment,
+            selectedAugmentIds: Object.freeze([...player.augmentLoadout.selectedAugmentIds]),
             position: vectorState(player.physics.position)
         });
-        if (replicate) this.recordReplicationEvent("foundation-selected", selectionPayload);
-        this.eventFlash = { type: "foundation-selected", age: 0, ...selectionPayload };
+        if (replicate) this.recordReplicationEvent("augment-selected", selectionPayload);
+        this.eventFlash = { type: "augment-selected", age: 0, ...selectionPayload };
 
-        this.#completeAugmentObjectiveIfPartyReady({ source, objectiveId, player, replicate });
-        return Object.freeze({ accepted: true, sourceId, foundationId: foundation.id, changed: true });
+        return Object.freeze({ accepted: true, sourceId, augmentId: augment.id, changed: true });
     }
 
-    #allPlayersConsumedAugmentSource(sourceId) {
-        return (
-            this.players.length > 0 &&
-            this.players.every(({ foundation }) => foundation.consumedSourceIds.includes(sourceId))
-        );
-    }
-
-    #completeAugmentObjectiveIfPartyReady({ source, objectiveId, player, replicate = true }) {
-        if (
-            !this.worldProgress ||
-            this.worldProgress.isObjectiveComplete(objectiveId) ||
-            !this.#allPlayersConsumedAugmentSource(source.id)
-        ) {
-            return false;
-        }
-        if (this.isSeamlessSectorWorld) {
-            const beforeRoutes = new Set(this.worldProgress.snapshot().unlockedRouteIds);
-            const completion = this.worldProgress.completeObjective(objectiveId);
-            if (!completion.changed) return false;
-            const objectivePayload = {
-                objectiveId,
-                landmarkId: source.landmarkId ?? null,
-                playerId: player.id,
-                position: vectorState(player.physics.position)
-            };
-            if (replicate) this.recordReplicationEvent("objective-completed", objectivePayload);
-            for (const routeId of this.worldProgress.snapshot().unlockedRouteIds) {
-                if (beforeRoutes.has(routeId)) continue;
-                if (replicate) {
-                    this.recordReplicationEvent("route-unlocked", {
-                        routeId,
-                        landmarkId: objectivePayload.landmarkId,
-                        playerId: player.id,
-                        position: objectivePayload.position
-                    });
-                }
-            }
-            this.#setActiveCollisionSurfaces(
-                this.#bossFilteredCollisionSurfaces(collisionSurfacesForSectorProgress(this.world, this.worldProgress))
-            );
-            return true;
-        }
-
-        const areaId = source.areaId ?? this.worldProgress.currentAreaId;
-        let completed = false;
-        for (const event of completeWorldProgressObjective({
-            progress: this.worldProgress,
-            objectiveId,
-            areaId,
-            player
-        })) {
-            completed = true;
-            const { type, ...payload } = event;
-            if (replicate) this.recordReplicationEvent(type, payload);
-            if (type === "gate-unlocked") {
-                this.#setActiveCollisionSurfaces(collisionSurfacesForProgress(this.world, this.worldProgress));
-            }
-        }
-        return completed;
-    }
-
-    // Records, per player, that their selected Augment's canonical effect actually fired while in
-    // range of a "calibration-frame" source - never from card ownership alone. Rope-family Augments
-    // (no actionId in FoundationAugmentCatalog) verify on a live rope attach; action-family Augments
-    // verify on a canonical action activation (a queued cooldown, or an action currently resolving -
-    // e.g. slow-fall, which never enqueues a cooldown). This intentionally does not reproduce each
-    // CALIBRATION-PROFILES.json profile's exact distance/timing window (all marked NOT_IMPLEMENTED in
-    // that package) - see docs/bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md for the flagged gap.
-    #advanceCalibrationVerification() {
-        const sources = this.objects.worldObjects.ofKind("calibration-frame");
-        if (sources.length === 0) return;
-        for (const player of this.players) {
-            if (player.lifeState !== "active" || player.foundation.selectedAugmentIds.length === 0) continue;
-            const augmentId = player.foundation.selectedAugmentIds.at(-1);
-            const definition = foundationAugmentById(augmentId);
-            if (!definition) continue;
-            const used = definition.actionId
-                ? player.augmentCombat.actionState?.rechargeQueue.length > 0 ||
-                  player.augmentCombat.actionState?.activeAction != null
-                : player.ropeObject.rope.isAttached;
-            if (!used) continue;
-            for (const source of sources) {
-                if (player.calibrationVerifiedSourceIds.includes(source.id)) continue;
-                if (player.physics.position.distanceTo(source.position) > source.interactionRadius) continue;
-                player.calibrationVerifiedSourceIds = [...player.calibrationVerifiedSourceIds, source.id];
-            }
-        }
-    }
-
-    #completeEligibleAugmentObjectivesForCurrentRoster() {
-        if (!this.worldProgress || this.players.length === 0) return;
-        for (const source of this.objects.worldObjects.ofKind("augment-node")) {
-            const objectiveId = source.objectiveId;
-            if (!objectiveId || this.worldProgress.isObjectiveComplete(objectiveId)) continue;
-            const player = this.players.find(({ foundation }) => foundation.consumedSourceIds.includes(source.id));
-            if (!player) continue;
-            this.#completeAugmentObjectiveIfPartyReady({ source, objectiveId, player });
-        }
-    }
-
-    clearFoundationSelection(playerId, sourceId = null, foundationId = null) {
+    clearAugmentSelection(playerId, sourceId = null, augmentId = null) {
         const player = this.#requirePlayer(playerId);
-        if (foundationId) player.foundation.deselect(foundationId, { sourceId });
-        player.augmentCombat.syncLoadout(player.foundation, player.maxHealth);
-        if (sourceId) {
-            const source = this.objects.worldObjects.find(sourceId);
-            if (source) this.beginFoundationReward(playerId, sourceId, source.objectiveId);
-        }
+        if (augmentId) player.augmentLoadout.deselect(augmentId);
+        player.augmentCombat.syncLoadout(player.augmentLoadout, player.maxHealth);
+        player.experience.rejectLatestReward();
         return this.playerState(playerId);
     }
 
@@ -3835,6 +3752,7 @@ export class GameSimulation {
         );
         if (resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(claim.targetId)) {
             this.metrics.enemyDefeats += 1;
+            target.defeatedByPlayerId = authenticatedPlayerId;
         }
         this.#removeDefeatedEnemies();
         return Object.freeze({ accepted: true, resolution, damage });
@@ -3846,6 +3764,18 @@ export class GameSimulation {
         for (const enemy of this.enemies) {
             if (this.debugTrainingDummy.matches(enemy)) continue;
             if (enemy.health > 0 || this.enemyImpactTombstones.has(enemy.id)) continue;
+            const creditedPlayer = this.#findPlayer(enemy.defeatedByPlayerId);
+            if (creditedPlayer) {
+                const experience = creditedPlayer.experience.add(enemy.experienceReward);
+                this.recordReplicationEvent("experience-gained", {
+                    playerId: creditedPlayer.id,
+                    enemyId: enemy.id,
+                    amount: enemy.experienceReward,
+                    totalExperience: creditedPlayer.experience.totalExperience,
+                    level: experience.level,
+                    pendingRewardCount: experience.pendingRewardCount
+                });
+            }
             recordEnemyImpactTombstone(this.enemyImpactTombstones, {
                 targetId: enemy.id,
                 defeatedAtTick: this.tick
@@ -4147,7 +4077,7 @@ export class GameSimulation {
             player.ropeObject.attachBufferRemaining = 0;
             player.ropeObject.launcher.clear();
             player.ropeDisabledRemaining = this.ropeDisabledSeconds;
-            player.statusEffects.applyElectrified({ sourceId: claim.sourceId });
+            player.statusEffects.apply(ELECTRIFIED_STATUS_ID, { sourceId: claim.sourceId });
             return;
         }
         if (claim.impactType === "rope-cut") {
@@ -4356,8 +4286,7 @@ export class GameSimulation {
         player.hitInvulnerabilityRemaining = 0;
         player.ropeDisabledRemaining = 0;
         player.lifeState = "active";
-        player.foundation.resetRuntime();
-        player.augmentCombat.resetForRespawn(player.foundation, player.maxHealth);
+        player.augmentCombat.resetForRespawn(player.augmentLoadout, player.maxHealth);
         player.statusEffects.reset();
     }
 
@@ -4433,7 +4362,7 @@ export class GameSimulation {
             enemies: this.enemyStates(),
             projectiles: this.objects.playerProjectiles.renderSnapshots(),
             enemyProjectiles: this.objects.enemyProjectiles.renderSnapshots(),
-            augmentProjectiles: playerState.augmentRuntimeState.combat.actionProjectiles,
+            augmentProjectiles: playerState.augmentRuntimeState.combat.spellProjectiles,
             playerHealth: playerState.health,
             playerMaxHealth: playerState.maxHealth,
             ropeDisabledRemaining: playerState.ropeDisabledRemaining,
@@ -4441,14 +4370,13 @@ export class GameSimulation {
             runState: this.runState,
             activeCheckpoint: this.activeCheckpoint,
             activeRespawnAnchor: this.activeRespawnAnchor,
-            foundationAugment: playerState.foundationAugment,
             selectedAugmentIds: playerState.selectedAugmentIds,
             ropeConfig: this.ropeConfig,
             augmentRuntimeState: playerState.augmentRuntimeState,
-            actionState: playerState.actionState,
+            experience: playerState.experience,
             ropeShot: playerState.launcher,
-            foundationReward: this.foundationRewards.get(player.id) ?? null,
-            foundationRewards: Object.fromEntries(this.foundationRewards),
+            augmentReward: this.augmentRewards.get(player.id) ?? null,
+            augmentRewards: Object.fromEntries(this.augmentRewards),
             metrics: this.metrics.snapshot(),
             worldProgress: this.worldProgress?.snapshot() ?? null,
             bossStage,
@@ -4459,7 +4387,7 @@ export class GameSimulation {
                 : Object.freeze([]),
             hardpointJammerStates: this.hardpointJammers.snapshot(),
             resets: this.resets,
-            maxAttachDistance: hookReach(player.foundation.effectiveRopeConfig(this.ropeConfig))
+            maxAttachDistance: hookReach(player.augmentLoadout.effectiveRopeConfig(this.ropeConfig))
         };
     }
 }

@@ -38,7 +38,9 @@ export const withEnemyRenderSnapshot = createRenderSnapshotCapabilityMixin({
             radius: this.radius,
             health: this.health,
             maxHealth: this.maxHealth,
-            fireCooldown: this.fireCooldown
+            experienceReward: this.experienceReward,
+            fireCooldown: this.fireCooldown,
+            statusEffects: this.statusEffects.snapshot()
         };
     }
 });

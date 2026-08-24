@@ -4,6 +4,8 @@ import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
 import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 import { GameSimulation } from "../simulation/GameSimulation.js";
 import { ROPE_AUTHORITY_EVENT_TYPE } from "../network/RopeAuthorityEvent.js";
+import { SPELL_SOURCE_KIND } from "../spells/SpellRuntimeDefinition.js";
+import { IncomingSpellImpactDetector } from "../spells/IncomingSpellImpactDetector.js";
 
 const APPLIED_AUTHORITY_EVENT_HISTORY_LIMIT = 64;
 
@@ -101,7 +103,8 @@ export class OwnerPredictionRuntime {
         this.pendingImpacts = new Map();
         this.nextImpactPredictionOrder = 0;
         this.pendingCheckpoint = null;
-        this.pendingFoundationSelection = null;
+        this.pendingAugmentSelection = null;
+        this.incomingSpellImpacts = new IncomingSpellImpactDetector();
         this.appliedPortalEventIds = new Set();
         this.appliedPortalEventIdOrder = [];
         this.appliedRopeReleaseEventIds = new Set();
@@ -191,7 +194,7 @@ export class OwnerPredictionRuntime {
                   respawnAnchorId: predictedRespawnIsAhead
                       ? localProgress.respawnAnchorId
                       : (sharedOwner?.respawnAnchorId ?? null),
-                  foundationReward: snapshot.state.foundationRewards?.[this.ownerId] ?? null
+                  augmentReward: snapshot.state.augmentRewards?.[this.ownerId] ?? null
               };
         this.simulation.preparePrediction(
             this.hydrateEnemyNetworkStates(snapshot.state.enemies ?? []),
@@ -220,8 +223,8 @@ export class OwnerPredictionRuntime {
         }
         const sharedOwner = snapshot.state.players.find(({ id }) => id === this.ownerId);
         if (!sharedOwner) throw new Error(`missing predicted ownerId: ${this.ownerId}`);
-        if (sharedOwner.selectedAugmentIds?.includes(this.pendingFoundationSelection?.foundationId)) {
-            this.pendingFoundationSelection = null;
+        if (sharedOwner.selectedAugmentIds?.includes(this.pendingAugmentSelection?.augmentId)) {
+            this.pendingAugmentSelection = null;
         }
         const ownerMotionTick = sharedOwner.ownerMotionTick;
         if (
@@ -280,7 +283,7 @@ export class OwnerPredictionRuntime {
         }
         this.simulation.applySharedOwnerProgress(this.ownerId, sharedOwner, targetTick, {
             preservePendingImpact: this.pendingImpacts.size > 0,
-            preservePendingFoundation: this.pendingFoundationSelection !== null
+            preservePendingAugment: this.pendingAugmentSelection !== null
         });
         this.simulation.rebaseElapsedSeconds(
             this.simulation.getTick(),
@@ -438,7 +441,39 @@ export class OwnerPredictionRuntime {
 
     resolveCollisions(otherPlayers) {
         if (!this.initialized) return false;
-        return this.simulation.resolveOwnerCollisions(this.ownerId, otherPlayers);
+        const playerCollision = this.simulation.resolveOwnerCollisions(this.ownerId, otherPlayers);
+        const target = Object.freeze({ ...this.state(), id: this.ownerId });
+        const detectedSpellImpacts = this.incomingSpellImpacts.observe(target, otherPlayers, {
+            targets: [target, ...this.simulation.enemyStates()],
+            surfaces: this.simulation.activeCollisionSurfaces
+        });
+        const incomingSpellImpacts = [];
+        for (const event of detectedSpellImpacts) {
+            if (!this.simulation.applyPredictedIncomingSpellImpact(this.ownerId, event)) continue;
+            this.recordPredictedIncomingSpellImpact(event);
+            incomingSpellImpacts.push(event);
+        }
+        return Object.freeze({ playerCollision, incomingSpellImpacts: Object.freeze(incomingSpellImpacts) });
+    }
+
+    recordPredictedIncomingSpellImpact(event) {
+        this.predictedEvents.push(
+            Object.freeze({
+                ...event,
+                eventType: "predicted-resolve",
+                resolution: event.predictedResolution,
+                parameters: Object.freeze({
+                    sourceKind: "incoming-spell-impact",
+                    eventId: event.eventId,
+                    predictionId: event.predictionId,
+                    effectId: event.effectId,
+                    effectSourceKind: event.sourceKind,
+                    sourcePlayerId: event.sourcePlayerId,
+                    targetId: event.targetId,
+                    damage: event.damage
+                })
+            })
+        );
     }
 
     checkpointClaimCandidate() {
@@ -488,53 +523,52 @@ export class OwnerPredictionRuntime {
         if (sharedOwner) {
             this.simulation.applySharedOwnerProgress(this.ownerId, sharedOwner, targetTick, {
                 preservePendingImpact: this.pendingImpacts.size > 0,
-                preservePendingFoundation: this.pendingFoundationSelection !== null
+                preservePendingAugment: this.pendingAugmentSelection !== null
             });
         }
         this.startPresentationCorrection(displayedBefore, this.state());
         return true;
     }
 
-    foundationReward() {
-        return this.simulation.getFoundationReward(this.ownerId);
+    augmentReward() {
+        return this.simulation.getAugmentReward(this.ownerId);
     }
 
-    applyPredictedFoundationSelection(selection) {
-        if (!this.initialized || this.pendingFoundationSelection) return false;
-        const result = this.simulation.resolveFoundationSelection(this.ownerId, selection, {
+    applyPredictedAugmentSelection(selection) {
+        if (!this.initialized || this.pendingAugmentSelection) return false;
+        const result = this.simulation.resolveAugmentSelection(this.ownerId, selection, {
             replicate: false,
             requireOpenReward: false
         });
         if (!result.accepted) return false;
-        this.pendingFoundationSelection = Object.freeze({ ...selection });
+        this.pendingAugmentSelection = Object.freeze({ ...selection });
         const state = this.state();
         this.predictedEvents.push(
             Object.freeze({
-                eventType: "predicted-foundation-selected",
-                predictionId: `${this.ownerId}:foundation-selection:${state.tick}`,
+                eventType: "predicted-augment-selected",
+                predictionId: `${this.ownerId}:augment-selection:${state.tick}`,
                 tick: state.tick,
                 playerId: this.ownerId,
                 ownerId: this.ownerId,
                 sourceId: selection.sourceId,
-                foundationId: selection.foundationId
+                augmentId: selection.augmentId
             })
         );
         return true;
     }
 
-    rejectPredictedFoundationSelection(sourceId, snapshot = null) {
+    rejectPredictedAugmentSelection(sourceId, snapshot = null) {
         if (!this.initialized) return false;
-        const rejectedFoundationId = this.pendingFoundationSelection?.foundationId ?? null;
-        this.pendingFoundationSelection = null;
-        this.simulation.clearFoundationSelection(this.ownerId, sourceId, rejectedFoundationId);
+        const rejectedAugmentId = this.pendingAugmentSelection?.augmentId ?? null;
+        this.pendingAugmentSelection = null;
+        this.simulation.clearAugmentSelection(this.ownerId, sourceId, rejectedAugmentId);
         if (snapshot?.state?.worldProgress && this.simulation.worldProgress) {
             this.simulation.restoreWorldProgress(
                 snapshot.state.worldProgress,
                 snapshot.state.worldElapsedSeconds ?? snapshot.serverTick * this.fixedDt
             );
         }
-        const source = this.simulation.world.objects?.find(({ id }) => id === sourceId);
-        return source ? this.simulation.beginFoundationReward(this.ownerId, sourceId, source.objectiveId) : false;
+        return false;
     }
 
     summitClaimCandidate() {
@@ -576,24 +610,24 @@ export class OwnerPredictionRuntime {
     recordPredictedOutcome(
         {
             projectile,
-            foundationEvents = [],
+            ropeAugmentEvents = [],
             fallImpactEvents = [],
             jammerImpactEvents = [],
             bossImpactEvents = [],
             ropeImpactEvents = [],
             augmentImpactEvents = [],
-            augmentEvents = []
+            spellEvents = []
         },
         tick,
         previous
     ) {
-        this.recordPredictedFoundationEvents(foundationEvents, tick);
+        this.recordPredictedAugmentEvents(ropeAugmentEvents, tick);
         this.recordPredictedFallImpacts(fallImpactEvents);
         this.recordPredictedPlayerImpacts(jammerImpactEvents);
         this.recordPredictedBossImpacts(bossImpactEvents, tick, previous);
         this.recordPredictedRopeImpacts(ropeImpactEvents);
         this.recordPredictedAugmentImpacts(augmentImpactEvents);
-        this.recordPredictedAugmentEvents(augmentEvents, tick);
+        this.recordPredictedAugmentEvents(spellEvents, tick);
         this.recordPredictedProjectile(projectile, tick, previous.weaponCooldown);
     }
 
@@ -684,7 +718,7 @@ export class OwnerPredictionRuntime {
                     ...(event.impactSpeed === undefined ? {} : { impactSpeed: event.impactSpeed }),
                     knockback: event.knockback ?? null,
                     effectId: event.effectId,
-                    sourceKind: event.sourceKind ?? "augment-action",
+                    sourceKind: event.sourceKind ?? SPELL_SOURCE_KIND.CAST,
                     sourcePlayerId: event.sourcePlayerId,
                     targetId: event.targetId,
                     parameters: Object.freeze({
@@ -692,7 +726,7 @@ export class OwnerPredictionRuntime {
                         eventId: event.eventId,
                         predictionId: event.predictionId ?? event.eventId,
                         effectId: event.effectId,
-                        effectSourceKind: event.sourceKind ?? "augment-action",
+                        effectSourceKind: event.sourceKind ?? SPELL_SOURCE_KIND.CAST,
                         sourcePlayerId: event.sourcePlayerId,
                         targetId: event.targetId,
                         damage: event.damage
@@ -709,22 +743,6 @@ export class OwnerPredictionRuntime {
                     ...event,
                     eventType: `predicted-${event.eventType ?? "augment-effect"}`,
                     predictionId: event.predictionId ?? `${this.ownerId}:augment-effect:${tick}:${index}`,
-                    tick,
-                    ownerId: this.ownerId
-                })
-            );
-        });
-    }
-
-    recordPredictedFoundationEvents(events, tick) {
-        events.forEach((event, index) => {
-            const suffix = event.eventType.replace(/^foundation-/, "");
-            const predictionKind = suffix === "shear-hit" ? "foundation-shear" : "foundation-effect";
-            this.predictedEvents.push(
-                Object.freeze({
-                    ...event,
-                    eventType: `predicted-foundation-${suffix}`,
-                    predictionId: `${this.ownerId}:${predictionKind}:${tick}:${index}`,
                     tick,
                     ownerId: this.ownerId
                 })

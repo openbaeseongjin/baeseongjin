@@ -34,7 +34,7 @@ import { DEFAULT_ENVIRONMENT_DEFINITION } from "./environment/EnvironmentCatalog
 import { EnvironmentAssetSet } from "./environment/EnvironmentAssetSet.js";
 import { EnvironmentRendererComposer } from "./environment/EnvironmentRendererComposer.js";
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
-import { ActorStatusRenderer, ElectrifiedStatusRenderer } from "./ActorStatusPresentation.js";
+import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
 import { DEFAULT_ENEMY_SPRITE_SECTOR_ID } from "./sprites/EnemySpriteCatalog.js";
 import { EnemySpritePackageCatalog } from "./sprites/EnemySpritePackageCatalog.js";
@@ -286,7 +286,6 @@ export class SpriteSceneRenderer {
                 }),
                 polygonRenderer: new PolygonLocalPlayerRenderer()
             }),
-            new ElectrifiedStatusRenderer(),
             new ActorStatusRenderer()
         ]);
 

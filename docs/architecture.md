@@ -29,9 +29,12 @@ index.html
       ├─ game/simulation/GameSimulation.js
       ├─ game/combat/CombatSystems.js
       ├─ game/combat/CombatFeedback.js
-      ├─ game/augments/FoundationAugmentCatalog.js
-      ├─ game/augments/FoundationAugmentState.js
-      ├─ game/rewards/RewardSelection.js
+      ├─ game/augments/AugmentCatalog.js
+      ├─ game/augments/AugmentLoadoutState.js
+      ├─ game/spells/SpellRuntimeState.js
+      ├─ game/status-effects/CombatStatusEffectPool.js
+      ├─ game/experience/PlayerExperienceState.js
+      ├─ game/rewards/AugmentRewardSelection.js
       ├─ game/metrics/RunMetrics.js
       ├─ game/network/PlayerCommandBatch.js
       ├─ game/network/AuthorityCommandInbox.js
@@ -164,7 +167,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 
 - `GameObjectManager`는 `PlayerObjectManager`, `EnemyObjectManager`, 종류별 Projectile manager, `ImpactTargetManager`, immutable `WorldObjectManager`, `CollisionBroadPhase`와 `GameObjectIdAllocator`를 Has-A로 조합하는 Runtime 객체 단일 진입점이다. 모든 종류 manager는 `BaseGameObjectManager`를 상속해 ID index·ordered collection·등록·조회·교체·제거·render snapshot을 그대로 사용하고 실제 lifecycle 차이만 override한다. Player 등록·제거는 Player·Rope·AutomaticWeapon·owner input collection을 하나의 transaction으로 처리하고 Enemy manager가 전체 roster·active membership·authored hydration index·tombstone을 소유한다. `GameSimulation`의 기존 공개 API와 network DTO는 유지하되 내부 collection 변경은 manager 명령만 사용한다. World progress·reward·replication event queue·metrics는 게임 객체가 아니므로 각 도메인 owner에 남는다.
 - `InputDrivenObject`와 `SimulationDrivenObject`는 실행 위치가 아니라 상태 변화 원인의 Is-A 정체성이다. 서버는 입력 주도 객체 claim을 검증할 복제 상태를 가지며 클라이언트는 시뮬레이션 주도 객체를 표시·보간할 복제 상태를 가질 수 있다.
-- 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·generic Augment loadout을 Has-A로 소유하고, 로프는 부착·장력·드래그·발사 shot 상태를 독립 소유한다. `FoundationAugmentState` 같은 기존 이름은 migration 호환 경계에만 남고 소유 관계는 ID와 공개 계약으로 연결한다.
+- 플레이어와 로프는 별도 `InputDrivenObject`다. 플레이어는 물리·체력·`AugmentLoadoutState`·`SpellRuntimeState`·`PlayerExperienceState`·`CombatStatusEffectPool`을 Has-A로 소유하고, 로프는 부착·장력·드래그·발사 상태를 독립 소유한다.
 - 적과 직접 조작하지 않는 자동 행동 객체는 `SimulationDrivenObject`다. 서버가 진행하되 플레이어 피격처럼 사용자 체감과 만나는 사건은 피해 클라이언트가 먼저 반응하고 서버가 권위 객체 상태로 검증한다.
 - 멀티는 권한 감각만 보면 P2P형이다. 플레이어별 `InputDrivenObject` 결과는 해당 소유자·피해자 클라이언트가 먼저 결정하고, 특정 클라이언트에 귀속할 수 없는 몹과 적 투사체 같은 `SimulationDrivenObject`의 생성·궤적은 서버가 중립적으로 진행한다. 서버는 지연된 플레이어 복제 위치로 충돌을 먼저 확정하지 않고 피해 클라이언트 claim을 중립 객체 상태로 검증한다.
 - 사건 전파와 지속 상태 수렴을 같은 것으로 취급하지 않는다. `InputDrivenObject`의 지속 상태는 인증·형식·세션 tick 검사를 통과한 최신 `owner-motion`을 값의 크기와 무관하게 서버와 동료가 따라가고, `SimulationDrivenObject`는 서버 상태를 모든 클라이언트가 따라간다. actor Rope는 예외적으로 서버가 `ownerId + localAnchor`의 현재 capability·surface·최초 reach/LOS를 검증하고 canonical Boss transform으로 anchor를 복원하며, 불가능한 부착만 `ropeReleased` receipt와 causal event로 해제한다. 원격 플레이어 위치는 `ownerMotionTick` 표본 사이를 보간하고 actor Rope 끝점은 같은 렌더 시점의 Boss transform에서 재구성한다.
@@ -204,11 +207,11 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 
 - PC: A/D 또는 방향키 이동, W 또는 위 방향키 점프, 마우스 누르기·드래그·해제로 로프 조작
 - 기본 Hook은 `1200px/s × 1/3초 = 400px`를 비행하며, 빗나감·비행 중 해제·취소 뒤 재발사 대기는 `0.50초`다. Rope Cut의 별도 차단시간과 부착 성공 상태는 이 reload를 대신하지 않는다.
-- 모바일 가로 화면: 화면 하단 중앙에 `좌 이동 · 점프 · 우 이동` 조작 바를 배치한다. 점프는 화면 폭의 40%이며 좌우 버튼과 4~8px 간격을 둔다. 우측 위 토글은 현재 `로프 조준` 또는 `액션 조준` 모드를 표시한다. 로프 조준에서 세 버튼을 제외한 화면은 로프 부착·드래그·해제에 사용하고, 액션 조준에서는 같은 화면 터치가 Rope pointer를 내리지 않은 채 실제 접촉 지점을 `aimWorld`로 만든다.
+- 모바일 가로 화면의 1차 조작은 화면 하단 중앙 `좌 이동 · 점프 · 우 이동`과 나머지 화면의 Rope 부착·드래그·해제만 제공한다. Spell 직접 탭 UI는 후속 범위다.
 - 모바일 이동·점프는 PC 키보드와 동일한 `horizontal`, `vertical` 명령을 만들며 별도 게임 규칙을 두지 않는다.
 - 버튼 판정과 Canvas 표시는 `MobileControlLayout`의 같은 사각형 정보를 사용한다.
 - 로프 손가락은 `pointerId`로 추적하며 다른 터치가 기존 로프 조작을 빼앗지 않는다.
-- 모바일 Rope·Action 조준점은 별도 위치 보정 없이 손가락이 닿은 실제 지점을 가리킨다. 활성 조준 gesture 중에는 토글을 바꾸지 않아 진행 중인 Rope release 또는 hold Action의 소유 pointer를 교체하지 않는다.
+- 모바일 1차 입력은 이동·점프·Rope만 제공한다. 네 마법 슬롯의 직접 탭 입력은 PC 커맨드와 같은 Spell 계약을 재사용하는 후속 범위다.
 - 스윙 드래그 임계값은 고정 픽셀이 아니라 현재 Canvas의 짧은 변에 대한 비율로 계산한다. 화면 크기는 `PlayerCommand.viewport`에 포함되어 권한 주체에서도 같은 판정을 재현한다.
 - 활성 로프 드래그가 브라우저 상단 UI로 빠지는 `pointerleave`, `pointercancel`, 창 포커스 상실 또는 문서 숨김으로 끝나면 로프 유지가 아니라 사용자의 해제 의도로 처리한다. 입력 상태를 먼저 정리하고, 렌더 프레임이 멈추기 전에 싱글의 공용 시뮬레이션과 멀티의 로컬 예측·즉시 전송을 한 번 실행한다. 화면 안의 정상 `pointerup`은 기존 고정 스텝에서 처리한다.
 
@@ -227,7 +230,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `CompositeBossEncounterRuntime`은 Sector 진행과 분리된 중립 월드 Has-A 상태다. attempt·phase HP·약점 노출·Player별 active/spectating을 top-level `bossRuntime` snapshot으로 복제하고, 한 번 완료한 Boss ID만 `SectorProgressState`에 영속한다. `GameSimulation`은 활성 Stage 선택, 공개 명령과 event 연결만 조정한다.
 - 0.66.0 default `GameSimulationFactory`는 `authored-continuous-stage-runtime-v18-boss06-direct-sector-portals`만 현재 authored world revision으로 해석한다. Sector 01~06의 48개 canonical v2 Stage와 Boss06 generated catalog를 production world에 포함한다. 일반 Stage surface·wall·world object는 Map Editor source만 사용하고 Runtime derived geometry는 0개다. 일반 Gate를 통과한 Player 한 명만 다음 authored Entry로 이동하며 다른 Player·Enemy·공용 진행을 함께 이동시키지 않는다.
 - 3-8 Gate는 source objective와 Sector03 Access 3-of-3 뒤 Player별로 4-1 authored Entry를 직접 연다. Boss06은 target landmark가 없는 terminal 계약으로 Gate/Bridge/Shuttle과 Player별 Boarding readiness를 진행해 모든 연결 참가자가 직접 boarding zone에 도달했을 때만 run completion을 연다.
-- `WorldSnapshot` protocol v15는 Boss 완료 이력을 포함한 공용 Sector 진행, 활성 Boss Stage와 Rope attachment actor transform, terminal readiness, Player별 `respawnAnchorId`·감전 상태, content boundary 이력, Hardpoint Jammer target/phase/sequence, non-null Action state와 Enemy 동적 상태를 전송한다. `owner-motion` v9는 Rope의 실제 `anchorSurfaceId`를 함께 보내 재머 부착 claim이 같은 표면과 attachment 세대인지 검증한다. 현재 Stage ID는 추가하지 않고 Player 위치가 현재 authored Stage를 나타낸다. Access 조건은 portal 사용 가능 여부만 바꾸며 collision·barrier geometry를 생성하거나 제거하지 않는다. Timer/Purge는 HOLD다.
+- `WorldSnapshot` protocol v16은 Boss 완료 이력을 포함한 공용 Sector 진행, 활성 Boss Stage와 Rope attachment actor transform, terminal readiness, Player별 `respawnAnchorId`·상태이상 Pool·마법 슬롯/쿨다운·경험치, content boundary 이력, Hardpoint Jammer target/phase/sequence와 Enemy 동적 상태를 전송한다. `owner-motion` v10은 Rope 표면과 Player 상태를 소유자 결과로 공유한다. 현재 Stage ID는 추가하지 않고 Player 위치가 현재 authored Stage를 나타낸다.
 - `src/game/world/sectors/`, `SectorDefinitionValidator.js`, `SectorProgressState.js`와 `SectorProgressController.js`는 시나리오 통합 fingerprint의 별도 `authored-sector-sha256`로 감시한다. Area migration source와 Sector Runtime source의 현재 상태를 각각 기록한다.
 
 ## 현재 게임 시스템
@@ -235,7 +238,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `createAuthoredSeamlessSectorRuntimeWorld()`가 Sector 01~~06의 generated Stage 48개를 authored bounds 그대로 맞닿는 48 landmark와 개별 Player portal 47개로 조립한다. 1-8·2-8·3-8·4-8·5-8 portal은 다음 Sector Entry로 직접 이동하고, 6-8은 terminal Boss06 전환을 소유한다.
 - `GameSimulation`이 Sector objective·route·content boundary와 플레이어별 진행 상태를 권위 상태로 보존한다.
 - 사망 재개는 월드와 공용 진행을 유지한 채 사망 Player 자신의 `respawnAnchorId`로 복귀한다. 각 anchor는 `StageSavePointGeometry`가 계산한 `triggerBounds`와 `level/radius/label` 표현 metadata를 포함하고 polygon·pixel renderer가 같은 최외곽 bounds 안에 `STAGE SAVE` 구조물을 그린다. player circle과 trigger가 겹치면 공용 `landmark-entered`와 별도로 해당 Player 체크포인트만 갱신하고, 저장 지표·cue·`stage-saved` 안내도 당사자에게 한 번 만든다. 전원 사망도 공용 진행을 초기화하지 않는다.
-- 1-4·2-3·3-5 explicit Augment Node 선택은 `PlayerCommand`의 좌우·점프 명령을 사용한다. `InputSampler`는 실제 W/위쪽/모바일 점프 pointer-down마다 `interactSequence`를 한 번 증가시키며 Player command v5가 이를 보존한다. 선택창은 열린 프레임의 sequence보다 큰 새 누름만 Confirm으로 인정하므로 held W, key repeat, 일시적인 neutral network sample이 선택으로 바뀌지 않는다. 선택 중인 플레이어의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
+- 몹 막타 경험치는 Player별 `PlayerExperienceState`에 한 번 귀속된다. 레벨업마다 개인 Augment 보상 선택을 열고 선택 중인 Player의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
 - Augment 선택 피드백은 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 선택 상태와 분리한다.
 - 정적 Sector surface, 독립 objective, Player별 savepoint respawn, 전원 사망 진행 보존과 마지막 content boundary는 관련 validator와 실제 브라우저·멀티플레이 smoke에서 확인한다.
 - `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가한다. 기본 Runtime은 `landmarkTiming`으로 현재 landmark 체류와 route 진행 시간을 기록한다.
@@ -245,10 +248,10 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 사망·낙사는 공용 player reset 경로를 사용하되 default Sector Runtime에서는 사망 Player의 체크포인트 상태가 가리키는 anchor로 복귀한다. Stage Bounds를 아래로 벗어나는 것은 낙사가 아니며 Player는 아래 Stage들로 계속 떨어져 authored surface에 착지하거나 Rope로 복구할 수 있다. 오직 전체 authored world `bottomY + recoveryMargin` 아래에서만 fall reset을 적용한다. 동료와 공용 진행은 유지하고 same-tick 전원 respawn도 `sector-reset`을 발생시키지 않는다.
 - Augment offer는 플레이어별 선택·pending entitlement·consumed source 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
 - 보상 Canvas 오버레이는 반투명 배경과 실시간 전투 경고를 사용해 선택 카드와 진행 중인 위험을 동시에 보여준다.
-- `RewardSelection`은 세 explicit Node에서 동일한 결정적 3장 offer의 카드 이동·Confirm·진입 Input Gate를 공유한다. 고정 Foundation/Specialization tier를 별도 선택 시스템으로 복구하지 않는다.
-- `FoundationAugmentState`라는 호환 class 이름은 Player별 최대 6장 generic loadout, consumed source와 순간 runtime window를 소유한다. 카드 효과는 기존 Rope/Action 사건에서 한 번만 판정하고 이름과 무관한 전역 분기를 추가하지 않는다.
-- `interact-choice`는 개인 chooser 요청을 만들고 현재 채널 Player 전원의 해당 source 소비가 끝나면 공유 objective를 한 번 완료한다. 완료 뒤 합류 Player도 같은 Node에서 자기 chooser를 열 수 있으며 선택 카드·consumed source는 개인 부활·재접속·전원 사망 뒤 유지된다.
-- 고정 HUD는 local Player의 좌표 기반 Stage, HP, 다음 Action charge cooldown과 generic Augment를 표시한다. 데스크톱·모바일 공통 `HUD 숨김/표시` 버튼은 이 고정 상태 HUD, Access 패널과 하단 조작 안내를 함께 토글하며 기본값은 표시다. 이 값은 각 클라이언트의 표현 상태로만 소유하고 gameplay command나 network snapshot에 넣지 않는다. local/remote Player 머리 위에는 HP+cooldown 두 bar를, viewport 내 모든 Enemy 머리 위에는 HP bar를 토글과 무관하게 항상 표시한다. fixed/overhead cooldown은 같은 resolver의 `rechargeRemaining/rechargeDuration`과 `chargesRemaining/maxCharges`를 사용한다.
+- `AugmentRewardSelection`은 경험치 레벨업 보상의 카드 이동·Confirm·진입 Input Gate를 소유한다. 첫 레벨은 메테오, 두 번째는 기동 증폭을 해금하고 이후 미획득 Rope 패시브를 제시한다.
+- `AugmentLoadoutState`는 Rope 패시브와 해금된 Spell ID만 소유한다. 과거 Foundation·Action·Signature·Modifier snapshot은 변환하지 않고 버전 전환 시 초기화한다.
+- `augment-selection` claim은 열린 개인 경험치 보상과 후보를 검증하고 선택한 Spell을 역할 슬롯에 자동 장착하거나 Rope 패시브를 추가한다. 별도 장착 UI와 authored Node 소비 상태는 없다.
+- 고정 HUD는 local Player의 좌표 기반 Stage·HP를 표시하고, 화면 하단 중앙은 네 Spell 슬롯·커맨드·독립 쿨다운과 경험치 진행을 표시한다. 잠긴 슬롯도 같은 위치에 잠김으로 남는다. HUD 토글은 표현 상태이며 gameplay command나 network snapshot에 넣지 않는다.
 - Access 위치 안내는 authored 문자열을 사용하지 않는다. 공용 resolver가 local Player의 현재 Sector에서 미수집 module을 거리·Stable ID 순으로 정렬해 최대 3개를 고르고, 가까운 대상일수록 큰 clamp scale을 edge arrow와 world-space diamond에 동일하게 적용한다. viewport 밖 대상은 safe-area edge arrow, 화면 안 대상은 `AccessModuleSignalRenderer`의 무문자 diamond 하나만 사용하므로 두 표현의 합은 남은 선택 대상 수와 같다. 좌측 화살표는 고정 HUD 아래로, 상단 화살표는 설정/HUD 버튼 오른쪽으로 밀고 모바일은 하단 조작 영역을 제외하며 같은 edge의 최대 3개는 방향을 유지한 채 분산한다. guide는 고정 HUD와 같은 로컬 표시 토글을 따른다.
 - `SectorProgressController`는 모든 objective를 전역 Stage cursor 없이 자기 trigger/source와 prerequisite로 평가한다. savepoint는 모든 anchor를 같은 collision resolver로 검사하고 낮은 checkpoint 재접촉은 Player anchor를 후퇴시키지 않는다.
 - `CommandReplay`는 게임 규칙 밖에서 불변 명령 타임라인을 기록·재생하고 권위 스냅샷의 결정성 다이제스트를 비교한다.
@@ -288,10 +291,9 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 자기 탄환은 `EnemyHitPrediction` 믹스인이 로컬 충돌 VFX와 검증 가능한 hit claim을 한 번 만든다. 첫 로컬 충돌에서 탄환 수명은 소비되며 claim 거부가 같은 탄환을 겹친 위치에 복구해 추가 피격을 만들지 않는다. 서버는 연결 소유권·탄환·대상·tick·중복을 검사하고 서버 소유 탄환 대미지로 검증된 결과를 다른 복제본에 공유한다. 서버 현재 위치·궤적과 공격 클라이언트가 본 지연 표본의 차이는 거부 조건이 아니다. 중립 적 탄환도 피해 클라이언트가 충돌을 인식한 순간 소비하며, 거부 receipt가 객체를 다시 표시하거나 같은 겹침에서 재발화하게 하지 않는다.
 - `GameSimulation`은 권위 틱을 증가시키며 중립 자동 발사·투사체 궤적과 검증된 피해자 피격·로프 절단 claim에서 복제 이벤트를 기록한다. 서버 고정 스텝은 플레이어 피격을 직접 만들지 않으며 전송 계층이 사건을 drain한 뒤에도 검증용 투사체 배열은 유지된다.
 
-## 증강 v1 구성과 전투 사건
+## 증강·마법·상태이상 구성과 전투 사건
 
-- `FoundationAugmentState`라는 호환 클래스명은 generic selected card IDs와 소비한 source IDs만 소유한다. 과거 Foundation gameplay state를 병렬 유지하지 않는다.
-- `ActionAugmentState`는 Action 공통 입력 edge·activation sequence·charge·recharge와 기존 snapshot 형식만 소유한다. Punch·DirectionDash·DashStrike·InstantGuard·PushAway·StraightShot·SlowFall 구체 `ActionDefinition`이 activation·월드 실행·종료 predicate를 override하고 `AugmentCombatRuntime`은 실행 context와 결과 연결만 조정한다. Signature는 구체 capability definition으로 Action에 선택 조합하며 Trail·Shield·Action projectile·접촉 membership은 각각 Has-A 상태 컴포넌트가 소유한다. Action projectile은 공통 `PhysicsMixin`의 position·velocity·acceleration 적분을 사용한다. Action·Signature·modifier ID와 event key는 단일 definition enum이 소유하고 고정 Catalog·formula·class registry는 frozen object lookup을 사용하며 `Map`·`Set`은 실행 중 변하는 contact·piercing membership에만 남긴다. 모든 Player는 생성 시 built-in `default-punch`를 기본 loadout으로 가지며, 증강 Action을 얻으면 같은 공통 상태의 loadout만 교체한다. 별도 punch cooldown 필드는 두지 않고 과거 `punchCooldownRemaining`만 전용 restore migration 입력으로 소비한다. `PlayerRuntimeFactory`가 이 runtime을 loadout과 함께 Has-A로 조립한다.
+- `SpellRuntimeState`는 네 커맨드 슬롯·독립 쿨다운·지속 마법 상태를 소유하고, 각 `CombatSpellDefinition` 구체 클래스가 cast를 override한다. `SpellProjectileState`는 공통 `PhysicsMixin`으로 투사체를 적분하며 Player·Enemy·Boss를 같은 impact target 계약으로 처리하고 시전자는 기본 제외한다. `CombatStatusEffectPool`은 Player·Enemy·Boss가 Has-A로 소유하며, 감전·점화·냉동 구체 effect가 lifecycle·pulse·`canAct()`·particle draw를 override한다. 경험치 요구량과 상한은 `ExperienceProgressionDefinition`이 카탈로그와 곡선 값에서 계산한다.
 - Rope 기본값은 `ROPE_CONFIG` 한 곳에서 시작하고 selected card의 percentage modifier로 effective config를 만든다. launcher와 fixed rope는 같은 effective config 참조를 사용한다.
 - `resolveEffectiveRopeConfig`는 DebugSettings의 부분 override를 유한 범위 안에서 완전한 immutable base config로 만든다. `GameSimulation`은 생성 시 이 base와 `ropeDisabledSeconds`를 주입받고 Player·launcher·rope·attachment candidate·render snapshot이 같은 참조를 소비한다. 싱글 적용은 기존 앱을 정지하고 새 `GameApp`·`GameSimulation`을 생성하는 restart 경계이며 살아 있는 Run hot swap과 멀티 session override는 지원하지 않는다.
 - owner client가 만든 모든 증강 적 피해는 `AugmentImpactClaim`으로 수렴한다. `PlayerEnemyImpactResolver`는 shield → damage → lethal/no-knockback → survivor knockback 순서만 소유하며 카드별 trigger를 알지 않는다.

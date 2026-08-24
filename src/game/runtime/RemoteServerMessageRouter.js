@@ -43,10 +43,8 @@ const SERVER_MESSAGE_HANDLER = Object.freeze({
         c.authority.recordReceipt(receipt);
         c.authority.stream.acceptReceipt(receipt);
     },
-    [MULTIPLAYER_MESSAGE_TYPE.FOUNDATION_SELECTION_RECEIPT]: (m, c) =>
-        c.authority.foundationSelectionReceipts.push(Object.freeze({ ...m.payload })),
-    [MULTIPLAYER_MESSAGE_TYPE.AUGMENT_OFFER_RECEIPT]: (m, c) =>
-        c.authority.augmentOfferReceipts.push(Object.freeze({ ...m.payload })),
+    [MULTIPLAYER_MESSAGE_TYPE.AUGMENT_SELECTION_RECEIPT]: (m, c) =>
+        c.authority.augmentSelectionReceipts.push(Object.freeze({ ...m.payload })),
     [MULTIPLAYER_MESSAGE_TYPE.HIT_CLAIM_RECEIPT]: (m, c) =>
         c.authority.recordHitClaimReceipt(createProjectileHitReceipt(m.payload)),
     [MULTIPLAYER_MESSAGE_TYPE.PROJECTILE_SPAWN_CLAIM_RECEIPT]: (m, c) => {

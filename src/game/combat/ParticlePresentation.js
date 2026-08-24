@@ -3,18 +3,6 @@ const HIGH_PRIORITY_HEADROOM = 48;
 const EMITTER_PARTICLE_BUDGET = 24;
 
 const PARTICLE_PRESET_DEFINITIONS = {
-    "player-punch": {
-        emission: "burst",
-        motion: "directional",
-        shape: "shard",
-        palette: ["#fef08a", "#67e8f9"],
-        count: 7,
-        size: 4,
-        speed: 160,
-        spread: 0.55,
-        lifetime: 0.32,
-        glow: 0.35
-    },
     "player-dash": {
         emission: "stream",
         motion: "directional",
@@ -62,18 +50,6 @@ const PARTICLE_PRESET_DEFINITIONS = {
         spread: 1.1,
         lifetime: 0.28,
         glow: 0.18
-    },
-    "damage-reflect": {
-        emission: "stream",
-        motion: "directional",
-        shape: "streak",
-        palette: ["#f8fafc", "#67e8f9"],
-        count: 7,
-        size: 3,
-        speed: 190,
-        spread: 0.12,
-        lifetime: 0.3,
-        glow: 0.35
     },
     "enemy-aim": {
         emission: "stream",
@@ -258,18 +234,6 @@ const PARTICLE_PRESET_DEFINITIONS = {
         spread: 2.1,
         lifetime: 0.24,
         opacity: 0.45
-    },
-    "rope-link": {
-        emission: "stream",
-        motion: "directional",
-        shape: "streak",
-        palette: ["#4ade80", "#bbf7d0"],
-        count: 4,
-        size: 2.5,
-        speed: 130,
-        spread: 0.12,
-        lifetime: 0.25,
-        glow: 0.12
     },
     "rope-contact": {
         emission: "burst",

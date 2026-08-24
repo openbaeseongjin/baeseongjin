@@ -35,7 +35,7 @@ function isOccluded(origin, target, targetSurfaceId, surfaces) {
 }
 
 function candidatesForPlayer({ player, source, querySurfaces, ropeConfig, excludedSurfaceIds, config }) {
-    const effectiveRopeConfig = player.foundation.effectiveRopeConfig(ropeConfig);
+    const effectiveRopeConfig = player.augmentLoadout.effectiveRopeConfig(ropeConfig);
     const reach = hookReach(effectiveRopeConfig);
     const direction = likelyTravelDirection(player, config);
     const origin = ropeLaunchHandPoint(player.physics, effectiveRopeConfig.handOffset, {

@@ -1,8 +1,10 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
-import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
+import { augmentById } from "../augments/AugmentCatalog.js";
+import { MAX_AUGMENT_SELECTIONS } from "../augments/AugmentCatalog.js";
+import { STATUS_EFFECT_ID } from "../status-effects/StatusEffectDefinition.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 13;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 14;
 export const PLAYER_IMPACT_TYPE = Object.freeze({
     ROPE_CUT: "rope-cut",
     PLAYER_HIT: "player-hit",
@@ -51,24 +53,18 @@ function assertFiniteVector(value, label) {
     return value;
 }
 
-function assertFoundationState(foundationId, runtimeState, label) {
-    if (foundationId !== null && !foundationAugmentById(foundationId)) {
-        throw new Error(`${label}.foundationAugment must be null or a known Foundation Augment`);
-    }
+function assertAugmentState(runtimeState, label) {
     if (!runtimeState || Array.isArray(runtimeState) || typeof runtimeState !== "object") {
         throw new Error(`${label}.augmentRuntimeState must be an object`);
     }
-    const selectedAugmentIds = runtimeState.selectedAugmentIds ?? (foundationId === null ? [] : [foundationId]);
+    const selectedAugmentIds = runtimeState.selectedAugmentIds ?? [];
     if (
         !Array.isArray(selectedAugmentIds) ||
-        selectedAugmentIds.length > 6 ||
+        selectedAugmentIds.length > MAX_AUGMENT_SELECTIONS ||
         new Set(selectedAugmentIds).size !== selectedAugmentIds.length ||
-        selectedAugmentIds.some((id) => !foundationAugmentById(id))
+        selectedAugmentIds.some((id) => !augmentById(id))
     ) {
-        throw new Error(`${label}.augmentRuntimeState.selectedAugmentIds must contain up to six known cards`);
-    }
-    if ((selectedAugmentIds[0] ?? null) !== foundationId) {
-        throw new Error(`${label}.foundationAugment must match the first selected Augment`);
+        throw new Error(`${label}.augmentRuntimeState.selectedAugmentIds contains invalid cards`);
     }
     if (runtimeState.combat !== undefined && runtimeState.combat !== null) {
         if (typeof runtimeState.combat !== "object" || Array.isArray(runtimeState.combat)) {
@@ -226,22 +222,23 @@ function normalizeImpactRecoveryState(state) {
         exclusiveMinimum: true
     });
     assertFinite(normalized.weapon?.cooldown, "outcome.state.weapon.cooldown", { minimum: 0 });
-    assertFoundationState(normalized.foundationAugment, normalized.augmentRuntimeState, "outcome.state");
+    assertAugmentState(normalized.augmentRuntimeState, "outcome.state");
     assertLauncher(normalized.launcher, "outcome.state.launcher");
-    const electrified = normalized.statusEffects?.electrified ?? null;
-    if (electrified !== null) {
-        assertBoolean(electrified.active, "outcome.state.statusEffects.electrified.active");
-        assertFinite(electrified.remainingSeconds, "outcome.state.statusEffects.electrified.remainingSeconds", {
+    const statusEffects = normalized.statusEffects?.effects ?? [];
+    if (!Array.isArray(statusEffects)) throw new Error("outcome.state.statusEffects.effects must be an array");
+    for (const effect of statusEffects) {
+        assertId(effect.id, "outcome.state.statusEffects.effect.id");
+        assertBoolean(effect.active, `outcome.state.statusEffects.${effect.id}.active`);
+        assertFinite(effect.remainingSeconds, `outcome.state.statusEffects.${effect.id}.remainingSeconds`, {
             minimum: 0
         });
-        assertFinite(
-            electrified.secondsUntilNextPulse,
-            "outcome.state.statusEffects.electrified.secondsUntilNextPulse",
-            { minimum: 0 }
-        );
-        if (electrified.sourceId !== null) {
-            assertId(electrified.sourceId, "outcome.state.statusEffects.electrified.sourceId");
-        }
+        if (effect.runtime?.secondsUntilNextPulse !== undefined)
+            assertFinite(
+                effect.runtime.secondsUntilNextPulse,
+                `outcome.state.statusEffects.${effect.id}.secondsUntilNextPulse`,
+                { minimum: 0 }
+            );
+        if (effect.sourceId !== null) assertId(effect.sourceId, `outcome.state.statusEffects.${effect.id}.sourceId`);
     }
     return normalized;
 }
@@ -280,7 +277,7 @@ function impactStateProjection(state, { impactType, respawned }) {
         };
     }
     if (impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK) {
-        const electrified = state.statusEffects?.electrified ?? null;
+        const electrified = state.statusEffects?.effects?.find(({ id }) => id === STATUS_EFFECT_ID.ELECTRIFIED) ?? null;
         return {
             ropeDisabledTicks: quantized(state.ropeDisabledRemaining, 1 / 120),
             ropeAttached: state.rope.isAttached,
@@ -289,7 +286,7 @@ function impactStateProjection(state, { impactType, respawned }) {
                 ? {
                       active: electrified.active,
                       remainingTicks: quantized(electrified.remainingSeconds, 1 / 120),
-                      nextPulseTicks: quantized(electrified.secondsUntilNextPulse, 1 / 120),
+                      nextPulseTicks: quantized(electrified.runtime?.secondsUntilNextPulse ?? 0, 1 / 120),
                       sourceId: electrified.sourceId
                   }
                 : null
@@ -332,7 +329,6 @@ function impactStateProjection(state, { impactType, respawned }) {
             fireInterval: quantized(state.weapon.fireInterval, 0.001),
             cooldownTicks: quantized(state.weapon.cooldown, 1 / 120)
         },
-        foundationAugment: state.foundationAugment,
         selectedAugmentIds: state.augmentRuntimeState.selectedAugmentIds ?? [],
         launcher: launcherProjection(state)
     };

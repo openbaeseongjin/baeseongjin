@@ -1,23 +1,18 @@
-import {
-    ACTION_EVENT_TYPE,
-    ACTION_MODIFIER_ID,
-    ACTION_PREDICTED_RESOLUTION,
-    ACTION_SIGNATURE_ID,
-    BASE_ACTION_ID
-} from "../augments/actions/ActionAugmentDefinition.js";
 import { ELECTRIFIED_STATUS_ID } from "../status-effects/ElectrifiedStatusEffect.js";
+import { SPELL_ID } from "../spells/SpellDefinition.js";
+import { SPELL_EVENT_TYPE, SPELL_IMPACT_RESOLUTION } from "../spells/SpellRuntimeDefinition.js";
 import { PLAYER_IMPACT_TYPE } from "../network/PlayerImpactClaim.js";
 
 export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PLAYER_RESPAWNED: "player-respawned",
     RESOLVE: "resolve",
     PREDICTED_RESOLVE: "predicted-resolve",
-    AUGMENT_ACTION_STARTED: ACTION_EVENT_TYPE.STARTED,
-    PREDICTED_AUGMENT_ACTION_STARTED: "predicted-augment-action-started",
+    SPELL_CAST_STARTED: SPELL_EVENT_TYPE.CAST_STARTED,
+    PREDICTED_SPELL_CAST_STARTED: "predicted-spell-cast-started",
     SPAWN: "spawn",
     PREDICTED_SPAWN: "predicted-spawn",
-    AUGMENT_SHOT_ENDED: ACTION_EVENT_TYPE.SHOT_ENDED,
-    PREDICTED_AUGMENT_SHOT_ENDED: "predicted-augment-shot-ended",
+    SPELL_PROJECTILE_ENDED: SPELL_EVENT_TYPE.PROJECTILE_ENDED,
+    PREDICTED_SPELL_PROJECTILE_ENDED: "predicted-spell-projectile-ended",
     PLAYER_FALL_DAMAGED: "player-fall-damaged",
     PREDICTED_PLAYER_FALL_DAMAGED: "predicted-player-fall-damaged",
     BOSS_PLAYER_HIT: "boss-player-hit",
@@ -25,8 +20,8 @@ export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
 });
 
 export const CLIENT_FEEDBACK_RESOLUTION = Object.freeze({
-    ENEMY_HIT: ACTION_PREDICTED_RESOLUTION.ENEMY_HIT,
-    ENEMY_DEFEATED: ACTION_PREDICTED_RESOLUTION.ENEMY_DEFEATED,
+    ENEMY_HIT: SPELL_IMPACT_RESOLUTION.ENEMY_HIT,
+    ENEMY_DEFEATED: SPELL_IMPACT_RESOLUTION.ENEMY_DEFEATED,
     BOSS_HIT: "boss-hit",
     BOSS_PHASE_COMPLETED: "boss-phase-completed",
     BOSS_DEFEATED: "boss-defeated",
@@ -34,7 +29,7 @@ export const CLIENT_FEEDBACK_RESOLUTION = Object.freeze({
     ROPE_CUT: PLAYER_IMPACT_TYPE.ROPE_CUT,
     JAMMER_SHOCK: PLAYER_IMPACT_TYPE.JAMMER_SHOCK,
     FALL_DAMAGE: PLAYER_IMPACT_TYPE.FALL_DAMAGE,
-    SHIELD_BLOCKED: ACTION_PREDICTED_RESOLUTION.SHIELD_BLOCKED,
+    SHIELD_BLOCKED: SPELL_IMPACT_RESOLUTION.SHIELD_BLOCKED,
     TARGET_ALREADY_DEAD: "target-already-dead"
 });
 
@@ -44,7 +39,6 @@ export const CLIENT_FEEDBACK_SOURCE_KIND = Object.freeze({
 });
 
 export const CLIENT_FEEDBACK_EFFECT_ID = Object.freeze({
-    DAMAGE_REFLECT: ACTION_SIGNATURE_ID.DAMAGE_REFLECT,
     ELECTRIFIED_ROPE: "electrified-rope",
     ELECTRIFIED_STATUS: ELECTRIFIED_STATUS_ID
 });
@@ -57,21 +51,11 @@ export const CLIENT_FEEDBACK_EVENT_CONFIG = Object.freeze({
     EMPTY_VIEWER_ID_LENGTH: 0,
     CAUSAL_LIMIT: 128,
     INITIAL_AGE: 0,
-    ACTION_AFTERIMAGE_LIFETIME: 0.42,
     ROPE_CUT_LIFETIME: 0.8,
     DEFAULT_DIRECTION: Object.freeze({ x: 1, y: 0 })
 });
 
-export const CLIENT_FEEDBACK_ACTION_ID = Object.freeze({
-    DEFAULT_PUNCH: BASE_ACTION_ID.DEFAULT_PUNCH,
-    STRAIGHT_SHOT: BASE_ACTION_ID.STRAIGHT_SHOT,
-    INSTANT_GUARD: BASE_ACTION_ID.INSTANT_GUARD,
-    DIRECTION_DASH: BASE_ACTION_ID.DIRECTION_DASH,
-    DASH_STRIKE: BASE_ACTION_ID.DASH_STRIKE
-});
-
 export const CLIENT_FEEDBACK_PRESET_ID = Object.freeze({
-    PLAYER_PUNCH: "player-punch",
     PLAYER_SHOT: "player-shot",
     PLAYER_GUARD: "player-guard",
     PLAYER_DASH: "player-dash",
@@ -83,7 +67,6 @@ export const CLIENT_FEEDBACK_PRESET_ID = Object.freeze({
     ENEMY_DEFEAT: "enemy-defeat",
     WIND_FLOW: "wind-flow",
     SHIELD_BLOCK: "shield-block",
-    DAMAGE_REFLECT: "damage-reflect",
     ROPE_CONTACT: "rope-contact",
     ROPE_CUT: "rope-cut",
     ROPE_LAUNCH: "rope-launch",
@@ -92,7 +75,6 @@ export const CLIENT_FEEDBACK_PRESET_ID = Object.freeze({
     ROPE_PULSE: "rope-pulse",
     ROPE_DISSIPATE: "rope-dissipate",
     ROPE_RELEASE: "rope-release",
-    ROPE_LINK: ACTION_MODIFIER_ID.ROPE_LINK,
     ROPE_TENSION: "rope-tension",
     ROPE_TENSION_ELECTRIC: "rope-tension-electric",
     PLAYER_MOTION: "player-motion",
@@ -101,14 +83,14 @@ export const CLIENT_FEEDBACK_PRESET_ID = Object.freeze({
 
 const EVENT_GROUP = Object.freeze({
     RESOLVE: Object.freeze([CLIENT_FEEDBACK_EVENT_TYPE.RESOLVE, CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_RESOLVE]),
-    ACTION_STARTED: Object.freeze([
-        CLIENT_FEEDBACK_EVENT_TYPE.AUGMENT_ACTION_STARTED,
-        CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_AUGMENT_ACTION_STARTED
+    SPELL_STARTED: Object.freeze([
+        CLIENT_FEEDBACK_EVENT_TYPE.SPELL_CAST_STARTED,
+        CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_SPELL_CAST_STARTED
     ]),
     SPAWN: Object.freeze([CLIENT_FEEDBACK_EVENT_TYPE.SPAWN, CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_SPAWN]),
     SHOT_ENDED: Object.freeze([
-        CLIENT_FEEDBACK_EVENT_TYPE.AUGMENT_SHOT_ENDED,
-        CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_AUGMENT_SHOT_ENDED
+        CLIENT_FEEDBACK_EVENT_TYPE.SPELL_PROJECTILE_ENDED,
+        CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_SPELL_PROJECTILE_ENDED
     ]),
     FALL_DAMAGE: Object.freeze([
         CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_FALL_DAMAGED,
@@ -132,12 +114,11 @@ const COMBAT_RESOLUTIONS = Object.freeze([
     CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE
 ]);
 
-const ACTION_PRESET = Object.freeze({
-    [CLIENT_FEEDBACK_ACTION_ID.DEFAULT_PUNCH]: CLIENT_FEEDBACK_PRESET_ID.PLAYER_PUNCH,
-    [CLIENT_FEEDBACK_ACTION_ID.STRAIGHT_SHOT]: CLIENT_FEEDBACK_PRESET_ID.PLAYER_SHOT,
-    [CLIENT_FEEDBACK_ACTION_ID.INSTANT_GUARD]: CLIENT_FEEDBACK_PRESET_ID.PLAYER_GUARD,
-    [CLIENT_FEEDBACK_ACTION_ID.DIRECTION_DASH]: CLIENT_FEEDBACK_PRESET_ID.PLAYER_DASH,
-    [CLIENT_FEEDBACK_ACTION_ID.DASH_STRIKE]: CLIENT_FEEDBACK_PRESET_ID.PLAYER_DASH
+const SPELL_PRESET = Object.freeze({
+    [SPELL_ID.ENERGY_ORB]: CLIENT_FEEDBACK_PRESET_ID.PLAYER_SHOT,
+    [SPELL_ID.MOBILITY_SURGE]: CLIENT_FEEDBACK_PRESET_ID.PLAYER_GUARD,
+    [SPELL_ID.METEOR]: CLIENT_FEEDBACK_PRESET_ID.ARTILLERY_STRIKE,
+    [SPELL_ID.PHYSICS_DASH]: CLIENT_FEEDBACK_PRESET_ID.PLAYER_DASH
 });
 
 const IMPACT_STATE = Object.freeze({
@@ -150,10 +131,7 @@ const IMPACT_STATE = Object.freeze({
     DEFAULT: Object.freeze({ lifetime: 0.12, strength: 2.5 })
 });
 
-const AUGMENT_EFFECT_LIFETIME = Object.freeze({
-    [CLIENT_FEEDBACK_EFFECT_ID.DAMAGE_REFLECT]: 0.28,
-    DEFAULT: 0.45
-});
+const AUGMENT_EFFECT_LIFETIME = Object.freeze({ DEFAULT: 0.45 });
 
 export class ClientFeedbackEventDefinition {
     constructor({ predicate, present }) {
@@ -167,13 +145,12 @@ export class ClientFeedbackEventDefinition {
 }
 
 export const CLIENT_FEEDBACK_KEY = Object.freeze({
-    actionPresentation: (ownerId, activationId) => `${ownerId}:${activationId}`,
     particle: (ownerId, causalId) => `${ownerId ?? "world"}:${causalId}`,
     continuous: (emitterId, sequence) => `${emitterId}:${sequence}`
 });
 
-export function actionParticlePreset(actionId) {
-    return ACTION_PRESET[actionId] ?? CLIENT_FEEDBACK_PRESET_ID.IMPACT;
+export function spellParticlePreset(spellId) {
+    return SPELL_PRESET[spellId] ?? CLIENT_FEEDBACK_PRESET_ID.IMPACT;
 }
 
 export function impactState(resolution) {
@@ -250,10 +227,6 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
         present: (event, context) =>
             context.suppressDetach(event.targetId ?? event.playerId ?? event.parameters?.targetId)
     }),
-    ACTION_AFTERIMAGE: new ClientFeedbackEventDefinition({
-        predicate: (event) => EVENT_GROUP.ACTION_STARTED.includes(event.eventType),
-        present: (event, context) => context.appendActionAfterimage(event)
-    }),
     AUGMENT_EFFECT: new ClientFeedbackEventDefinition({
         predicate: (event) =>
             eventSourceKind(event) === CLIENT_FEEDBACK_SOURCE_KIND.AUGMENT_IMPACT &&
@@ -261,11 +234,11 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
             event.resolution !== CLIENT_FEEDBACK_RESOLUTION.TARGET_ALREADY_DEAD,
         present: (event, context) => context.appendAugmentEffect(event)
     }),
-    ACTION_PARTICLE: new ClientFeedbackEventDefinition({
-        predicate: (event) => EVENT_GROUP.ACTION_STARTED.includes(event.eventType),
+    SPELL_PARTICLE: new ClientFeedbackEventDefinition({
+        predicate: (event) => EVENT_GROUP.SPELL_STARTED.includes(event.eventType),
         present: (event, context) =>
             context.appendParticle(event, {
-                presetId: actionParticlePreset(event.actionId ?? event.parameters?.actionId)
+                presetId: spellParticlePreset(event.spellId ?? event.parameters?.spellId)
             })
     }),
     SPAWN_PARTICLE: new ClientFeedbackEventDefinition({
@@ -285,24 +258,18 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
     SHOT_ENDED_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) => EVENT_GROUP.SHOT_ENDED.includes(event.eventType),
         present: (event, context) =>
-            context.appendParticle(event, { presetId: CLIENT_FEEDBACK_PRESET_ID.PLAYER_SHOT_IMPACT })
+            context.appendParticle(event, {
+                presetId:
+                    event.spellId === SPELL_ID.METEOR
+                        ? CLIENT_FEEDBACK_PRESET_ID.ARTILLERY_STRIKE
+                        : CLIENT_FEEDBACK_PRESET_ID.PLAYER_SHOT_IMPACT
+            })
     }),
     SHIELD_BLOCK_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) =>
             EVENT_GROUP.RESOLVE.includes(event.eventType) &&
             event.resolution === CLIENT_FEEDBACK_RESOLUTION.SHIELD_BLOCKED,
         present: (event, context) => context.appendParticle(event, { presetId: CLIENT_FEEDBACK_PRESET_ID.SHIELD_BLOCK })
-    }),
-    DAMAGE_REFLECT_PARTICLE: new ClientFeedbackEventDefinition({
-        predicate: (event) =>
-            EVENT_GROUP.RESOLVE.includes(event.eventType) &&
-            eventEffectId(event) === CLIENT_FEEDBACK_EFFECT_ID.DAMAGE_REFLECT,
-        present: (event, context) =>
-            context.appendParticle(event, {
-                presetId: CLIENT_FEEDBACK_PRESET_ID.DAMAGE_REFLECT,
-                position: event.sourcePosition ?? event.parameters?.sourcePosition,
-                targetPosition: event.position ?? event.parameters?.position
-            })
     }),
     ELECTRIFIED_ROPE_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) => eventEffectId(event) === CLIENT_FEEDBACK_EFFECT_ID.ELECTRIFIED_ROPE,

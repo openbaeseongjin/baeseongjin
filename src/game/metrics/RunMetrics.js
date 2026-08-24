@@ -9,7 +9,7 @@ export class RunMetrics {
         this.damageTaken = 0;
         this.ropeCuts = 0;
         this.defeats = 0;
-        this.firstFoundationSeconds = null;
+        this.firstAugmentSeconds = null;
         this.currentProgressId = null;
         this.progressActiveSeconds = new Map();
         this.progressClearSeconds = new Map();
@@ -42,8 +42,8 @@ export class RunMetrics {
         this.recordProgressClear(areaId);
     }
 
-    recordFirstFoundation() {
-        if (this.firstFoundationSeconds === null) this.firstFoundationSeconds = this.activeSeconds;
+    recordFirstAugment() {
+        if (this.firstAugmentSeconds === null) this.firstAugmentSeconds = this.activeSeconds;
     }
 
     recordEnemyOutcomes(playerEvents) {
@@ -76,7 +76,7 @@ export class RunMetrics {
             damageTaken: this.damageTaken,
             ropeCuts: this.ropeCuts,
             defeats: this.defeats,
-            firstFoundationSeconds: this.firstFoundationSeconds,
+            firstAugmentSeconds: this.firstAugmentSeconds,
             progressKind: this.progressKind,
             progressTiming
         };

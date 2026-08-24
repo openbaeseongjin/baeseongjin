@@ -14,7 +14,6 @@ export class PlayerRopeFeedbackLifecycle {
     constructor({ config = PLAYER_ROPE_FEEDBACK_CONFIG } = {}) {
         this.config = config;
         this.previousByPlayerId = new Map();
-        this.lastActionSequenceByPlayerId = new Map();
         this.suppressedDetachRemainingByPlayerId = new Map();
     }
 
@@ -40,14 +39,6 @@ export class PlayerRopeFeedbackLifecycle {
         return { player, dt, previous, current, velocity, shot, swing };
     }
 
-    actionSequence(player) {
-        const sequence = player.actionState?.actionSequence;
-        if (!Number.isSafeInteger(sequence)) return null;
-        const previous = this.lastActionSequenceByPlayerId.get(player.id);
-        this.lastActionSequenceByPlayerId.set(player.id, sequence);
-        return { previous, sequence };
-    }
-
     suppressDetach(playerId, seconds = this.config.SUPPRESS_DETACH_SECONDS) {
         if (playerId) this.suppressedDetachRemainingByPlayerId.set(playerId, seconds);
     }
@@ -66,8 +57,6 @@ export class PlayerRopeFeedbackLifecycle {
 
     removeMissing(players) {
         const activeIds = new Set(players.map(({ id }) => id));
-        for (const playerId of this.lastActionSequenceByPlayerId.keys())
-            if (!activeIds.has(playerId)) this.lastActionSequenceByPlayerId.delete(playerId);
         for (const playerId of this.previousByPlayerId.keys())
             if (!activeIds.has(playerId)) this.previousByPlayerId.delete(playerId);
         for (const playerId of this.suppressedDetachRemainingByPlayerId.keys())

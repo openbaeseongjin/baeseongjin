@@ -24,15 +24,14 @@ export const withPlayerRenderSnapshot = createRenderSnapshotCapabilityMixin({
                 fireInterval: this.weapon.fireInterval,
                 cooldown: this.weapon.cooldown
             },
-            foundationAugment: this.foundation.selectedId,
-            selectedAugmentIds: this.foundation.selectedIds,
-            calibrationVerifiedSourceIds: Object.freeze([...this.calibrationVerifiedSourceIds]),
+            selectedAugmentIds: this.augmentLoadout.selectedAugmentIds,
             augmentRuntimeState: Object.freeze({
-                ...this.foundation.snapshot(),
+                ...this.augmentLoadout.snapshot(),
+                experience: this.experience.snapshot(),
                 combat: this.augmentCombat.snapshot()
             }),
-            actionState: this.augmentCombat.actionState?.snapshot() ?? null,
-            statusEffects: this.statusEffects.snapshot()
+            statusEffects: this.statusEffects.snapshot(),
+            experience: this.experience.snapshot()
         };
     }
 });

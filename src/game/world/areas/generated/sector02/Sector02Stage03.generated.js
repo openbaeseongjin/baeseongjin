@@ -38,8 +38,7 @@ const SPEC = {
     "cameraZones": [],
     "checkpoints": [],
     "cueIds": [
-      "residential-service-node",
-      "second-generic-augment-source"
+      "residential-service-node"
     ],
     "entry": {
       "id": "sector-02-03:entry",
@@ -69,37 +68,12 @@ const SPEC = {
     "nextAreaId": "sector-02-04",
     "objectives": [
       {
-        "id": "sector-02-03:specialization-selected",
-        "sourceObjectId": "sector-02-03:specialization-node",
-        "type": "interact-choice"
-      },
-      {
         "id": "sector-02-03:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-02-03:specialization-selected"
-        ],
         "sourceObjectId": "sector-02-03:exit-panel",
         "type": "interact"
       }
     ],
     "objects": [
-      {
-        "coordinateAnchor": "center",
-        "cueIds": [
-          "grapple-device-detected",
-          "emergency-configuration-active"
-        ],
-        "id": "sector-02-03:specialization-node",
-        "interactionRadius": 72,
-        "kind": "augment-node",
-        "objectiveId": "sector-02-03:specialization-selected",
-        "position": {
-          "x": 256,
-          "y": -256
-        },
-        "presentationId": "world-object:augment-node",
-        "stableSourceId": "sector-02-03:specialization-node"
-      },
       {
         "activationSpec": {
           "anchor": "center",
@@ -145,10 +119,7 @@ const SPEC = {
           "x": 468,
           "y": -440
         },
-        "presentationId": "world-object:gate-panel",
-        "requiredObjectiveIds": [
-          "sector-02-03:specialization-selected"
-        ]
+        "presentationId": "world-object:gate-panel"
       },
       {
         "coordinateAnchor": "bottom-center",
@@ -210,9 +181,7 @@ const SPEC = {
     "scannerGroups": [],
     "sectorId": "sector-02",
     "storyTriggers": [
-      "augment-service-node",
-      "grapple-device-detected",
-      "emergency-configuration-active"
+      "grapple-device-detected"
     ],
     "subtitle": "AUGMENT SERVICE",
     "surfaces": [
