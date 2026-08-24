@@ -38,6 +38,8 @@ import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
 import { DEFAULT_ENEMY_SPRITE_SECTOR_ID } from "./sprites/EnemySpriteCatalog.js";
 import { EnemySpritePackageCatalog } from "./sprites/EnemySpritePackageCatalog.js";
+import { DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION } from "./boss/ContinuityWardenSpriteCatalog.js";
+import { ContinuityWardenSpriteObjectRendererCatalog } from "./boss/ContinuityWardenSpriteObjectRenderer.js";
 
 function authoredEnvironmentAtlases(authoredAreaEnvironmentDefinitions) {
     return Object.fromEntries(
@@ -57,6 +59,8 @@ export class SpriteSceneResourceBundle {
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
         environmentAssets = null,
         authoredAreaEnvironmentDefinitions = Object.freeze({}),
+        continuityWardenDefinition = DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION,
+        continuityWardenAssets = null,
         ImageClass = globalThis.Image
     } = {}) {
         this.playerDefinition = playerDefinition;
@@ -92,6 +96,15 @@ export class SpriteSceneResourceBundle {
                 autoStart: false,
                 ImageClass
             });
+        this.continuityWardenDefinition = continuityWardenDefinition;
+        this.continuityWardenAssets =
+            continuityWardenAssets ??
+            new SpriteImageAssetSet({
+                atlases: continuityWardenDefinition.atlases,
+                autoStart: false,
+                ImageClass,
+                fallbackLabel: "Continuity Warden polygon fallback"
+            });
     }
 
     environmentDefinitionForArea(areaId) {
@@ -116,6 +129,17 @@ export class SpriteSceneResourceBundle {
         return this.snapshotForArea({ areaId, sectorId });
     }
 
+    async prepareBossStage({ areaId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
+        const environmentAtlasIds = this.environmentAtlasIdsForArea(areaId);
+        await Promise.all([
+            this.preparePlayer(),
+            this.enemySpritePackages.prepareSector(sectorId),
+            this.environmentAssets.prepare(environmentAtlasIds),
+            this.continuityWardenAssets.prepare()
+        ]);
+        return this.snapshotForArea({ areaId, sectorId });
+    }
+
     prepareRemaining({ areaId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
         const currentEnvironmentAtlasIds = new Set(this.environmentAtlasIdsForArea(areaId));
         const remainingEnvironmentAtlasIds = Object.keys(this.environmentAssets.assets).filter(
@@ -123,7 +147,8 @@ export class SpriteSceneResourceBundle {
         );
         return Promise.all([
             this.enemySpritePackages.prepareRemaining([sectorId]),
-            this.environmentAssets.prepare(remainingEnvironmentAtlasIds)
+            this.environmentAssets.prepare(remainingEnvironmentAtlasIds),
+            this.continuityWardenAssets.prepare()
         ]).then(() => this.snapshot());
     }
 
@@ -131,7 +156,8 @@ export class SpriteSceneResourceBundle {
         await Promise.all([
             this.playerAssets.prepare(),
             this.enemySpritePackages.prepare(),
-            this.environmentAssets.prepare()
+            this.environmentAssets.prepare(),
+            this.continuityWardenAssets.prepare()
         ]);
         return this.snapshot();
     }
@@ -147,7 +173,8 @@ export class SpriteSceneResourceBundle {
                     ])
                 )
             ),
-            environment: this.environmentAssets.status
+            environment: this.environmentAssets.status,
+            continuityWarden: this.continuityWardenAssets.status
         });
     }
 
@@ -155,7 +182,8 @@ export class SpriteSceneResourceBundle {
         return Object.freeze({
             player: this.playerAssets.status,
             enemies: this.enemySpritePackages.statusForSector(sectorId),
-            environment: this.environmentAssets.statusFor(this.environmentAtlasIdsForArea(areaId))
+            environment: this.environmentAssets.statusFor(this.environmentAtlasIdsForArea(areaId)),
+            continuityWarden: this.continuityWardenAssets.status
         });
     }
 }
@@ -185,6 +213,8 @@ export class SpriteSceneRenderer {
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
         environmentAssets = null,
         authoredAreaEnvironmentDefinitions = Object.freeze({}),
+        continuityWardenDefinition = DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION,
+        continuityWardenAssets = null,
         resources = null
     } = {}) {
         this.profile = "sprite";
@@ -203,7 +233,9 @@ export class SpriteSceneRenderer {
                 enemySpritePackages,
                 environmentDefinition,
                 environmentAssets,
-                authoredAreaEnvironmentDefinitions
+                authoredAreaEnvironmentDefinitions,
+                continuityWardenDefinition,
+                continuityWardenAssets
             });
         this.playerDefinition = this.resources.playerDefinition;
         this.playerAssets = this.resources.playerAssets;
@@ -213,6 +245,8 @@ export class SpriteSceneRenderer {
         this.environmentDefinition = this.resources.environmentDefinition;
         this.authoredAreaEnvironmentDefinitions = this.resources.authoredAreaEnvironmentDefinitions;
         this.environmentAssets = this.resources.environmentAssets;
+        this.continuityWardenDefinition = this.resources.continuityWardenDefinition;
+        this.continuityWardenAssets = this.resources.continuityWardenAssets;
         this.environmentDiagnostics = null;
 
         const polygonBackdrop = new BackdropRenderer();
@@ -226,10 +260,15 @@ export class SpriteSceneRenderer {
             polygonTerrain
         });
 
+        const bossObjectRenderers = new ContinuityWardenSpriteObjectRendererCatalog({
+            assets: this.continuityWardenAssets,
+            definition: this.continuityWardenDefinition
+        });
+
         const actorRenderers = new CameraWorldRenderer([
             new AuthoredAreaStructureRenderer(),
             new AuthoredWorldObjectRenderer(),
-            new BossStageWorldRenderer(),
+            new BossStageWorldRenderer({ objectRenderer: bossObjectRenderers.rendererFor.bind(bossObjectRenderers) }),
             new AccessScanSurfaceRenderer(),
             new HardpointJammerSurfaceRenderer(),
             new AccessModuleSignalRenderer(),

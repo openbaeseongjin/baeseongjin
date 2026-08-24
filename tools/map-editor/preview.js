@@ -105,6 +105,13 @@ async function preparePreviewGraphics(areaId) {
     void previewResources.prepareRemaining(identity);
 }
 
+async function prepareBossPreviewGraphics(areaId) {
+    if (!previewResources) return;
+    const identity = previewGraphicsIdentity(areaId);
+    await previewResources.prepareBossStage(identity);
+    void previewResources.prepareRemaining(identity);
+}
+
 async function createPreview() {
     reloadButton.disabled = true;
     document.body.classList.add("is-loading");
@@ -121,7 +128,7 @@ async function createPreview() {
                 preview.spec.sourceAreaId
             );
             const renderer = rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions });
-            await preparePreviewGraphics(preview.spec.sourceAreaId);
+            await prepareBossPreviewGraphics(preview.spec.sourceAreaId);
             currentApp = new BossStagePreviewGameApp({
                 canvas,
                 renderer,

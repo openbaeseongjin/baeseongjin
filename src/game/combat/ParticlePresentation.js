@@ -2,6 +2,15 @@ const ACTIVE_PARTICLE_CAP = 192;
 const HIGH_PRIORITY_HEADROOM = 48;
 const EMITTER_PARTICLE_BUDGET = 24;
 
+const BOSS_WARDEN_ACTIVE_PRESET = Object.freeze({
+    emission: "area",
+    motion: "directional",
+    shape: "streak",
+    lifetime: 0.22,
+    fadeStart: 0.04,
+    blend: "additive"
+});
+
 const PARTICLE_PRESET_DEFINITIONS = {
     "player-dash": {
         emission: "stream",
@@ -100,6 +109,53 @@ const PARTICLE_PRESET_DEFINITIONS = {
         lifetime: 0.45,
         gravity: 190,
         glow: 0.28
+    },
+    "boss-warden-melee-active": {
+        ...BOSS_WARDEN_ACTIVE_PRESET,
+        palette: ["#fff7ed", "#fde68a", "#fb923c"],
+        count: 8,
+        size: 5,
+        speed: 105,
+        spread: 0.82,
+        opacity: 0.82,
+        glow: 0.32
+    },
+    "boss-warden-beam-active": {
+        ...BOSS_WARDEN_ACTIVE_PRESET,
+        palette: ["#fff1f2", "#f9a8d4", "#fb7185"],
+        count: 12,
+        size: 5.5,
+        speed: 265,
+        spread: 0.1,
+        opacity: 0.88,
+        glow: 0.48
+    },
+    "boss-warden-melee-impact": {
+        emission: "burst",
+        motion: "ballistic",
+        shape: "shard",
+        palette: ["#fff7ed", "#fde68a", "#fb923c"],
+        count: 10,
+        size: 5,
+        speed: 190,
+        spread: 2.1,
+        lifetime: 0.32,
+        gravity: 180,
+        glow: 0.3,
+        blend: "additive"
+    },
+    "boss-warden-beam-impact": {
+        emission: "burst",
+        motion: "directional",
+        shape: "streak",
+        palette: ["#fff1f2", "#f9a8d4", "#fb7185"],
+        count: 9,
+        size: 4.5,
+        speed: 235,
+        spread: 0.9,
+        lifetime: 0.28,
+        glow: 0.42,
+        blend: "additive"
     },
     "rope-cut": {
         emission: "burst",

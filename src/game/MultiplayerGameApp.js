@@ -6,7 +6,7 @@ import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, resolveMobileCameraZoom } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
-import { createBossStagePresentation } from "../render/boss/BossStagePresentation.js";
+import { createBossPresentationEvents, createBossStagePresentation } from "../render/boss/BossStagePresentation.js";
 import { bossStageSpecById } from "./boss-authoring/BossStageCatalog.js";
 import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
@@ -112,6 +112,7 @@ export class MultiplayerGameApp {
         this.statusFeedback = new ClientStatusFeedback({ viewerId: this.authority.playerId });
         this.checkpointFeedback = null;
         this.playerPresentationEvents = [];
+        this.bossPresentationEvents = [];
         const presentationDefinition =
             playerDefinition ?? this.renderer.sceneRenderer?.playerDefinition ?? DEFAULT_PLAYER_SPRITE_DEFINITION;
         const deathPresentation = presentationDefinition.presentationFor("death");
@@ -285,6 +286,7 @@ export class MultiplayerGameApp {
             cssHeight: this.renderer.cssHeight
         }).worldBounds;
         const events = this.authority.drainEvents();
+        this.bossPresentationEvents.push(...createBossPresentationEvents(events));
         this.statusFeedback.update(dt);
         this.statusFeedback.apply(events);
         this.worldUnlockPresentation.prepare(events, {
@@ -443,6 +445,11 @@ export class MultiplayerGameApp {
             this.combatFeedback.syncContinuous(
                 {
                     ...presentationState,
+                    bossStage:
+                        current.state.bossStage ??
+                        current.state.bossStageRuntime ??
+                        current.state.bossRuntime ??
+                        presentationState.bossStage,
                     players: current.state.players.map((player) =>
                         player.id === this.authority.playerId ? presentationState.player : player
                     ),
@@ -587,7 +594,8 @@ export class MultiplayerGameApp {
         const localBossStage = localBossStageSnapshot(bossStageSnapshot, player);
         const bossStagePresentation = createBossStagePresentation(
             localBossStage,
-            bossStageSpecById(localBossStage?.stageId ?? localBossStage?.id ?? localBossStage?.encounterId)
+            bossStageSpecById(localBossStage?.stageId ?? localBossStage?.id ?? localBossStage?.encounterId),
+            Object.freeze(this.bossPresentationEvents.splice(0))
         );
         this.statusFeedback.apply([base.eventFlash]);
         this.queuePlayerPresentationEvents([base.eventFlash]);

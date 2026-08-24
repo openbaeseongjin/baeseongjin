@@ -65,6 +65,10 @@ export const CLIENT_FEEDBACK_PRESET_ID = Object.freeze({
     ENEMY_MUZZLE: "enemy-muzzle",
     ENEMY_IMPACT: "enemy-impact",
     ENEMY_DEFEAT: "enemy-defeat",
+    BOSS_WARDEN_MELEE_ACTIVE: "boss-warden-melee-active",
+    BOSS_WARDEN_BEAM_ACTIVE: "boss-warden-beam-active",
+    BOSS_WARDEN_MELEE_IMPACT: "boss-warden-melee-impact",
+    BOSS_WARDEN_BEAM_IMPACT: "boss-warden-beam-impact",
     WIND_FLOW: "wind-flow",
     SHIELD_BLOCK: "shield-block",
     ROPE_CONTACT: "rope-contact",
@@ -131,6 +135,31 @@ const IMPACT_STATE = Object.freeze({
     DEFAULT: Object.freeze({ lifetime: 0.12, strength: 2.5 })
 });
 
+const BOSS_WARDEN_HAZARD_FAMILY = Object.freeze({
+    MELEE: "melee",
+    BEAM: "beam"
+});
+
+const BOSS_WARDEN_HAZARD_FAMILY_BY_KIND = Object.freeze({
+    "baton-1": BOSS_WARDEN_HAZARD_FAMILY.MELEE,
+    "baton-2": BOSS_WARDEN_HAZARD_FAMILY.MELEE,
+    "overhead-slam": BOSS_WARDEN_HAZARD_FAMILY.MELEE,
+    "back-swing": BOSS_WARDEN_HAZARD_FAMILY.MELEE,
+    "counter-bash": BOSS_WARDEN_HAZARD_FAMILY.MELEE,
+    "security-beam-low": BOSS_WARDEN_HAZARD_FAMILY.BEAM,
+    "security-beam-high": BOSS_WARDEN_HAZARD_FAMILY.BEAM
+});
+
+const BOSS_WARDEN_IMPACT_PRESET_BY_FAMILY = Object.freeze({
+    [BOSS_WARDEN_HAZARD_FAMILY.MELEE]: CLIENT_FEEDBACK_PRESET_ID.BOSS_WARDEN_MELEE_IMPACT,
+    [BOSS_WARDEN_HAZARD_FAMILY.BEAM]: CLIENT_FEEDBACK_PRESET_ID.BOSS_WARDEN_BEAM_IMPACT
+});
+
+const BOSS_WARDEN_IMPACT_DIRECTION_BY_FAMILY = Object.freeze({
+    [BOSS_WARDEN_HAZARD_FAMILY.MELEE]: Object.freeze({ x: 0, y: -1 }),
+    [BOSS_WARDEN_HAZARD_FAMILY.BEAM]: Object.freeze({ x: 1, y: 0 })
+});
+
 const AUGMENT_EFFECT_LIFETIME = Object.freeze({ DEFAULT: 0.45 });
 
 export class ClientFeedbackEventDefinition {
@@ -179,6 +208,18 @@ export function eventEffectId(event) {
 
 export function eventSourceKind(event) {
     return event.parameters?.sourceKind;
+}
+
+export function bossWardenImpactPreset(event) {
+    const hazardKind = event.hazardKind ?? event.parameters?.sourceType;
+    const family = BOSS_WARDEN_HAZARD_FAMILY_BY_KIND[hazardKind];
+    return BOSS_WARDEN_IMPACT_PRESET_BY_FAMILY[family] ?? null;
+}
+
+export function bossWardenImpactDirection(event) {
+    const hazardKind = event.hazardKind ?? event.parameters?.sourceType;
+    const family = BOSS_WARDEN_HAZARD_FAMILY_BY_KIND[hazardKind];
+    return BOSS_WARDEN_IMPACT_DIRECTION_BY_FAMILY[family] ?? CLIENT_FEEDBACK_EVENT_CONFIG.DEFAULT_DIRECTION;
 }
 
 export function createClientFeedbackEvent(event, resolution, index = 0) {
@@ -278,6 +319,16 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
     ELECTRIFIED_STATUS_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) => eventEffectId(event) === CLIENT_FEEDBACK_EFFECT_ID.ELECTRIFIED_STATUS,
         present: (event, context) => context.appendParticle(event, { presetId: CLIENT_FEEDBACK_PRESET_ID.ROPE_CONTACT })
+    }),
+    BOSS_WARDEN_HIT_PARTICLE: new ClientFeedbackEventDefinition({
+        predicate: (event) =>
+            event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.BOSS_PLAYER_HIT && Boolean(bossWardenImpactPreset(event)),
+        present: (event, context) =>
+            context.appendParticle(event, {
+                presetId: bossWardenImpactPreset(event),
+                position: event.position,
+                direction: bossWardenImpactDirection(event)
+            })
     }),
     ARTILLERY_HIT_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) =>

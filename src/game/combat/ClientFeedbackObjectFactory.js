@@ -2,6 +2,7 @@ import { EnemyCombatFeedback } from "./EnemyCombatFeedback.js";
 import { ProjectileCombatFeedback } from "./ProjectileCombatFeedback.js";
 import { WindCombatFeedback } from "./WindCombatFeedback.js";
 import { PlayerRopeCombatFeedback } from "./PlayerRopeCombatFeedback.js";
+import { ContinuityWardenCombatFeedback } from "./ContinuityWardenCombatFeedback.js";
 
 export function createClientFeedbackObjects() {
     const playerRope = new PlayerRopeCombatFeedback();
@@ -10,6 +11,7 @@ export function createClientFeedbackObjects() {
             new EnemyCombatFeedback(),
             new WindCombatFeedback(),
             new ProjectileCombatFeedback(),
+            new ContinuityWardenCombatFeedback(),
             playerRope
         ]),
         playerRope

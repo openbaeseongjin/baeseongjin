@@ -15,11 +15,20 @@ export class ContinuousFeedbackEmitter {
         this.frame = { dt, visibleWorldBounds, effectBuffer };
     }
 
-    emit(id, presetId, position, direction, options = {}) {
+    emit(
+        id,
+        presetId,
+        position,
+        direction,
+        { intervalSeconds = this.config.EMITTER_INTERVAL_SECONDS, ...particleOptions } = {}
+    ) {
         if (!position) return;
+        if (!Number.isFinite(intervalSeconds) || intervalSeconds <= 0) {
+            throw new Error("ContinuousFeedbackEmitter intervalSeconds must be positive");
+        }
         this.activeIds.add(id);
         const elapsed = (this.elapsedById.get(id) ?? this.config.INITIAL_ELAPSED_SECONDS) + this.frame.dt;
-        if (elapsed < this.config.EMITTER_INTERVAL_SECONDS) {
+        if (elapsed < intervalSeconds) {
             this.elapsedById.set(id, elapsed);
             return;
         }
@@ -34,7 +43,7 @@ export class ContinuousFeedbackEmitter {
             density: this.config.EMITTER_DENSITY,
             priority: this.config.EMITTER_PRIORITY,
             visibleWorldBounds: this.frame.visibleWorldBounds,
-            ...options
+            ...particleOptions
         });
     }
 
