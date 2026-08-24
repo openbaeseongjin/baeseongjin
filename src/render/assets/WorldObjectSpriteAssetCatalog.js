@@ -1,18 +1,36 @@
 import { ImageAsset } from "./ImageAsset.js";
 
-function spriteEntries(presentations, { ImageClass, autoStart }) {
-    return Object.entries(presentations)
-        .filter(([, presentation]) => Boolean(presentation.sprite))
-        .map(([presentationId, presentation]) => [
-            presentationId,
-            new ImageAsset({
-                source: presentation.sprite.source,
-                expectedSize: presentation.sprite.size,
-                assetLabel: `World object ${presentationId}`,
-                ImageClass,
-                autoStart
-            })
-        ]);
+const DEFAULT_SPRITE_STATE = "default";
+
+function spriteDefinitions(presentation) {
+    if (presentation.sprites) return presentation.sprites;
+    return presentation.sprite ? Object.freeze({ [DEFAULT_SPRITE_STATE]: presentation.sprite }) : null;
+}
+
+function stateAssets(presentationId, presentation, { ImageClass, autoStart }) {
+    const definitions = spriteDefinitions(presentation);
+    if (!definitions) return null;
+    return Object.freeze(
+        Object.fromEntries(
+            Object.entries(definitions).map(([state, sprite]) => [
+                state,
+                new ImageAsset({
+                    source: sprite.source,
+                    expectedSize: sprite.size,
+                    assetLabel: `World object ${presentationId} (${state})`,
+                    ImageClass,
+                    autoStart
+                })
+            ])
+        )
+    );
+}
+
+function spriteEntries(presentations, options) {
+    return Object.entries(presentations).flatMap(([presentationId, presentation]) => {
+        const assets = stateAssets(presentationId, presentation, options);
+        return assets ? [[presentationId, assets]] : [];
+    });
 }
 
 export class WorldObjectSpriteAssetCatalog {
@@ -23,12 +41,12 @@ export class WorldObjectSpriteAssetCatalog {
         this.assets = Object.freeze(Object.fromEntries(spriteEntries(presentations, { ImageClass, autoStart })));
     }
 
-    assetFor(presentationId) {
-        return this.assets[presentationId] ?? null;
+    assetFor(presentationId, state = DEFAULT_SPRITE_STATE) {
+        return this.assets[presentationId]?.[state] ?? null;
     }
 
-    imageFor(presentationId) {
-        const asset = this.assetFor(presentationId);
+    imageFor(presentationId, state = DEFAULT_SPRITE_STATE) {
+        const asset = this.assetFor(presentationId, state);
         return asset?.status === "ready" ? asset.image : null;
     }
 }

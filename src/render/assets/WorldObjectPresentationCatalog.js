@@ -6,6 +6,41 @@ const STORY_DISPLAY_SPRITE = Object.freeze({
     source: runtimeAssetUrl("objects", "story-display-universal", "story-display.png"),
     size: STORY_DISPLAY_SIZE
 });
+const EXIT_GATE_SIZE = Object.freeze({ width: 64, height: 64 });
+const GATE_CONTROL_PANEL_SIZE = Object.freeze({ width: 48, height: 48 });
+
+export const WORLD_OBJECT_SPRITE_STATE = Object.freeze({
+    CLOSED: "closed",
+    OPENED: "opened"
+});
+
+function statefulObjectSprites(assetId, fileByState, size) {
+    return Object.freeze(
+        Object.fromEntries(
+            Object.entries(fileByState).map(([state, filePath]) => [
+                state,
+                Object.freeze({ source: runtimeAssetUrl("objects", assetId, filePath), size })
+            ])
+        )
+    );
+}
+
+const EXIT_GATE_SPRITES = statefulObjectSprites(
+    "exit-gate-universal",
+    Object.freeze({
+        [WORLD_OBJECT_SPRITE_STATE.CLOSED]: "gate-closed.png",
+        [WORLD_OBJECT_SPRITE_STATE.OPENED]: "gate-opened.png"
+    }),
+    EXIT_GATE_SIZE
+);
+const GATE_CONTROL_PANEL_SPRITES = statefulObjectSprites(
+    "gate-control-panel-universal",
+    Object.freeze({
+        [WORLD_OBJECT_SPRITE_STATE.CLOSED]: "panel-closed.png",
+        [WORLD_OBJECT_SPRITE_STATE.OPENED]: "panel-opened.png"
+    }),
+    GATE_CONTROL_PANEL_SIZE
+);
 
 const DEFAULT_DEFINITIONS = {
     "world-object:grapple-landmark": { renderMode: "mock-shape", color: "#22d3ee", radius: 15 },
@@ -15,7 +50,8 @@ const DEFAULT_DEFINITIONS = {
         renderMode: "mock-shape",
         color: "#fbbf24",
         radius: 18,
-        size: { width: 44, height: 45 }
+        size: GATE_CONTROL_PANEL_SIZE,
+        sprites: GATE_CONTROL_PANEL_SPRITES
     },
     "world-object:augment-node": {
         renderMode: "mock-shape",
@@ -27,7 +63,8 @@ const DEFAULT_DEFINITIONS = {
         renderMode: "mock-shape",
         color: "#fb7185",
         radius: 28,
-        size: { width: 52, height: 62 }
+        size: EXIT_GATE_SIZE,
+        sprites: EXIT_GATE_SPRITES
     },
     "world-object:wind-source": { renderMode: "mock-shape", color: "#67e8f9", radius: 64 },
     "world-object:test-target": {

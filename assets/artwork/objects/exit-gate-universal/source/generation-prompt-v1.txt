@@ -1,0 +1,24 @@
+Create one isolated 2D pixel-art game asset concept: a universal EXIT GATE for a side-view platform action game set in a sealed vertical corporate city. This same gate must look natural in all six sectors: waste service levels, industrial maintenance, worker/commercial district, upper residential, corporate control, and rooftop evacuation.
+
+Composition and output:
+- one single closed gate, front orthographic view, perfectly centered
+- true transparent background with clean alpha; no wall, floor, scenery, shadow plane, vignette, border, UI frame, or prop beside it
+- a bottom-standing silhouette with a flat, clearly readable floor contact, designed for a bottom-center anchor
+- portrait object proportions, intended to normalize later to a 64×64 logical pixel canvas with about 52×62 opaque pixels
+- crisp deliberate pixel clusters, hard stepped edges, nearest-neighbor pixel-art appearance, no antialiasing, no soft painterly gradients
+
+Design:
+- universal corporate-industrial bulkhead, restrained and neutral rather than sector-themed
+- dark graphite and iron frame, broad chamfered outer casing, two large vertical sliding door leaves, one bold central seam, one sturdy horizontal lock bar
+- state shown as CLOSED / LOCKED by the physical lock bar and closed leaves, not by color alone
+- only a few large readable masses; minimal interior detail that will survive at roughly 52×62 pixels
+- limited palette: near-black, graphite, blue-gray iron, one muted amber lock indicator, tiny restrained cyan service indicator
+- stronger silhouette and contrast than a background decoration because it is a major interactive exit
+
+Avoid:
+- text, letters, numbers, arrows, EXIT label, logos, branding, icons, watermark
+- hazard stripes, skulls, warning chevrons, ornate sci-fi greebles, dense vents, exposed pipe clusters, loose cables, residential furniture, storefront motifs, military bunker styling
+- bright sector signature colors, red alarm wash, neon outline everywhere, glossy 3D rendering, realistic lighting
+- open doorway or visible room behind it
+
+Deliver only the single transparent pixel-art gate cutout.

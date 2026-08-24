@@ -1,8 +1,16 @@
 # Runtime object assets
 
-장애물과 상호작용 오브젝트의 검증된 runtime package를 `<object-id>/`에 둔다. 아직 공개 manifest·loader·validator 계약은 없으며, 계약이 생기기 전에는 [`assets/artwork/objects/`](../../artwork/README.md)에만 납품한다.
+장애물과 상호작용 오브젝트의 검증된 runtime package를 `<object-id>/`에 둔다. 아직 공개 manifest·validator 계약은 없지만 정적 PNG는 `RuntimeAssetCatalog`의 stable category·asset ID와 `WorldObjectSpriteAssetCatalog`의 실제 크기 검사를 통해 로드할 수 있다.
 
 그래픽 package에는 충돌체, 피해량과 물리 값을 넣지 않는다.
+
+## 현재 공용 Runtime sprite
+
+- `story-display-universal`: `64×48` 단일 상태 정보 표지판.
+- `exit-gate-universal`: `64×64` 닫힘·열림 출구문.
+- `gate-control-panel-universal`: `48×48` 닫힘·열림 조작 패널.
+- 세 package는 Sector 01~06 공용 presentation ID를 사용하며 authored 좌표·anchor와 gameplay 상태를 변경하지 않는다.
+- 준비 전이나 로드 실패 시 각 presentation의 기존 Canvas mock으로 독립 fallback한다.
 
 ## 현재 공용 Canvas 표현
 
