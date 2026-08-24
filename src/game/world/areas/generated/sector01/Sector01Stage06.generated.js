@@ -36,16 +36,16 @@ const SPEC = {
           "label": "D",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": -448,
-        "y": -768
+        "x": -690,
+        "y": -825
       },
       "objectIndex": 1,
       "surfaceIndex": 12,
       "target": {
         "id": "sector-01-06:anchor-d-surface",
         "properties": {},
-        "x": -448,
-        "y": -768
+        "x": -690,
+        "y": -825
       }
     },
     {
@@ -93,16 +93,16 @@ const SPEC = {
           "coordinateAnchor": "center",
           "presentationId": "world-object:structural-grapple-joint"
         },
-        "x": 64,
-        "y": -832
+        "x": 260,
+        "y": -830
       },
       "objectIndex": 4,
       "surfaceIndex": 17,
       "target": {
         "id": "sector-01-06:grip-e-surface",
         "properties": {},
-        "x": 64,
-        "y": -832
+        "x": 260,
+        "y": -830
       }
     },
     {
@@ -112,36 +112,16 @@ const SPEC = {
           "coordinateAnchor": "center",
           "presentationId": "world-object:structural-grapple-joint"
         },
-        "x": 704,
-        "y": -896
+        "x": 820,
+        "y": -910
       },
       "objectIndex": 5,
       "surfaceIndex": 18,
       "target": {
         "id": "sector-01-06:grip-f-surface",
         "properties": {},
-        "x": 704,
-        "y": -896
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-01-06:access-anchor-a",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "ACCESS A",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": -672,
-        "y": -576
-      },
-      "objectIndex": 8,
-      "surfaceIndex": 13,
-      "target": {
-        "id": "sector-01-06:access-anchor-a-surface",
-        "properties": {},
-        "x": -672,
-        "y": -576
+        "x": 820,
+        "y": -910
       }
     },
     {
@@ -182,8 +162,8 @@ const SPEC = {
       {
         "desktopZoom": 0.81,
         "id": "fan-a-crossflow",
-        "maxY": -288,
-        "minY": -544,
+        "maxY": -287,
+        "minY": -543,
         "mobileZoom": 0.62,
         "verticalPlayerRatio": 0.6
       },
@@ -348,8 +328,8 @@ const SPEC = {
         "id": "sector-01-06:access-guard-left",
         "kind": "sentry",
         "position": {
-          "x": -1728,
-          "y": -672
+          "x": -90,
+          "y": -595
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -550,25 +530,25 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": 544,
-          "y": -128
+          "x": 535,
+          "y": -25
         },
         "vertices": [
           {
-            "x": 384,
-            "y": -128
+            "x": 375,
+            "y": -25
           },
           {
-            "x": 704,
-            "y": -128
+            "x": 695,
+            "y": -25
           },
           {
-            "x": 704,
-            "y": -110
+            "x": 695,
+            "y": -7
           },
           {
-            "x": 384,
-            "y": -110
+            "x": 375,
+            "y": -7
           }
         ]
       },
@@ -602,36 +582,6 @@ const SPEC = {
         ]
       },
       {
-        "coordinateAnchor": "bottom-center",
-        "grappleable": true,
-        "id": "sector-01-06:wind-baffle",
-        "kind": "solid",
-        "oneWay": false,
-        "position": {
-          "x": -224,
-          "y": -400
-        },
-        "vertices": [
-          {
-            "x": -272,
-            "y": -688
-          },
-          {
-            "x": -176,
-            "y": -688
-          },
-          {
-            "x": -176,
-            "y": -400
-          },
-          {
-            "x": -272,
-            "y": -400
-          }
-        ],
-        "windOcclusion": true
-      },
-      {
         "coordinateAnchor": "top-center",
         "grappleable": true,
         "id": "sector-01-06:neutral-shadow-deck",
@@ -657,93 +607,6 @@ const SPEC = {
           {
             "x": -416,
             "y": -544
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-06:pulse-setup",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": -704,
-          "y": -704
-        },
-        "vertices": [
-          {
-            "x": -848,
-            "y": -704
-          },
-          {
-            "x": -560,
-            "y": -704
-          },
-          {
-            "x": -560,
-            "y": -682
-          },
-          {
-            "x": -848,
-            "y": -682
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-06:fan-b-recovery",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": 320,
-          "y": -736
-        },
-        "vertices": [
-          {
-            "x": 160,
-            "y": -736
-          },
-          {
-            "x": 480,
-            "y": -736
-          },
-          {
-            "x": 480,
-            "y": -718
-          },
-          {
-            "x": 160,
-            "y": -718
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-06:exit-approach",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": 1184,
-          "y": -992
-        },
-        "vertices": [
-          {
-            "x": 1008,
-            "y": -992
-          },
-          {
-            "x": 1360,
-            "y": -992
-          },
-          {
-            "x": 1360,
-            "y": -964
-          },
-          {
-            "x": 1008,
-            "y": -964
           }
         ]
       },

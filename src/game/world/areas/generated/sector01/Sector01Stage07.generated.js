@@ -30,42 +30,22 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "sector-01-07:anchor-d",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "D",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": 608,
-        "y": -512
-      },
-      "objectIndex": 1,
-      "surfaceIndex": 11,
-      "target": {
-        "id": "sector-01-07:anchor-d-surface",
-        "properties": {},
-        "x": 608,
-        "y": -512
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-01-07:anchor-g",
         "properties": {
           "coordinateAnchor": "center",
           "label": "G",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": -320,
-        "y": -960
+        "x": -250,
+        "y": -1035
       },
       "objectIndex": 2,
       "surfaceIndex": 12,
       "target": {
         "id": "sector-01-07:anchor-g-surface",
         "properties": {},
-        "x": -320,
-        "y": -960
+        "x": -250,
+        "y": -1035
       }
     },
     {
@@ -108,40 +88,21 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "sector-01-07:grip-e",
-        "properties": {
-          "coordinateAnchor": "center",
-          "presentationId": "world-object:structural-grapple-joint"
-        },
-        "x": 352,
-        "y": -640
-      },
-      "objectIndex": 5,
-      "surfaceIndex": 17,
-      "target": {
-        "id": "sector-01-07:grip-e-surface",
-        "properties": {},
-        "x": 352,
-        "y": -640
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-01-07:grip-f",
         "properties": {
           "coordinateAnchor": "center",
           "presentationId": "world-object:structural-grapple-joint"
         },
-        "x": -128,
-        "y": -704
+        "x": -275,
+        "y": -725
       },
       "objectIndex": 6,
       "surfaceIndex": 18,
       "target": {
         "id": "sector-01-07:grip-f-surface",
         "properties": {},
-        "x": -128,
-        "y": -704
+        "x": -275,
+        "y": -725
       }
     },
     {
@@ -170,16 +131,16 @@ const SPEC = {
           "coordinateAnchor": "center",
           "presentationId": "world-object:structural-grapple-joint"
         },
-        "x": 704,
-        "y": -1088
+        "x": 530,
+        "y": -1080
       },
       "objectIndex": 8,
       "surfaceIndex": 20,
       "target": {
         "id": "sector-01-07:far-catch-surface",
         "properties": {},
-        "x": 704,
-        "y": -1088
+        "x": 530,
+        "y": -1080
       }
     },
     {
@@ -620,25 +581,25 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": -544,
-          "y": -128
+          "x": -460,
+          "y": -25
         },
         "vertices": [
           {
-            "x": -688,
-            "y": -128
+            "x": -604,
+            "y": -25
           },
           {
-            "x": -400,
-            "y": -128
+            "x": -316,
+            "y": -25
           },
           {
-            "x": -400,
-            "y": -110
+            "x": -316,
+            "y": -7
           },
           {
-            "x": -688,
-            "y": -110
+            "x": -604,
+            "y": -7
           }
         ]
       },
@@ -730,36 +691,6 @@ const SPEC = {
         ]
       },
       {
-        "coordinateAnchor": "bottom-center",
-        "grappleable": true,
-        "id": "sector-01-07:pressure-baffle",
-        "kind": "solid",
-        "oneWay": false,
-        "position": {
-          "x": -832,
-          "y": -704
-        },
-        "vertices": [
-          {
-            "x": -880,
-            "y": -928
-          },
-          {
-            "x": -784,
-            "y": -928
-          },
-          {
-            "x": -784,
-            "y": -704
-          },
-          {
-            "x": -880,
-            "y": -704
-          }
-        ],
-        "windOcclusion": true
-      },
-      {
         "coordinateAnchor": "top-center",
         "grappleable": true,
         "id": "sector-01-07:bypass-deck",
@@ -785,35 +716,6 @@ const SPEC = {
           {
             "x": 704,
             "y": -1188
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "bottom-center",
-        "grappleable": true,
-        "id": "sector-01-07:bypass-panel-body",
-        "kind": "solid",
-        "oneWay": false,
-        "position": {
-          "x": 960,
-          "y": -1216
-        },
-        "vertices": [
-          {
-            "x": 936,
-            "y": -1296
-          },
-          {
-            "x": 984,
-            "y": -1296
-          },
-          {
-            "x": 984,
-            "y": -1216
-          },
-          {
-            "x": 936,
-            "y": -1216
           }
         ]
       },

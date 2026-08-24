@@ -16,16 +16,16 @@ const SPEC = {
           "label": "A",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": 224,
-        "y": -192
+        "x": -120,
+        "y": -170
       },
       "objectIndex": 2,
       "surfaceIndex": 10,
       "target": {
         "id": "sector-01-02:anchor-a-surface",
         "properties": {},
-        "x": 224,
-        "y": -192
+        "x": -120,
+        "y": -170
       }
     },
     {
@@ -36,16 +36,16 @@ const SPEC = {
           "label": "C",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": -320,
-        "y": -560
+        "x": -270,
+        "y": -550
       },
       "objectIndex": 3,
       "surfaceIndex": 11,
       "target": {
         "id": "sector-01-02:anchor-c-surface",
         "properties": {},
-        "x": -320,
-        "y": -560
+        "x": -270,
+        "y": -550
       }
     }
   ],
@@ -157,8 +157,8 @@ const SPEC = {
         "id": "sector-01-02:maintenance-lift",
         "kind": "background-prop",
         "position": {
-          "x": 128,
-          "y": -448
+          "x": 115,
+          "y": -460
         },
         "presentationId": "world-object:background-prop"
       },
@@ -327,87 +327,29 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-01-02:r2",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": 64,
-          "y": -656
-        },
-        "vertices": [
-          {
-            "x": -48,
-            "y": -656
-          },
-          {
-            "x": 176,
-            "y": -656
-          },
-          {
-            "x": 176,
-            "y": -640
-          },
-          {
-            "x": -48,
-            "y": -640
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-02:p2",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": 64,
-          "y": -704
-        },
-        "vertices": [
-          {
-            "x": -64,
-            "y": -704
-          },
-          {
-            "x": 192,
-            "y": -704
-          },
-          {
-            "x": 192,
-            "y": -688
-          },
-          {
-            "x": -64,
-            "y": -688
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "sector-01-02:p3",
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -160,
-          "y": -768
+          "x": -60,
+          "y": -720
         },
         "vertices": [
           {
-            "x": -320,
-            "y": -768
+            "x": -220,
+            "y": -720
           },
           {
-            "x": 0,
-            "y": -768
+            "x": 100,
+            "y": -720
           },
           {
-            "x": 0,
-            "y": -744
+            "x": 100,
+            "y": -696
           },
           {
-            "x": -320,
-            "y": -744
+            "x": -220,
+            "y": -696
           }
         ]
       },
@@ -418,25 +360,25 @@ const SPEC = {
         "kind": "dead-lift-cage",
         "oneWay": false,
         "position": {
-          "x": 128,
-          "y": -608
+          "x": 175,
+          "y": -600
         },
         "vertices": [
           {
-            "x": -96,
-            "y": -608
+            "x": -49,
+            "y": -600
           },
           {
-            "x": 352,
-            "y": -608
+            "x": 399,
+            "y": -600
           },
           {
-            "x": 352,
-            "y": -288
+            "x": 399,
+            "y": -280
           },
           {
-            "x": -96,
-            "y": -288
+            "x": -49,
+            "y": -280
           }
         ]
       },

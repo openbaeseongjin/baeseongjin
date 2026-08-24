@@ -7,7 +7,25 @@ export const GENERATED_AREA_ID = "sector-01-04";
 // JSON ordering and formatting are deterministic generator output.
 // prettier-ignore
 const SPEC = {
-  "anchors": [],
+  "anchors": [
+    {
+      "landmark": {
+        "id": "sector-01-04:editor-anchor-1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "NEW"
+        },
+        "x": -190,
+        "y": -635
+      },
+      "target": {
+        "id": "sector-01-04:editor-anchor-1-surface",
+        "properties": {},
+        "x": -190,
+        "y": -635
+      }
+    }
+  ],
   "behaviorRefs": [],
   "definition": {
     "bounds": {
@@ -26,8 +44,8 @@ const SPEC = {
       {
         "desktopZoom": 1.12,
         "id": "node",
-        "maxY": -192,
-        "minY": -384,
+        "maxY": -194,
+        "minY": -386,
         "mobileZoom": 0.77,
         "verticalPlayerRatio": 0.58
       },
@@ -137,8 +155,8 @@ const SPEC = {
         "id": "sector-01-04:calibration-far-sensor",
         "kind": "background-prop",
         "position": {
-          "x": 264,
-          "y": -608
+          "x": 245,
+          "y": -525
         },
         "presentationId": "world-object:background-prop"
       },
@@ -161,8 +179,8 @@ const SPEC = {
         "id": "sector-01-04:calibration-pulse-emitter",
         "kind": "background-prop",
         "position": {
-          "x": -208,
-          "y": -576
+          "x": -315,
+          "y": -515
         },
         "presentationId": "world-object:background-prop"
       },
@@ -173,8 +191,8 @@ const SPEC = {
         "id": "sector-01-04:calibration-scan-field",
         "kind": "background-prop",
         "position": {
-          "x": -256,
-          "y": -608
+          "x": -215,
+          "y": -605
         },
         "presentationId": "world-object:background-prop"
       },
@@ -201,8 +219,8 @@ const SPEC = {
         "id": "sector-01-04:node-approach-guard",
         "kind": "sentry",
         "position": {
-          "x": 432,
-          "y": -160
+          "x": 170,
+          "y": -285
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -361,25 +379,25 @@ const SPEC = {
         "kind": "solid",
         "oneWay": false,
         "position": {
-          "x": 96,
-          "y": -160
+          "x": 350,
+          "y": -515
         },
         "vertices": [
           {
-            "x": 64,
-            "y": -416
+            "x": 318,
+            "y": -771
           },
           {
-            "x": 128,
-            "y": -416
+            "x": 382,
+            "y": -771
           },
           {
-            "x": 128,
-            "y": -160
+            "x": 382,
+            "y": -515
           },
           {
-            "x": 64,
-            "y": -160
+            "x": 318,
+            "y": -515
           }
         ]
       },
@@ -438,35 +456,6 @@ const SPEC = {
           {
             "x": -320,
             "y": -480
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-04:calibration-upper-lip",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": -256,
-          "y": -640
-        },
-        "vertices": [
-          {
-            "x": -384,
-            "y": -640
-          },
-          {
-            "x": -128,
-            "y": -640
-          },
-          {
-            "x": -128,
-            "y": -624
-          },
-          {
-            "x": -384,
-            "y": -624
           }
         ]
       },

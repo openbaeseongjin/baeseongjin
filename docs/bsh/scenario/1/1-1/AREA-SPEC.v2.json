@@ -28,16 +28,16 @@
           "label": "C",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": -96,
-        "y": -736
+        "x": -45,
+        "y": -735
       },
       "objectIndex": 1,
       "surfaceIndex": 12,
       "target": {
         "id": "sector-01-01:anchor-c-surface",
         "properties": {},
-        "x": -96,
-        "y": -736
+        "x": -45,
+        "y": -735
       }
     }
   ],
@@ -137,8 +137,8 @@
         "id": "sector-01-01:cooling-fan",
         "kind": "background-prop",
         "position": {
-          "x": -288,
-          "y": -672
+          "x": -365,
+          "y": -755
         },
         "presentationId": "world-object:background-prop"
       },
@@ -261,25 +261,25 @@
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": -304,
-          "y": -240
+          "x": -335,
+          "y": -185
         },
         "vertices": [
           {
-            "x": -400,
-            "y": -240
+            "x": -431,
+            "y": -185
           },
           {
-            "x": -208,
-            "y": -240
+            "x": -239,
+            "y": -185
           },
           {
-            "x": -208,
-            "y": -224
+            "x": -239,
+            "y": -169
           },
           {
-            "x": -400,
-            "y": -224
+            "x": -431,
+            "y": -169
           }
         ]
       },
@@ -290,25 +290,25 @@
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 50,
-          "y": -300
+          "x": 310,
+          "y": -470
         },
         "vertices": [
           {
-            "x": -62,
-            "y": -300
+            "x": 198,
+            "y": -470
           },
           {
-            "x": 162,
-            "y": -300
+            "x": 422,
+            "y": -470
           },
           {
-            "x": 162,
-            "y": -284
+            "x": 422,
+            "y": -454
           },
           {
-            "x": -62,
-            "y": -284
+            "x": 198,
+            "y": -454
           }
         ]
       },
@@ -319,54 +319,25 @@
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": -144,
-          "y": -560
+          "x": -345,
+          "y": -555
         },
         "vertices": [
           {
-            "x": -256,
-            "y": -560
+            "x": -457,
+            "y": -555
           },
           {
-            "x": -32,
-            "y": -560
+            "x": -233,
+            "y": -555
           },
           {
-            "x": -32,
-            "y": -544
+            "x": -233,
+            "y": -539
           },
           {
-            "x": -256,
-            "y": -544
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-01:r3",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": -272,
-          "y": -768
-        },
-        "vertices": [
-          {
-            "x": -368,
-            "y": -768
-          },
-          {
-            "x": -176,
-            "y": -768
-          },
-          {
-            "x": -176,
-            "y": -752
-          },
-          {
-            "x": -368,
-            "y": -752
+            "x": -457,
+            "y": -539
           }
         ]
       },
@@ -406,25 +377,25 @@
         "kind": "sealed-door",
         "oneWay": false,
         "position": {
-          "x": -95,
-          "y": -330
+          "x": -30,
+          "y": -310
         },
         "vertices": [
           {
-            "x": -159,
-            "y": -458
+            "x": -94,
+            "y": -438
           },
           {
-            "x": -31,
-            "y": -458
+            "x": 34,
+            "y": -438
           },
           {
-            "x": -31,
-            "y": -330
+            "x": 34,
+            "y": -310
           },
           {
-            "x": -159,
-            "y": -330
+            "x": -94,
+            "y": -310
           }
         ]
       },
@@ -514,7 +485,7 @@
   "stage": {
     "id": "1-1",
     "sector": 1,
-    "stage": 1,
-    "sourceAreaId": "sector-01-01"
+    "sourceAreaId": "sector-01-01",
+    "stage": 1
   }
 }

@@ -1,325 +1,411 @@
 {
-  "schemaVersion": "area-spec-v2",
-  "stage": {
-    "id": "1-6",
-    "sector": 1,
-    "stage": 6,
-    "sourceAreaId": "sector-01-06"
-  },
-  "editor": {
-    "editableDomains": [
-      "bounds",
-      "entry",
-      "exit",
-      "surfaces",
-      "anchors",
-      "recoveryRoute",
-      "enemySlots",
-      "worldObjects",
-      "wind",
-      "camera"
-    ],
-    "readOnlyDomains": [
-      "objectives",
-      "progression",
-      "story",
-      "scanner",
-      "behaviorRegistry"
-    ]
-  },
+  "anchors": [
+    {
+      "landmark": {
+        "id": "sector-01-06:anchor-a",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "A",
+          "presentationId": "world-object:grapple-landmark"
+        },
+        "x": 1120,
+        "y": -192
+      },
+      "objectIndex": 0,
+      "surfaceIndex": 11,
+      "target": {
+        "id": "sector-01-06:anchor-a-surface",
+        "properties": {},
+        "x": 1120,
+        "y": -192
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-01-06:anchor-d",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "D",
+          "presentationId": "world-object:grapple-landmark"
+        },
+        "x": -690,
+        "y": -825
+      },
+      "objectIndex": 1,
+      "surfaceIndex": 12,
+      "target": {
+        "id": "sector-01-06:anchor-d-surface",
+        "properties": {},
+        "x": -690,
+        "y": -825
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-01-06:grip-b",
+        "properties": {
+          "coordinateAnchor": "center",
+          "presentationId": "world-object:structural-grapple-joint"
+        },
+        "x": 736,
+        "y": -288
+      },
+      "objectIndex": 2,
+      "surfaceIndex": 15,
+      "target": {
+        "id": "sector-01-06:grip-b-surface",
+        "properties": {},
+        "x": 736,
+        "y": -288
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-01-06:grip-c",
+        "properties": {
+          "coordinateAnchor": "center",
+          "presentationId": "world-object:structural-grapple-joint"
+        },
+        "x": 320,
+        "y": -352
+      },
+      "objectIndex": 3,
+      "surfaceIndex": 16,
+      "target": {
+        "id": "sector-01-06:grip-c-surface",
+        "properties": {},
+        "x": 320,
+        "y": -352
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-01-06:grip-e",
+        "properties": {
+          "coordinateAnchor": "center",
+          "presentationId": "world-object:structural-grapple-joint"
+        },
+        "x": 260,
+        "y": -830
+      },
+      "objectIndex": 4,
+      "surfaceIndex": 17,
+      "target": {
+        "id": "sector-01-06:grip-e-surface",
+        "properties": {},
+        "x": 260,
+        "y": -830
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-01-06:grip-f",
+        "properties": {
+          "coordinateAnchor": "center",
+          "presentationId": "world-object:structural-grapple-joint"
+        },
+        "x": 820,
+        "y": -910
+      },
+      "objectIndex": 5,
+      "surfaceIndex": 18,
+      "target": {
+        "id": "sector-01-06:grip-f-surface",
+        "properties": {},
+        "x": 820,
+        "y": -910
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-01-06:access-anchor-b",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "ACCESS B",
+          "presentationId": "world-object:grapple-landmark"
+        },
+        "x": -1056,
+        "y": -640
+      },
+      "objectIndex": 9,
+      "surfaceIndex": 14,
+      "target": {
+        "id": "sector-01-06:access-anchor-b-surface",
+        "properties": {},
+        "x": -1056,
+        "y": -640
+      }
+    }
+  ],
+  "behaviorRefs": [],
   "definition": {
-    "subtitle": "AIRFLOW FAILURE",
-    "surfaces": [
+    "bounds": {
+      "height": 1280,
+      "width": 3840
+    },
+    "cameraZones": [
       {
-        "id": "sector-01-06:p0",
-        "kind": "platform",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": 1408,
-          "y": 0
-        },
-        "vertices": [
-          {
-            "x": 1152,
-            "y": 0
-          },
-          {
-            "x": 1664,
-            "y": 0
-          },
-          {
-            "x": 1664,
-            "y": 32
-          },
-          {
-            "x": 1152,
-            "y": 32
-          }
-        ]
+        "desktopZoom": 1.05,
+        "id": "airflow-preview",
+        "maxY": 0,
+        "minY": -288,
+        "mobileZoom": 0.74
       },
       {
-        "id": "sector-01-06:fan-a-recovery",
-        "kind": "recovery",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": 544,
-          "y": -128
-        },
-        "vertices": [
-          {
-            "x": 384,
-            "y": -128
-          },
-          {
-            "x": 704,
-            "y": -128
-          },
-          {
-            "x": 704,
-            "y": -110
-          },
-          {
-            "x": 384,
-            "y": -110
-          }
-        ]
+        "desktopZoom": 0.81,
+        "id": "fan-a-crossflow",
+        "maxY": -287,
+        "minY": -543,
+        "mobileZoom": 0.62,
+        "verticalPlayerRatio": 0.6
       },
       {
-        "id": "sector-01-06:neutral-landing",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -128,
-          "y": -416
-        },
-        "vertices": [
-          {
-            "x": -336,
-            "y": -416
-          },
-          {
-            "x": 80,
-            "y": -416
-          },
-          {
-            "x": 80,
-            "y": -388
-          },
-          {
-            "x": -336,
-            "y": -388
-          }
-        ]
+        "desktopZoom": 1.02,
+        "id": "neutral-shadow",
+        "maxY": -544,
+        "minY": -672,
+        "mobileZoom": 0.72,
+        "verticalPlayerRatio": 0.62
       },
       {
-        "id": "sector-01-06:wind-baffle",
-        "kind": "solid",
-        "oneWay": false,
-        "grappleable": true,
-        "windOcclusion": true,
-        "coordinateAnchor": "bottom-center",
-        "position": {
-          "x": -224,
-          "y": -400
-        },
-        "vertices": [
-          {
-            "x": -272,
-            "y": -688
-          },
-          {
-            "x": -176,
-            "y": -688
-          },
-          {
-            "x": -176,
-            "y": -400
-          },
-          {
-            "x": -272,
-            "y": -400
-          }
-        ]
+        "desktopZoom": 0.79,
+        "id": "fan-b-crossflow",
+        "maxY": -672,
+        "minY": -928,
+        "mobileZoom": 0.61,
+        "verticalPlayerRatio": 0.62
       },
       {
-        "id": "sector-01-06:neutral-shadow-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -160,
-          "y": -576
-        },
-        "vertices": [
-          {
-            "x": -416,
-            "y": -576
-          },
-          {
-            "x": 96,
-            "y": -576
-          },
-          {
-            "x": 96,
-            "y": -544
-          },
-          {
-            "x": -416,
-            "y": -544
-          }
-        ]
+        "desktopZoom": 0.86,
+        "id": "access-intake",
+        "maxY": -928,
+        "minY": -1024,
+        "mobileZoom": 0.65,
+        "verticalPlayerRatio": 0.62
       },
       {
-        "id": "sector-01-06:pulse-setup",
-        "kind": "platform",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -704,
-          "y": -704
+        "desktopZoom": 1.1,
+        "id": "exit",
+        "maxY": -1024,
+        "minY": -1280,
+        "mobileZoom": 0.76
+      }
+    ],
+    "checkpoints": [],
+    "cueIds": [
+      "airflow-unstable",
+      "fan-a-continuous",
+      "fan-b-lull-warning-active-decay",
+      "cooling-pressure-critical"
+    ],
+    "entry": {
+      "id": "sector-01-06:entry",
+      "x": 1408,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-01-06:exit",
+      "x": 1568,
+      "y": -1120
+    },
+    "gate": {
+      "id": "sector-01-06:gate",
+      "nextAreaId": "sector-01-07",
+      "requiredObjectiveIds": [
+        "sector-01-06:exit-panel-engaged"
+      ],
+      "trigger": {
+        "height": 62,
+        "width": 52,
+        "x": 1542,
+        "y": -1150
+      }
+    },
+    "id": "sector-01-06",
+    "name": "COOLING SHAFT",
+    "nextAreaId": "sector-01-07",
+    "objectives": [
+      {
+        "bounds": {
+          "height": 96,
+          "width": 320,
+          "x": 1232,
+          "y": -1120
         },
-        "vertices": [
-          {
-            "x": -848,
-            "y": -704
-          },
-          {
-            "x": -560,
-            "y": -704
-          },
-          {
-            "x": -560,
-            "y": -682
-          },
-          {
-            "x": -848,
-            "y": -682
-          }
-        ]
+        "id": "sector-01-06:final-deck-reached",
+        "type": "reach"
       },
       {
-        "id": "sector-01-06:fan-b-recovery",
-        "kind": "recovery",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
+        "id": "sector-01-06:exit-panel-engaged",
+        "requiredObjectiveIds": [
+          "sector-01-06:final-deck-reached"
+        ],
+        "sourceObjectId": "sector-01-06:exit-panel",
+        "type": "interact"
+      }
+    ],
+    "objects": [
+      {
+        "coordinateAnchor": "center",
+        "damage": false,
+        "id": "sector-01-06:fan-a",
+        "kind": "wind-source",
         "position": {
-          "x": 320,
-          "y": -736
+          "x": 1664,
+          "y": -352
         },
-        "vertices": [
-          {
-            "x": 160,
-            "y": -736
-          },
-          {
-            "x": 480,
-            "y": -736
-          },
-          {
-            "x": 480,
-            "y": -718
-          },
-          {
-            "x": 160,
-            "y": -718
-          }
-        ]
+        "presentationId": "world-object:wind-source",
+        "windZoneId": "sector-01-06:fan-a-wind"
       },
       {
-        "id": "sector-01-06:exit-approach",
-        "kind": "platform",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
+        "coordinateAnchor": "center",
+        "damage": false,
+        "id": "sector-01-06:fan-b",
+        "kind": "wind-source",
         "position": {
-          "x": 1184,
-          "y": -992
+          "x": -1664,
+          "y": -800
         },
-        "vertices": [
-          {
-            "x": 1008,
-            "y": -992
-          },
-          {
-            "x": 1360,
-            "y": -992
-          },
-          {
-            "x": 1360,
-            "y": -964
-          },
-          {
-            "x": 1008,
-            "y": -964
-          }
-        ]
+        "presentationId": "world-object:wind-source",
+        "windZoneId": "sector-01-06:fan-b-wind"
       },
       {
-        "id": "sector-01-06:access-intake-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
+        "accessModuleId": "sector-01:access-module:b",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": -16
+          },
+          "size": {
+            "height": 480,
+            "width": 900
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "sentry-t1",
+        "id": "sector-01-06:access-carrier",
+        "kind": "sentry",
         "position": {
           "x": -1456,
           "y": -672
         },
-        "vertices": [
-          {
-            "x": -1808,
-            "y": -672
-          },
-          {
-            "x": -1104,
-            "y": -672
-          },
-          {
-            "x": -1104,
-            "y": -640
-          },
-          {
-            "x": -1808,
-            "y": -640
-          }
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "standard-projectile",
+          "no-rope-cut"
         ]
       },
       {
-        "id": "sector-01-06:exit-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 320,
+            "width": 320
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "pursuit-drone-t1",
+            "shield-drone-t1"
+          ]
+        },
+        "enemyType": "sentry-t1",
+        "id": "sector-01-06:access-guard-left",
+        "kind": "sentry",
         "position": {
-          "x": 1392,
+          "x": -90,
+          "y": -595
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "standard-projectile",
+          "no-rope-cut"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 320,
+            "width": 320
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "pursuit-drone-t1",
+            "shield-drone-t1"
+          ]
+        },
+        "enemyType": "sentry-t1",
+        "id": "sector-01-06:access-guard-right",
+        "kind": "sentry",
+        "position": {
+          "x": -1184,
+          "y": -672
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "standard-projectile",
+          "no-rope-cut"
+        ]
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-06:gate",
+        "id": "sector-01-06:exit-panel",
+        "interactionRadius": 72,
+        "kind": "gate-panel",
+        "objectiveId": "sector-01-06:exit-panel-engaged",
+        "position": {
+          "x": 1456,
           "y": -1088
         },
-        "vertices": [
-          {
-            "x": 1184,
-            "y": -1088
-          },
-          {
-            "x": 1600,
-            "y": -1088
-          },
-          {
-            "x": 1600,
-            "y": -1056
-          },
-          {
-            "x": 1184,
-            "y": -1056
-          }
+        "presentationId": "world-object:gate-panel",
+        "requiredObjectiveIds": [
+          "sector-01-06:final-deck-reached"
         ]
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-06:gate",
+        "id": "sector-01-06:exit-gate",
+        "kind": "gate",
+        "position": {
+          "x": 1568,
+          "y": -1088
+        },
+        "presentationId": "world-object:gate"
+      }
+    ],
+    "order": 6,
+    "recoveryPoints": [
+      {
+        "id": "sector-01-06:recovery-fan-a-miss",
+        "x": 544,
+        "y": -152
+      },
+      {
+        "id": "sector-01-06:recovery-fan-b-miss",
+        "x": 320,
+        "y": -760
+      },
+      {
+        "id": "sector-01-06:recovery-access-local-reset",
+        "x": -1184,
+        "y": -704
       }
     ],
     "routePoints": [
@@ -330,9 +416,9 @@
       },
       {
         "id": "sector-01-06:route-a",
+        "landmark": "A",
         "x": 1120,
-        "y": -192,
-        "landmark": "A"
+        "y": -192
       },
       {
         "id": "sector-01-06:route-b",
@@ -361,9 +447,9 @@
       },
       {
         "id": "sector-01-06:route-d",
+        "landmark": "D",
         "x": -448,
-        "y": -768,
-        "landmark": "D"
+        "y": -768
       },
       {
         "id": "sector-01-06:route-e",
@@ -386,485 +472,262 @@
         "y": -1088
       }
     ],
-    "recoveryPoints": [
-      {
-        "id": "sector-01-06:recovery-fan-a-miss",
-        "x": 544,
-        "y": -152
-      },
-      {
-        "id": "sector-01-06:recovery-fan-b-miss",
-        "x": 320,
-        "y": -760
-      },
-      {
-        "id": "sector-01-06:recovery-access-local-reset",
-        "x": -1184,
-        "y": -704
-      }
-    ],
-    "checkpoints": [],
-    "objects": [
-      {
-        "id": "sector-01-06:fan-a",
-        "kind": "wind-source",
-        "presentationId": "world-object:wind-source",
-        "position": {
-          "x": 1664,
-          "y": -352
-        },
-        "damage": false,
-        "windZoneId": "sector-01-06:fan-a-wind",
-        "coordinateAnchor": "center"
-      },
-      {
-        "id": "sector-01-06:fan-b",
-        "kind": "wind-source",
-        "presentationId": "world-object:wind-source",
-        "position": {
-          "x": -1664,
-          "y": -800
-        },
-        "damage": false,
-        "windZoneId": "sector-01-06:fan-b-wind",
-        "coordinateAnchor": "center"
-      },
-      {
-        "id": "sector-01-06:access-carrier",
-        "kind": "sentry",
-        "presentationId": "world-object:sentry",
-        "position": {
-          "x": -1456,
-          "y": -672
-        },
-        "enemyType": "sentry-t1",
-        "accessModuleId": "sector-01:access-module:b",
-        "activationSpec": {
-          "anchor": "center",
-          "offset": {
-            "x": 0,
-            "y": -16
-          },
-          "size": {
-            "width": 900,
-            "height": 480
-          }
-        },
-        "rules": [
-          "standard-projectile",
-          "no-rope-cut"
-        ],
-        "coordinateAnchor": "center"
-      },
-      {
-        "id": "sector-01-06:access-guard-left",
-        "kind": "sentry",
-        "presentationId": "world-object:sentry",
-        "position": {
-          "x": -1728,
-          "y": -672
-        },
-        "enemyType": "sentry-t1",
-        "enemySelection": {
-          "allowedEnemyTypes": [
-            "sentry-t1",
-            "pursuit-drone-t1",
-            "shield-drone-t1"
-          ]
-        },
-        "activationSpec": {
-          "anchor": "center",
-          "offset": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 320,
-            "height": 320
-          }
-        },
-        "rules": [
-          "standard-projectile",
-          "no-rope-cut"
-        ],
-        "coordinateAnchor": "center"
-      },
-      {
-        "id": "sector-01-06:access-guard-right",
-        "kind": "sentry",
-        "presentationId": "world-object:sentry",
-        "position": {
-          "x": -1184,
-          "y": -672
-        },
-        "enemyType": "sentry-t1",
-        "enemySelection": {
-          "allowedEnemyTypes": [
-            "sentry-t1",
-            "pursuit-drone-t1",
-            "shield-drone-t1"
-          ]
-        },
-        "activationSpec": {
-          "anchor": "center",
-          "offset": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 320,
-            "height": 320
-          }
-        },
-        "rules": [
-          "standard-projectile",
-          "no-rope-cut"
-        ],
-        "coordinateAnchor": "center"
-      },
-      {
-        "id": "sector-01-06:exit-panel",
-        "kind": "gate-panel",
-        "presentationId": "world-object:gate-panel",
-        "position": {
-          "x": 1456,
-          "y": -1088
-        },
-        "coordinateAnchor": "bottom-center",
-        "interactionRadius": 72,
-        "objectiveId": "sector-01-06:exit-panel-engaged",
-        "gateId": "sector-01-06:gate",
-        "requiredObjectiveIds": [
-          "sector-01-06:final-deck-reached"
-        ]
-      },
-      {
-        "id": "sector-01-06:exit-gate",
-        "kind": "gate",
-        "presentationId": "world-object:gate",
-        "position": {
-          "x": 1568,
-          "y": -1088
-        },
-        "coordinateAnchor": "bottom-center",
-        "gateId": "sector-01-06:gate"
-      }
-    ],
-    "objectives": [
-      {
-        "id": "sector-01-06:final-deck-reached",
-        "type": "reach",
-        "bounds": {
-          "x": 1232,
-          "y": -1120,
-          "width": 320,
-          "height": 96
-        }
-      },
-      {
-        "id": "sector-01-06:exit-panel-engaged",
-        "type": "interact",
-        "sourceObjectId": "sector-01-06:exit-panel",
-        "requiredObjectiveIds": [
-          "sector-01-06:final-deck-reached"
-        ]
-      }
-    ],
-    "windZones": [
-      {
-        "id": "sector-01-06:fan-a-wind",
-        "bounds": {
-          "x": -480,
-          "y": -480,
-          "width": 2016,
-          "height": 320
-        },
-        "direction": {
-          "x": -1,
-          "y": 0
-        },
-        "mode": "continuous",
-        "strength": 500,
-        "falloff": 80
-      },
-      {
-        "id": "sector-01-06:fan-b-wind",
-        "bounds": {
-          "x": -1408,
-          "y": -992,
-          "width": 2688,
-          "height": 288
-        },
-        "direction": {
-          "x": 1,
-          "y": 0
-        },
-        "mode": "pulsed",
-        "strength": 800,
-        "falloff": 80,
-        "cycle": {
-          "lull": 1.75,
-          "warning": 0.7,
-          "active": 1.4,
-          "decay": 0.3
-        }
-      }
-    ],
-    "scannerGroups": [],
-    "storyTriggers": [
-      "airflow-unstable",
-      "cooling-pressure-critical",
-      "bypass-required"
-    ],
     "routes": [
       "safe",
       "flow",
       "recovery"
     ],
-    "cameraZones": [
-      {
-        "id": "airflow-preview",
-        "minY": -288,
-        "maxY": 0,
-        "desktopZoom": 1.05,
-        "mobileZoom": 0.74
-      },
-      {
-        "id": "fan-a-crossflow",
-        "minY": -544,
-        "maxY": -288,
-        "desktopZoom": 0.81,
-        "mobileZoom": 0.62,
-        "verticalPlayerRatio": 0.6
-      },
-      {
-        "id": "neutral-shadow",
-        "minY": -672,
-        "maxY": -544,
-        "desktopZoom": 1.02,
-        "mobileZoom": 0.72,
-        "verticalPlayerRatio": 0.62
-      },
-      {
-        "id": "fan-b-crossflow",
-        "minY": -928,
-        "maxY": -672,
-        "desktopZoom": 0.79,
-        "mobileZoom": 0.61,
-        "verticalPlayerRatio": 0.62
-      },
-      {
-        "id": "access-intake",
-        "minY": -1024,
-        "maxY": -928,
-        "desktopZoom": 0.86,
-        "mobileZoom": 0.65,
-        "verticalPlayerRatio": 0.62
-      },
-      {
-        "id": "exit",
-        "minY": -1280,
-        "maxY": -1024,
-        "desktopZoom": 1.1,
-        "mobileZoom": 0.76
-      }
-    ],
-    "cueIds": [
-      "airflow-unstable",
-      "fan-a-continuous",
-      "fan-b-lull-warning-active-decay",
-      "cooling-pressure-critical"
-    ],
-    "id": "sector-01-06",
+    "scannerGroups": [],
     "sectorId": "sector-01",
-    "order": 6,
-    "name": "COOLING SHAFT",
-    "bounds": {
-      "width": 3840,
-      "height": 1280
-    },
-    "entry": {
-      "id": "sector-01-06:entry",
-      "x": 1408,
-      "y": -32
-    },
-    "exit": {
-      "id": "sector-01-06:exit",
-      "x": 1568,
-      "y": -1120
-    },
-    "nextAreaId": "sector-01-07",
-    "gate": {
-      "id": "sector-01-06:gate",
-      "nextAreaId": "sector-01-07",
-      "requiredObjectiveIds": [
-        "sector-01-06:exit-panel-engaged"
-      ],
-      "trigger": {
-        "x": 1542,
-        "y": -1150,
-        "width": 52,
-        "height": 62
+    "storyTriggers": [
+      "airflow-unstable",
+      "cooling-pressure-critical",
+      "bypass-required"
+    ],
+    "subtitle": "AIRFLOW FAILURE",
+    "surfaces": [
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "sector-01-06:p0",
+        "kind": "platform",
+        "oneWay": true,
+        "position": {
+          "x": 1408,
+          "y": 0
+        },
+        "vertices": [
+          {
+            "x": 1152,
+            "y": 0
+          },
+          {
+            "x": 1664,
+            "y": 0
+          },
+          {
+            "x": 1664,
+            "y": 32
+          },
+          {
+            "x": 1152,
+            "y": 32
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "sector-01-06:fan-a-recovery",
+        "kind": "recovery",
+        "oneWay": true,
+        "position": {
+          "x": 535,
+          "y": -25
+        },
+        "vertices": [
+          {
+            "x": 375,
+            "y": -25
+          },
+          {
+            "x": 695,
+            "y": -25
+          },
+          {
+            "x": 695,
+            "y": -7
+          },
+          {
+            "x": 375,
+            "y": -7
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "sector-01-06:neutral-landing",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": -128,
+          "y": -416
+        },
+        "vertices": [
+          {
+            "x": -336,
+            "y": -416
+          },
+          {
+            "x": 80,
+            "y": -416
+          },
+          {
+            "x": 80,
+            "y": -388
+          },
+          {
+            "x": -336,
+            "y": -388
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "sector-01-06:neutral-shadow-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": -160,
+          "y": -576
+        },
+        "vertices": [
+          {
+            "x": -416,
+            "y": -576
+          },
+          {
+            "x": 96,
+            "y": -576
+          },
+          {
+            "x": 96,
+            "y": -544
+          },
+          {
+            "x": -416,
+            "y": -544
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "sector-01-06:access-intake-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": -1456,
+          "y": -672
+        },
+        "vertices": [
+          {
+            "x": -1808,
+            "y": -672
+          },
+          {
+            "x": -1104,
+            "y": -672
+          },
+          {
+            "x": -1104,
+            "y": -640
+          },
+          {
+            "x": -1808,
+            "y": -640
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "sector-01-06:exit-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": 1392,
+          "y": -1088
+        },
+        "vertices": [
+          {
+            "x": 1184,
+            "y": -1088
+          },
+          {
+            "x": 1600,
+            "y": -1088
+          },
+          {
+            "x": 1600,
+            "y": -1056
+          },
+          {
+            "x": 1184,
+            "y": -1056
+          }
+        ]
       }
-    }
+    ],
+    "windZones": [
+      {
+        "bounds": {
+          "height": 320,
+          "width": 2016,
+          "x": -480,
+          "y": -480
+        },
+        "direction": {
+          "x": -1,
+          "y": 0
+        },
+        "falloff": 80,
+        "id": "sector-01-06:fan-a-wind",
+        "mode": "continuous",
+        "strength": 500
+      },
+      {
+        "bounds": {
+          "height": 288,
+          "width": 2688,
+          "x": -1408,
+          "y": -992
+        },
+        "cycle": {
+          "active": 1.4,
+          "decay": 0.3,
+          "lull": 1.75,
+          "warning": 0.7
+        },
+        "direction": {
+          "x": 1,
+          "y": 0
+        },
+        "falloff": 80,
+        "id": "sector-01-06:fan-b-wind",
+        "mode": "pulsed",
+        "strength": 800
+      }
+    ]
   },
-  "anchors": [
-    {
-      "surfaceIndex": 11,
-      "objectIndex": 0,
-      "target": {
-        "id": "sector-01-06:anchor-a-surface",
-        "x": 1120,
-        "y": -192,
-        "properties": {}
-      },
-      "landmark": {
-        "id": "sector-01-06:anchor-a",
-        "x": 1120,
-        "y": -192,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "A",
-          "coordinateAnchor": "center"
-        }
-      }
-    },
-    {
-      "surfaceIndex": 12,
-      "objectIndex": 1,
-      "target": {
-        "id": "sector-01-06:anchor-d-surface",
-        "x": -448,
-        "y": -768,
-        "properties": {}
-      },
-      "landmark": {
-        "id": "sector-01-06:anchor-d",
-        "x": -448,
-        "y": -768,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "D",
-          "coordinateAnchor": "center"
-        }
-      }
-    },
-    {
-      "surfaceIndex": 15,
-      "objectIndex": 2,
-      "target": {
-        "id": "sector-01-06:grip-b-surface",
-        "x": 736,
-        "y": -288,
-        "properties": {}
-      },
-      "landmark": {
-        "id": "sector-01-06:grip-b",
-        "x": 736,
-        "y": -288,
-        "properties": {
-          "presentationId": "world-object:structural-grapple-joint",
-          "coordinateAnchor": "center"
-        }
-      }
-    },
-    {
-      "surfaceIndex": 16,
-      "objectIndex": 3,
-      "target": {
-        "id": "sector-01-06:grip-c-surface",
-        "x": 320,
-        "y": -352,
-        "properties": {}
-      },
-      "landmark": {
-        "id": "sector-01-06:grip-c",
-        "x": 320,
-        "y": -352,
-        "properties": {
-          "presentationId": "world-object:structural-grapple-joint",
-          "coordinateAnchor": "center"
-        }
-      }
-    },
-    {
-      "surfaceIndex": 17,
-      "objectIndex": 4,
-      "target": {
-        "id": "sector-01-06:grip-e-surface",
-        "x": 64,
-        "y": -832,
-        "properties": {}
-      },
-      "landmark": {
-        "id": "sector-01-06:grip-e",
-        "x": 64,
-        "y": -832,
-        "properties": {
-          "presentationId": "world-object:structural-grapple-joint",
-          "coordinateAnchor": "center"
-        }
-      }
-    },
-    {
-      "surfaceIndex": 18,
-      "objectIndex": 5,
-      "target": {
-        "id": "sector-01-06:grip-f-surface",
-        "x": 704,
-        "y": -896,
-        "properties": {}
-      },
-      "landmark": {
-        "id": "sector-01-06:grip-f",
-        "x": 704,
-        "y": -896,
-        "properties": {
-          "presentationId": "world-object:structural-grapple-joint",
-          "coordinateAnchor": "center"
-        }
-      }
-    },
-    {
-      "surfaceIndex": 13,
-      "objectIndex": 8,
-      "target": {
-        "id": "sector-01-06:access-anchor-a-surface",
-        "x": -672,
-        "y": -576,
-        "properties": {}
-      },
-      "landmark": {
-        "id": "sector-01-06:access-anchor-a",
-        "x": -672,
-        "y": -576,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "ACCESS A",
-          "coordinateAnchor": "center"
-        }
-      }
-    },
-    {
-      "surfaceIndex": 14,
-      "objectIndex": 9,
-      "target": {
-        "id": "sector-01-06:access-anchor-b-surface",
-        "x": -1056,
-        "y": -640,
-        "properties": {}
-      },
-      "landmark": {
-        "id": "sector-01-06:access-anchor-b",
-        "x": -1056,
-        "y": -640,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "ACCESS B",
-          "coordinateAnchor": "center"
-        }
-      }
-    }
-  ],
-  "behaviorRefs": []
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "exit",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "worldObjects",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "id": "1-6",
+    "sector": 1,
+    "sourceAreaId": "sector-01-06",
+    "stage": 6
+  }
 }

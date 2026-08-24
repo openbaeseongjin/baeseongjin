@@ -30,62 +30,22 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "sector-01-08:anchor-d",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "D",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": 384,
-        "y": -704
-      },
-      "objectIndex": 1,
-      "surfaceIndex": 11,
-      "target": {
-        "id": "sector-01-08:anchor-d-surface",
-        "properties": {},
-        "x": 384,
-        "y": -704
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-01-08:anchor-e",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "E",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": 416,
-        "y": -960
-      },
-      "objectIndex": 2,
-      "surfaceIndex": 12,
-      "target": {
-        "id": "sector-01-08:anchor-e-surface",
-        "properties": {},
-        "x": 416,
-        "y": -960
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-01-08:anchor-f",
         "properties": {
           "coordinateAnchor": "center",
           "label": "F",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": 64,
-        "y": -1056
+        "x": 85,
+        "y": -995
       },
       "objectIndex": 3,
       "surfaceIndex": 13,
       "target": {
         "id": "sector-01-08:anchor-f-surface",
         "properties": {},
-        "x": 64,
-        "y": -1056
+        "x": 85,
+        "y": -995
       }
     },
     {
@@ -134,16 +94,16 @@ const SPEC = {
           "coordinateAnchor": "center",
           "presentationId": "world-object:structural-grapple-joint"
         },
-        "x": 352,
-        "y": -416
+        "x": 200,
+        "y": -405
       },
       "objectIndex": 6,
       "surfaceIndex": 16,
       "target": {
         "id": "sector-01-08:grip-c-surface",
         "properties": {},
-        "x": 352,
-        "y": -416
+        "x": 200,
+        "y": -405
       }
     },
     {
@@ -163,25 +123,6 @@ const SPEC = {
         "properties": {},
         "x": -384,
         "y": -1152
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-01-08:grip-i",
-        "properties": {
-          "coordinateAnchor": "center",
-          "presentationId": "world-object:structural-grapple-joint"
-        },
-        "x": 352,
-        "y": -1432
-      },
-      "objectIndex": 8,
-      "surfaceIndex": 18,
-      "target": {
-        "id": "sector-01-08:grip-i-surface",
-        "properties": {},
-        "x": 352,
-        "y": -1432
       }
     }
   ],
@@ -409,8 +350,8 @@ const SPEC = {
         "id": "sector-01-08:upper-grid-guard",
         "kind": "sentry",
         "position": {
-          "x": 192,
-          "y": -1056
+          "x": 105,
+          "y": -845
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -443,8 +384,8 @@ const SPEC = {
         "id": "sector-01-08:upper-turret",
         "kind": "sentry",
         "position": {
-          "x": -544,
-          "y": -1184
+          "x": -180,
+          "y": -1120
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -671,25 +612,25 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": -128,
-          "y": -176
+          "x": -75,
+          "y": -30
         },
         "vertices": [
           {
-            "x": -272,
-            "y": -176
+            "x": -219,
+            "y": -30
           },
           {
-            "x": 16,
-            "y": -176
+            "x": 69,
+            "y": -30
           },
           {
-            "x": 16,
-            "y": -158
+            "x": 69,
+            "y": -12
           },
           {
-            "x": -272,
-            "y": -158
+            "x": -219,
+            "y": -12
           }
         ]
       },
@@ -700,25 +641,25 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": 256,
-          "y": -352
+          "x": 310,
+          "y": -25
         },
         "vertices": [
           {
-            "x": 144,
-            "y": -352
+            "x": 198,
+            "y": -25
           },
           {
-            "x": 368,
-            "y": -352
+            "x": 422,
+            "y": -25
           },
           {
-            "x": 368,
-            "y": -334
+            "x": 422,
+            "y": -7
           },
           {
-            "x": 144,
-            "y": -334
+            "x": 198,
+            "y": -7
           }
         ]
       },
@@ -758,25 +699,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 0,
-          "y": -832
+          "x": -80,
+          "y": -725
         },
         "vertices": [
           {
-            "x": -256,
-            "y": -832
+            "x": -336,
+            "y": -725
           },
           {
-            "x": 256,
-            "y": -832
+            "x": 176,
+            "y": -725
           },
           {
-            "x": 256,
-            "y": -802
+            "x": 176,
+            "y": -695
           },
           {
-            "x": -256,
-            "y": -802
+            "x": -336,
+            "y": -695
           }
         ]
       },
@@ -787,25 +728,25 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": 160,
-          "y": -896
+          "x": 410,
+          "y": -885
         },
         "vertices": [
           {
-            "x": 32,
-            "y": -896
+            "x": 282,
+            "y": -885
           },
           {
-            "x": 288,
-            "y": -896
+            "x": 538,
+            "y": -885
           },
           {
-            "x": 288,
-            "y": -878
+            "x": 538,
+            "y": -867
           },
           {
-            "x": 32,
-            "y": -878
+            "x": 282,
+            "y": -867
           }
         ]
       },
@@ -874,25 +815,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 480,
-          "y": -1536
+          "x": 395,
+          "y": -1425
         },
         "vertices": [
           {
-            "x": 304,
-            "y": -1536
+            "x": 219,
+            "y": -1425
           },
           {
-            "x": 656,
-            "y": -1536
+            "x": 571,
+            "y": -1425
           },
           {
-            "x": 656,
-            "y": -1508
+            "x": 571,
+            "y": -1397
           },
           {
-            "x": 304,
-            "y": -1508
+            "x": 219,
+            "y": -1397
           }
         ]
       },
