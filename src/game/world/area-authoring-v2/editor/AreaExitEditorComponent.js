@@ -75,12 +75,15 @@ export class AreaExitEditorDefinition {
     }
 
     install(definition, position) {
+        const current = AreaExitEditorComponent.from(definition);
         const created = this.create({ definition, position });
         const deckIds = EXIT_DECK_ID.candidates(definition.id);
         const gateIds = new Set([definition.gate?.id, created.gate.id].filter(Boolean));
-        definition.surfaces = definition.surfaces.filter(({ id }) => !deckIds.includes(id));
+        definition.surfaces = definition.surfaces.filter(({ id }) => id !== current?.deck?.id && !deckIds.includes(id));
         definition.routePoints = definition.routePoints.filter(
-            ({ id }) => !EXIT_ROUTE_SUFFIXES.some((suffix) => id.toLocaleLowerCase("en-US").endsWith(suffix))
+            ({ id }) =>
+                id !== current?.routePoint?.id &&
+                !EXIT_ROUTE_SUFFIXES.some((suffix) => id.toLocaleLowerCase("en-US").endsWith(suffix))
         );
         definition.objects = definition.objects.filter(({ gateId }) => !gateIds.has(gateId));
         definition.exit = created.exit;
@@ -104,14 +107,32 @@ function translatePoint(point, delta) {
 }
 
 function translateSurface(surface, delta) {
+    if (!surface) return;
     if (finitePoint(surface.position)) translatePoint(surface.position, delta);
     for (const vertex of surface.vertices ?? []) translatePoint(vertex, delta);
+}
+
+function finiteBounds(value) {
+    return (
+        Number.isFinite(value?.x) &&
+        Number.isFinite(value?.y) &&
+        Number.isFinite(value?.width) &&
+        Number.isFinite(value?.height)
+    );
+}
+
+function deckForExit(definition) {
+    const deckIds = EXIT_DECK_ID.candidates(definition.id);
+    const declaredDeck = definition.surfaces?.find(({ id }) => deckIds.includes(id));
+    if (declaredDeck) return Object.freeze({ deck: declaredDeck, usesDeckHandle: finitePoint(declaredDeck.position) });
+    return Object.freeze({ deck: null, usesDeckHandle: false });
 }
 
 function routePointForExit(definition) {
     const points = definition.routePoints ?? [];
     return (
         points.find(({ id }) => EXIT_ROUTE_SUFFIXES.some((suffix) => id.toLocaleLowerCase("en-US").endsWith(suffix))) ??
+        points.find((point) => point.x === definition.exit.x && point.y === definition.exit.y) ??
         null
     );
 }
@@ -123,18 +144,17 @@ function replaceById(entries, replacement) {
 
 export class AreaExitEditorComponent {
     static from(definition) {
-        if (!definition?.id || !definition.exit || !definition.gate) return null;
-        const deckIds = EXIT_DECK_ID.candidates(definition.id);
-        const deck = definition.surfaces?.find(({ id }) => deckIds.includes(id));
+        if (!definition?.id || !finitePoint(definition.exit) || !finiteBounds(definition.gate?.trigger)) return null;
+        const { deck, usesDeckHandle } = deckForExit(definition);
         const routePoint = routePointForExit(definition);
-        if (!deck || !finitePoint(deck.position) || !routePoint) return null;
-        return new AreaExitEditorComponent({ definition, deck, routePoint });
+        return new AreaExitEditorComponent({ definition, deck, routePoint, usesDeckHandle });
     }
 
-    constructor({ definition, deck, routePoint }) {
+    constructor({ definition, deck, routePoint, usesDeckHandle }) {
         this.definition = definition;
         this.deck = deck;
         this.routePoint = routePoint;
+        this.usesDeckHandle = usesDeckHandle;
     }
 
     get id() {
@@ -142,15 +162,15 @@ export class AreaExitEditorComponent {
     }
 
     get point() {
-        return this.deck.position;
+        return this.usesDeckHandle ? this.deck.position : this.definition.exit;
     }
 
     ownsSurface(surfaceId) {
-        return surfaceId === this.deck.id;
+        return surfaceId === this.deck?.id;
     }
 
     ownsRoutePoint(routePointId) {
-        return routePointId === this.routePoint.id;
+        return routePointId === this.routePoint?.id;
     }
 
     gateObjects() {
@@ -161,8 +181,17 @@ export class AreaExitEditorComponent {
         translateSurface(this.deck, delta);
         translatePoint(this.definition.exit, delta);
         translatePoint(this.definition.gate.trigger, delta);
-        translatePoint(this.routePoint, delta);
+        if (this.routePoint) translatePoint(this.routePoint, delta);
         for (const object of this.gateObjects()) translatePoint(object.position, delta);
+    }
+
+    ownsSameLayout(other) {
+        return (
+            other instanceof AreaExitEditorComponent &&
+            this.id === other.id &&
+            this.deck?.id === other.deck?.id &&
+            this.routePoint?.id === other.routePoint?.id
+        );
     }
 
     synchronizeFrom(baseline) {
@@ -172,10 +201,10 @@ export class AreaExitEditorComponent {
             x: this.point.x - baseline.point.x,
             y: this.point.y - baseline.point.y
         });
-        replaceById(this.definition.surfaces, derived.deck);
+        if (derived.deck) replaceById(this.definition.surfaces, derived.deck);
         this.definition.exit = structuredClone(derived.definition.exit);
         this.definition.gate.trigger = structuredClone(derived.definition.gate.trigger);
-        replaceById(this.definition.routePoints, derived.routePoint);
+        if (derived.routePoint) replaceById(this.definition.routePoints, derived.routePoint);
         for (const object of derived.gateObjects()) replaceById(this.definition.objects, object);
     }
 }
@@ -184,13 +213,7 @@ export function synchronizeExitEditorDefinition(baselineDefinition, candidateDef
     const next = structuredClone(candidateDefinition);
     const baseline = AreaExitEditorComponent.from(baselineDefinition);
     const candidate = AreaExitEditorComponent.from(next);
-    if (
-        baseline &&
-        candidate &&
-        baseline.id === candidate.id &&
-        baseline.deck.id === candidate.deck.id &&
-        baseline.routePoint.id === candidate.routePoint.id
-    ) {
+    if (baseline?.ownsSameLayout(candidate)) {
         candidate.synchronizeFrom(baseline);
     }
     return next;

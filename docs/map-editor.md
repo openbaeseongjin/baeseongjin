@@ -42,7 +42,7 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - `0`: 전체 스테이지 보기, `C`: 시나리오 HTML 비교 열기/닫기, `F`: 선택한 위치로 집중, `Esc`: 선택 해제.
 - `Ctrl/Cmd + Z`, `Ctrl/Cmd + Shift + Z`: 초안 되돌리기/다시 실행. 속성 패널 입력 중에는 브라우저의 일반 입력 편집을 우선한다.
 - `Delete`: 선택한 비필수 편집 요소를 초안에서 삭제한다. 입력 필드에 포커스가 있으면 일반 문자 편집을 우선한다.
-- 캔버스는 클릭으로 선택하고, 선택한 오브젝트만 5px 단위로 드래그해 이동한다. 속성 패널의 X/Y 입력도 5px 단위이며, 새 요소는 현재 캔버스 중심의 5px 격자 위치에 추가된다. 휠로 확대/축소하며 `Space + 드래그` 또는 가운데 버튼으로 화면을 이동한다.
+- 캔버스는 클릭으로 선택하고, 선택한 오브젝트만 5px 단위로 드래그해 이동한다. Entry와 Anchor처럼 같은 위치에 겹친 객체는 이동하지 않고 다시 클릭할 때 다음 객체로 선택이 전환된다. 속성 패널의 X/Y 입력도 5px 단위이며, 새 요소는 현재 캔버스 중심의 5px 격자 위치에 추가된다. 휠로 확대/축소하며 `Space + 드래그` 또는 가운데 버튼으로 화면을 이동한다.
 - 각 캔버스 요소 위에는 `이름`과 실제 authoring 값에서 계산한 `효과`를 표시한다. 예를 들어 지형은 통과/부착 성질, 바람은 세기, 카메라는 데스크톱 배율을 보여 준다.
 - Desktop은 캔버스를 화면 높이에 고정하고 좌측 목록과 속성 패널만 내부 스크롤한다. 작은 화면에서는 목록 → 캔버스 → 속성 패널 순서로 세로 배치된다.
 - `시나리오 비교`는 데스크톱에서 전체 Bounds 캔버스와 같은 Stage `MAP-PREVIEW.html`의 SVG 지도를 나란히 놓고, 작은 화면에서는 캔버스 아래에 배치한다. 설명 패널은 숨겨 지도 전체를 우선 표시한다. 참조는 실행 격리된 읽기 전용 화면이며 Stage를 바꾸면 같은 Stage의 HTML로 함께 바뀐다.
@@ -55,7 +55,7 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - `저장 버전`은 마지막 Git `HEAD` 기준과 각 `저장 적용` 직전의 Stage source snapshot을 보여 준다. `버전 복원`은 선택한 snapshot을 다시 적용할 뿐 새 version을 만들지 않는다. 이 local `.map-editor-history/` 기록은 commit·merge를 만들거나 Git history를 바꾸지 않으며, Stage별 최근 20개만 보관한다.
 - 메모리 초안 저장은 로컬 v2 검사와 서버 검증을 통과한 Draft만 보관하며, 요청 중 상태와 최종 성공·실패를 상태 줄에 즉시 표시한다. 이후 Draft를 다시 수정하면 메모리 저장 상태와 Gameplay View 준비 상태를 해제한다.
 - 시작 지점은 아래 지지 플랫폼 상단 32px을 기준으로 하는 최대 1개의 Entry 컴포넌트다. 둘은 독립 좌표로 편집하지 않으며 서버도 저장 전에 같은 이동량으로 다시 구성한다.
-- 출구는 Stage당 최대 1개이며 데크 위치가 복합 객체 이동의 단일 권위다. 출구점·Gate trigger·Gate panel·Gate visual·출구 route point는 에디터와 서버가 데크 이동량에서 다시 구성하며 독립 좌표로 편집하지 않는다. `nextAreaId`, Gate ID와 해제 조건은 이동 대상이 아니며 일반 Runtime의 Stage 전환 계약을 유지한다.
+- 출구는 Stage당 최대 1개다. 전용 출구 데크가 있는 Stage는 데크 위치가 복합 객체 이동의 권위이며, 과거 Stable ID 형식 때문에 전용 데크를 명확히 식별할 수 없는 Stage도 출구점 자체를 편집 손잡이로 사용해 출구를 누락하지 않는다. 출구점·Gate trigger·Gate panel·Gate visual과 명확히 식별된 전용 데크·출구 route point는 에디터와 서버가 같은 이동량으로 다시 구성하며 독립 좌표로 편집하지 않는다. `nextAreaId`, Gate ID와 해제 조건은 이동 대상이 아니며 일반 Runtime의 Stage 전환 계약을 유지한다.
 - 해커톤 운영에서는 맵 에디터를 한 번에 한 명만 사용한다. 다중 사용자 mutex와 서버 crash까지 견디는 완전한 다중 파일 원자 저장은 후속 범위다.
 - generated output은 수기 편집하지 않는다. 특수 동작은 Stable ID를 수기 Behavior Registry에서 해석한다.
 - Boss Stage Apply도 진행 중 전투를 hot reload하지 않는다. 저장된 Spec은 다음 Boss Stage 시작 또는 새 게임에서만 읽으며, 참가자 수와 scaled Phase HP는 최초 Boss Stage 시작에서 고정한다.
