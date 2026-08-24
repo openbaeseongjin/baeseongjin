@@ -92,7 +92,7 @@ export function collectEditorEntities(spec) {
                 kind: "exit",
                 point: exitComponent.point,
                 path: "/definition/exit",
-                sourceId: exitComponent.deck.id
+                sourceId: exitComponent.deck?.id ?? null
             })
         );
     }
@@ -219,50 +219,58 @@ export function screenToWorld(point, view) {
     return Object.freeze({ x: (point.x - view.x) / view.zoom, y: (point.y - view.y) / view.zoom });
 }
 
-export function hitTestEditorEntity(entities, point, radius) {
+export function hitTestEditorEntities(entities, point, radius) {
     if (!Array.isArray(entities) || !finitePoint(point) || !Number.isFinite(radius) || radius < 0) {
         throw new TypeError("editor-hit-test-invalid");
     }
-    const candidates = entities
-        .map((entry, index) => {
-            const interactionPriority = Number.isFinite(entry.interactionPriority) ? entry.interactionPriority : 0;
-            const pointDistance = entry.point ? Math.hypot(entry.point.x - point.x, entry.point.y - point.y) : Infinity;
-            if (!entry.bounds || !Number.isFinite(entry.bounds.x) || !Number.isFinite(entry.bounds.y)) {
-                return { entry, index, priority: interactionPriority, distance: pointDistance, area: 0 };
-            }
-            const { x, y, width, height } = entry.bounds;
-            const inside = point.x >= x && point.x <= x + width && point.y >= y && point.y <= y + height;
-            const edgeDistance = inside
-                ? Math.min(point.x - x, x + width - point.x, point.y - y, y + height - point.y)
-                : Infinity;
-            const boundary = entry.domain === "bounds" || entry.domain === "arena";
-            if (pointDistance <= radius)
-                return { entry, index, priority: interactionPriority, distance: pointDistance, area: 0 };
-            if (boundary)
+    return Object.freeze(
+        entities
+            .map((entry, index) => {
+                const interactionPriority = Number.isFinite(entry.interactionPriority) ? entry.interactionPriority : 0;
+                const pointDistance = entry.point
+                    ? Math.hypot(entry.point.x - point.x, entry.point.y - point.y)
+                    : Infinity;
+                if (!entry.bounds || !Number.isFinite(entry.bounds.x) || !Number.isFinite(entry.bounds.y)) {
+                    return { entry, index, priority: interactionPriority, distance: pointDistance, area: 0 };
+                }
+                const { x, y, width, height } = entry.bounds;
+                const inside = point.x >= x && point.x <= x + width && point.y >= y && point.y <= y + height;
+                const edgeDistance = inside
+                    ? Math.min(point.x - x, x + width - point.x, point.y - y, y + height - point.y)
+                    : Infinity;
+                const boundary = entry.domain === "bounds" || entry.domain === "arena";
+                if (pointDistance <= radius)
+                    return { entry, index, priority: interactionPriority, distance: pointDistance, area: 0 };
+                if (boundary)
+                    return {
+                        entry,
+                        index,
+                        priority: interactionPriority + 2,
+                        distance: edgeDistance,
+                        area: width * height
+                    };
                 return {
                     entry,
                     index,
-                    priority: interactionPriority + 2,
-                    distance: edgeDistance,
+                    priority: interactionPriority + 1,
+                    distance: inside ? 0 : Infinity,
                     area: width * height
                 };
-            return {
-                entry,
-                index,
-                priority: interactionPriority + 1,
-                distance: inside ? 0 : Infinity,
-                area: width * height
-            };
-        })
-        .filter(({ distance }) => distance <= radius)
-        .sort(
-            (left, right) =>
-                left.priority - right.priority ||
-                left.distance - right.distance ||
-                left.area - right.area ||
-                left.index - right.index
-        );
-    return candidates[0]?.entry ?? null;
+            })
+            .filter(({ distance }) => distance <= radius)
+            .sort(
+                (left, right) =>
+                    left.priority - right.priority ||
+                    left.distance - right.distance ||
+                    left.area - right.area ||
+                    left.index - right.index
+            )
+            .map(({ entry }) => entry)
+    );
+}
+
+export function hitTestEditorEntity(entities, point, radius) {
+    return hitTestEditorEntities(entities, point, radius)[0] ?? null;
 }
 
 function translateSurface(surface, delta) {
@@ -403,8 +411,8 @@ export function removeEditorEntity(spec, selected) {
         const exit = AreaExitEditorComponent.from(definition);
         const gateId = definition.gate?.id;
         if (exit) {
-            definition.surfaces = definition.surfaces.filter(({ id }) => id !== exit.deck.id);
-            definition.routePoints = definition.routePoints.filter(({ id }) => id !== exit.routePoint.id);
+            definition.surfaces = definition.surfaces.filter(({ id }) => id !== exit.deck?.id);
+            definition.routePoints = definition.routePoints.filter(({ id }) => id !== exit.routePoint?.id);
         }
         definition.objects = definition.objects.filter(({ gateId: objectGateId }) => objectGateId !== gateId);
         definition.exit = null;

@@ -5,6 +5,7 @@ import { AREA_EXIT_EDITOR_DEFINITION } from "../../src/game/world/area-authoring
 import {
     canRemoveEditorEntity,
     collectEditorEntities,
+    hitTestEditorEntities,
     hitTestEditorEntity,
     removeEditorEntity,
     screenToWorld,
@@ -1842,13 +1843,19 @@ function drawSelectedEntityOverlay() {
     if (entity.point) drawMarker(entity.point, "#66e6ff", "circle", true);
 }
 
-function hitTestEntitiesWithSelectedPriority() {
-    const selected = state.draft.selected();
-    return entities().map((entity) =>
-        selected?.domain === entity.domain && selected.id === entity.id
-            ? { ...entity, interactionPriority: -100 }
-            : entity
-    );
+function sameEditorEntity(left, right) {
+    return Boolean(left && right && left.domain === right.domain && left.id === right.id);
+}
+
+function selectedFirst(candidates, selected) {
+    if (!selected) return candidates;
+    const currentIndex = candidates.findIndex((candidate) => sameEditorEntity(candidate, selected));
+    if (currentIndex <= 0) return candidates;
+    return Object.freeze([
+        candidates[currentIndex],
+        ...candidates.slice(currentIndex + 1),
+        ...candidates.slice(0, currentIndex)
+    ]);
 }
 
 function annotationEntityAt(screen) {
@@ -2291,13 +2298,23 @@ dom.canvas.addEventListener("pointerdown", (event) => {
         state.pointer = { mode: "pan", screen };
         dom.canvas.classList.add("is-panning");
     } else {
-        const selected =
-            annotationEntityAt(screen) ??
-            hitTestEditorEntity(hitTestEntitiesWithSelectedPriority(), world, 28 / state.view.zoom);
+        const previousSelection = state.draft.selected();
+        const annotationSelection = annotationEntityAt(screen);
+        const candidates = annotationSelection
+            ? Object.freeze([annotationSelection])
+            : selectedFirst(hitTestEditorEntities(entities(), world, 28 / state.view.zoom), previousSelection);
+        const selected = candidates[0] ?? null;
         state.draft.select(selected);
         if (selected?.point && selected.domain !== "bounds") {
             state.draft.beginBufferedMutation({ domain: selected.domain, label: "Move map object" });
-            state.pointer = { mode: "drag", selected, originPoint: { ...selected.point }, originWorld: world };
+            state.pointer = {
+                mode: "drag",
+                selected,
+                originPoint: { ...selected.point },
+                originWorld: world,
+                cycleOnClick: candidates.length > 1 && sameEditorEntity(previousSelection, selected),
+                candidates
+            };
             dom.canvas.classList.add("is-dragging");
         } else {
             state.pointer = null;
@@ -2340,6 +2357,8 @@ function finishPointer(event) {
             else if (state.draft.commitBufferedMutation()) {
                 state.memoryPreviewReady = false;
                 setMessage("dirty", "변경사항이 있습니다. 메모리 초안 저장으로 미리보거나 저장 적용하세요.");
+            } else if (state.pointer.cycleOnClick) {
+                state.draft.select(state.pointer.candidates[1]);
             }
         } catch (cause) {
             state.draft.cancelBufferedMutation();

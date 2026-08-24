@@ -1,3 +1,4 @@
+import { createImpactDamage } from "./ImpactTarget.js";
 import { ROPE_IMPACT_STATE_REASON } from "./RopeImpactState.js";
 
 export const ROPE_IMPACT_REJECTION_REASON = Object.freeze({
