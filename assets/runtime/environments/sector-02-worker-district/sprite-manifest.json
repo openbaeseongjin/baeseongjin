@@ -3,8 +3,8 @@
     "formatVersion": 1,
     "id": "environment-sector-02-worker-district",
     "generator": {
-        "tool": "openai-imagegen-depth-islands-and-adjacent-runtime-seams",
-        "exportVersion": "2026-08-22",
+        "tool": "openai-imagegen-depth-islands-and-sector-terrain-normalization",
+        "exportVersion": "2026-08-24",
         "sourceExport": "assets/artwork/environments/sector-02-03-runtime-seam/export/sector-02-worker-district"
     },
     "atlases": {
@@ -25,13 +25,13 @@
         },
         "sector-02-worker-district-terrain-fill": {
             "image": "terrain-fill.png",
-            "size": { "width": 48, "height": 48 },
-            "frameSize": { "width": 24, "height": 24 }
+            "size": { "width": 32, "height": 32 },
+            "frameSize": { "width": 32, "height": 32 }
         },
         "sector-02-worker-district-terrain-edge": {
             "image": "terrain-edge.png",
-            "size": { "width": 48, "height": 24 },
-            "frameSize": { "width": 24, "height": 24 }
+            "size": { "width": 32, "height": 8 },
+            "frameSize": { "width": 32, "height": 8 }
         },
         "sector-02-worker-district-decoration": {
             "image": "decoration.png",
@@ -50,10 +50,10 @@
                 "silhouetteFar": "#1b2b48",
                 "silhouetteMid": "#2a3547",
                 "silhouetteNear": "#090f19",
-                "terrainFill": "#303238",
-                "terrainEdge": "#66666a",
-                "oneWayEdge": "#8bb8c4",
-                "accent": "#d99a52"
+                "terrainFill": "#292c33",
+                "terrainEdge": "#6f6b61",
+                "oneWayEdge": "#6f8784",
+                "accent": "#62684f"
             },
             "backdropVariant": "sector-02-lower",
             "terrainMaterial": "sector-02-residential",
@@ -69,10 +69,10 @@
                 "silhouetteFar": "#203250",
                 "silhouetteMid": "#303c4f",
                 "silhouetteNear": "#0a111c",
-                "terrainFill": "#34363c",
-                "terrainEdge": "#6b6b70",
-                "oneWayEdge": "#94bec8",
-                "accent": "#dfa158"
+                "terrainFill": "#2b2e35",
+                "terrainEdge": "#726e64",
+                "oneWayEdge": "#728b88",
+                "accent": "#646a50"
             },
             "backdropVariant": "sector-02-service",
             "terrainMaterial": "sector-02-residential",
@@ -88,10 +88,10 @@
                 "silhouetteFar": "#263958",
                 "silhouetteMid": "#374457",
                 "silhouetteNear": "#0c1420",
-                "terrainFill": "#393b41",
-                "terrainEdge": "#727277",
-                "oneWayEdge": "#9cc4cc",
-                "accent": "#e5aa62"
+                "terrainFill": "#2d3037",
+                "terrainEdge": "#757165",
+                "oneWayEdge": "#758f8c",
+                "accent": "#656c52"
             },
             "backdropVariant": "sector-02-residential",
             "terrainMaterial": "sector-02-residential",
@@ -107,10 +107,10 @@
                 "silhouetteFar": "#2c405f",
                 "silhouetteMid": "#3e4c5f",
                 "silhouetteNear": "#0e1724",
-                "terrainFill": "#3e4046",
-                "terrainEdge": "#79797e",
-                "oneWayEdge": "#a5cbd2",
-                "accent": "#ebb16a"
+                "terrainFill": "#30333a",
+                "terrainEdge": "#787468",
+                "oneWayEdge": "#799391",
+                "accent": "#687056"
             },
             "backdropVariant": "sector-02-shelter",
             "terrainMaterial": "sector-02-residential",
@@ -126,10 +126,10 @@
                 "silhouetteFar": "#334766",
                 "silhouetteMid": "#455467",
                 "silhouetteNear": "#111a28",
-                "terrainFill": "#43454b",
-                "terrainEdge": "#808085",
-                "oneWayEdge": "#add1d7",
-                "accent": "#f0b873"
+                "terrainFill": "#33363d",
+                "terrainEdge": "#7b776b",
+                "oneWayEdge": "#7d9794",
+                "accent": "#6c7459"
             },
             "backdropVariant": "sector-02-evacuation",
             "terrainMaterial": "sector-02-residential",
@@ -173,9 +173,9 @@
     "terrain": {
         "materials": {
             "sector-02-residential": {
-                "fill": { "atlas": "sector-02-worker-district-terrain-fill", "cell": { "column": 1, "row": 0 } },
+                "fill": { "atlas": "sector-02-worker-district-terrain-fill", "cell": { "column": 0, "row": 0 } },
                 "edge": { "atlas": "sector-02-worker-district-terrain-edge", "cell": { "column": 0, "row": 0 } },
-                "oneWayColor": "#9cc4cc"
+                "oneWayColor": "#758f8c"
             }
         },
         "blockPool": {
