@@ -1,5 +1,7 @@
 # BOSS 06 BLOCKOUT QA — DAMAGE PREFLIGHT CURRENT
 
+> **V2 SUPERSEDED:** 아래 판정은 V2 좌표 전용이다. V3 검증 상태는 [`../BOSS-06-V3-CONTRACT.md`](../BOSS-06-V3-CONTRACT.md)와 [`VALIDATION.md`](./VALIDATION.md)를 따른다.
+
 > 최신 권위: `DAMAGE-LOOP-PREFLIGHT.md`, `DAMAGE-CHECKS.json`
 > GitHub main: `20e6c22deb6e95d9a5a7e351a95874d931a0a845`
 
@@ -29,8 +31,8 @@ grappleable=true
 
 ## 2. Upper Anchor
 
-| Edge | Distance |
-|---|---:|
+| Edge  | Distance |
+| ----- | -------: |
 | U1→U2 | 361.25px |
 | U2→U3 | 360.56px |
 | U3→U4 | 360.56px |
@@ -45,16 +47,16 @@ grappleable=true
 
 최종 좌표:
 
-| Anchor | x | y |
-|---|---:|---:|
-| U1 | 1300 | 1540 |
-| U2 | 1660 | 1510 |
-| U3 | 2020 | 1490 |
-| U4 | 2380 | 1510 |
-| U5 | 2740 | 1540 |
-| U6 | 3100 | 1510 |
-| U7 | 3460 | 1490 |
-| U8 | 3820 | 1540 |
+| Anchor |    x |    y |
+| ------ | ---: | ---: |
+| U1     | 1300 | 1540 |
+| U2     | 1660 | 1510 |
+| U3     | 2020 | 1490 |
+| U4     | 2380 | 1510 |
+| U5     | 2740 | 1540 |
+| U6     | 3100 | 1510 |
+| U7     | 3460 | 1490 |
+| U8     | 3820 | 1540 |
 
 이 높이는 회피뿐 아니라 **Ground Warden에 대한 Rope Impact 가능성**을 확보하기 위해 조정했다.
 
@@ -90,12 +92,14 @@ rope attached
 ```
 
 사전 pendulum model:
+
 - Warden center x 25px 간격 121 samples
 - 실패 0
 - 최저 성공속도 656.98
 - 실제 GameSimulation 검증은 별도 필수
 
 Guard/Counter:
+
 - 선택 가능 Warden center `1250..3870`
 - 좌측 진입 실패 0
 - 우측 진입 실패 0

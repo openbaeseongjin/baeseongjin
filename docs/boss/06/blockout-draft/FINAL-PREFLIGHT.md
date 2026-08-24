@@ -1,5 +1,7 @@
 # BOSS 06 — FINAL PREFLIGHT
 
+> **V2 SUPERSEDED:** 아래 hard gate와 수치는 현재 V3 merge gate가 아니다. [`../BOSS-06-V3-CONTRACT.md`](../BOSS-06-V3-CONTRACT.md)를 사용한다.
+
 > 상태: **설계 구현 진입 가능 / Runtime 미구현 / Merge Ready 아님**
 > 최신 GitHub main 기준: `20e6c22deb6e95d9a5a7e351a95874d931a0a845`
 
@@ -16,24 +18,25 @@ Boss06 `CONTINUITY WARDEN`은 **구현 작업으로 넘겨도 되는 설계 상�
 
 ## 2. 기존 보스 문제 재발 방지 판정
 
-| 문제 | Boss06 대응 | 판정 |
-|---|---|---|
-| 약점이 Boss 내부에 생겨 공격 불가 | 별도 weakpoint 0개, body ImpactTarget 1개 | PASS |
-| 보이는 몸과 피격 판정 크기가 다름 | Warden visible body를 96×150 physics envelope 안으로 축소 | PASS |
-| Anchor가 보이지만 실제로 안 잡힘 | U1~U8 + RR1/RR3 모두 `role:swing-attack` 요구 | PASS |
-| 엉뚱한 발판/장치가 Rope target | Emitter/Warden은 grappleable 대상 아님(solid collision 없음/제외). Main/Ledge/Gate는 공용 지형 규칙에 따라 grappleable true, U1~U8/RR1/RR3는 별도 `swing-attack` 계약 | PASS |
-| 발판 단차에 Dash/Charge 걸림 | Main collision deck 단일 flat rectangle | PASS |
-| 공간이 좁아 Boss/Player가 끼임 | Warden 96×150 상한 + Main 3120px + Ledge 280px | PASS |
-| Boss 이동/공격이 구조물 관통 | 후보 위치/전체 hazard geometry 교차 검사 후 blocked면 취소 | 구현 필수 |
-| Recovery가 그림뿐이고 실제 복귀 불가 | RR1/RR3 실제 Rope target + 더 아래는 recoverPlayer | PASS |
-| 4인 입장 시 좌측 낙사 위험 | Entry x=1120, 4P body 범위 1045..1195 | PASS |
-| LOW Beam에서 위치에 따라 Rope 탈출 불가 | Anchor 재배치, jump-apex direct coverage 전 Main 폭 연속 | PASS |
+| 문제                                    | Boss06 대응                                                                                                                                                           | 판정      |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 약점이 Boss 내부에 생겨 공격 불가       | 별도 weakpoint 0개, body ImpactTarget 1개                                                                                                                             | PASS      |
+| 보이는 몸과 피격 판정 크기가 다름       | Warden visible body를 96×150 physics envelope 안으로 축소                                                                                                             | PASS      |
+| Anchor가 보이지만 실제로 안 잡힘        | U1~U8 + RR1/RR3 모두 `role:swing-attack` 요구                                                                                                                         | PASS      |
+| 엉뚱한 발판/장치가 Rope target          | Emitter/Warden은 grappleable 대상 아님(solid collision 없음/제외). Main/Ledge/Gate는 공용 지형 규칙에 따라 grappleable true, U1~U8/RR1/RR3는 별도 `swing-attack` 계약 | PASS      |
+| 발판 단차에 Dash/Charge 걸림            | Main collision deck 단일 flat rectangle                                                                                                                               | PASS      |
+| 공간이 좁아 Boss/Player가 끼임          | Warden 96×150 상한 + Main 3120px + Ledge 280px                                                                                                                        | PASS      |
+| Boss 이동/공격이 구조물 관통            | 후보 위치/전체 hazard geometry 교차 검사 후 blocked면 취소                                                                                                            | 구현 필수 |
+| Recovery가 그림뿐이고 실제 복귀 불가    | RR1/RR3 실제 Rope target + 더 아래는 recoverPlayer                                                                                                                    | PASS      |
+| 4인 입장 시 좌측 낙사 위험              | Entry x=1120, 4P body 범위 1045..1195                                                                                                                                 | PASS      |
+| LOW Beam에서 위치에 따라 Rope 탈출 불가 | Anchor 재배치, jump-apex direct coverage 전 Main 폭 연속                                                                                                              | PASS      |
 
 ## 3. Rope / Anchor 최종 수치
 
 Base Rope Reach = `400px`.
 
 Player:
+
 - radius = `15px`
 - gravity = `1250`
 - jumpSpeed = `440`
@@ -43,16 +46,16 @@ Player:
 
 Upper Anchor:
 
-| Anchor | x | y |
-|---|---:|---:|
-| U1 | 1300 | 1540 |
-| U2 | 1660 | 1510 |
-| U3 | 2020 | 1490 |
-| U4 | 2380 | 1510 |
-| U5 | 2740 | 1540 |
-| U6 | 3100 | 1510 |
-| U7 | 3460 | 1490 |
-| U8 | 3820 | 1540 |
+| Anchor |    x |    y |
+| ------ | ---: | ---: |
+| U1     | 1300 | 1540 |
+| U2     | 1660 | 1510 |
+| U3     | 2020 | 1490 |
+| U4     | 2380 | 1510 |
+| U5     | 2740 | 1540 |
+| U6     | 3100 | 1510 |
+| U7     | 3460 | 1490 |
+| U8     | 3820 | 1540 |
 
 인접 최대거리 = `363.46px`
 비인접 `≤400px` shortcut = `0`
@@ -109,6 +112,7 @@ Warden가 Main에 서 있을 때 머리 위 잔여 여유 = `84px`
 280px Ledge 위 Warden 좌우 여유 = 약 `92px`씩
 
 규칙:
+
 - `canGroundActors:false`
 - `ropeAttachment:false`
 - Shield/Baton은 solid collider에 포함하지 않음
@@ -125,6 +129,7 @@ Boss06에도 같은 안전 원칙을 적용한다.
 ### Warden 이동
 
 모든 Ground Dash / Charge:
+
 - 시작/끝 Warden body가 Main collision 위에 있어야 함
 - entire body bounds가 combat x 범위 안
 - Gate/Emitter/Ledge collision과 교차 금지
@@ -164,11 +169,13 @@ R3 fall/catch 폭도 180px에서 `240px`로 늘려 복수 Player 추락 시 여�
 ## 8. Recovery
 
 R1:
+
 - x=`540..1000`
 - RR1=`(770,2000)`
 - sampled deck point 최대 직접 Rope 거리 ≈ `368.57px`
 
 R3:
+
 - x=`4120..4360`
 - RR3=`(4240,2000)`
 - sampled deck point 최대 직접 Rope 거리 ≈ `312.00px`
@@ -180,16 +187,19 @@ R1/R3 아래까지 놓치면 숨은 중앙 발판을 만들지 않고 `recoverPl
 ## 9. Beam
 
 LOW:
+
 - flat Main standing body band와 실제 overlap
 - Main combat 폭 전체를 덮음
 - 해법 = 점프 + Upper Anchor
 
 HIGH:
+
 - Upper Player movement band를 차단
 - Main standing band는 안전
 - 해법 = Rope release → Main
 
 연속 Beam:
+
 - 최대 3연속
 - Telegraph 시작 시 전체 순서 표시
 - Security active 중 Warden 직접 공격 OFF
@@ -202,6 +212,7 @@ HIGH:
 따라서 Boss06 구현 시 `continuity-warden`을 generic Boss focus 대상으로 추가해야 한다.
 
 Gameplay View 최종 Gate:
+
 - Guard = Warden + Shield 방향 + 뒤쪽 Anchor
 - Charge = Telegraph + 전체 진행 방향 + Rope 회피 Anchor
 - Security = Telegraph + Player + 다음 safe band
@@ -213,6 +224,7 @@ Gameplay View 최종 Gate:
 Boss06는 별도 약점이 없다.
 
 필수 test:
+
 - neutral front/rear → damage
 - guard front → 0
 - guard rear → damage
@@ -248,7 +260,6 @@ Terminal Boss transition은 현행 일반 Boss source/target landmark 경로와 
 - Warden이 grapple target 또는 ground surface
 - 4P entry/recovery body overlap
 - Gameplay View에서 공격 Telegraph와 대응 Anchor가 동시에 안 보임
-
 
 # Damage-loop 재검증
 

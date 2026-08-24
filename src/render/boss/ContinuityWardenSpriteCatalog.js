@@ -1,5 +1,6 @@
 import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 import { SpriteAnimation } from "../sprites/SpriteAnimation.js";
+import { CONTINUITY_WARDEN_STATE } from "../../game/boss/ContinuityWardenDefinition.js";
 
 const ASSET_ID = "continuity-warden-phase-1";
 const CELL = Object.freeze({ width: 128, height: 192 });
@@ -7,6 +8,7 @@ const OUTPUT_SIZE = Object.freeze({ width: 128, height: 192 });
 const ANCHOR = Object.freeze({ x: 0.5, y: 113 / 192 });
 const VISUAL_PRESET_ID = "continuity-warden";
 const LEFT_DIRECTION = "left";
+const LEFT_DIRECTION_VALUE = -1;
 const ACTION_PHASE = Object.freeze({ TELEGRAPH: "telegraph", ACTIVE: "active" });
 const CHARGE_CLIP_ID = Object.freeze({
     TELEGRAPH: "charge-telegraph",
@@ -108,6 +110,9 @@ const STATE_CLIP_ID = Object.freeze({
     "counter-bash": "counter-bash",
     "security-command": "security-command",
     "security-active": "security-command",
+    [CONTINUITY_WARDEN_STATE.JUMP]: "combat-idle",
+    [CONTINUITY_WARDEN_STATE.LANDING]: "combat-idle",
+    [CONTINUITY_WARDEN_STATE.SUMMON]: "security-command",
     defeated: "defeated-unconscious"
 });
 
@@ -239,7 +244,7 @@ export class ContinuityWardenSpriteDefinition {
     }
 
     flipX(direction) {
-        return direction === LEFT_DIRECTION;
+        return direction === LEFT_DIRECTION || direction === LEFT_DIRECTION_VALUE;
     }
 }
 

@@ -117,6 +117,20 @@ export class BossStagePreviewGameApp extends GameApp {
         });
     }
 
+    debugMovePlayerNearBoss() {
+        const snapshot = this.authority.snapshot();
+        const bossBody = snapshot.bossStage?.presentation?.objects?.find(({ physicsBody }) => physicsBody === true);
+        if (!bossBody?.position) return Object.freeze({ accepted: false });
+        const stage = this.authority.simulation.world.bossStages?.find(({ id }) => id === this.previewBossStageId);
+        if (!stage) return Object.freeze({ accepted: false });
+        const target = {
+            x: Math.max(stage.bounds.x, bossBody.position.x - 420),
+            y: stage.entry.y
+        };
+        this.authority.applyFlightMotion(target);
+        return Object.freeze({ accepted: true, position: Object.freeze(target) });
+    }
+
     update(dt, input) {
         if (!this.previewFlight.enabled) return super.update(dt, input);
         const owner = this.authority.ownerState();

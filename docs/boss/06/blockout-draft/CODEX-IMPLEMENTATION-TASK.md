@@ -1,5 +1,7 @@
 # Boss06 CONTINUITY WARDEN — 구현 지시서
 
+> **V2 SUPERSEDED:** 현재 작업 지시는 [`../BOSS-06-V3-CONTRACT.md`](../BOSS-06-V3-CONTRACT.md)로 대체됐다.
+
 > 기준 main: `20e6c22deb6e95d9a5a7e351a95874d931a0a845`
 > 설계 권위: `docs/boss/06/blockout-draft/BOSS-06-BRIEF.md`
 > 구현 안전 Gate: `IMPLEMENTATION-PREFLIGHT.md`, `FINAL-PREFLIGHT.md`
@@ -11,6 +13,7 @@
 ## 작업 순서
 
 ### 최우선 1 — Terminal Boss 연결
+
 - 6-8 `content-boundary` 완료 후 Boss06 entry
 - regular 6-9 추가 금지
 - Boss defeat 후 arena 유지
@@ -18,6 +21,7 @@
 - Boarding 완료 시 기존 `beginCompletion()` 사용
 
 ### 최우선 2 — Boss06 Spec / Runtime 골격
+
 - `continuity-warden` mechanic/runtime 등록
 - `CompositeBossEncounterRuntime` 재사용
 - visible HP 하나
@@ -25,6 +29,7 @@
 - body ImpactTarget exactly 1
 
 ### 최우선 3 — Physics
+
 - Main collision flat rectangle 1개
 - Warden solid body <=96×150
 - Warden `canGroundActors:false`
@@ -33,12 +38,14 @@
 - 그 외 Boss06 solid surface(Main/Ledge/Gate/Boarding)는 공용 지형 규칙에 따라 grappleable true; Emitter/Warden만 grappleable 대상 아님
 
 ### 최우선 4 — 피격 / Guard / Counter
+
 - common Boss impact path에서 impact/source position을 Warden runtime에 전달
 - facing + impact position으로 front/rear 분류
 - Guard front=0, rear=normal
 - Counter front=Bash, rear=normal
 
 ### 최우선 5 — 기본 공격
+
 - Baton 3타, 3타 Overhead
 - Back Swing
 - Ground/Diagonal Thruster Dash
@@ -46,6 +53,7 @@
 - Dash/Charge candidate가 solid와 겹치거나 Arena 밖이면 행동 선택/진행 취소
 
 ### 중요 — Security
+
 - LOW/HIGH
 - sequential 2, late 3
 - first Telegraph에서 full order 공개
@@ -53,12 +61,14 @@
 - Beam은 `activeHazards()` damage bounds, solid collision 아님
 
 ### 중요 — multiplayer
+
 - direct target: Main combat zone nearest active player
 - Recovery player direct target 제외
 - Charge: Telegraph 시 target/direction lock, commit 후 retarget 없음
 - 1P와 4P test
 
 ### 중요 — Presentation
+
 - Warden visual silhouette가 96×150 hit envelope와 크게 다르지 않게 유지
 - Anchor marker는 Warden/Beam보다 foreground
 - camera focus에 Warden 포함
@@ -90,6 +100,7 @@
 ## 검증 명령
 
 기존 저장소 기준:
+
 - `npm run check`
 - `npm run format:check`
 - `npm run check:scenario-integration`
@@ -97,6 +108,7 @@
 - `git diff --check`
 
 그리고 Map Editor Gameplay View로:
+
 - Neutral
 - Guard
 - Charge
@@ -117,7 +129,6 @@
 - Warden body target/collider 실제 수치
 - 알려진 미해결 사항
 
-
 ## 최우선 추가 — Player → Boss 실제 피해 루프
 
 `DAMAGE-LOOP-PREFLIGHT.md`와 `DAMAGE-CHECKS.json`을 구현 권위로 사용한다.
@@ -133,6 +144,7 @@ attach U anchor
 ```
 
 Test matrix:
+
 - Warden x: left / quarter / center / three-quarter / right
 - Neutral: 양쪽 진입
 - Guard: front block / rear damage

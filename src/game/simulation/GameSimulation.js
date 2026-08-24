@@ -3,6 +3,11 @@ import { AUGMENT_CATALOG, MAX_AUGMENT_SELECTIONS, augmentById } from "../augment
 import { augmentImpactFormula, validateAugmentImpactFormula } from "../augments/AugmentImpactFormula.js";
 import { BOSS_STAGE_CATALOG } from "../boss-authoring/BossStageCatalog.js";
 import { createBossEncounterRuntime } from "../boss/BossEncounterRuntimeFactory.js";
+import {
+    CONTINUITY_WARDEN_EVENT,
+    CONTINUITY_WARDEN_HAZARD_KIND,
+    CONTINUITY_WARDEN_ID
+} from "../boss/ContinuityWardenDefinition.js";
 import { BOSS_ANCHOR_ROLE } from "../boss-authoring/BossStageSpec.js";
 import { defineBossStage } from "../boss/BossStageDefinition.js";
 import {
@@ -33,7 +38,8 @@ import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js
 import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
 import { ROPE_IMPACT_EVENT_TYPE, ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { IMPACT_TARGET_KIND, ImpactTarget } from "../combat/ImpactTarget.js";
-import { HomingProjectileObject } from "../combat/ProjectileObject.js";
+import { createProjectileObject, HomingProjectileObject } from "../combat/ProjectileObject.js";
+import { PROJECTILE_MOTION_KIND, PROJECTILE_TYPE } from "../combat/ProjectileDefinition.js";
 import {
     COMBAT_CONFIG,
     COLLISION_BROAD_PHASE_CONFIG,
@@ -234,19 +240,6 @@ function cloneSwingDrag(swingDrag) {
 
 const PORTAL_ARRIVAL_SPACING = PLAYER_CONFIG.radius * 2 + 10;
 const BOSS_WEAKPOINT_RADIUS = 90;
-const BOSS_HAZARD_KIND = Object.freeze({
-    "baton-1": true,
-    "baton-2": true,
-    "overhead-slam": true,
-    "back-swing": true,
-    "ground-thruster-dash": true,
-    "diagonal-thruster-dash": true,
-    "counter-bash": true,
-    "security-beam-low": true,
-    "security-beam-high": true,
-    "landing-burst": true
-});
-
 function normalizedBossDefinitions({ bossDefinition, bossDefinitions }) {
     const definitions = bossDefinitions ?? (bossDefinition ? [bossDefinition] : Object.values(BOSS_STAGE_CATALOG));
     if (!Array.isArray(definitions) || definitions.length === 0) {
@@ -494,11 +487,92 @@ export class GameSimulation {
         return this.objects.players.ids();
     }
 
+    #spawnBossMissile(payload) {
+        if (this.objects.enemyProjectiles.find(payload.projectileId)) return null;
+        const projectile = createProjectileObject({
+            id: payload.projectileId,
+            objectType: PROJECTILE_TYPE.ENEMY,
+            motionKind: PROJECTILE_MOTION_KIND.HOMING,
+            ownerId: payload.ownerId,
+            targetId: payload.targetPlayerId,
+            position: new Vector2(payload.position.x, payload.position.y),
+            velocity: new Vector2(payload.velocity.x, payload.velocity.y),
+            speed: payload.speed,
+            damage: payload.damage,
+            radius: payload.radius,
+            lifetimeSeconds: payload.lifetimeSeconds,
+            turnRateRadiansPerSecond: payload.turnRateRadiansPerSecond,
+            visualPresetId: payload.visualPresetId
+        });
+        this.objects.enemyProjectiles.add(projectile);
+        this.recordProjectileSpawn(projectile);
+        return projectile;
+    }
+
+    #bossSummonedEnemies() {
+        return this.enemies.filter(({ id }) => CONTINUITY_WARDEN_ID.isSummonedEnemy(id));
+    }
+
+    #spawnBossSummonedEnemy(payload) {
+        if (this.objects.enemies.find(payload.enemyId)) return null;
+        const stage = this.#bossStageWorld();
+        const radius = enemyInitialRadius(payload.enemyType, COMBAT_CONFIG.enemyRadius);
+        const health = enemyInitialHealth(payload.enemyType, COMBAT_CONFIG.enemyHealth);
+        const enemy = createEnemyRuntime({
+            id: payload.enemyId,
+            position: new Vector2(payload.position.x, payload.position.y),
+            level: stage?.level ?? this.world.landmarks?.length ?? 0,
+            areaId: stage?.id ?? null,
+            objectId: payload.enemyId,
+            enemyType: payload.enemyType,
+            awakened: true,
+            radius,
+            health,
+            maxHealth: health,
+            fireCooldown: COMBAT_CONFIG.enemyFireInterval
+        });
+        this.objects.enemies.add(enemy);
+        this.collisionBroadPhase.invalidateFrame();
+        return enemy;
+    }
+
+    #clearBossMissiles(resolution) {
+        const missiles = this.enemyProjectiles.filter(({ ownerId }) => ownerId === CONTINUITY_WARDEN_ID.MISSILE_OWNER);
+        for (const missile of missiles) {
+            this.objects.enemyProjectiles.remove(missile.id);
+            this.recordProjectileResolution({
+                projectileId: missile.id,
+                resolution,
+                position: missile.position.clone()
+            });
+        }
+        return missiles.length;
+    }
+
+    #clearBossSummonedEnemies(resolution) {
+        const enemies = this.#bossSummonedEnemies();
+        for (const enemy of enemies) {
+            for (const projectile of this.objects.enemyProjectiles.removeOwnedBy(enemy.id)) {
+                this.recordProjectileResolution({
+                    projectileId: projectile.id,
+                    resolution,
+                    position: projectile.position.clone()
+                });
+            }
+            this.objects.enemies.remove(enemy.id);
+            this.enemyImpactTombstones.delete(enemy.id);
+        }
+        if (enemies.length > 0) this.collisionBroadPhase.invalidateFrame();
+        return enemies.length;
+    }
+
     #commitBossEvents() {
         if (!this.bossRuntime) return Object.freeze([]);
         const events = this.bossRuntime.drainEvents();
         for (const event of events) {
             const { eventId: bossEventId, eventType, sequence: bossSequence, ...payload } = event;
+            if (eventType === CONTINUITY_WARDEN_EVENT.MISSILE_FIRED) this.#spawnBossMissile(payload);
+            if (eventType === CONTINUITY_WARDEN_EVENT.ENEMY_SUMMONED) this.#spawnBossSummonedEnemy(payload);
             const bossBody = this.bossStageSnapshot()?.presentation?.objects.find(
                 ({ physicsBody }) => physicsBody === true
             );
@@ -589,6 +663,10 @@ export class GameSimulation {
             });
         }
         const outcome = this.bossRuntime.handlePlayerDefeat(playerId, cause);
+        if (outcome.retryStarted) {
+            this.#clearBossMissiles("boss-attempt-reset");
+            this.#clearBossSummonedEnemies("boss-attempt-reset");
+        }
         this.#commitBossEvents();
         return outcome;
     }
@@ -781,6 +859,8 @@ export class GameSimulation {
     }
 
     #completeBossStage(stageId) {
+        this.#clearBossMissiles("boss-defeated");
+        this.#clearBossSummonedEnemies("boss-defeated");
         const completion = this.worldProgress?.completeBossStage(stageId);
         if (!completion?.accepted || !completion.changed) return false;
         this.#setActiveCollisionSurfaces(
@@ -970,6 +1050,7 @@ export class GameSimulation {
             ),
             surfaces: stage?.surfaces ?? Object.freeze([]),
             anchors: stage?.route ?? Object.freeze([]),
+            bossSummonedEnemyCount: this.#bossSummonedEnemies().filter(({ health }) => health > 0).length,
             worldOffset: this.#bossWorldOffset()
         });
         this.#setActiveDynamicCollisionSurfaces();
@@ -2359,6 +2440,7 @@ export class GameSimulation {
         for (const projectile of enemyProjectileSpawns) this.recordProjectileSpawn(projectile);
         const enemyProjectileLifecycle = advanceEnemyProjectiles({
             projectiles: this.enemyProjectiles,
+            targets: this.players,
             dt,
             maxLifetimeSeconds: COMBAT_CONFIG.enemyProjectileLifetimeSeconds
         });
@@ -3649,7 +3731,11 @@ export class GameSimulation {
                 radius: replication.radius,
                 damage: replication.damage,
                 speed: replication.speed,
-                canCutRope: replication.canCutRope
+                canCutRope: replication.canCutRope,
+                motionKind: replication.motionKind,
+                visualPresetId: replication.visualPresetId,
+                turnRateRadiansPerSecond: replication.turnRateRadiansPerSecond,
+                lifetimeSeconds: replication.lifetimeSeconds
             }
         });
         Object.defineProperty(projectile, "replicationSpawnEvent", {
@@ -3849,7 +3935,7 @@ export class GameSimulation {
         const stage = this.#bossStageWorld();
         if (!stage || claim.sourceId !== stage.id)
             return Object.freeze({ accepted: false, reason: "boss-stage-mismatch" });
-        if (BOSS_HAZARD_KIND[claim.sourceType] !== true) {
+        if (CONTINUITY_WARDEN_HAZARD_KIND[claim.sourceType] !== true) {
             return Object.freeze({ accepted: false, reason: "boss-hazard-mismatch" });
         }
         const playerSuffix = `:${player.id}`;
@@ -4136,6 +4222,8 @@ export class GameSimulation {
         if (fatal) {
             const defeat = this.bossRuntime.handlePlayerDefeat(player.id, `boss-${claim.sourceType}`);
             if (defeat.retryStarted) {
+                this.#clearBossMissiles("boss-attempt-reset");
+                this.#clearBossSummonedEnemies("boss-attempt-reset");
                 this.#respawnBossParticipants("boss-wipe");
             }
         }

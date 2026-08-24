@@ -7,97 +7,111 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 id: "boss-06:anchor:u1",
                 role: "swing-attack",
                 surfaceId: "boss-06:surface:u1",
-                x: 1300,
-                y: -1460
+                x: 850,
+                y: -1430
             },
             {
                 id: "boss-06:anchor:u2",
                 role: "swing-attack",
                 surfaceId: "boss-06:surface:u2",
-                x: 1660,
-                y: -1490
+                x: 1230,
+                y: -1530
             },
             {
                 id: "boss-06:anchor:u3",
                 role: "swing-attack",
                 surfaceId: "boss-06:surface:u3",
-                x: 2020,
-                y: -1510
+                x: 1610,
+                y: -1630
             },
             {
                 id: "boss-06:anchor:u4",
                 role: "swing-attack",
                 surfaceId: "boss-06:surface:u4",
-                x: 2380,
-                y: -1490
+                x: 1990,
+                y: -1710
             },
             {
                 id: "boss-06:anchor:u5",
                 role: "swing-attack",
                 surfaceId: "boss-06:surface:u5",
-                x: 2740,
-                y: -1460
+                x: 2370,
+                y: -1750
             },
             {
                 id: "boss-06:anchor:u6",
                 role: "swing-attack",
                 surfaceId: "boss-06:surface:u6",
-                x: 3100,
-                y: -1490
+                x: 2750,
+                y: -1750
             },
             {
                 id: "boss-06:anchor:u7",
                 role: "swing-attack",
                 surfaceId: "boss-06:surface:u7",
-                x: 3460,
-                y: -1510
+                x: 3130,
+                y: -1710
             },
             {
                 id: "boss-06:anchor:u8",
                 role: "swing-attack",
                 surfaceId: "boss-06:surface:u8",
-                x: 3820,
-                y: -1460
+                x: 3510,
+                y: -1630
             },
             {
-                id: "boss-06:anchor:rr1",
+                id: "boss-06:anchor:u9",
                 role: "swing-attack",
-                surfaceId: "boss-06:surface:rr1",
-                x: 770,
-                y: -1000
+                surfaceId: "boss-06:surface:u9",
+                x: 3890,
+                y: -1530
             },
             {
-                id: "boss-06:anchor:rr3",
+                id: "boss-06:anchor:u10",
                 role: "swing-attack",
-                surfaceId: "boss-06:surface:rr3",
-                x: 4240,
-                y: -1000
+                surfaceId: "boss-06:surface:u10",
+                x: 4270,
+                y: -1430
+            },
+            {
+                id: "boss-06:anchor:rr-left",
+                role: "swing-attack",
+                surfaceId: "boss-06:surface:rr-left",
+                x: 420,
+                y: -1020
+            },
+            {
+                id: "boss-06:anchor:rr-right",
+                role: "swing-attack",
+                surfaceId: "boss-06:surface:rr-right",
+                x: 4740,
+                y: -1020
             }
         ],
         baseHookReach: 400,
         bounds: {
-            height: 3000,
-            width: 5400,
+            height: 2600,
+            width: 5600,
             x: 0,
-            y: -3000
+            y: -2600
         },
         entry: {
             id: "boss-06:entry",
-            x: 1120,
-            y: -1115
+            x: 820,
+            y: -1055
         },
         exit: {
             id: "boss-06:boarding",
-            x: 5150,
-            y: -1147
+            x: 5260,
+            y: -1070
         },
         phaseZones: [
             {
                 bounds: {
-                    height: 1118,
-                    width: 3820,
-                    x: 540,
-                    y: -1750
+                    height: 1320,
+                    width: 4740,
+                    x: 220,
+                    y: -1950
                 },
                 id: "boss-06:zone:security-court",
                 phaseId: "boss-06:combat"
@@ -106,13 +120,13 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
         recoveryPoints: [
             {
                 id: "boss-06:recovery-point:left",
-                x: 770,
-                y: -722
+                x: 430,
+                y: -732
             },
             {
                 id: "boss-06:recovery-point:right",
-                x: 4240,
-                y: -722
+                x: 4740,
+                y: -732
             }
         ],
         routeEdges: [
@@ -150,15 +164,25 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 from: "boss-06:anchor:u7",
                 id: "boss-06:route:07",
                 to: "boss-06:anchor:u8"
+            },
+            {
+                from: "boss-06:anchor:u8",
+                id: "boss-06:route:08",
+                to: "boss-06:anchor:u9"
+            },
+            {
+                from: "boss-06:anchor:u9",
+                id: "boss-06:route:09",
+                to: "boss-06:anchor:u10"
             }
         ],
         surfaces: [
             {
                 bounds: {
-                    height: 115,
-                    width: 3120,
-                    x: 1000,
-                    y: -1100
+                    height: 120,
+                    width: 3920,
+                    x: 640,
+                    y: -1040
                 },
                 grappleable: true,
                 id: "boss-06:main-runway",
@@ -166,10 +190,10 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 46,
-                    width: 280,
-                    x: 1790,
-                    y: -1380
+                    height: 48,
+                    width: 560,
+                    x: 1040,
+                    y: -1360
                 },
                 grappleable: true,
                 id: "boss-06:ledge-left",
@@ -177,10 +201,21 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 46,
-                    width: 280,
-                    x: 3100,
-                    y: -1380
+                    height: 48,
+                    width: 840,
+                    x: 2180,
+                    y: -1500
+                },
+                grappleable: true,
+                id: "boss-06:ledge-center",
+                kind: "raised-ledge"
+            },
+            {
+                bounds: {
+                    height: 48,
+                    width: 560,
+                    x: 3440,
+                    y: -1360
                 },
                 grappleable: true,
                 id: "boss-06:ledge-right",
@@ -189,9 +224,9 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
             {
                 bounds: {
                     height: 58,
-                    width: 460,
-                    x: 540,
-                    y: -690
+                    width: 420,
+                    x: 220,
+                    y: -700
                 },
                 grappleable: true,
                 id: "boss-06:recovery-left",
@@ -200,9 +235,9 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
             {
                 bounds: {
                     height: 58,
-                    width: 240,
-                    x: 4120,
-                    y: -690
+                    width: 360,
+                    x: 4560,
+                    y: -700
                 },
                 grappleable: true,
                 id: "boss-06:recovery-right",
@@ -210,10 +245,10 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 130,
-                    width: 990,
-                    x: 4360,
-                    y: -1115
+                    height: 135,
+                    width: 760,
+                    x: 4780,
+                    y: -1055
                 },
                 grappleable: true,
                 id: "boss-06:departure-deck",
@@ -223,8 +258,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 1288,
-                    y: -1472
+                    x: 838,
+                    y: -1442
                 },
                 grappleable: true,
                 id: "boss-06:surface:u1",
@@ -234,8 +269,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 1648,
-                    y: -1502
+                    x: 1218,
+                    y: -1542
                 },
                 grappleable: true,
                 id: "boss-06:surface:u2",
@@ -245,8 +280,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 2008,
-                    y: -1522
+                    x: 1598,
+                    y: -1642
                 },
                 grappleable: true,
                 id: "boss-06:surface:u3",
@@ -256,8 +291,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 2368,
-                    y: -1502
+                    x: 1978,
+                    y: -1722
                 },
                 grappleable: true,
                 id: "boss-06:surface:u4",
@@ -267,8 +302,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 2728,
-                    y: -1472
+                    x: 2358,
+                    y: -1762
                 },
                 grappleable: true,
                 id: "boss-06:surface:u5",
@@ -278,8 +313,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 3088,
-                    y: -1502
+                    x: 2738,
+                    y: -1762
                 },
                 grappleable: true,
                 id: "boss-06:surface:u6",
@@ -289,8 +324,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 3448,
-                    y: -1522
+                    x: 3118,
+                    y: -1722
                 },
                 grappleable: true,
                 id: "boss-06:surface:u7",
@@ -300,8 +335,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 3808,
-                    y: -1472
+                    x: 3498,
+                    y: -1642
                 },
                 grappleable: true,
                 id: "boss-06:surface:u8",
@@ -311,22 +346,44 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 758,
-                    y: -1012
+                    x: 3878,
+                    y: -1542
                 },
                 grappleable: true,
-                id: "boss-06:surface:rr1",
+                id: "boss-06:surface:u9",
                 kind: "grapple-target"
             },
             {
                 bounds: {
                     height: 24,
                     width: 24,
-                    x: 4228,
-                    y: -1012
+                    x: 4258,
+                    y: -1442
                 },
                 grappleable: true,
-                id: "boss-06:surface:rr3",
+                id: "boss-06:surface:u10",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 408,
+                    y: -1032
+                },
+                grappleable: true,
+                id: "boss-06:surface:rr-left",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 4728,
+                    y: -1032
+                },
+                grappleable: true,
+                id: "boss-06:surface:rr-right",
                 kind: "grapple-target"
             }
         ]
@@ -336,14 +393,14 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
         collider: {
             height: 150,
             width: 96,
-            x: 3492,
-            y: -1250
+            x: 3552,
+            y: -1190
         },
         impactTargetIds: ["boss-06:continuity-warden:body"],
         mechanicId: "continuity-warden",
         position: {
-            x: 3540,
-            y: -1175
+            x: 3600,
+            y: -1115
         },
         visualPresetId: "continuity-warden"
     },
@@ -374,84 +431,97 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
     mechanics: [
         {
             bounds: {
-                height: 765,
-                width: 3840,
-                x: 1000,
-                y: -1750
+                height: 980,
+                width: 3920,
+                x: 640,
+                y: -1900
             },
             id: "boss-06:warden-combat",
             parameters: {
                 beamGapSeconds: 0.3,
                 beamSeconds: 0.8,
                 boardingBounds: {
-                    height: 235,
-                    width: 360,
-                    x: 4920,
-                    y: -1220
+                    height: 280,
+                    width: 430,
+                    x: 5030,
+                    y: -1200
                 },
                 bridgeBounds: {
-                    height: 130,
-                    width: 240,
-                    x: 4120,
-                    y: -1115
+                    height: 135,
+                    width: 220,
+                    x: 4560,
+                    y: -1055
                 },
                 chargeRecoverySeconds: 1.8,
                 chargeSpeed: 900,
                 chargeTelegraphSeconds: 0.9,
-                combatMaxX: 4072,
-                combatMinX: 1048,
                 counterSeconds: 1.2,
                 damage: 25,
-                gateBounds: {
-                    height: 760,
-                    width: 480,
-                    x: 4360,
-                    y: -1750
+                emitterLeft: {
+                    x: 688,
+                    y: -1370
                 },
-                groundCenterY: -1175,
-                guardMaxX: 3870,
-                guardMinX: 1250,
+                emitterRight: {
+                    x: 4512,
+                    y: -1370
+                },
+                gateBounds: {
+                    height: 705,
+                    width: 220,
+                    x: 4560,
+                    y: -1760
+                },
+                guardEdgeInset: 240,
                 guardSeconds: 1.5,
                 highBeamBounds: {
-                    height: 270,
-                    width: 3160,
-                    x: 980,
-                    y: -1485
+                    height: 360,
+                    width: 3960,
+                    x: 620,
+                    y: -1790
                 },
-                ledgeLeft: {
-                    x: 1930,
-                    y: -1455
-                },
-                ledgeRight: {
-                    x: 3240,
-                    y: -1455
-                },
+                jumpDurationSeconds: 0.95,
+                jumpGravity: 1500,
+                jumpTelegraphSeconds: 0.4,
+                landingActiveSeconds: 0.3,
+                landingBurstRadius: 150,
+                landingRecoverySeconds: 0.45,
                 lowBeamBounds: {
-                    height: 130,
-                    width: 3160,
-                    x: 980,
-                    y: -1200
-                },
-                mainBounds: {
-                    height: 115,
-                    width: 3120,
-                    x: 1000,
-                    y: -1100
+                    height: 140,
+                    width: 3960,
+                    x: 620,
+                    y: -1160
                 },
                 meleeActiveSeconds: 0.35,
                 meleeRecoverySeconds: 0.9,
                 meleeTelegraphSeconds: 0.6,
+                minionSummonCooldownSeconds: 15,
+                minionSummonCount: 2,
+                minionSummonSkipAliveCount: 6,
+                missileDamage: 20,
+                missileFanAnglesDegrees: [-50, -25, 0, 25, 50],
+                missileLifetimeSeconds: 5,
+                missileRadius: 26,
+                missileSpeed: 480,
+                missileTurnRateRadiansPerSecond: 1.75,
                 securityRecoverySeconds: 0.8,
                 securityTelegraphSeconds: 1,
                 shuttlePosition: {
-                    x: 5150,
-                    y: -1345
+                    x: 5260,
+                    y: -1330
+                },
+                summonLeft: {
+                    x: 1280,
+                    y: -1240
+                },
+                summonRight: {
+                    x: 3920,
+                    y: -1240
                 },
                 victoryCameraSeconds: 2
             },
             position: {
-                x: 3540,
-                y: -1175
+                x: 3600,
+                y: -1115
             },
             type: "continuity-warden"
         }
@@ -462,7 +532,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
         {
             basePhaseHealth: 1000,
             hud: {
-                objective: "Rope로 정면 통제를 우회해 Warden을 제압"
+                objective: "점프 미사일의 부채꼴을 읽고 Rope로 Warden의 통제를 돌파"
             },
             id: "boss-06:combat",
             mechanicIds: ["boss-06:warden-combat"],

@@ -1,3 +1,10 @@
+import { bossBodyPolygonVertices } from "../../game/boss/BossBodyPolygon.js";
+import {
+    CONTINUITY_WARDEN_LOCOMOTION_STATE,
+    CONTINUITY_WARDEN_OBJECT_KIND,
+    CONTINUITY_WARDEN_STATE
+} from "../../game/boss/ContinuityWardenDefinition.js";
+
 const COLOR = Object.freeze({
     BODY: "#273442",
     DARK: "#111827",
@@ -9,19 +16,24 @@ const COLOR = Object.freeze({
 });
 
 const WARDEN_ATTACK_FAMILY = Object.freeze({
-    "baton-1": "melee",
-    "baton-2": "melee",
-    "overhead-slam": "melee",
-    "back-swing": "melee",
-    "counter-bash": "melee",
-    "ground-thruster-dash": "dash",
-    "diagonal-thruster-dash": "dash",
-    charge: "dash"
+    [CONTINUITY_WARDEN_STATE.BATON_1]: "melee",
+    [CONTINUITY_WARDEN_STATE.BATON_2]: "melee",
+    [CONTINUITY_WARDEN_STATE.OVERHEAD_SLAM]: "melee",
+    [CONTINUITY_WARDEN_STATE.BACK_SWING]: "melee",
+    [CONTINUITY_WARDEN_STATE.COUNTER_BASH]: "melee",
+    [CONTINUITY_WARDEN_STATE.GROUND_DASH]: "dash",
+    [CONTINUITY_WARDEN_STATE.DIAGONAL_DASH]: "dash",
+    [CONTINUITY_WARDEN_STATE.CHARGE]: "dash",
+    [CONTINUITY_WARDEN_STATE.MISSILE]: "missile",
+    [CONTINUITY_WARDEN_STATE.JUMP]: "missile",
+    [CONTINUITY_WARDEN_STATE.SUMMON]: "summon"
 });
 
 const WARDEN_ATTACK_FAMILY_COLOR = Object.freeze({
     melee: COLOR.WARNING,
-    dash: "#38bdf8"
+    dash: "#38bdf8",
+    missile: "#a78bfa",
+    summon: "#4ade80"
 });
 const WARDEN_TELEGRAPH_COLOR_BY_STATE = Object.freeze({
     "baton-1": COLOR.WARNING,
@@ -76,15 +88,32 @@ const WARDEN_BEAM_RANGE_IMAGE = Object.freeze({
 
 const KIND = Object.freeze({
     GRAPPLE_ANCHOR: "grapple-anchor",
-    CONTINUITY_WARDEN: "boss-continuity-warden",
-    SECURITY_EMITTER: "boss-security-emitter",
-    WARDEN_HAZARD: "boss-warden-hazard",
-    SECURITY_BEAM: "boss-security-beam",
-    DEPARTURE_GATE: "boss-departure-gate",
-    THRESHOLD_BRIDGE: "boss-threshold-bridge",
-    MAINTENANCE_SHUTTLE: "boss-maintenance-shuttle",
-    VICTORY_CAMERA: "boss-victory-camera",
-    PAD_SURFACE: "boss-pad-surface"
+    CONTINUITY_WARDEN: CONTINUITY_WARDEN_OBJECT_KIND.WARDEN,
+    SECURITY_EMITTER: CONTINUITY_WARDEN_OBJECT_KIND.EMITTER,
+    WARDEN_HAZARD: CONTINUITY_WARDEN_OBJECT_KIND.HAZARD,
+    SECURITY_BEAM: CONTINUITY_WARDEN_OBJECT_KIND.BEAM,
+    DEPARTURE_GATE: CONTINUITY_WARDEN_OBJECT_KIND.GATE,
+    THRESHOLD_BRIDGE: CONTINUITY_WARDEN_OBJECT_KIND.BRIDGE,
+    MAINTENANCE_SHUTTLE: CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE,
+    VICTORY_CAMERA: CONTINUITY_WARDEN_OBJECT_KIND.CAMERA,
+    PAD_SURFACE: CONTINUITY_WARDEN_OBJECT_KIND.PAD_SURFACE
+});
+const WARDEN_THRUSTER_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_STATE.GROUND_DASH]: true,
+    [CONTINUITY_WARDEN_STATE.DIAGONAL_DASH]: true
+});
+const WARDEN_TELEGRAPH_FILL = Object.freeze({
+    dash: "rgba(56, 189, 248, 0.2)",
+    missile: "rgba(167, 139, 250, 0.2)",
+    summon: "rgba(74, 222, 128, 0.2)",
+    melee: "rgba(251, 191, 36, 0.2)"
+});
+const MISSILE_RACK_VFX = Object.freeze({
+    indexes: Object.freeze([-2, -1, 0, 1, 2]),
+    horizontalSpacingRatio: 0.16,
+    yRatio: -0.52,
+    outerYOffset: 4,
+    radius: 5
 });
 
 function size(object, fallbackWidth, fallbackHeight) {
@@ -189,6 +218,23 @@ const WARDEN_DEFEAT_STAGE_ROTATION = Object.freeze({
     "player-control": -0.95
 });
 
+function applyWardenLocomotionPose(context, object, height) {
+    const sign = direction(object);
+    if (object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.TAKEOFF) {
+        context.translate(0, height * 0.1);
+        context.scale(1.12, 0.78);
+    } else if (object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.JUMP) {
+        context.rotate(sign * 0.14);
+        context.scale(0.94, 1.08);
+    } else if (object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.FALL) {
+        context.rotate(-sign * 0.1);
+        context.scale(1.04, 0.96);
+    } else if (object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.LANDING) {
+        context.translate(0, height * 0.12);
+        context.scale(1.18, 0.72);
+    }
+}
+
 class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
         const { width, height } = size(object, 96, 150);
@@ -198,6 +244,7 @@ class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
         const family = WARDEN_ATTACK_FAMILY[object.state] ?? null;
         const warningColor = wardenTelegraphColor(object.state, family);
         if (defeated) context.rotate(WARDEN_DEFEAT_STAGE_ROTATION[object.defeatStage] ?? -0.95);
+        else applyWardenLocomotionPose(context, object, height);
         context.fillStyle = "#4d5b61";
         context.strokeStyle = warning ? warningColor : defeated ? "#64748b" : "#e1eaed";
         context.lineWidth = warning ? 5 : 3;
@@ -225,7 +272,29 @@ class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
             context.lineTo(-sign * width * 0.85, height * 0.3);
             context.stroke();
         }
-        if (String(object.state).includes("thruster") || object.state === "charge") {
+        if (object.missileArmed) {
+            context.fillStyle = "#a78bfa";
+            context.strokeStyle = "#ede9fe";
+            context.lineWidth = 2;
+            for (const index of MISSILE_RACK_VFX.indexes) {
+                context.beginPath();
+                context.arc(
+                    index * width * MISSILE_RACK_VFX.horizontalSpacingRatio,
+                    height * MISSILE_RACK_VFX.yRatio - Math.abs(index) * MISSILE_RACK_VFX.outerYOffset,
+                    MISSILE_RACK_VFX.radius,
+                    0,
+                    Math.PI * 2
+                );
+                context.fill();
+                context.stroke();
+            }
+        }
+        if (
+            WARDEN_THRUSTER_STATE[object.state] === true ||
+            object.state === CONTINUITY_WARDEN_STATE.CHARGE ||
+            object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.JUMP ||
+            object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.FALL
+        ) {
             context.fillStyle = "#68e7ff";
             context.beginPath();
             context.moveTo(-sign * width * 0.45, height * 0.3);
@@ -437,9 +506,7 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
         context.globalAlpha = active ? 0.62 : 0.32;
         context.fillStyle = active
             ? "rgba(251, 113, 133, 0.35)"
-            : family === "dash"
-              ? "rgba(56, 189, 248, 0.2)"
-              : "rgba(251, 191, 36, 0.2)";
+            : (WARDEN_TELEGRAPH_FILL[family] ?? "rgba(251, 191, 36, 0.2)");
         context.strokeStyle = active ? COLOR.HAZARD : telegraphColor;
         context.lineWidth = active ? 5 : 3;
         context.setLineDash(active ? [] : family === "dash" ? [10, 8] : [20, 14]);
@@ -533,4 +600,3 @@ const RENDERER_BY_KIND = Object.freeze({
 export function bossPolygonObjectRenderer(kind) {
     return RENDERER_BY_KIND[kind] ?? GENERIC_RENDERER;
 }
-import { bossBodyPolygonVertices } from "../../game/boss/BossBodyPolygon.js";

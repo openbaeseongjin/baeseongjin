@@ -40,6 +40,8 @@ import { DEFAULT_ENEMY_SPRITE_SECTOR_ID } from "./sprites/EnemySpriteCatalog.js"
 import { EnemySpritePackageCatalog } from "./sprites/EnemySpritePackageCatalog.js";
 import { DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION } from "./boss/ContinuityWardenSpriteCatalog.js";
 import { ContinuityWardenSpriteObjectRendererCatalog } from "./boss/ContinuityWardenSpriteObjectRenderer.js";
+import { CONTINUITY_WARDEN_PROJECTILE_PRESET_ID } from "../game/boss/ContinuityWardenDefinition.js";
+import { HomingMissileRenderer } from "./projectiles/HomingMissileRenderer.js";
 
 function authoredEnvironmentAtlases(authoredAreaEnvironmentDefinitions) {
     return Object.fromEntries(
@@ -130,7 +132,9 @@ export class SpriteSceneResourceBundle {
     }
 
     async prepareBossStage({ areaId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
-        const environmentAtlasIds = this.environmentAtlasIdsForArea(areaId);
+        const environmentAtlasIds = Object.freeze([
+            ...new Set([...this.environmentAtlasIdsForArea(areaId), ...Object.keys(this.environmentDefinition.atlases)])
+        ]);
         await Promise.all([
             this.preparePlayer(),
             this.enemySpritePackages.prepareSector(sectorId),
@@ -303,11 +307,27 @@ export class SpriteSceneRenderer {
             }),
             new SpriteProjectileRenderer({
                 selectProjectiles: (scene) =>
-                    (scene.enemyProjectiles ?? []).filter((projectile) => !projectile.canCutRope),
+                    (scene.enemyProjectiles ?? []).filter(
+                        (projectile) =>
+                            !projectile.canCutRope &&
+                            projectile.visualPresetId !== CONTINUITY_WARDEN_PROJECTILE_PRESET_ID
+                    ),
                 sprite: enemyProjectileSprite,
                 palette: { a: "#881337", b: "#fb7185", c: "#fecdd3" },
                 size: { width: 14, height: 14 },
                 category: "enemyProjectiles"
+            }),
+            new HomingMissileRenderer({
+                selectProjectiles: (scene) =>
+                    (scene.enemyProjectiles ?? []).filter(
+                        ({ visualPresetId }) => visualPresetId === CONTINUITY_WARDEN_PROJECTILE_PRESET_ID
+                    ),
+                palette: {
+                    body: "#38bdf8",
+                    edge: "#e0f2fe",
+                    core: "#fb7185",
+                    trail: "rgba(14, 165, 233, 0.72)"
+                }
             }),
             new SpriteCutterProjectileRenderer({
                 selectProjectiles: (scene) =>

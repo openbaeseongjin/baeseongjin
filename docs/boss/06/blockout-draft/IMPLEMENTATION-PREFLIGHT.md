@@ -1,5 +1,7 @@
 # BOSS 06 — IMPLEMENTATION PREFLIGHT
 
+> **V2 SUPERSEDED:** 현재 구현 전제는 [`../BOSS-06-V3-CONTRACT.md`](../BOSS-06-V3-CONTRACT.md)가 소유한다.
+
 > 목적: 다른 Boss 구현에서 발생한 `약점이 Boss 내부에 생성되어 타격 불가`, `Anchor/발판 배치 불량`, `공간이 좁아 이동 불가` 문제를 Boss06 구현 전에 차단한다.
 > 기준 GitHub main: `20e6c22deb6e95d9a5a7e351a95874d931a0a845`
 
@@ -16,6 +18,7 @@ impactTargetIds = ["boss-06:continuity-warden:body"]
 ```
 
 HARD RULE:
+
 - 별도 `rear-core`, `shield-core`, `weakpoint-circle` 금지
 - body collision actor와 body ImpactTarget `position` 동일
 - body ImpactTarget collider와 Warden physics collider 동일 geometry
@@ -24,6 +27,7 @@ HARD RULE:
 - Shield/Baton visual을 solid body collider에 포함하지 않음
 
 필수 자동 테스트:
+
 1. Neutral front → damage > 0
 2. Neutral rear → damage > 0
 3. Guard front → damage = 0
@@ -52,6 +56,7 @@ Warden solid collision envelope <= 96px × 150px
 - Warden 96px width로 ledge center에 서면 좌우 margin ≈92px
 
 금지:
+
 - 삭제된 대형 원형 Boss collider 재사용
 - Shield 포함 200px+ solid collider
 - Baton reach를 body collider 크기로 구현
@@ -85,6 +90,7 @@ grappleable=true
 **하나의 flat rectangle만 사용.**
 
 이유:
+
 - Ground 이동에 step 없음
 - Baton 이동 막힘 없음
 - Ground Thruster 턱 없음
@@ -103,6 +109,7 @@ grappleable=true
 ## 6. Upper Rope Anchor
 
 U1~U8:
+
 - `role:"swing-attack"`
 - 최신 main이 24×24 real grapple-target으로 materialize
 - 인접 최대 ≈363.46px
@@ -126,6 +133,7 @@ Boss Stage renderer는 presentation object 순서대로 그린다.
 Boss06 custom presentation에서는 grapple-anchor marker를 Warden/Beam 뒤가 아니라 **마지막 쪽에 append**해 항상 전경에 보이게 한다.
 
 Acceptance:
+
 - Warden이 Ledge 위에 있어도 근처 Anchor marker 식별 가능
 - HIGH/LOW Telegraph 중 다음 이동 Anchor 식별 가능
 - Beam active 중에도 target marker를 읽을 수 있음
@@ -135,12 +143,14 @@ Acceptance:
 Draft03에서는 R2 deep gantry를 제거한다.
 
 ### R1
+
 - deck x=540..1000, y=2310
 - RR1=(770,2000), `role:"swing-attack"`
 - deck 양 끝 샘플 기준 RR1 최대 거리 ≈376px
 - RR1→Main edge ≈251px
 
 ### R3
+
 - deck x=3980..4300, y=2310
 - RR3=(4220,2000), `role:"swing-attack"`
 - deck 양 끝 샘플 기준 RR3 최대 거리 ≈368px
@@ -153,6 +163,7 @@ R1/R3까지 완전히 놓친 경우에만 custom `recoverPlayer()` fallback.
 ## 9. Emitter / Beam이 이동 공간을 먹지 않게 한다
 
 Emitter:
+
 ```text
 collision=false
 grappleable=false
@@ -160,6 +171,7 @@ ropeOccluder=false
 ```
 
 Beam:
+
 - `activeHazards()` bounds only
 - static collision surface 금지
 - damage only
@@ -174,6 +186,7 @@ Beam:
 - Gate는 Main Charge lane을 침범하지 않음
 
 Victory:
+
 - Gate collision 제거/open
 - 240px Threshold Bridge 활성화
 - Boarding Deck 연결
@@ -194,6 +207,7 @@ Main top y=1900
 HTML Preview만으로 PASS 처리 금지.
 
 Map Editor Gameplay View에서 반드시:
+
 - Neutral: Player + Warden + 가까운 Rope Anchor 2개 이상
 - Guard: Shield 방향 + 후면 우회 Anchor 동시 표시
 - Charge: Telegraph + Charge path + 회피 Anchor + Recovery 위치 동시 표시
@@ -226,6 +240,7 @@ assert boss06ImpactTargetCount == 1
 ## 14. 1인 / 4인 공간 검증
 
 1인:
+
 - Warden/Player 교차
 - Guard flank
 - Charge miss/punish
@@ -233,6 +248,7 @@ assert boss06ImpactTargetCount == 1
 - R1/R3 recovery
 
 4인:
+
 - entry portal spacing 후 body overlap 없음
 - Main에 4 Player + Warden이 있어도 끼임 없음
 - R1/R3에 2명 이상 떨어져도 RR 사용 가능
@@ -241,6 +257,7 @@ assert boss06ImpactTargetCount == 1
 ## 15. 구현 중단 조건
 
 아래 중 하나라도 발생하면 구현/merge 중단:
+
 - dummy weakpoint가 Warden 내부에 생김
 - body ImpactTarget 이외의 Boss06 target이 생김
 - Warden collider >96×150인데 Arena 재검증 없음
@@ -250,7 +267,6 @@ assert boss06ImpactTargetCount == 1
 - Warden이 Rope attachment target
 - 의도하지 않은 Grapple surface가 추가됨
 - Gameplay View에서 회피 Anchor가 화면 밖으로 사라짐
-
 
 # Player Damage Hard Gate
 

@@ -13,6 +13,7 @@ const status = document.querySelector("#preview-status");
 const reloadButton = document.querySelector("#reload-preview");
 const flightMode = document.querySelector("#preview-flight-mode");
 const flightStatus = document.querySelector("#preview-flight-status");
+const focusBossButton = document.querySelector("#preview-focus-boss");
 const weakpointStrikeButton = document.querySelector("#preview-weakpoint-strike");
 const stageId = new URLSearchParams(globalThis.location.search).get("stage");
 let currentApp = null;
@@ -122,6 +123,7 @@ async function createPreview() {
         const [preview, presentation] = await Promise.all([requestPreview(), runtimePresentationPromise]);
         const { areaId, revision, previewArea } = preview;
         syncFlightMode();
+        focusBossButton.hidden = preview.specType !== "boss-stage";
         weakpointStrikeButton.hidden = preview.specType !== "boss-stage";
         if (preview.specType === "boss-stage") {
             const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(
@@ -180,6 +182,14 @@ async function createPreview() {
 
 reloadButton.addEventListener("click", createPreview);
 flightMode.addEventListener("change", syncFlightMode);
+focusBossButton.addEventListener("click", () => {
+    const outcome = currentApp?.debugMovePlayerNearBoss?.();
+    if (!outcome?.accepted) {
+        setStatus("현재 Boss 위치로 이동할 수 없습니다.", "error");
+        return;
+    }
+    setStatus(`Boss 옆으로 이동 · x ${Math.round(outcome.position.x)} / y ${Math.round(outcome.position.y)}`);
+});
 weakpointStrikeButton.addEventListener("click", () => {
     const outcome = currentApp?.debugStrikeWeakpoint?.();
     if (!outcome?.accepted) {
