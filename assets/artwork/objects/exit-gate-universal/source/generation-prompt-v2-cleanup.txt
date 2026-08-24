@@ -1,0 +1,3 @@
+Edit the attached exit gate asset while preserving its exact overall design, front orthographic view, graphite/iron palette, two closed leaves, central seam, horizontal lock bar, muted amber lock indicator, tiny cyan service lights, and flat bottom-standing silhouette.
+
+Remove every non-object pixel: delete all ambient background haze, translucent black field, glow spill, floor shadow, isolated edge specks, and border artifacts. The output must be one centered gate cutout on a genuinely transparent background. Keep only the gate itself. Use clean hard pixel-art alpha edges with no soft halo and no scenery. Do not add text, symbols, wall, floor, cable, or another object. Keep the design readable but avoid adding detail.

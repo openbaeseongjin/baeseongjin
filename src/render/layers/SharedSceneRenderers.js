@@ -8,6 +8,7 @@ import { resolveAccessModuleTargets } from "../ScreenEdgeGuide.js";
 import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
+    WORLD_OBJECT_SPRITE_STATE,
     worldObjectLocalBounds,
     worldObjectPresentation,
     worldObjectWorldBounds
@@ -33,6 +34,11 @@ const COLORS = Object.freeze({
     hookShank: "#94a3b8",
     hookClaw: "#cbd5e1",
     hookTip: "#f8fafc"
+});
+
+const SPRITE_STATE_BY_OPENED = Object.freeze({
+    false: WORLD_OBJECT_SPRITE_STATE.CLOSED,
+    true: WORLD_OBJECT_SPRITE_STATE.OPENED
 });
 
 function drawRope(context, rope, player, { electrified = false, time = 0 } = {}) {
@@ -501,6 +507,7 @@ export class AuthoredWorldObjectRenderer {
     }
 
     drawGate(context, style, bounds, unlocked, { sectorId = null } = {}) {
+        if (this.drawWorldObjectSprite(context, style, bounds, SPRITE_STATE_BY_OPENED[unlocked])) return;
         if (sectorId === "sector-01") {
             this.drawSector01Gate(context, bounds, unlocked);
             return;
@@ -611,6 +618,7 @@ export class AuthoredWorldObjectRenderer {
     }
 
     drawGatePanel(context, style, bounds, { blocked, ready, opened, sectorId = null }) {
+        if (this.drawWorldObjectSprite(context, style, bounds, SPRITE_STATE_BY_OPENED[opened])) return;
         if (sectorId === "sector-01") {
             this.drawSector01GatePanel(context, bounds, { blocked, ready, opened });
             return;
@@ -1011,12 +1019,7 @@ export class AuthoredWorldObjectRenderer {
     }
 
     drawStoryDisplay(context, style, bounds) {
-        const image = this.spriteAssets.imageFor(style.id);
-        if (image) {
-            context.imageSmoothingEnabled = false;
-            context.drawImage(image, bounds.x, bounds.y, bounds.width, bounds.height);
-            return;
-        }
+        if (this.drawWorldObjectSprite(context, style, bounds)) return;
         const width = bounds.width * 0.5;
         const height = bounds.height * 0.5;
         context.save();
@@ -1028,6 +1031,14 @@ export class AuthoredWorldObjectRenderer {
         context.fillRect(-width + 7, -height + 7, width * 1.15, 4);
         context.fillRect(-width + 7, -height + 16, width * 0.75, 3);
         context.restore();
+    }
+
+    drawWorldObjectSprite(context, style, bounds, state) {
+        const image = this.spriteAssets.imageFor(style.id, state);
+        if (!image) return false;
+        context.imageSmoothingEnabled = false;
+        context.drawImage(image, bounds.x, bounds.y, bounds.width, bounds.height);
+        return true;
     }
 
     drawMaintenanceFrame(context, style) {

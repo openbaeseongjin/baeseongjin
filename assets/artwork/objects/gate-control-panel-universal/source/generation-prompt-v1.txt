@@ -1,0 +1,24 @@
+Create one isolated 2D pixel-art game asset concept: a universal EXIT GATE CONTROL PANEL for a side-view platform action game set in a sealed vertical corporate city. This same control panel must look natural beside gates in all six sectors: waste service levels, industrial maintenance, worker/commercial district, upper residential, corporate control, and rooftop evacuation.
+
+Composition and output:
+- one single upright control panel, front orthographic view, perfectly centered
+- true transparent background with clean alpha; no wall, floor, scenery, shadow plane, vignette, border, UI frame, cable leading off-canvas, door, or other prop
+- freestanding narrow body on a compact pedestal and flat foot, designed for a bottom-center anchor
+- silhouette slightly smaller than the player, intended to normalize later to a 48×48 logical pixel canvas with no more than about 44×45 opaque pixels
+- crisp deliberate pixel clusters, hard stepped edges, nearest-neighbor pixel-art appearance, no antialiasing, no soft painterly gradients
+
+Design:
+- universal corporate-industrial interaction panel, restrained and neutral rather than sector-themed
+- dark graphite and iron casing with a clear large recessed display block, one large mechanical actuator/input plate, compact pedestal, broad stable foot
+- current concept reads as IDLE / BLOCKED through a closed physical actuator cover and inactive display shape, not through color alone
+- only a few large readable masses; minimal interior detail that will survive at roughly 44×45 pixels
+- limited palette: near-black, graphite, blue-gray iron, one muted amber status bar, tiny restrained cyan service indicator
+- visibly interactive and higher contrast than a background sign, but clearly subordinate to the exit gate
+
+Avoid:
+- text, letters, numbers, keypad digits, arrows, EXIT label, logos, branding, icons, watermark
+- hazard stripes, skulls, warning chevrons, ornate sci-fi greebles, dense buttons, exposed pipe clusters, loose cables, residential furniture, storefront motifs, military terminal styling
+- bright sector signature colors, red alarm wash, neon outline everywhere, glossy 3D rendering, realistic lighting
+- human hand, character, wall mount, or floating hologram
+
+Deliver only the single transparent pixel-art gate control panel cutout.
