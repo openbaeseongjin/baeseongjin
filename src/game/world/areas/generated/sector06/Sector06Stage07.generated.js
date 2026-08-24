@@ -50,26 +50,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "sector-06-07:p1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P1",
-          "sourceId": "sector-06-07:p1"
-        },
-        "x": -420,
-        "y": -500
-      },
-      "target": {
-        "id": "sector-06-07:p1-surface",
-        "properties": {
-          "sourceId": "sector-06-07:p1"
-        },
-        "x": -420,
-        "y": -500
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-06-07:h2",
         "properties": {
           "coordinateAnchor": "center",
@@ -196,16 +176,16 @@ const SPEC = {
           "label": "P2",
           "sourceId": "sector-06-07:p2"
         },
-        "x": 120,
-        "y": -1810
+        "x": 400,
+        "y": -1740
       },
       "target": {
         "id": "sector-06-07:p2-surface",
         "properties": {
           "sourceId": "sector-06-07:p2"
         },
-        "x": 120,
-        "y": -1810
+        "x": 400,
+        "y": -1740
       }
     },
     {
@@ -216,36 +196,16 @@ const SPEC = {
           "label": "H8",
           "sourceId": "sector-06-07:h8"
         },
-        "x": 340,
-        "y": -1970
+        "x": 325,
+        "y": -2000
       },
       "target": {
         "id": "sector-06-07:h8-surface",
         "properties": {
           "sourceId": "sector-06-07:h8"
         },
-        "x": 340,
-        "y": -1970
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-06-07:p3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P3",
-          "sourceId": "sector-06-07:p3"
-        },
-        "x": 500,
-        "y": -2140
-      },
-      "target": {
-        "id": "sector-06-07:p3-surface",
-        "properties": {
-          "sourceId": "sector-06-07:p3"
-        },
-        "x": 500,
-        "y": -2140
+        "x": 325,
+        "y": -2000
       }
     }
   ],
@@ -432,39 +392,6 @@ const SPEC = {
         "activation": "OUT",
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "R0",
-        "kind": "recovery",
-        "landingOnly": true,
-        "oneWay": true,
-        "position": {
-          "x": -330,
-          "y": -600
-        },
-        "retrySecondsTargetMax": 5,
-        "sourceId": "R0",
-        "vertices": [
-          {
-            "x": -394,
-            "y": -600
-          },
-          {
-            "x": -266,
-            "y": -600
-          },
-          {
-            "x": -266,
-            "y": -568
-          },
-          {
-            "x": -394,
-            "y": -568
-          }
-        ]
-      },
-      {
-        "activation": "OUT",
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "R1",
         "kind": "recovery",
         "landingOnly": true,
@@ -588,35 +515,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "lattice-preview-link",
-        "kind": "lattice",
-        "oneWay": true,
-        "position": {
-          "x": -510,
-          "y": -325
-        },
-        "vertices": [
-          {
-            "x": -510,
-            "y": -325
-          },
-          {
-            "x": -330,
-            "y": -325
-          },
-          {
-            "x": -330,
-            "y": -297
-          },
-          {
-            "x": -510,
-            "y": -297
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
         "id": "cutter-preview",
         "kind": "safe-deck",
         "oneWay": true,
@@ -669,35 +567,6 @@ const SPEC = {
           {
             "x": -20,
             "y": -1815
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "lattice-upper-link",
-        "kind": "lattice",
-        "oneWay": true,
-        "position": {
-          "x": 250,
-          "y": -2000
-        },
-        "vertices": [
-          {
-            "x": 250,
-            "y": -2000
-          },
-          {
-            "x": 470,
-            "y": -2000
-          },
-          {
-            "x": 470,
-            "y": -1972
-          },
-          {
-            "x": 250,
-            "y": -1972
           }
         ]
       },
