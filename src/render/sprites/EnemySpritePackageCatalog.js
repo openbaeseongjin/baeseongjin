@@ -32,9 +32,13 @@ export class EnemySpritePackageCatalog {
         definitionsBySectorId = EMPTY_DEFINITIONS,
         defaultSectorId,
         assetsBySectorId = EMPTY_DEFINITIONS,
+        autoStart = true,
+        ImageClass = globalThis.Image,
         assetSetFactory = (definition) =>
             new SpriteImageAssetSet({
                 atlases: definition.atlases,
+                autoStart,
+                ImageClass,
                 fallbackLabel: "built-in enemy mock sprites"
             })
     } = {}) {
@@ -79,6 +83,33 @@ export class EnemySpritePackageCatalog {
         await Promise.all(
             Object.values(this.packagesBySectorId).map((spritePackage) => spritePackage.assets.prepare())
         );
+        return this.snapshot();
+    }
+
+    async prepareSector(sectorId) {
+        const packages = [...new Set([this.packagesBySectorId[sectorId], this.defaultPackage].filter(Boolean))];
+        await Promise.all(packages.map((spritePackage) => spritePackage.assets.prepare()));
+        return this.statusForSector(sectorId);
+    }
+
+    prepareRemaining(excludedSectorIds = []) {
+        const excluded = new Set(excludedSectorIds);
+        return Promise.all(
+            Object.entries(this.packagesBySectorId)
+                .filter(([sectorId]) => !excluded.has(sectorId))
+                .map(([, spritePackage]) => spritePackage.assets.prepare())
+        ).then(() => this.snapshot());
+    }
+
+    statusForSector(sectorId) {
+        const sectorPackage = this.packagesBySectorId[sectorId] ?? null;
+        return Object.freeze({
+            sector: sectorPackage?.assets.status ?? null,
+            fallback: sectorPackage === this.defaultPackage ? null : (this.defaultPackage?.assets.status ?? null)
+        });
+    }
+
+    snapshot() {
         return Object.freeze(
             Object.fromEntries(
                 Object.entries(this.packagesBySectorId).map(([sectorId, spritePackage]) => [

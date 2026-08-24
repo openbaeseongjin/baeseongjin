@@ -56,10 +56,13 @@ export class SpriteSceneResourceBundle {
         enemySpritePackages = null,
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
         environmentAssets = null,
-        authoredAreaEnvironmentDefinitions = Object.freeze({})
+        authoredAreaEnvironmentDefinitions = Object.freeze({}),
+        ImageClass = globalThis.Image
     } = {}) {
         this.playerDefinition = playerDefinition;
-        this.playerAssets = playerAssets ?? new SpriteImageAssetSet({ atlases: playerDefinition.atlases });
+        this.playerAssets =
+            playerAssets ??
+            new SpriteImageAssetSet({ atlases: playerDefinition.atlases, autoStart: false, ImageClass });
         const resolvedEnemyDefinitions =
             enemyDefinitionsBySectorId ??
             (enemyDefinition
@@ -73,7 +76,9 @@ export class SpriteSceneResourceBundle {
             new EnemySpritePackageCatalog({
                 definitionsBySectorId: resolvedEnemyDefinitions,
                 defaultSectorId: DEFAULT_ENEMY_SPRITE_SECTOR_ID,
-                assetsBySectorId: resolvedEnemyAssets
+                assetsBySectorId: resolvedEnemyAssets,
+                autoStart: false,
+                ImageClass
             });
         this.environmentDefinition = environmentDefinition;
         this.authoredAreaEnvironmentDefinitions = authoredAreaEnvironmentDefinitions;
@@ -83,8 +88,43 @@ export class SpriteSceneResourceBundle {
                 atlases: {
                     ...environmentDefinition.atlases,
                     ...authoredEnvironmentAtlases(authoredAreaEnvironmentDefinitions)
-                }
+                },
+                autoStart: false,
+                ImageClass
             });
+    }
+
+    environmentDefinitionForArea(areaId) {
+        return this.authoredAreaEnvironmentDefinitions[areaId] ?? this.environmentDefinition;
+    }
+
+    environmentAtlasIdsForArea(areaId) {
+        return Object.keys(this.environmentDefinitionForArea(areaId).atlases);
+    }
+
+    preparePlayer() {
+        return this.playerAssets.prepare();
+    }
+
+    async prepareArea({ areaId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
+        const environmentAtlasIds = this.environmentAtlasIdsForArea(areaId);
+        await Promise.all([
+            this.preparePlayer(),
+            this.enemySpritePackages.prepareSector(sectorId),
+            this.environmentAssets.prepare(environmentAtlasIds)
+        ]);
+        return this.snapshotForArea({ areaId, sectorId });
+    }
+
+    prepareRemaining({ areaId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
+        const currentEnvironmentAtlasIds = new Set(this.environmentAtlasIdsForArea(areaId));
+        const remainingEnvironmentAtlasIds = Object.keys(this.environmentAssets.assets).filter(
+            (atlasId) => !currentEnvironmentAtlasIds.has(atlasId)
+        );
+        return Promise.all([
+            this.enemySpritePackages.prepareRemaining([sectorId]),
+            this.environmentAssets.prepare(remainingEnvironmentAtlasIds)
+        ]).then(() => this.snapshot());
     }
 
     async prepare() {
@@ -108,6 +148,14 @@ export class SpriteSceneResourceBundle {
                 )
             ),
             environment: this.environmentAssets.status
+        });
+    }
+
+    snapshotForArea({ areaId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
+        return Object.freeze({
+            player: this.playerAssets.status,
+            enemies: this.enemySpritePackages.statusForSector(sectorId),
+            environment: this.environmentAssets.statusFor(this.environmentAtlasIdsForArea(areaId))
         });
     }
 }

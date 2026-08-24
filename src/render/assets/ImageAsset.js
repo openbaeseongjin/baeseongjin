@@ -19,7 +19,8 @@ export class ImageAsset {
         ImageClass = globalThis.Image,
         assetLabel,
         onFailure = () => {},
-        timeoutMs = IMAGE_ASSET_LOAD_TIMEOUT_MS
+        timeoutMs = IMAGE_ASSET_LOAD_TIMEOUT_MS,
+        autoStart = true
     } = {}) {
         if (typeof assetLabel !== "string" || !assetLabel) throw new Error("ImageAsset requires assetLabel");
         if (typeof source !== "string" || !source) throw new Error(`${assetLabel}ImageAsset requires source`);
@@ -29,28 +30,43 @@ export class ImageAsset {
         this.assetLabel = assetLabel;
         this.expectedSize = expectedImageSize(expectedSize, `${assetLabel}ImageAsset`);
         this.onFailure = onFailure;
-        this.status = "pending";
+        this.ImageClass = ImageClass;
+        this.timeoutMs = timeoutMs;
+        this.status = "idle";
         this.image = null;
         this.error = null;
+        this.timeoutId = null;
         this.settledPromise = new Promise((resolve) => {
             this.#resolveSettled = resolve;
         });
+        if (autoStart) void this.prepare();
+    }
+
+    start() {
+        if (this.status !== "idle") return this.status;
+        this.status = "pending";
         this.timeoutId = globalThis.setTimeout?.(
-            () => this.fail(`Timed out loading ${assetLabel.toLowerCase()} '${source}' after ${timeoutMs}ms`),
-            timeoutMs
+            () =>
+                this.fail(
+                    `Timed out loading ${this.assetLabel.toLowerCase()} '${this.source}' after ${this.timeoutMs}ms`
+                ),
+            this.timeoutMs
         );
-        if (typeof ImageClass !== "function") {
+        if (typeof this.ImageClass !== "function") {
             this.fail("Image constructor is unavailable");
-            return;
+            return this.status;
         }
-        const image = new ImageClass();
+        const image = new this.ImageClass();
         image.addEventListener("load", () => void this.complete(image));
-        image.addEventListener("error", () => this.fail(`Failed to load ${assetLabel.toLowerCase()} '${source}'`));
-        image.src = source;
+        image.addEventListener("error", () =>
+            this.fail(`Failed to load ${this.assetLabel.toLowerCase()} '${this.source}'`)
+        );
+        image.src = this.source;
+        return this.status;
     }
 
     async complete(image) {
-        if (this.status !== "pending") return this.status;
+        if (this.status === "ready" || this.status === "failed") return this.status;
         try {
             if (typeof image.decode === "function") await image.decode();
         } catch (error) {
@@ -98,6 +114,7 @@ export class ImageAsset {
     }
 
     prepare() {
+        this.start();
         return this.settledPromise;
     }
 }

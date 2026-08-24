@@ -4,28 +4,59 @@ import {
     EnvironmentComponentRenderer,
     EnvironmentRendererDiagnostics
 } from "./EnvironmentComponentRenderer.js";
-import { PixelBackdropRenderer } from "./renderers/PixelBackdropRenderer.js";
+import { authoredBackdropEnvironmentAreas, PixelBackdropRenderer } from "./renderers/PixelBackdropRenderer.js";
 import { PixelTerrainRenderer } from "./renderers/PixelTerrainRenderer.js";
 import { PixelDecorationRenderer } from "./renderers/PixelDecorationRenderer.js";
+import { authoredAreaEnvironmentDefinitionFor } from "./AuthoredAreaEnvironmentCatalog.js";
+import { currentAuthoredArea } from "./AltitudeZoneResolver.js";
 
-function backdropAtlasIds(definition, authoredAreaEnvironmentDefinitions) {
-    return [definition, ...Object.values(authoredAreaEnvironmentDefinitions)].flatMap(({ backdrop }) =>
-        backdrop.layers.flatMap(({ frames }) => frames.map(({ atlasId }) => atlasId))
-    );
+function backdropAtlasIds(definition) {
+    return definition.backdrop.layers.flatMap(({ frames }) => frames.map(({ atlasId }) => atlasId));
 }
 
-function terrainAtlasIds(definition, authoredAreaEnvironmentDefinitions) {
-    return [definition, ...Object.values(authoredAreaEnvironmentDefinitions)].flatMap((environmentDefinition) =>
-        Object.values(environmentDefinition.terrain.materials).flatMap(({ fill, edge }) => [fill.atlasId, edge.atlasId])
-    );
+function terrainAtlasIds(definition) {
+    return Object.values(definition.terrain.materials).flatMap(({ fill, edge }) => [fill.atlasId, edge.atlasId]);
 }
 
-function decorationAtlasIds(definition, authoredAreaEnvironmentDefinitions) {
-    return [definition, ...Object.values(authoredAreaEnvironmentDefinitions)].flatMap((environmentDefinition) =>
-        Object.values(environmentDefinition.decoration.groups).flatMap(({ items }) =>
-            items.map(({ frame }) => frame.atlasId)
+function decorationAtlasIds(definition) {
+    return Object.values(definition.decoration.groups).flatMap(({ items }) => items.map(({ frame }) => frame.atlasId));
+}
+
+function componentAtlasIds(definition) {
+    return Object.freeze({
+        backdrop: Object.freeze([...new Set(backdropAtlasIds(definition))]),
+        terrain: Object.freeze([...new Set(terrainAtlasIds(definition))]),
+        decoration: Object.freeze([...new Set(decorationAtlasIds(definition))])
+    });
+}
+
+function componentAtlasIdsByDefinition(definition, authoredAreaEnvironmentDefinitions) {
+    return Object.freeze(
+        Object.fromEntries(
+            [definition, ...Object.values(authoredAreaEnvironmentDefinitions)].map((candidate) => [
+                candidate.id,
+                componentAtlasIds(candidate)
+            ])
         )
     );
+}
+
+function authoredRegions(world) {
+    return world?.landmarks?.length ? world.landmarks : (world?.areas ?? []);
+}
+
+function currentEnvironmentArea(scene) {
+    const bossEnvironmentAreaId = scene?.bossStage?.status === "active" ? scene.bossStage.environmentAreaId : null;
+    if (typeof bossEnvironmentAreaId === "string" && bossEnvironmentAreaId) {
+        const bossArea = authoredRegions(scene.world).find(
+            (area) =>
+                area.id === bossEnvironmentAreaId ||
+                area.areaId === bossEnvironmentAreaId ||
+                area.stageId === bossEnvironmentAreaId
+        );
+        if (bossArea) return bossArea;
+    }
+    return currentAuthoredArea(scene);
 }
 
 export class EnvironmentRendererComposer {
@@ -37,9 +68,37 @@ export class EnvironmentRendererComposer {
         polygonTerrain,
         warn = console.warn
     } = {}) {
+        const atlasIdsByDefinitionId = componentAtlasIdsByDefinition(definition, authoredAreaEnvironmentDefinitions);
+        const definitionForScene = (scene) =>
+            authoredAreaEnvironmentDefinitionFor(
+                authoredAreaEnvironmentDefinitions,
+                currentEnvironmentArea(scene),
+                definition
+            );
+        const atlasIdsForScene = (componentId) => (scene) =>
+            atlasIdsByDefinitionId[definitionForScene(scene).id][componentId];
+        let cachedBackdropDefinitions = Object.freeze([]);
+        let cachedBackdropAtlasIds = atlasIdsByDefinitionId[definition.id].backdrop;
+        const backdropAtlasIdsForScene = (scene) => {
+            const definitions = authoredBackdropEnvironmentAreas(scene).map((area) =>
+                authoredAreaEnvironmentDefinitionFor(authoredAreaEnvironmentDefinitions, area, definition)
+            );
+            if (
+                definitions.length === cachedBackdropDefinitions.length &&
+                definitions.every((candidate, index) => candidate === cachedBackdropDefinitions[index])
+            ) {
+                return cachedBackdropAtlasIds;
+            }
+            cachedBackdropDefinitions = Object.freeze(definitions);
+            cachedBackdropAtlasIds = Object.freeze([
+                ...new Set(definitions.flatMap((candidate) => atlasIdsByDefinitionId[candidate.id].backdrop))
+            ]);
+            return cachedBackdropAtlasIds;
+        };
         const backdrop = new EnvironmentComponentRenderer({
             id: "backdrop",
-            atlasIds: backdropAtlasIds(definition, authoredAreaEnvironmentDefinitions),
+            atlasIds: atlasIdsByDefinitionId[definition.id].backdrop,
+            atlasIdsForScene: backdropAtlasIdsForScene,
             assets,
             renderer: new PixelBackdropRenderer({ definition, assets, authoredAreaEnvironmentDefinitions }),
             fallbackRenderer: polygonBackdrop ?? new EmptyEnvironmentRenderer(),
@@ -47,7 +106,8 @@ export class EnvironmentRendererComposer {
         });
         const terrain = new EnvironmentComponentRenderer({
             id: "terrain",
-            atlasIds: terrainAtlasIds(definition, authoredAreaEnvironmentDefinitions),
+            atlasIds: atlasIdsByDefinitionId[definition.id].terrain,
+            atlasIdsForScene: atlasIdsForScene("terrain"),
             assets,
             renderer: new PixelTerrainRenderer({ definition, assets, authoredAreaEnvironmentDefinitions }),
             fallbackRenderer: polygonTerrain ?? new EmptyEnvironmentRenderer(),
@@ -55,7 +115,8 @@ export class EnvironmentRendererComposer {
         });
         const decoration = new EnvironmentComponentRenderer({
             id: "decoration",
-            atlasIds: decorationAtlasIds(definition, authoredAreaEnvironmentDefinitions),
+            atlasIds: atlasIdsByDefinitionId[definition.id].decoration,
+            atlasIdsForScene: atlasIdsForScene("decoration"),
             assets,
             renderer: new PixelDecorationRenderer({ definition, assets, authoredAreaEnvironmentDefinitions }),
             fallbackRenderer: new EmptyEnvironmentRenderer(),

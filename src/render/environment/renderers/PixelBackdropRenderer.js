@@ -218,6 +218,15 @@ function authoredDefinitionForArea(definitions, area) {
     return definitions[area?.areaId] ?? definitions[area?.id];
 }
 
+export function authoredBackdropEnvironmentAreas(scene) {
+    const bossEnvironmentArea = bossStageAuthoredArea(scene);
+    if (bossEnvironmentArea) return Object.freeze([bossEnvironmentArea]);
+    const transition = authoredSectorBackdropTransition(scene);
+    if (transition) return Object.freeze([transition.fromArea, transition.toArea]);
+    const area = currentAuthoredArea(scene);
+    return Object.freeze(area ? [area] : []);
+}
+
 function authoredSectorBackdropTransition(scene) {
     if (!scene?.world?.landmarks?.length) return null;
     const playerY = scene.player?.position?.y;
