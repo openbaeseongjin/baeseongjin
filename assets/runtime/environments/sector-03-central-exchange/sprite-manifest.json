@@ -3,8 +3,8 @@
   "formatVersion": 1,
   "id": "environment-sector-03-central-exchange",
   "generator": {
-    "tool": "openai-imagegen-offline-depth-far-mid-near",
-    "exportVersion": "2026-08-22-v8-depth-fmn",
+    "tool": "openai-imagegen-offline-depth-far-mid-near-and-sector-terrain-normalization",
+    "exportVersion": "2026-08-24-v8-depth-fmn-terrain",
     "sourceExport": "assets/artwork/environments/sector-03-central-exchange-background/export/seam-match-v8-far-mid-near-depth-v1"
   },
   "atlases": {
@@ -25,13 +25,13 @@
     },
     "sector-03-central-exchange-terrain-fill": {
       "image": "terrain-fill.png",
-      "size": { "width": 48, "height": 48 },
-      "frameSize": { "width": 24, "height": 24 }
+      "size": { "width": 32, "height": 32 },
+      "frameSize": { "width": 32, "height": 32 }
     },
     "sector-03-central-exchange-terrain-edge": {
       "image": "terrain-edge.png",
-      "size": { "width": 48, "height": 24 },
-      "frameSize": { "width": 24, "height": 24 }
+      "size": { "width": 32, "height": 8 },
+      "frameSize": { "width": 32, "height": 8 }
     },
     "sector-03-central-exchange-decoration": {
       "image": "decoration.png",
@@ -52,8 +52,8 @@
         "silhouetteNear": "#0b0d18",
         "terrainFill": "#282838",
         "terrainEdge": "#5b5d78",
-        "oneWayEdge": "#82d7e8",
-        "accent": "#c084fc"
+        "oneWayEdge": "#7d8888",
+        "accent": "#817049"
       },
       "backdropVariant": "sector-03-lower",
       "terrainMaterial": "sector-03-commercial",
@@ -71,8 +71,8 @@
         "silhouetteNear": "#0c0f1c",
         "terrainFill": "#2b2b3b",
         "terrainEdge": "#60627d",
-        "oneWayEdge": "#82d7e8",
-        "accent": "#c084fc"
+        "oneWayEdge": "#818c8c",
+        "accent": "#85744c"
       },
       "backdropVariant": "sector-03-service",
       "terrainMaterial": "sector-03-commercial",
@@ -90,8 +90,8 @@
         "silhouetteNear": "#0e1120",
         "terrainFill": "#2f2f40",
         "terrainEdge": "#686985",
-        "oneWayEdge": "#82d7e8",
-        "accent": "#f4c27a"
+        "oneWayEdge": "#858f8f",
+        "accent": "#89784f"
       },
       "backdropVariant": "sector-03-retail",
       "terrainMaterial": "sector-03-commercial",
@@ -109,8 +109,8 @@
         "silhouetteNear": "#101322",
         "terrainFill": "#333344",
         "terrainEdge": "#70718c",
-        "oneWayEdge": "#82d7e8",
-        "accent": "#f4c27a"
+        "oneWayEdge": "#899393",
+        "accent": "#8d7c52"
       },
       "backdropVariant": "sector-03-atrium",
       "terrainMaterial": "sector-03-commercial",
@@ -128,8 +128,8 @@
         "silhouetteNear": "#121626",
         "terrainFill": "#373748",
         "terrainEdge": "#787994",
-        "oneWayEdge": "#82d7e8",
-        "accent": "#d8b4fe"
+        "oneWayEdge": "#8d9797",
+        "accent": "#918055"
       },
       "backdropVariant": "sector-03-upper",
       "terrainMaterial": "sector-03-commercial",
@@ -179,9 +179,9 @@
   "terrain": {
     "materials": {
       "sector-03-commercial": {
-        "fill": { "atlas": "sector-03-central-exchange-terrain-fill", "cell": { "column": 1, "row": 0 } },
+        "fill": { "atlas": "sector-03-central-exchange-terrain-fill", "cell": { "column": 0, "row": 0 } },
         "edge": { "atlas": "sector-03-central-exchange-terrain-edge", "cell": { "column": 0, "row": 0 } },
-        "oneWayColor": "#82d7e8"
+        "oneWayColor": "#858f8f"
       }
     },
     "blockPool": {
