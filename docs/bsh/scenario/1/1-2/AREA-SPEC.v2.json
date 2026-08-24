@@ -1,33 +1,261 @@
 {
-  "schemaVersion": "area-spec-v2",
-  "stage": {
-    "id": "1-2",
-    "sector": 1,
-    "stage": 2,
-    "sourceAreaId": "sector-01-02"
-  },
-  "editor": {
-    "editableDomains": [
-      "bounds",
-      "entry",
-      "exit",
-      "surfaces",
-      "anchors",
-      "recoveryRoute",
-      "enemySlots",
-      "worldObjects",
-      "wind",
-      "camera"
-    ],
-    "readOnlyDomains": [
-      "objectives",
-      "progression",
-      "story",
-      "scanner",
-      "behaviorRegistry"
-    ]
-  },
+  "anchors": [
+    {
+      "landmark": {
+        "id": "sector-01-02:anchor-a",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "A",
+          "presentationId": "world-object:grapple-landmark"
+        },
+        "x": -120,
+        "y": -170
+      },
+      "objectIndex": 2,
+      "surfaceIndex": 10,
+      "target": {
+        "id": "sector-01-02:anchor-a-surface",
+        "properties": {},
+        "x": -120,
+        "y": -170
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-01-02:anchor-c",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "C",
+          "presentationId": "world-object:grapple-landmark"
+        },
+        "x": -270,
+        "y": -550
+      },
+      "objectIndex": 3,
+      "surfaceIndex": 11,
+      "target": {
+        "id": "sector-01-02:anchor-c-surface",
+        "properties": {},
+        "x": -270,
+        "y": -550
+      }
+    }
+  ],
+  "behaviorRefs": [],
   "definition": {
+    "bounds": {
+      "height": 960,
+      "width": 1664
+    },
+    "cameraZones": [
+      {
+        "desktopZoom": 1.15,
+        "horizontalPlayerRatio": 0.75,
+        "id": "lift-failure",
+        "maxY": 0,
+        "minY": -224,
+        "mobileZoom": 0.79
+      },
+      {
+        "desktopZoom": 0.94,
+        "horizontalPlayerRatio": 0.68,
+        "id": "left-cross",
+        "maxY": -223,
+        "minY": -447,
+        "mobileZoom": 0.7
+      },
+      {
+        "desktopZoom": 0.9,
+        "id": "airborne-reattach",
+        "maxY": -449,
+        "minY": -641,
+        "mobileZoom": 0.68
+      },
+      {
+        "desktopZoom": 0.96,
+        "id": "roof-wrap",
+        "maxY": -640,
+        "minY": -800,
+        "mobileZoom": 0.71
+      },
+      {
+        "desktopZoom": 1.1,
+        "id": "exit",
+        "maxY": -800,
+        "minY": -960,
+        "mobileZoom": 0.76
+      }
+    ],
+    "checkpoints": [],
+    "cueIds": [
+      "maintenance-lift",
+      "airborne-handoff",
+      "security-access-check",
+      "counterweight-stalled"
+    ],
+    "entry": {
+      "id": "sector-01-02:entry",
+      "x": 448,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-01-02:exit",
+      "x": -192,
+      "y": -864
+    },
+    "gate": {
+      "id": "sector-01-02:gate",
+      "nextAreaId": "sector-01-03",
+      "requiredObjectiveIds": [
+        "sector-01-02:exit-panel-engaged"
+      ],
+      "trigger": {
+        "height": 62,
+        "width": 52,
+        "x": -218,
+        "y": -894
+      }
+    },
+    "id": "sector-01-02",
+    "name": "DOUBLE ANCHOR SHAFT",
+    "nextAreaId": "sector-01-03",
+    "objectives": [
+      {
+        "bounds": {
+          "height": 96,
+          "width": 320,
+          "x": -512,
+          "y": -864
+        },
+        "id": "sector-01-02:final-deck-reached",
+        "type": "reach"
+      },
+      {
+        "id": "sector-01-02:exit-panel-engaged",
+        "requiredObjectiveIds": [
+          "sector-01-02:final-deck-reached"
+        ],
+        "sourceObjectId": "sector-01-02:exit-panel",
+        "type": "interact"
+      }
+    ],
+    "objects": [
+      {
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-01-02:lift-offline"
+        ],
+        "gameplay": false,
+        "id": "sector-01-02:maintenance-lift",
+        "kind": "background-prop",
+        "position": {
+          "x": 115,
+          "y": -460
+        },
+        "presentationId": "world-object:background-prop"
+      },
+      {
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-01-02:counterweight-stalled"
+        ],
+        "gameplay": false,
+        "id": "sector-01-02:counterweight-visual",
+        "kind": "background-prop",
+        "position": {
+          "x": -544,
+          "y": -480
+        },
+        "presentationId": "world-object:background-prop"
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-02:gate",
+        "id": "sector-01-02:exit-gate",
+        "kind": "gate",
+        "position": {
+          "x": -192,
+          "y": -832
+        },
+        "presentationId": "world-object:gate"
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-01-02:gate",
+        "id": "sector-01-02:exit-panel",
+        "interactionRadius": 72,
+        "kind": "gate-panel",
+        "objectiveId": "sector-01-02:exit-panel-engaged",
+        "position": {
+          "x": -304,
+          "y": -832
+        },
+        "presentationId": "world-object:gate-panel",
+        "requiredObjectiveIds": [
+          "sector-01-02:final-deck-reached"
+        ]
+      }
+    ],
+    "order": 2,
+    "recoveryPoints": [
+      {
+        "id": "sector-01-02:recovery-p1",
+        "x": -416,
+        "y": -344
+      },
+      {
+        "id": "sector-01-02:recovery-r2",
+        "x": 64,
+        "y": -680
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-01-02:route-entry",
+        "x": 448,
+        "y": -32
+      },
+      {
+        "id": "sector-01-02:route-a",
+        "landmark": "A",
+        "x": 224,
+        "y": -192
+      },
+      {
+        "id": "sector-01-02:route-airborne-c-window",
+        "x": -208,
+        "y": -350
+      },
+      {
+        "id": "sector-01-02:route-c",
+        "landmark": "C",
+        "x": -320,
+        "y": -560
+      },
+      {
+        "id": "sector-01-02:route-p2",
+        "x": 64,
+        "y": -704
+      },
+      {
+        "id": "sector-01-02:route-p3",
+        "x": -160,
+        "y": -768
+      },
+      {
+        "id": "sector-01-02:route-final-deck",
+        "x": -352,
+        "y": -832
+      }
+    ],
+    "routes": [
+      "safe",
+      "flow",
+      "recovery"
+    ],
+    "scannerGroups": [],
+    "sectorId": "sector-01",
+    "storyTriggers": [],
     "subtitle": "LIFT BYPASS",
     "surfaces": [
       {
@@ -91,87 +319,29 @@
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-01-02:r2",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": 64,
-          "y": -656
-        },
-        "vertices": [
-          {
-            "x": -48,
-            "y": -656
-          },
-          {
-            "x": 176,
-            "y": -656
-          },
-          {
-            "x": 176,
-            "y": -640
-          },
-          {
-            "x": -48,
-            "y": -640
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-01-02:p2",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": 64,
-          "y": -704
-        },
-        "vertices": [
-          {
-            "x": -64,
-            "y": -704
-          },
-          {
-            "x": 192,
-            "y": -704
-          },
-          {
-            "x": 192,
-            "y": -688
-          },
-          {
-            "x": -64,
-            "y": -688
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "sector-01-02:p3",
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -160,
-          "y": -768
+          "x": -60,
+          "y": -720
         },
         "vertices": [
           {
-            "x": -320,
-            "y": -768
+            "x": -220,
+            "y": -720
           },
           {
-            "x": 0,
-            "y": -768
+            "x": 100,
+            "y": -720
           },
           {
-            "x": 0,
-            "y": -744
+            "x": 100,
+            "y": -696
           },
           {
-            "x": -320,
-            "y": -744
+            "x": -220,
+            "y": -696
           }
         ]
       },
@@ -182,25 +352,25 @@
         "kind": "dead-lift-cage",
         "oneWay": false,
         "position": {
-          "x": 128,
-          "y": -608
+          "x": 175,
+          "y": -600
         },
         "vertices": [
           {
-            "x": -96,
-            "y": -608
+            "x": -49,
+            "y": -600
           },
           {
-            "x": 352,
-            "y": -608
+            "x": 399,
+            "y": -600
           },
           {
-            "x": 352,
-            "y": -288
+            "x": 399,
+            "y": -280
           },
           {
-            "x": -96,
-            "y": -288
+            "x": -49,
+            "y": -280
           }
         ]
       },
@@ -321,262 +491,34 @@
         ]
       }
     ],
-    "routePoints": [
-      {
-        "id": "sector-01-02:route-entry",
-        "x": 448,
-        "y": -32
-      },
-      {
-        "id": "sector-01-02:route-a",
-        "landmark": "A",
-        "x": 224,
-        "y": -192
-      },
-      {
-        "id": "sector-01-02:route-airborne-c-window",
-        "x": -208,
-        "y": -350
-      },
-      {
-        "id": "sector-01-02:route-c",
-        "landmark": "C",
-        "x": -320,
-        "y": -560
-      },
-      {
-        "id": "sector-01-02:route-p2",
-        "x": 64,
-        "y": -704
-      },
-      {
-        "id": "sector-01-02:route-p3",
-        "x": -160,
-        "y": -768
-      },
-      {
-        "id": "sector-01-02:route-final-deck",
-        "x": -352,
-        "y": -832
-      }
-    ],
-    "recoveryPoints": [
-      {
-        "id": "sector-01-02:recovery-p1",
-        "x": -416,
-        "y": -344
-      },
-      {
-        "id": "sector-01-02:recovery-r2",
-        "x": 64,
-        "y": -680
-      }
-    ],
-    "checkpoints": [],
-    "objects": [
-      {
-        "coordinateAnchor": "center",
-        "cueIds": [
-          "sector-01-02:lift-offline"
-        ],
-        "gameplay": false,
-        "id": "sector-01-02:maintenance-lift",
-        "kind": "background-prop",
-        "position": {
-          "x": 128,
-          "y": -448
-        },
-        "presentationId": "world-object:background-prop"
-      },
-      {
-        "coordinateAnchor": "center",
-        "cueIds": [
-          "sector-01-02:counterweight-stalled"
-        ],
-        "gameplay": false,
-        "id": "sector-01-02:counterweight-visual",
-        "kind": "background-prop",
-        "position": {
-          "x": -544,
-          "y": -480
-        },
-        "presentationId": "world-object:background-prop"
-      },
-      {
-        "coordinateAnchor": "bottom-center",
-        "gateId": "sector-01-02:gate",
-        "id": "sector-01-02:exit-gate",
-        "kind": "gate",
-        "position": {
-          "x": -192,
-          "y": -832
-        },
-        "presentationId": "world-object:gate"
-      },
-      {
-        "coordinateAnchor": "bottom-center",
-        "gateId": "sector-01-02:gate",
-        "id": "sector-01-02:exit-panel",
-        "interactionRadius": 72,
-        "kind": "gate-panel",
-        "objectiveId": "sector-01-02:exit-panel-engaged",
-        "position": {
-          "x": -304,
-          "y": -832
-        },
-        "presentationId": "world-object:gate-panel",
-        "requiredObjectiveIds": [
-          "sector-01-02:final-deck-reached"
-        ]
-      }
-    ],
-    "objectives": [
-      {
-        "bounds": {
-          "height": 96,
-          "width": 320,
-          "x": -512,
-          "y": -864
-        },
-        "id": "sector-01-02:final-deck-reached",
-        "type": "reach"
-      },
-      {
-        "id": "sector-01-02:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-01-02:final-deck-reached"
-        ],
-        "sourceObjectId": "sector-01-02:exit-panel",
-        "type": "interact"
-      }
-    ],
-    "windZones": [],
-    "scannerGroups": [],
-    "storyTriggers": [],
-    "routes": [
-      "safe",
-      "flow",
-      "recovery"
-    ],
-    "cameraZones": [
-      {
-        "desktopZoom": 1.15,
-        "horizontalPlayerRatio": 0.75,
-        "id": "lift-failure",
-        "maxY": 0,
-        "minY": -224,
-        "mobileZoom": 0.79
-      },
-      {
-        "desktopZoom": 0.94,
-        "horizontalPlayerRatio": 0.68,
-        "id": "left-cross",
-        "maxY": -223,
-        "minY": -447,
-        "mobileZoom": 0.7
-      },
-      {
-        "desktopZoom": 0.9,
-        "id": "airborne-reattach",
-        "maxY": -449,
-        "minY": -641,
-        "mobileZoom": 0.68
-      },
-      {
-        "desktopZoom": 0.96,
-        "id": "roof-wrap",
-        "maxY": -640,
-        "minY": -800,
-        "mobileZoom": 0.71
-      },
-      {
-        "desktopZoom": 1.1,
-        "id": "exit",
-        "maxY": -800,
-        "minY": -960,
-        "mobileZoom": 0.76
-      }
-    ],
-    "cueIds": [
-      "maintenance-lift",
-      "airborne-handoff",
-      "security-access-check",
-      "counterweight-stalled"
-    ],
-    "id": "sector-01-02",
-    "sectorId": "sector-01",
-    "order": 2,
-    "name": "DOUBLE ANCHOR SHAFT",
-    "bounds": {
-      "width": 1664,
-      "height": 960
-    },
-    "entry": {
-      "id": "sector-01-02:entry",
-      "x": 448,
-      "y": -32
-    },
-    "exit": {
-      "id": "sector-01-02:exit",
-      "x": -192,
-      "y": -864
-    },
-    "nextAreaId": "sector-01-03",
-    "gate": {
-      "id": "sector-01-02:gate",
-      "nextAreaId": "sector-01-03",
-      "requiredObjectiveIds": [
-        "sector-01-02:exit-panel-engaged"
-      ],
-      "trigger": {
-        "x": -218,
-        "y": -894,
-        "width": 52,
-        "height": 62
-      }
-    }
+    "windZones": []
   },
-  "anchors": [
-    {
-      "landmark": {
-        "id": "sector-01-02:anchor-a",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "A",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": 224,
-        "y": -192
-      },
-      "objectIndex": 2,
-      "surfaceIndex": 10,
-      "target": {
-        "id": "sector-01-02:anchor-a-surface",
-        "properties": {},
-        "x": 224,
-        "y": -192
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-01-02:anchor-c",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": -320,
-        "y": -560
-      },
-      "objectIndex": 3,
-      "surfaceIndex": 11,
-      "target": {
-        "id": "sector-01-02:anchor-c-surface",
-        "properties": {},
-        "x": -320,
-        "y": -560
-      }
-    }
-  ],
-  "behaviorRefs": []
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "exit",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "worldObjects",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "id": "1-2",
+    "sector": 1,
+    "sourceAreaId": "sector-01-02",
+    "stage": 2
+  }
 }

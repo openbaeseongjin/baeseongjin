@@ -132,35 +132,16 @@ const SPEC = {
           "coordinateAnchor": "center",
           "presentationId": "world-object:structural-grapple-joint"
         },
-        "x": 192,
-        "y": -672
+        "x": 125,
+        "y": -665
       },
       "objectIndex": 6,
       "surfaceIndex": 15,
       "target": {
         "id": "sector-01-05:high-capture-surface",
         "properties": {},
-        "x": 192,
-        "y": -672
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-01-05:final-grip",
-        "properties": {
-          "coordinateAnchor": "center",
-          "presentationId": "world-object:structural-grapple-joint"
-        },
-        "x": -576,
-        "y": -928
-      },
-      "objectIndex": 7,
-      "surfaceIndex": 16,
-      "target": {
-        "id": "sector-01-05:final-grip-surface",
-        "properties": {},
-        "x": -576,
-        "y": -928
+        "x": 125,
+        "y": -665
       }
     }
   ],
@@ -195,8 +176,8 @@ const SPEC = {
       {
         "desktopZoom": 0.9,
         "id": "upper-return",
-        "maxY": -704,
-        "minY": -928,
+        "maxY": -703,
+        "minY": -927,
         "mobileZoom": 0.67
       },
       {
@@ -283,8 +264,8 @@ const SPEC = {
         "id": "sector-01-05:low-guard",
         "kind": "sentry",
         "position": {
-          "x": 864,
-          "y": -160
+          "x": 755,
+          "y": -290
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -315,8 +296,8 @@ const SPEC = {
         "id": "sector-01-05:upper-guard",
         "kind": "sentry",
         "position": {
-          "x": 96,
-          "y": -832
+          "x": -265,
+          "y": -770
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -358,11 +339,6 @@ const SPEC = {
         "id": "sector-01-05:recovery-r1",
         "x": 64,
         "y": -280
-      },
-      {
-        "id": "sector-01-05:recovery-low-slot",
-        "x": 620,
-        "y": -192
       },
       {
         "id": "sector-01-05:recovery-upper-return",
@@ -662,35 +638,6 @@ const SPEC = {
           {
             "x": -560,
             "y": -812
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "bottom-center",
-        "grappleable": true,
-        "id": "sector-01-05:upper-cover",
-        "kind": "cover",
-        "oneWay": false,
-        "position": {
-          "x": -224,
-          "y": -832
-        },
-        "vertices": [
-          {
-            "x": -256,
-            "y": -944
-          },
-          {
-            "x": -192,
-            "y": -944
-          },
-          {
-            "x": -192,
-            "y": -832
-          },
-          {
-            "x": -256,
-            "y": -832
           }
         ]
       },
