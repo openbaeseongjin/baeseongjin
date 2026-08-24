@@ -10,27 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "sector-03-04:g0",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G0",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g0"
-        },
-        "x": 0,
-        "y": -128
-      },
-      "target": {
-        "id": "sector-03-04:g0-surface",
-        "properties": {
-          "sourceId": "g0"
-        },
-        "x": 0,
-        "y": -128
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-03-04:g1",
         "properties": {
           "coordinateAnchor": "center",
@@ -38,7 +17,7 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g1"
         },
-        "x": -544,
+        "x": -540,
         "y": -320
       },
       "target": {
@@ -46,7 +25,7 @@ const SPEC = {
         "properties": {
           "sourceId": "g1"
         },
-        "x": -544,
+        "x": -540,
         "y": -320
       }
     },
@@ -59,8 +38,8 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "c1"
         },
-        "x": -1088,
-        "y": -544
+        "x": -830,
+        "y": -530
       },
       "target": {
         "id": "sector-03-04:c1-surface",
@@ -68,8 +47,8 @@ const SPEC = {
           "scannerControlled": true,
           "sourceId": "c1"
         },
-        "x": -1088,
-        "y": -544
+        "x": -830,
+        "y": -530
       }
     },
     {
@@ -103,16 +82,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g3"
         },
-        "x": -160,
-        "y": -1056
+        "x": -535,
+        "y": -1335
       },
       "target": {
         "id": "sector-03-04:g3-surface",
         "properties": {
           "sourceId": "g3"
         },
-        "x": -160,
-        "y": -1056
+        "x": -535,
+        "y": -1335
       }
     },
     {
@@ -124,16 +103,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g4"
         },
-        "x": 512,
-        "y": -352
+        "x": 275,
+        "y": -425
       },
       "target": {
         "id": "sector-03-04:g4-surface",
         "properties": {
           "sourceId": "g4"
         },
-        "x": 512,
-        "y": -352
+        "x": 275,
+        "y": -425
       }
     },
     {
@@ -145,16 +124,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g5"
         },
-        "x": 768,
-        "y": -608
+        "x": 540,
+        "y": -605
       },
       "target": {
         "id": "sector-03-04:g5-surface",
         "properties": {
           "sourceId": "g5"
         },
-        "x": 768,
-        "y": -608
+        "x": 540,
+        "y": -605
       }
     },
     {
@@ -180,27 +159,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "sector-03-04:g7",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G7",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g7"
-        },
-        "x": 1280,
-        "y": -928
-      },
-      "target": {
-        "id": "sector-03-04:g7-surface",
-        "properties": {
-          "sourceId": "g7"
-        },
-        "x": 1280,
-        "y": -928
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-03-04:g8",
         "properties": {
           "coordinateAnchor": "center",
@@ -208,16 +166,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g8"
         },
-        "x": 736,
-        "y": -1056
+        "x": 1055,
+        "y": -1110
       },
       "target": {
         "id": "sector-03-04:g8-surface",
         "properties": {
           "sourceId": "g8"
         },
-        "x": 736,
-        "y": -1056
+        "x": 1055,
+        "y": -1110
       }
     },
     {
@@ -229,16 +187,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g9"
         },
-        "x": 512,
-        "y": -1248
+        "x": 220,
+        "y": -1510
       },
       "target": {
         "id": "sector-03-04:g9-surface",
         "properties": {
           "sourceId": "g9"
         },
-        "x": 512,
-        "y": -1248
+        "x": 220,
+        "y": -1510
       }
     },
     {
@@ -370,8 +328,8 @@ const SPEC = {
         "id": "sector-03-04:service-node-upper",
         "kind": "story-display",
         "position": {
-          "x": 768,
-          "y": -1338
+          "x": 585,
+          "y": -1320
         },
         "presentationId": "world-object:story-display"
       },
@@ -383,8 +341,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 384,
-            "width": 720
+            "height": 800,
+            "width": 800
           }
         },
         "coordinateAnchor": "center",
@@ -407,8 +365,8 @@ const SPEC = {
           "waitSeconds": 0.45
         },
         "position": {
-          "x": -1376,
-          "y": -704
+          "x": -810,
+          "y": -715
         },
         "presentationId": "world-object:patrol-drone",
         "rules": [
@@ -426,8 +384,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 384,
-            "width": 512
+            "height": 1000,
+            "width": 1000
           }
         },
         "coordinateAnchor": "center",
@@ -443,8 +401,8 @@ const SPEC = {
         "id": "sector-03-04:service-route-guard",
         "kind": "sentry",
         "position": {
-          "x": 816,
-          "y": -672
+          "x": 675,
+          "y": -560
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -461,8 +419,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 384,
-            "width": 640
+            "height": 900,
+            "width": 900
           }
         },
         "coordinateAnchor": "center",
@@ -479,8 +437,8 @@ const SPEC = {
         "id": "sector-03-04:upper-arcade-guard",
         "kind": "sentry",
         "position": {
-          "x": 768,
-          "y": -1312
+          "x": 1055,
+          "y": -970
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -706,36 +664,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "p2-public-lobby",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -640,
-          "y": -384
-        },
-        "sourceId": "p2-public-lobby",
-        "vertices": [
-          {
-            "x": -832,
-            "y": -384
-          },
-          {
-            "x": -448,
-            "y": -384
-          },
-          {
-            "x": -448,
-            "y": -358
-          },
-          {
-            "x": -832,
-            "y": -358
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "p3-public-main",
         "kind": "safe-deck",
         "oneWay": true,
@@ -796,60 +724,30 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "p5-service-bay",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": 576,
-          "y": -448
-        },
-        "sourceId": "p5-service-bay",
-        "vertices": [
-          {
-            "x": 448,
-            "y": -448
-          },
-          {
-            "x": 704,
-            "y": -448
-          },
-          {
-            "x": 704,
-            "y": -422
-          },
-          {
-            "x": 448,
-            "y": -422
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "p6-service-shelf",
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 816,
-          "y": -672
+          "x": 875,
+          "y": -510
         },
         "sourceId": "p6-service-shelf",
         "vertices": [
           {
-            "x": 704,
-            "y": -672
+            "x": 763,
+            "y": -510
           },
           {
-            "x": 928,
-            "y": -672
+            "x": 987,
+            "y": -510
           },
           {
-            "x": 928,
-            "y": -646
+            "x": 987,
+            "y": -484
           },
           {
-            "x": 704,
-            "y": -646
+            "x": 763,
+            "y": -484
           }
         ]
       },
@@ -860,26 +758,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 1248,
-          "y": -992
+          "x": 1400,
+          "y": -965
         },
         "sourceId": "p7-service-return",
         "vertices": [
           {
-            "x": 1088,
-            "y": -992
+            "x": 1240,
+            "y": -965
           },
           {
-            "x": 1408,
-            "y": -992
+            "x": 1560,
+            "y": -965
           },
           {
-            "x": 1408,
-            "y": -964
+            "x": 1560,
+            "y": -937
           },
           {
-            "x": 1088,
-            "y": -964
+            "x": 1240,
+            "y": -937
           }
         ]
       },
@@ -970,38 +868,6 @@ const SPEC = {
           {
             "x": 1152,
             "y": -1508
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "damage": false,
-        "grappleable": true,
-        "id": "double-skin-divider",
-        "kind": "solid-architectural-blocker",
-        "oneWay": true,
-        "position": {
-          "x": 80,
-          "y": -690
-        },
-        "purpose": "prevents mid-route switching and makes Public Front / Service Back a real architectural choice",
-        "sourceId": "double-skin-divider",
-        "vertices": [
-          {
-            "x": -320,
-            "y": -690
-          },
-          {
-            "x": 480,
-            "y": -690
-          },
-          {
-            "x": 480,
-            "y": 70
-          },
-          {
-            "x": -320,
-            "y": 70
           }
         ]
       }

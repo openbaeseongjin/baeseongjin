@@ -1,11 +1,781 @@
 {
-  "schemaVersion": "area-spec-v2",
+  "anchors": [
+    {
+      "landmark": {
+        "id": "sector-03-03:g1b",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "G1B",
+          "presentationId": "world-object:grapple-landmark",
+          "sourceId": "g1b"
+        },
+        "x": -945,
+        "y": -360
+      },
+      "target": {
+        "id": "sector-03-03:g1b-surface",
+        "properties": {
+          "sourceId": "g1b"
+        },
+        "x": -945,
+        "y": -360
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-03-03:g2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "G2",
+          "presentationId": "world-object:grapple-landmark",
+          "sourceId": "g2"
+        },
+        "x": -690,
+        "y": -455
+      },
+      "target": {
+        "id": "sector-03-03:g2-surface",
+        "properties": {
+          "sourceId": "g2"
+        },
+        "x": -690,
+        "y": -455
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-03-03:c1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "C1",
+          "presentationId": "world-object:grapple-landmark",
+          "sourceId": "c1"
+        },
+        "x": -690,
+        "y": -945
+      },
+      "target": {
+        "id": "sector-03-03:c1-surface",
+        "properties": {
+          "scannerControlled": true,
+          "sourceId": "c1"
+        },
+        "x": -690,
+        "y": -945
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-03-03:c2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "C2",
+          "presentationId": "world-object:grapple-landmark",
+          "sourceId": "c2"
+        },
+        "x": -265,
+        "y": -1055
+      },
+      "target": {
+        "id": "sector-03-03:c2-surface",
+        "properties": {
+          "scannerControlled": true,
+          "sourceId": "c2"
+        },
+        "x": -265,
+        "y": -1055
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-03-03:g5",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "G5",
+          "presentationId": "world-object:grapple-landmark",
+          "sourceId": "g5"
+        },
+        "x": -128,
+        "y": -1248
+      },
+      "target": {
+        "id": "sector-03-03:g5-surface",
+        "properties": {
+          "sourceId": "g5"
+        },
+        "x": -128,
+        "y": -1248
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-03-03:g6a",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "G6A",
+          "presentationId": "world-object:grapple-landmark",
+          "sourceId": "g6a"
+        },
+        "x": -352,
+        "y": -1328
+      },
+      "target": {
+        "id": "sector-03-03:g6a-surface",
+        "properties": {
+          "sourceId": "g6a"
+        },
+        "x": -352,
+        "y": -1328
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-03-03:g7",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "G7",
+          "presentationId": "world-object:grapple-landmark",
+          "sourceId": "g7"
+        },
+        "x": -160,
+        "y": -1536
+      },
+      "target": {
+        "id": "sector-03-03:g7-surface",
+        "properties": {
+          "sourceId": "g7"
+        },
+        "x": -160,
+        "y": -1536
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-03-03:g8",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "G8",
+          "presentationId": "world-object:grapple-landmark",
+          "sourceId": "g8"
+        },
+        "x": 192,
+        "y": -1624
+      },
+      "target": {
+        "id": "sector-03-03:g8-surface",
+        "properties": {
+          "sourceId": "g8"
+        },
+        "x": 192,
+        "y": -1624
+      }
+    }
+  ],
   "authoringMode": "runtime",
-  "stage": {
-    "id": "3-3",
-    "sector": 3,
-    "stage": 3,
-    "sourceAreaId": "sector-03-03"
+  "behaviorRefs": [],
+  "definition": {
+    "bounds": {
+      "height": 1952,
+      "width": 3712
+    },
+    "cameraZones": [],
+    "checkpoints": [],
+    "cueIds": [
+      "retail-security-walk",
+      "scanner-patrol-synthesis"
+    ],
+    "entry": {
+      "id": "sector-03-03:entry",
+      "x": -1680,
+      "y": -32
+    },
+    "exit": {
+      "id": "sector-03-03:exit",
+      "x": 704,
+      "y": -1696
+    },
+    "gate": {
+      "id": "sector-03-03:gate",
+      "nextAreaId": "sector-03-04",
+      "requiredObjectiveIds": [
+        "sector-03-03:exit-panel-engaged"
+      ],
+      "trigger": {
+        "height": 62,
+        "width": 52,
+        "x": 678,
+        "y": -1758
+      }
+    },
+    "id": "sector-03-03",
+    "name": "CENTRAL RETAIL WALK",
+    "nextAreaId": "sector-03-04",
+    "objectives": [
+      {
+        "bounds": {
+          "height": 96,
+          "width": 320,
+          "x": 544,
+          "y": -1728
+        },
+        "id": "sector-03-03:final-deck-reached",
+        "type": "reach"
+      },
+      {
+        "id": "sector-03-03:exit-panel-engaged",
+        "requiredObjectiveIds": [
+          "sector-03-03:final-deck-reached"
+        ],
+        "sourceObjectId": "sector-03-03:exit-panel",
+        "type": "interact"
+      }
+    ],
+    "objects": [
+      {
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-03:retail-security"
+        ],
+        "id": "sector-03-03:retail-security",
+        "kind": "story-display",
+        "position": {
+          "x": -1125,
+          "y": -220
+        },
+        "presentationId": "world-object:story-display"
+      },
+      {
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-03:route-state"
+        ],
+        "id": "sector-03-03:route-state",
+        "kind": "story-display",
+        "position": {
+          "x": -1024,
+          "y": -794
+        },
+        "presentationId": "world-object:story-display"
+      },
+      {
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-03:patrol-status"
+        ],
+        "id": "sector-03-03:patrol-status",
+        "kind": "story-display",
+        "position": {
+          "x": 410,
+          "y": -1125
+        },
+        "presentationId": "world-object:story-display"
+      },
+      {
+        "coordinateAnchor": "center",
+        "cueIds": [
+          "sector-03-03:service-arcade-next"
+        ],
+        "id": "sector-03-03:service-arcade-next",
+        "kind": "story-display",
+        "position": {
+          "x": 704,
+          "y": -1754
+        },
+        "presentationId": "world-object:story-display"
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 448,
+            "width": 960
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "patrol-drone-t1",
+        "id": "sector-03-03:drone-1",
+        "kind": "patrol-drone",
+        "patrol": {
+          "mode": "pingpong",
+          "points": [
+            {
+              "x": -384,
+              "y": -976
+            },
+            {
+              "x": 352,
+              "y": -976
+            }
+          ],
+          "speed": 48,
+          "waitSeconds": 0.45
+        },
+        "position": {
+          "x": -785,
+          "y": -690
+        },
+        "presentationId": "world-object:patrol-drone",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "target-lock-cycle",
+          "activation-band-only"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 448,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "enemyType": "sentry-t1",
+        "id": "sector-03-03:retail-support-guard",
+        "kind": "sentry",
+        "position": {
+          "x": -195,
+          "y": -1200
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-03-03:gate",
+        "id": "sector-03-03:exit-panel",
+        "interactionRadius": 72,
+        "kind": "gate-panel",
+        "objectiveId": "sector-03-03:exit-panel-engaged",
+        "position": {
+          "x": 624,
+          "y": -1696
+        },
+        "presentationId": "world-object:gate-panel",
+        "requiredObjectiveIds": [
+          "sector-03-03:final-deck-reached"
+        ]
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-03-03:gate",
+        "id": "sector-03-03:exit-gate",
+        "kind": "gate",
+        "position": {
+          "x": 704,
+          "y": -1696
+        },
+        "presentationId": "world-object:gate"
+      }
+    ],
+    "order": 3,
+    "recoveryPoints": [
+      {
+        "id": "sector-03-03:recovery-recovery-a",
+        "sourceId": "recovery-a",
+        "x": -224,
+        "y": -786
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-03-03:route-entry",
+        "sourceId": "entry",
+        "x": -1680,
+        "y": -32
+      },
+      {
+        "id": "sector-03-03:route-g1",
+        "sourceId": "g1",
+        "x": -1376,
+        "y": -224
+      },
+      {
+        "id": "sector-03-03:route-p1-right-edge",
+        "sourceId": "p1-right-edge",
+        "x": -1120,
+        "y": -256
+      },
+      {
+        "id": "sector-03-03:route-g1b",
+        "sourceId": "g1b",
+        "x": -960,
+        "y": -352
+      },
+      {
+        "id": "sector-03-03:route-g2",
+        "sourceId": "g2",
+        "x": -768,
+        "y": -480
+      },
+      {
+        "id": "sector-03-03:route-p2-left-edge",
+        "sourceId": "p2-left-edge",
+        "x": -544,
+        "y": -544
+      },
+      {
+        "id": "sector-03-03:route-g3",
+        "sourceId": "g3",
+        "x": -832,
+        "y": -704
+      },
+      {
+        "id": "sector-03-03:route-p3-right-edge",
+        "sourceId": "p3-right-edge",
+        "x": -832,
+        "y": -768
+      },
+      {
+        "id": "sector-03-03:route-c1",
+        "sourceId": "c1",
+        "x": -608,
+        "y": -896
+      },
+      {
+        "id": "sector-03-03:route-c2",
+        "sourceId": "c2",
+        "x": -256,
+        "y": -1024
+      },
+      {
+        "id": "sector-03-03:route-g4",
+        "sourceId": "g4",
+        "x": 96,
+        "y": -1088
+      },
+      {
+        "id": "sector-03-03:route-p4-center",
+        "sourceId": "p4-center",
+        "x": 256,
+        "y": -1120
+      },
+      {
+        "id": "sector-03-03:route-g5",
+        "sourceId": "g5",
+        "x": -128,
+        "y": -1248
+      },
+      {
+        "id": "sector-03-03:route-g6a",
+        "sourceId": "g6a",
+        "x": -352,
+        "y": -1328
+      },
+      {
+        "id": "sector-03-03:route-g6",
+        "sourceId": "g6",
+        "x": -512,
+        "y": -1376
+      },
+      {
+        "id": "sector-03-03:route-p5-center",
+        "sourceId": "p5-center",
+        "x": -672,
+        "y": -1408
+      },
+      {
+        "id": "sector-03-03:route-g7",
+        "sourceId": "g7",
+        "x": -160,
+        "y": -1536
+      },
+      {
+        "id": "sector-03-03:route-g8",
+        "sourceId": "g8",
+        "x": 192,
+        "y": -1624
+      },
+      {
+        "id": "sector-03-03:route-exit-left-edge",
+        "sourceId": "exit-left-edge",
+        "x": 544,
+        "y": -1696
+      },
+      {
+        "id": "sector-03-03:route-exit",
+        "sourceId": "exit",
+        "x": 704,
+        "y": -1696
+      }
+    ],
+    "routes": [
+      "safe",
+      "flow",
+      "recovery"
+    ],
+    "scannerGroups": [
+      {
+        "contract": {
+          "currentRopePersistsThroughLocked": true,
+          "damage": 0,
+          "forcedDetach": false,
+          "knockback": 0,
+          "newAttachAllowed": [
+            "AVAILABLE",
+            "WARNING"
+          ],
+          "newAttachDenied": [
+            "LOCKED",
+            "RESET"
+          ],
+          "ropeCut": false
+        },
+        "controlledSurfaceIds": [
+          "sector-03-03:c1-surface",
+          "sector-03-03:c2-surface"
+        ],
+        "cycle": {
+          "available": 1.5,
+          "locked": 1.1,
+          "reset": 0.3,
+          "warning": 0.6
+        },
+        "id": "sector-03-03:scanner-retail-A",
+        "phaseOffsetSeconds": 0
+      }
+    ],
+    "sectorId": "sector-03",
+    "storyTriggers": [
+      "retail-security",
+      "scanner-reminder",
+      "patrol-reveal"
+    ],
+    "subtitle": "SCANNER + PATROL",
+    "surfaces": [
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "p0-entry",
+        "kind": "platform",
+        "oneWay": true,
+        "position": {
+          "x": -1680,
+          "y": 0
+        },
+        "sourceId": "p0-entry",
+        "vertices": [
+          {
+            "x": -1792,
+            "y": 0
+          },
+          {
+            "x": -1568,
+            "y": 0
+          },
+          {
+            "x": -1568,
+            "y": 32
+          },
+          {
+            "x": -1792,
+            "y": 32
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "p1-lower-retail",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": -1285,
+          "y": -205
+        },
+        "sourceId": "p1-lower-retail",
+        "vertices": [
+          {
+            "x": -1461,
+            "y": -205
+          },
+          {
+            "x": -1109,
+            "y": -205
+          },
+          {
+            "x": -1109,
+            "y": -179
+          },
+          {
+            "x": -1461,
+            "y": -179
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "p2-east-mid",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": -230,
+          "y": -545
+        },
+        "sourceId": "p2-east-mid",
+        "vertices": [
+          {
+            "x": -422,
+            "y": -545
+          },
+          {
+            "x": -38,
+            "y": -545
+          },
+          {
+            "x": -38,
+            "y": -517
+          },
+          {
+            "x": -422,
+            "y": -517
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "p3-west-observation",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": -1140,
+          "y": -770
+        },
+        "sourceId": "p3-west-observation",
+        "vertices": [
+          {
+            "x": -1332,
+            "y": -770
+          },
+          {
+            "x": -948,
+            "y": -770
+          },
+          {
+            "x": -948,
+            "y": -742
+          },
+          {
+            "x": -1332,
+            "y": -742
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "p4-central-gantry",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": 256,
+          "y": -1120
+        },
+        "sourceId": "p4-central-gantry",
+        "vertices": [
+          {
+            "x": 96,
+            "y": -1120
+          },
+          {
+            "x": 416,
+            "y": -1120
+          },
+          {
+            "x": 416,
+            "y": -1092
+          },
+          {
+            "x": 96,
+            "y": -1092
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "p5-west-upper",
+        "kind": "platform",
+        "oneWay": true,
+        "position": {
+          "x": -672,
+          "y": -1408
+        },
+        "sourceId": "p5-west-upper",
+        "vertices": [
+          {
+            "x": -832,
+            "y": -1408
+          },
+          {
+            "x": -512,
+            "y": -1408
+          },
+          {
+            "x": -512,
+            "y": -1382
+          },
+          {
+            "x": -832,
+            "y": -1382
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "exit-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": 704,
+          "y": -1696
+        },
+        "sourceId": "exit-deck",
+        "vertices": [
+          {
+            "x": 544,
+            "y": -1696
+          },
+          {
+            "x": 864,
+            "y": -1696
+          },
+          {
+            "x": 864,
+            "y": -1668
+          },
+          {
+            "x": 544,
+            "y": -1668
+          }
+        ]
+      }
+    ],
+    "windZones": []
   },
   "editor": {
     "editableDomains": [
@@ -28,895 +798,11 @@
       "behaviorRegistry"
     ]
   },
-  "definition": {
-    "id": "sector-03-03",
-    "sectorId": "sector-03",
-    "order": 3,
-    "name": "CENTRAL RETAIL WALK",
-    "subtitle": "SCANNER + PATROL",
-    "bounds": {
-      "width": 3712,
-      "height": 1952
-    },
-    "entry": {
-      "id": "sector-03-03:entry",
-      "x": -1680,
-      "y": -32
-    },
-    "exit": {
-      "id": "sector-03-03:exit",
-      "x": 704,
-      "y": -1696
-    },
-    "nextAreaId": "sector-03-04",
-    "surfaces": [
-      {
-        "id": "p0-entry",
-        "kind": "platform",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -1680,
-          "y": 0
-        },
-        "vertices": [
-          {
-            "x": -1792,
-            "y": 0
-          },
-          {
-            "x": -1568,
-            "y": 0
-          },
-          {
-            "x": -1568,
-            "y": 32
-          },
-          {
-            "x": -1792,
-            "y": 32
-          }
-        ],
-        "sourceId": "p0-entry"
-      },
-      {
-        "id": "p1-lower-retail",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -1296,
-          "y": -256
-        },
-        "vertices": [
-          {
-            "x": -1472,
-            "y": -256
-          },
-          {
-            "x": -1120,
-            "y": -256
-          },
-          {
-            "x": -1120,
-            "y": -230
-          },
-          {
-            "x": -1472,
-            "y": -230
-          }
-        ],
-        "sourceId": "p1-lower-retail"
-      },
-      {
-        "id": "p2-east-mid",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -352,
-          "y": -544
-        },
-        "vertices": [
-          {
-            "x": -544,
-            "y": -544
-          },
-          {
-            "x": -160,
-            "y": -544
-          },
-          {
-            "x": -160,
-            "y": -516
-          },
-          {
-            "x": -544,
-            "y": -516
-          }
-        ],
-        "sourceId": "p2-east-mid"
-      },
-      {
-        "id": "p3-west-observation",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -1024,
-          "y": -768
-        },
-        "vertices": [
-          {
-            "x": -1216,
-            "y": -768
-          },
-          {
-            "x": -832,
-            "y": -768
-          },
-          {
-            "x": -832,
-            "y": -740
-          },
-          {
-            "x": -1216,
-            "y": -740
-          }
-        ],
-        "sourceId": "p3-west-observation"
-      },
-      {
-        "id": "recovery-a",
-        "kind": "recovery",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -224,
-          "y": -768
-        },
-        "vertices": [
-          {
-            "x": -352,
-            "y": -768
-          },
-          {
-            "x": -96,
-            "y": -768
-          },
-          {
-            "x": -96,
-            "y": -750
-          },
-          {
-            "x": -352,
-            "y": -750
-          }
-        ],
-        "sourceId": "recovery-a"
-      },
-      {
-        "id": "p4-central-gantry",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": 256,
-          "y": -1120
-        },
-        "vertices": [
-          {
-            "x": 96,
-            "y": -1120
-          },
-          {
-            "x": 416,
-            "y": -1120
-          },
-          {
-            "x": 416,
-            "y": -1092
-          },
-          {
-            "x": 96,
-            "y": -1092
-          }
-        ],
-        "sourceId": "p4-central-gantry"
-      },
-      {
-        "id": "p5-west-upper",
-        "kind": "platform",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": -672,
-          "y": -1408
-        },
-        "vertices": [
-          {
-            "x": -832,
-            "y": -1408
-          },
-          {
-            "x": -512,
-            "y": -1408
-          },
-          {
-            "x": -512,
-            "y": -1382
-          },
-          {
-            "x": -832,
-            "y": -1382
-          }
-        ],
-        "sourceId": "p5-west-upper"
-      },
-      {
-        "id": "exit-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": 704,
-          "y": -1696
-        },
-        "vertices": [
-          {
-            "x": 544,
-            "y": -1696
-          },
-          {
-            "x": 864,
-            "y": -1696
-          },
-          {
-            "x": 864,
-            "y": -1668
-          },
-          {
-            "x": 544,
-            "y": -1668
-          }
-        ],
-        "sourceId": "exit-deck"
-      }
-    ],
-    "routePoints": [
-      {
-        "id": "sector-03-03:route-entry",
-        "x": -1680,
-        "y": -32,
-        "sourceId": "entry"
-      },
-      {
-        "id": "sector-03-03:route-g1",
-        "x": -1376,
-        "y": -224,
-        "sourceId": "g1"
-      },
-      {
-        "id": "sector-03-03:route-p1-right-edge",
-        "x": -1120,
-        "y": -256,
-        "sourceId": "p1-right-edge"
-      },
-      {
-        "id": "sector-03-03:route-g1b",
-        "x": -960,
-        "y": -352,
-        "sourceId": "g1b"
-      },
-      {
-        "id": "sector-03-03:route-g2",
-        "x": -768,
-        "y": -480,
-        "sourceId": "g2"
-      },
-      {
-        "id": "sector-03-03:route-p2-left-edge",
-        "x": -544,
-        "y": -544,
-        "sourceId": "p2-left-edge"
-      },
-      {
-        "id": "sector-03-03:route-g3",
-        "x": -832,
-        "y": -704,
-        "sourceId": "g3"
-      },
-      {
-        "id": "sector-03-03:route-p3-right-edge",
-        "x": -832,
-        "y": -768,
-        "sourceId": "p3-right-edge"
-      },
-      {
-        "id": "sector-03-03:route-c1",
-        "x": -608,
-        "y": -896,
-        "sourceId": "c1"
-      },
-      {
-        "id": "sector-03-03:route-c2",
-        "x": -256,
-        "y": -1024,
-        "sourceId": "c2"
-      },
-      {
-        "id": "sector-03-03:route-g4",
-        "x": 96,
-        "y": -1088,
-        "sourceId": "g4"
-      },
-      {
-        "id": "sector-03-03:route-p4-center",
-        "x": 256,
-        "y": -1120,
-        "sourceId": "p4-center"
-      },
-      {
-        "id": "sector-03-03:route-g5",
-        "x": -128,
-        "y": -1248,
-        "sourceId": "g5"
-      },
-      {
-        "id": "sector-03-03:route-g6a",
-        "x": -352,
-        "y": -1328,
-        "sourceId": "g6a"
-      },
-      {
-        "id": "sector-03-03:route-g6",
-        "x": -512,
-        "y": -1376,
-        "sourceId": "g6"
-      },
-      {
-        "id": "sector-03-03:route-p5-center",
-        "x": -672,
-        "y": -1408,
-        "sourceId": "p5-center"
-      },
-      {
-        "id": "sector-03-03:route-g7",
-        "x": -160,
-        "y": -1536,
-        "sourceId": "g7"
-      },
-      {
-        "id": "sector-03-03:route-g8",
-        "x": 192,
-        "y": -1624,
-        "sourceId": "g8"
-      },
-      {
-        "id": "sector-03-03:route-exit-left-edge",
-        "x": 544,
-        "y": -1696,
-        "sourceId": "exit-left-edge"
-      },
-      {
-        "id": "sector-03-03:route-exit",
-        "x": 704,
-        "y": -1696,
-        "sourceId": "exit"
-      }
-    ],
-    "recoveryPoints": [
-      {
-        "id": "sector-03-03:recovery-recovery-a",
-        "x": -224,
-        "y": -786,
-        "sourceId": "recovery-a"
-      }
-    ],
-    "checkpoints": [],
-    "objects": [
-      {
-        "id": "sector-03-03:retail-security",
-        "kind": "story-display",
-        "presentationId": "world-object:story-display",
-        "position": {
-          "x": -1296,
-          "y": -282
-        },
-        "coordinateAnchor": "center",
-        "cueIds": [
-          "sector-03-03:retail-security"
-        ]
-      },
-      {
-        "id": "sector-03-03:route-state",
-        "kind": "story-display",
-        "presentationId": "world-object:story-display",
-        "position": {
-          "x": -1024,
-          "y": -794
-        },
-        "coordinateAnchor": "center",
-        "cueIds": [
-          "sector-03-03:route-state"
-        ]
-      },
-      {
-        "id": "sector-03-03:patrol-status",
-        "kind": "story-display",
-        "presentationId": "world-object:story-display",
-        "position": {
-          "x": 256,
-          "y": -1146
-        },
-        "coordinateAnchor": "center",
-        "cueIds": [
-          "sector-03-03:patrol-status"
-        ]
-      },
-      {
-        "id": "sector-03-03:service-arcade-next",
-        "kind": "story-display",
-        "presentationId": "world-object:story-display",
-        "position": {
-          "x": 704,
-          "y": -1754
-        },
-        "coordinateAnchor": "center",
-        "cueIds": [
-          "sector-03-03:service-arcade-next"
-        ]
-      },
-      {
-        "id": "sector-03-03:drone-1",
-        "kind": "patrol-drone",
-        "presentationId": "world-object:patrol-drone",
-        "position": {
-          "x": -384,
-          "y": -976
-        },
-        "coordinateAnchor": "center",
-        "enemyType": "patrol-drone-t1",
-        "activationSpec": {
-          "anchor": "center",
-          "offset": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 960,
-            "height": 448
-          }
-        },
-        "patrol": {
-          "points": [
-            {
-              "x": -384,
-              "y": -976
-            },
-            {
-              "x": 352,
-              "y": -976
-            }
-          ],
-          "speed": 48,
-          "waitSeconds": 0.45,
-          "mode": "pingpong"
-        },
-        "rules": [
-          "kill-optional",
-          "no-rope-cut",
-          "target-lock-cycle",
-          "activation-band-only"
-        ]
-      },
-      {
-        "id": "sector-03-03:retail-support-guard",
-        "kind": "sentry",
-        "presentationId": "world-object:sentry",
-        "position": {
-          "x": -672,
-          "y": -1408
-        },
-        "coordinateAnchor": "center",
-        "enemyType": "sentry-t1",
-        "enemySelection": {
-          "allowedEnemyTypes": [
-            "pursuit-drone-t1",
-            "shield-drone-t1",
-            "artillery-drone-t1",
-            "support-drone-t1"
-          ]
-        },
-        "activationSpec": {
-          "anchor": "center",
-          "offset": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 640,
-            "height": 448
-          }
-        },
-        "rules": [
-          "kill-optional",
-          "no-rope-cut",
-          "activation-band-only"
-        ]
-      },
-      {
-        "id": "sector-03-03:exit-panel",
-        "kind": "gate-panel",
-        "presentationId": "world-object:gate-panel",
-        "position": {
-          "x": 624,
-          "y": -1696
-        },
-        "coordinateAnchor": "bottom-center",
-        "interactionRadius": 72,
-        "objectiveId": "sector-03-03:exit-panel-engaged",
-        "gateId": "sector-03-03:gate",
-        "requiredObjectiveIds": [
-          "sector-03-03:final-deck-reached"
-        ]
-      },
-      {
-        "id": "sector-03-03:exit-gate",
-        "kind": "gate",
-        "presentationId": "world-object:gate",
-        "position": {
-          "x": 704,
-          "y": -1696
-        },
-        "coordinateAnchor": "bottom-center",
-        "gateId": "sector-03-03:gate"
-      }
-    ],
-    "objectives": [
-      {
-        "id": "sector-03-03:final-deck-reached",
-        "type": "reach",
-        "bounds": {
-          "x": 544,
-          "y": -1728,
-          "width": 320,
-          "height": 96
-        }
-      },
-      {
-        "id": "sector-03-03:exit-panel-engaged",
-        "type": "interact",
-        "sourceObjectId": "sector-03-03:exit-panel",
-        "requiredObjectiveIds": [
-          "sector-03-03:final-deck-reached"
-        ]
-      }
-    ],
-    "windZones": [],
-    "scannerGroups": [
-      {
-        "id": "sector-03-03:scanner-retail-A",
-        "cycle": {
-          "available": 1.5,
-          "warning": 0.6,
-          "locked": 1.1,
-          "reset": 0.3
-        },
-        "phaseOffsetSeconds": 0,
-        "controlledSurfaceIds": [
-          "sector-03-03:c1-surface",
-          "sector-03-03:c2-surface"
-        ],
-        "contract": {
-          "newAttachAllowed": [
-            "AVAILABLE",
-            "WARNING"
-          ],
-          "newAttachDenied": [
-            "LOCKED",
-            "RESET"
-          ],
-          "currentRopePersistsThroughLocked": true,
-          "damage": 0,
-          "knockback": 0,
-          "ropeCut": false,
-          "forcedDetach": false
-        }
-      }
-    ],
-    "storyTriggers": [
-      "retail-security",
-      "scanner-reminder",
-      "patrol-reveal"
-    ],
-    "routes": [
-      "safe",
-      "flow",
-      "recovery"
-    ],
-    "cameraZones": [],
-    "cueIds": [
-      "retail-security-walk",
-      "scanner-patrol-synthesis"
-    ],
-    "gate": {
-      "id": "sector-03-03:gate",
-      "nextAreaId": "sector-03-04",
-      "requiredObjectiveIds": [
-        "sector-03-03:exit-panel-engaged"
-      ],
-      "trigger": {
-        "x": 678,
-        "y": -1758,
-        "width": 52,
-        "height": 62
-      }
-    }
-  },
-  "anchors": [
-    {
-      "target": {
-        "id": "sector-03-03:g1-surface",
-        "x": -1376,
-        "y": -224,
-        "properties": {
-          "sourceId": "g1"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g1",
-        "x": -1376,
-        "y": -224,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G1",
-          "coordinateAnchor": "center",
-          "sourceId": "g1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g1b-surface",
-        "x": -960,
-        "y": -352,
-        "properties": {
-          "sourceId": "g1b"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g1b",
-        "x": -960,
-        "y": -352,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G1B",
-          "coordinateAnchor": "center",
-          "sourceId": "g1b"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g2-surface",
-        "x": -768,
-        "y": -480,
-        "properties": {
-          "sourceId": "g2"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g2",
-        "x": -768,
-        "y": -480,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G2",
-          "coordinateAnchor": "center",
-          "sourceId": "g2"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g3-surface",
-        "x": -832,
-        "y": -704,
-        "properties": {
-          "sourceId": "g3"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g3",
-        "x": -832,
-        "y": -704,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G3",
-          "coordinateAnchor": "center",
-          "sourceId": "g3"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:c1-surface",
-        "x": -608,
-        "y": -896,
-        "properties": {
-          "sourceId": "c1",
-          "scannerControlled": true
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:c1",
-        "x": -608,
-        "y": -896,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "C1",
-          "coordinateAnchor": "center",
-          "sourceId": "c1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:c2-surface",
-        "x": -256,
-        "y": -1024,
-        "properties": {
-          "sourceId": "c2",
-          "scannerControlled": true
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:c2",
-        "x": -256,
-        "y": -1024,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "C2",
-          "coordinateAnchor": "center",
-          "sourceId": "c2"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g4-surface",
-        "x": 96,
-        "y": -1088,
-        "properties": {
-          "sourceId": "g4"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g4",
-        "x": 96,
-        "y": -1088,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G4",
-          "coordinateAnchor": "center",
-          "sourceId": "g4"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g5-surface",
-        "x": -128,
-        "y": -1248,
-        "properties": {
-          "sourceId": "g5"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g5",
-        "x": -128,
-        "y": -1248,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G5",
-          "coordinateAnchor": "center",
-          "sourceId": "g5"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g6a-surface",
-        "x": -352,
-        "y": -1328,
-        "properties": {
-          "sourceId": "g6a"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g6a",
-        "x": -352,
-        "y": -1328,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G6A",
-          "coordinateAnchor": "center",
-          "sourceId": "g6a"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g6-surface",
-        "x": -512,
-        "y": -1376,
-        "properties": {
-          "sourceId": "g6"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g6",
-        "x": -512,
-        "y": -1376,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G6",
-          "coordinateAnchor": "center",
-          "sourceId": "g6"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g7-surface",
-        "x": -160,
-        "y": -1536,
-        "properties": {
-          "sourceId": "g7"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g7",
-        "x": -160,
-        "y": -1536,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G7",
-          "coordinateAnchor": "center",
-          "sourceId": "g7"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "sector-03-03:g8-surface",
-        "x": 192,
-        "y": -1624,
-        "properties": {
-          "sourceId": "g8"
-        }
-      },
-      "landmark": {
-        "id": "sector-03-03:g8",
-        "x": 192,
-        "y": -1624,
-        "properties": {
-          "presentationId": "world-object:grapple-landmark",
-          "label": "G8",
-          "coordinateAnchor": "center",
-          "sourceId": "g8"
-        }
-      }
-    }
-  ],
-  "behaviorRefs": []
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "id": "3-3",
+    "sector": 3,
+    "sourceAreaId": "sector-03-03",
+    "stage": 3
+  }
 }

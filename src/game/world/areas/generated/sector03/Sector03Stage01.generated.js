@@ -10,27 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "sector-03-01:g1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g1"
-        },
-        "x": -1184,
-        "y": -192
-      },
-      "target": {
-        "id": "sector-03-01:g1-surface",
-        "properties": {
-          "sourceId": "g1"
-        },
-        "x": -1184,
-        "y": -192
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-03-01:g2",
         "properties": {
           "coordinateAnchor": "center",
@@ -59,37 +38,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g3"
         },
-        "x": 416,
-        "y": -640
+        "x": 390,
+        "y": -755
       },
       "target": {
         "id": "sector-03-01:g3-surface",
         "properties": {
           "sourceId": "g3"
         },
-        "x": 416,
-        "y": -640
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-01:g4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G4",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g4"
-        },
-        "x": 1184,
-        "y": -672
-      },
-      "target": {
-        "id": "sector-03-01:g4-surface",
-        "properties": {
-          "sourceId": "g4"
-        },
-        "x": 1184,
-        "y": -672
+        "x": 390,
+        "y": -755
       }
     }
   ],
@@ -161,8 +119,8 @@ const SPEC = {
         "id": "sector-03-01:district-sign",
         "kind": "story-display",
         "position": {
-          "x": -1026,
-          "y": -286
+          "x": -870,
+          "y": -230
         },
         "presentationId": "world-object:story-display"
       },
@@ -203,8 +161,8 @@ const SPEC = {
         "id": "sector-03-01:promenade-guard",
         "kind": "sentry",
         "position": {
-          "x": 944,
-          "y": -416
+          "x": 890,
+          "y": -610
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -408,26 +366,26 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": -576,
-          "y": -176
+          "x": -415,
+          "y": -70
         },
         "sourceId": "recovery-a",
         "vertices": [
           {
-            "x": -704,
-            "y": -176
+            "x": -543,
+            "y": -70
           },
           {
-            "x": -448,
-            "y": -176
+            "x": -287,
+            "y": -70
           },
           {
-            "x": -448,
-            "y": -158
+            "x": -287,
+            "y": -52
           },
           {
-            "x": -704,
-            "y": -158
+            "x": -543,
+            "y": -52
           }
         ]
       },
@@ -468,26 +426,26 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": 384,
-          "y": -304
+          "x": 450,
+          "y": -125
         },
         "sourceId": "recovery-b",
         "vertices": [
           {
-            "x": 256,
-            "y": -304
+            "x": 322,
+            "y": -125
           },
           {
-            "x": 512,
-            "y": -304
+            "x": 578,
+            "y": -125
           },
           {
-            "x": 512,
-            "y": -286
+            "x": 578,
+            "y": -107
           },
           {
-            "x": 256,
-            "y": -286
+            "x": 322,
+            "y": -107
           }
         ]
       },
@@ -498,26 +456,26 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 896,
-          "y": -416
+          "x": 895,
+          "y": -510
         },
         "sourceId": "p3-right-market",
         "vertices": [
           {
-            "x": 704,
-            "y": -416
+            "x": 703,
+            "y": -510
           },
           {
-            "x": 1088,
-            "y": -416
+            "x": 1087,
+            "y": -510
           },
           {
-            "x": 1088,
-            "y": -390
+            "x": 1087,
+            "y": -484
           },
           {
-            "x": 704,
-            "y": -390
+            "x": 703,
+            "y": -484
           }
         ]
       },

@@ -17,16 +17,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g0"
         },
-        "x": -1664,
-        "y": -192
+        "x": -1555,
+        "y": -250
       },
       "target": {
         "id": "sector-03-08:g0-surface",
         "properties": {
           "sourceId": "g0"
         },
-        "x": -1664,
-        "y": -192
+        "x": -1555,
+        "y": -250
       }
     },
     {
@@ -38,8 +38,8 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "c1"
         },
-        "x": -1376,
-        "y": -384
+        "x": -1165,
+        "y": -415
       },
       "target": {
         "id": "sector-03-08:c1-surface",
@@ -47,8 +47,8 @@ const SPEC = {
           "scannerControlled": true,
           "sourceId": "c1"
         },
-        "x": -1376,
-        "y": -384
+        "x": -1165,
+        "y": -415
       }
     },
     {
@@ -60,8 +60,8 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "c2"
         },
-        "x": -416,
-        "y": -832
+        "x": -400,
+        "y": -800
       },
       "target": {
         "id": "sector-03-08:c2-surface",
@@ -69,8 +69,8 @@ const SPEC = {
           "scannerControlled": true,
           "sourceId": "c2"
         },
-        "x": -416,
-        "y": -832
+        "x": -400,
+        "y": -800
       }
     },
     {
@@ -82,205 +82,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "central-lower"
         },
-        "x": -128,
-        "y": -1000
+        "x": -65,
+        "y": -905
       },
       "target": {
         "id": "sector-03-08:central-lower-surface",
         "properties": {
           "sourceId": "central-lower"
         },
-        "x": -128,
-        "y": -1000
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-l1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-L1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-l1"
-        },
-        "x": -1152,
-        "y": -768
-      },
-      "target": {
-        "id": "sector-03-08:west-l1-surface",
-        "properties": {
-          "sourceId": "west-l1"
-        },
-        "x": -1152,
-        "y": -768
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-l2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-L2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-l2"
-        },
-        "x": -1472,
-        "y": -896
-      },
-      "target": {
-        "id": "sector-03-08:west-l2-surface",
-        "properties": {
-          "sourceId": "west-l2"
-        },
-        "x": -1472,
-        "y": -896
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-l3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-L3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-l3"
-        },
-        "x": -1152,
-        "y": -1024
-      },
-      "target": {
-        "id": "sector-03-08:west-l3-surface",
-        "properties": {
-          "sourceId": "west-l3"
-        },
-        "x": -1152,
-        "y": -1024
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-l4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-L4",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-l4"
-        },
-        "x": -800,
-        "y": -1104
-      },
-      "target": {
-        "id": "sector-03-08:west-l4-surface",
-        "properties": {
-          "sourceId": "west-l4"
-        },
-        "x": -800,
-        "y": -1104
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-l5",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-L5",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-l5"
-        },
-        "x": -448,
-        "y": -1120
-      },
-      "target": {
-        "id": "sector-03-08:west-l5-surface",
-        "properties": {
-          "sourceId": "west-l5"
-        },
-        "x": -448,
-        "y": -1120
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-l1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-L1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-l1"
-        },
-        "x": -192,
-        "y": -736
-      },
-      "target": {
-        "id": "sector-03-08:east-l1-surface",
-        "properties": {
-          "sourceId": "east-l1"
-        },
-        "x": -192,
-        "y": -736
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-l2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-L2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-l2"
-        },
-        "x": 160,
-        "y": -832
-      },
-      "target": {
-        "id": "sector-03-08:east-l2-surface",
-        "properties": {
-          "sourceId": "east-l2"
-        },
-        "x": 160,
-        "y": -832
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-l3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-L3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-l3"
-        },
-        "x": 480,
-        "y": -944
-      },
-      "target": {
-        "id": "sector-03-08:east-l3-surface",
-        "properties": {
-          "sourceId": "east-l3"
-        },
-        "x": 480,
-        "y": -944
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-l4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-L4",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-l4"
-        },
-        "x": 320,
-        "y": -1088
-      },
-      "target": {
-        "id": "sector-03-08:east-l4-surface",
-        "properties": {
-          "sourceId": "east-l4"
-        },
-        "x": 320,
-        "y": -1088
+        "x": -65,
+        "y": -905
       }
     },
     {
@@ -314,121 +125,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "west-m1"
         },
-        "x": -352,
-        "y": -1232
+        "x": -375,
+        "y": -1230
       },
       "target": {
         "id": "sector-03-08:west-m1-surface",
         "properties": {
           "sourceId": "west-m1"
         },
-        "x": -352,
-        "y": -1232
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-m2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-M2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-m2"
-        },
-        "x": -704,
-        "y": -1344
-      },
-      "target": {
-        "id": "sector-03-08:west-m2-surface",
-        "properties": {
-          "sourceId": "west-m2"
-        },
-        "x": -704,
-        "y": -1344
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-m3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-M3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-m3"
-        },
-        "x": -384,
-        "y": -1456
-      },
-      "target": {
-        "id": "sector-03-08:west-m3-surface",
-        "properties": {
-          "sourceId": "west-m3"
-        },
-        "x": -384,
-        "y": -1456
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-m1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-M1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-m1"
-        },
-        "x": 640,
-        "y": -1216
-      },
-      "target": {
-        "id": "sector-03-08:east-m1-surface",
-        "properties": {
-          "sourceId": "east-m1"
-        },
-        "x": 640,
-        "y": -1216
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-m2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-M2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-m2"
-        },
-        "x": 992,
-        "y": -1344
-      },
-      "target": {
-        "id": "sector-03-08:east-m2-surface",
-        "properties": {
-          "sourceId": "east-m2"
-        },
-        "x": 992,
-        "y": -1344
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-m3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-M3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-m3"
-        },
-        "x": 640,
-        "y": -1464
-      },
-      "target": {
-        "id": "sector-03-08:east-m3-surface",
-        "properties": {
-          "sourceId": "east-m3"
-        },
-        "x": 640,
-        "y": -1464
+        "x": -375,
+        "y": -1230
       }
     },
     {
@@ -440,8 +146,8 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "c4"
         },
-        "x": 128,
-        "y": -1656
+        "x": 85,
+        "y": -1610
       },
       "target": {
         "id": "sector-03-08:c4-surface",
@@ -449,134 +155,8 @@ const SPEC = {
           "scannerControlled": true,
           "sourceId": "c4"
         },
-        "x": 128,
-        "y": -1656
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:central-final",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "CENTRAL-FINAL",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "central-final"
-        },
-        "x": 128,
-        "y": -1784
-      },
-      "target": {
-        "id": "sector-03-08:central-final-surface",
-        "properties": {
-          "sourceId": "central-final"
-        },
-        "x": 128,
-        "y": -1784
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-f1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-F1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-f1"
-        },
-        "x": -352,
-        "y": -1600
-      },
-      "target": {
-        "id": "sector-03-08:west-f1-surface",
-        "properties": {
-          "sourceId": "west-f1"
-        },
-        "x": -352,
-        "y": -1600
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-f2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-F2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-f2"
-        },
-        "x": -704,
-        "y": -1712
-      },
-      "target": {
-        "id": "sector-03-08:west-f2-surface",
-        "properties": {
-          "sourceId": "west-f2"
-        },
-        "x": -704,
-        "y": -1712
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:west-f3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "WEST-F3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "west-f3"
-        },
-        "x": -384,
-        "y": -1840
-      },
-      "target": {
-        "id": "sector-03-08:west-f3-surface",
-        "properties": {
-          "sourceId": "west-f3"
-        },
-        "x": -384,
-        "y": -1840
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-f1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-F1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-f1"
-        },
-        "x": 608,
-        "y": -1600
-      },
-      "target": {
-        "id": "sector-03-08:east-f1-surface",
-        "properties": {
-          "sourceId": "east-f1"
-        },
-        "x": 608,
-        "y": -1600
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-08:east-f2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "EAST-F2",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "east-f2"
-        },
-        "x": 960,
-        "y": -1712
-      },
-      "target": {
-        "id": "sector-03-08:east-f2-surface",
-        "properties": {
-          "sourceId": "east-f2"
-        },
-        "x": 960,
-        "y": -1712
+        "x": 85,
+        "y": -1610
       }
     },
     {
@@ -588,16 +168,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "east-f3"
         },
-        "x": 608,
-        "y": -1840
+        "x": 765,
+        "y": -1730
       },
       "target": {
         "id": "sector-03-08:east-f3-surface",
         "properties": {
           "sourceId": "east-f3"
         },
-        "x": 608,
-        "y": -1840
+        "x": 765,
+        "y": -1730
       }
     },
     {
@@ -609,16 +189,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g5"
         },
-        "x": 672,
-        "y": -1984
+        "x": 540,
+        "y": -1990
       },
       "target": {
         "id": "sector-03-08:g5-surface",
         "properties": {
           "sourceId": "g5"
         },
-        "x": 672,
-        "y": -1984
+        "x": 540,
+        "y": -1990
       }
     }
   ],
@@ -698,7 +278,7 @@ const SPEC = {
           },
           "size": {
             "height": 416,
-            "width": 640
+            "width": 1200
           }
         },
         "coordinateAnchor": "center",
@@ -721,8 +301,8 @@ const SPEC = {
           "waitSeconds": 0.45
         },
         "position": {
-          "x": -1220,
-          "y": -730
+          "x": -865,
+          "y": -590
         },
         "presentationId": "world-object:patrol-drone",
         "rules": [
@@ -740,8 +320,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 416,
-            "width": 576
+            "height": 500,
+            "width": 1200
           }
         },
         "coordinateAnchor": "center",
@@ -764,8 +344,8 @@ const SPEC = {
           "waitSeconds": 0.45
         },
         "position": {
-          "x": 475,
-          "y": -1300
+          "x": -65,
+          "y": -1305
         },
         "presentationId": "world-object:patrol-drone",
         "rules": [
@@ -783,8 +363,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 448,
-            "width": 576
+            "height": 500,
+            "width": 1200
           }
         },
         "coordinateAnchor": "center",
@@ -854,8 +434,8 @@ const SPEC = {
             "y": 0
           },
           "size": {
-            "height": 384,
-            "width": 576
+            "height": 500,
+            "width": 1200
           }
         },
         "coordinateAnchor": "center",
@@ -872,8 +452,8 @@ const SPEC = {
         "id": "sector-03-08:final-control-guard",
         "kind": "sentry",
         "position": {
-          "x": 595,
-          "y": -1860
+          "x": 380,
+          "y": -1635
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -890,8 +470,8 @@ const SPEC = {
         "id": "sector-03-08:market-gate",
         "kind": "story-display",
         "position": {
-          "x": -1170,
-          "y": -595
+          "x": -530,
+          "y": -660
         },
         "presentationId": "world-object:story-display"
       },
@@ -1225,12 +805,6 @@ const SPEC = {
         "y": -1600
       },
       {
-        "id": "sector-03-08:route-route-5-3-east-path-3-48",
-        "sourceId": "route-5-3-east-path-3-48",
-        "x": 960,
-        "y": -1712
-      },
-      {
         "id": "sector-03-08:route-route-5-3-east-path-4-49",
         "sourceId": "route-5-3-east-path-4-49",
         "x": 608,
@@ -1322,36 +896,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "upper-gate-entry",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -1120,
-          "y": -512
-        },
-        "sourceId": "upper-gate-entry",
-        "vertices": [
-          {
-            "x": -1280,
-            "y": -512
-          },
-          {
-            "x": -960,
-            "y": -512
-          },
-          {
-            "x": -960,
-            "y": -484
-          },
-          {
-            "x": -1280,
-            "y": -484
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "safe-hub-m0",
         "kind": "safe-deck",
         "oneWay": true,
@@ -1416,26 +960,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 128,
-          "y": -1488
+          "x": 335,
+          "y": -1430
         },
         "sourceId": "safe-hub-m1",
         "vertices": [
           {
-            "x": -64,
-            "y": -1488
+            "x": 143,
+            "y": -1430
           },
           {
-            "x": 320,
-            "y": -1488
+            "x": 527,
+            "y": -1430
           },
           {
-            "x": 320,
-            "y": -1458
+            "x": 527,
+            "y": -1400
           },
           {
-            "x": -64,
-            "y": -1458
+            "x": 143,
+            "y": -1400
           }
         ]
       },
@@ -1446,26 +990,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 0,
-          "y": -1888
+          "x": -25,
+          "y": -1835
         },
         "sourceId": "records-bay",
         "vertices": [
           {
-            "x": -384,
-            "y": -1888
+            "x": -409,
+            "y": -1835
           },
           {
-            "x": 384,
-            "y": -1888
+            "x": 359,
+            "y": -1835
           },
           {
-            "x": 384,
-            "y": -1854
+            "x": 359,
+            "y": -1801
           },
           {
-            "x": -384,
-            "y": -1854
+            "x": -409,
+            "y": -1801
           }
         ]
       },

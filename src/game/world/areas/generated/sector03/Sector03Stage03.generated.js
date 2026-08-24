@@ -10,27 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "sector-03-03:g1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G1",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g1"
-        },
-        "x": -1376,
-        "y": -224
-      },
-      "target": {
-        "id": "sector-03-03:g1-surface",
-        "properties": {
-          "sourceId": "g1"
-        },
-        "x": -1376,
-        "y": -224
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-03-03:g1b",
         "properties": {
           "coordinateAnchor": "center",
@@ -38,16 +17,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g1b"
         },
-        "x": -960,
-        "y": -352
+        "x": -945,
+        "y": -360
       },
       "target": {
         "id": "sector-03-03:g1b-surface",
         "properties": {
           "sourceId": "g1b"
         },
-        "x": -960,
-        "y": -352
+        "x": -945,
+        "y": -360
       }
     },
     {
@@ -59,37 +38,16 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "g2"
         },
-        "x": -768,
-        "y": -480
+        "x": -690,
+        "y": -455
       },
       "target": {
         "id": "sector-03-03:g2-surface",
         "properties": {
           "sourceId": "g2"
         },
-        "x": -768,
-        "y": -480
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-03:g3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G3",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g3"
-        },
-        "x": -832,
-        "y": -704
-      },
-      "target": {
-        "id": "sector-03-03:g3-surface",
-        "properties": {
-          "sourceId": "g3"
-        },
-        "x": -832,
-        "y": -704
+        "x": -690,
+        "y": -455
       }
     },
     {
@@ -101,8 +59,8 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "c1"
         },
-        "x": -608,
-        "y": -896
+        "x": -690,
+        "y": -945
       },
       "target": {
         "id": "sector-03-03:c1-surface",
@@ -110,8 +68,8 @@ const SPEC = {
           "scannerControlled": true,
           "sourceId": "c1"
         },
-        "x": -608,
-        "y": -896
+        "x": -690,
+        "y": -945
       }
     },
     {
@@ -123,8 +81,8 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark",
           "sourceId": "c2"
         },
-        "x": -256,
-        "y": -1024
+        "x": -265,
+        "y": -1055
       },
       "target": {
         "id": "sector-03-03:c2-surface",
@@ -132,29 +90,8 @@ const SPEC = {
           "scannerControlled": true,
           "sourceId": "c2"
         },
-        "x": -256,
-        "y": -1024
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-03:g4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G4",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g4"
-        },
-        "x": 96,
-        "y": -1088
-      },
-      "target": {
-        "id": "sector-03-03:g4-surface",
-        "properties": {
-          "sourceId": "g4"
-        },
-        "x": 96,
-        "y": -1088
+        "x": -265,
+        "y": -1055
       }
     },
     {
@@ -197,27 +134,6 @@ const SPEC = {
         },
         "x": -352,
         "y": -1328
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-03-03:g6",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G6",
-          "presentationId": "world-object:grapple-landmark",
-          "sourceId": "g6"
-        },
-        "x": -512,
-        "y": -1376
-      },
-      "target": {
-        "id": "sector-03-03:g6-surface",
-        "properties": {
-          "sourceId": "g6"
-        },
-        "x": -512,
-        "y": -1376
       }
     },
     {
@@ -331,8 +247,8 @@ const SPEC = {
         "id": "sector-03-03:retail-security",
         "kind": "story-display",
         "position": {
-          "x": -1296,
-          "y": -282
+          "x": -1125,
+          "y": -220
         },
         "presentationId": "world-object:story-display"
       },
@@ -357,8 +273,8 @@ const SPEC = {
         "id": "sector-03-03:patrol-status",
         "kind": "story-display",
         "position": {
-          "x": 256,
-          "y": -1146
+          "x": 410,
+          "y": -1125
         },
         "presentationId": "world-object:story-display"
       },
@@ -407,8 +323,8 @@ const SPEC = {
           "waitSeconds": 0.45
         },
         "position": {
-          "x": -384,
-          "y": -976
+          "x": -785,
+          "y": -690
         },
         "presentationId": "world-object:patrol-drone",
         "rules": [
@@ -443,8 +359,8 @@ const SPEC = {
         "id": "sector-03-03:retail-support-guard",
         "kind": "sentry",
         "position": {
-          "x": -672,
-          "y": -1408
+          "x": -195,
+          "y": -1200
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -693,26 +609,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -1296,
-          "y": -256
+          "x": -1285,
+          "y": -205
         },
         "sourceId": "p1-lower-retail",
         "vertices": [
           {
-            "x": -1472,
-            "y": -256
+            "x": -1461,
+            "y": -205
           },
           {
-            "x": -1120,
-            "y": -256
+            "x": -1109,
+            "y": -205
           },
           {
-            "x": -1120,
-            "y": -230
+            "x": -1109,
+            "y": -179
           },
           {
-            "x": -1472,
-            "y": -230
+            "x": -1461,
+            "y": -179
           }
         ]
       },
@@ -723,26 +639,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -352,
-          "y": -544
+          "x": -230,
+          "y": -545
         },
         "sourceId": "p2-east-mid",
         "vertices": [
           {
-            "x": -544,
-            "y": -544
+            "x": -422,
+            "y": -545
           },
           {
-            "x": -160,
-            "y": -544
+            "x": -38,
+            "y": -545
           },
           {
-            "x": -160,
-            "y": -516
+            "x": -38,
+            "y": -517
           },
           {
-            "x": -544,
-            "y": -516
+            "x": -422,
+            "y": -517
           }
         ]
       },
@@ -753,56 +669,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -1024,
-          "y": -768
+          "x": -1140,
+          "y": -770
         },
         "sourceId": "p3-west-observation",
         "vertices": [
           {
-            "x": -1216,
-            "y": -768
+            "x": -1332,
+            "y": -770
           },
           {
-            "x": -832,
-            "y": -768
+            "x": -948,
+            "y": -770
           },
           {
-            "x": -832,
-            "y": -740
+            "x": -948,
+            "y": -742
           },
           {
-            "x": -1216,
-            "y": -740
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "recovery-a",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": -224,
-          "y": -768
-        },
-        "sourceId": "recovery-a",
-        "vertices": [
-          {
-            "x": -352,
-            "y": -768
-          },
-          {
-            "x": -96,
-            "y": -768
-          },
-          {
-            "x": -96,
-            "y": -750
-          },
-          {
-            "x": -352,
-            "y": -750
+            "x": -1332,
+            "y": -742
           }
         ]
       },
