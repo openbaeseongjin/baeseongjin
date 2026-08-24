@@ -3,8 +3,8 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: c3f88c3fc3e3de132e0ce82e2dc56bcae4483fdd36136151275359b74fab3f7c
-authored-area-sha256: 9522bc1a1c5951580f1d31dfa546f641dd98cf3408f5182062ec91ac4eee358a
+scenario-source-sha256: 7bf32b205c46ab69900b3169172498486d19856a5300b5ca4c94e695d9844619
+authored-area-sha256: 2fb88ad63249b6e2c92e3eb7e17f9667088b48eba1a2c5230802175a4877e928
 authored-sector-sha256: ad0424499e2d11575db20f4ec5d995488348e94fe68fdb0bf078965aeea11974
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
@@ -30,6 +30,7 @@ reviewed-upstream: 829d3fe3b7d6dc4fd3cd5fb95690ad4f210afaee
 
 ## 최근 반영된 시나리오 변화
 
+- Sector 02·03·05의 `story-display` 36개를 발판 pedestal 19개와 벽 rail 17개로 구분했다. 기존에 발판 근처에서 `center` 또는 어긋난 Y를 쓰던 17개를 `bottom-center`와 해당 surface top Y로 맞췄고, 이미 정확했던 2개는 유지했다. Story cue·상호작용·collision·surface geometry는 변경하지 않았다.
 - 전수 공간 감사에서 발견한 2-8의 Final Control 이중 발판을 Editor 소유 `exit-deck` 하나로 정리하고, 5-1 인접 Entry Deck의 1px 내부 겹침을 맞닿는 경계로 보정했다. Anchor의 collision 부착 target이 발판에 물리는 구조는 Rope capability 계약을 유지하므로 변경하지 않았다.
 - Map Editor에서 저장한 Sector 06의 6-1~6-8 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. 일반 Stage는 catalog의 선택 경로가 없어도 stable Stage ID로 `MAP-PREVIEW.html`을 찾아 시나리오 비교 화면을 제공하며, Boss Stage만 이 비교 대상에서 제외한다. 실제 전체 traversal과 Boss06·멀티플레이 체감은 별도 검증 범위다.
 - Map Editor에서 저장한 Sector 04·05의 4-1~4-8, 5-1~5-8 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. 4-8 Quorum 진행 게이트는 목표 완료 전후에만 전환되며, 적 슬롯을 움직이면 legacy activation bounds도 같은 delta로 이동해 드론 위치와 공격·활성 범위 표시가 분리되지 않는다.

@@ -72,11 +72,11 @@ rect(60, 22, 2, 2, COLOR.amber);
 
 // Centered underside bracket supports wall-rail and pedestal presentations.
 rect(25, 37, 14, 2, COLOR.outline);
-rect(27, 39, 10, 4, COLOR.iron);
-rect(25, 39, 2, 5, COLOR.outline);
-rect(37, 39, 2, 5, COLOR.outline);
-rect(22, 43, 20, 3, COLOR.outline);
-rect(24, 43, 16, 2, COLOR.ironDark);
+rect(27, 39, 10, 6, COLOR.iron);
+rect(25, 39, 2, 7, COLOR.outline);
+rect(37, 39, 2, 7, COLOR.outline);
+rect(22, 45, 20, 3, COLOR.outline);
+rect(24, 45, 16, 2, COLOR.ironDark);
 
 async function build() {
     const sprite = PNG.sync.write(png, { colorType: 6 });

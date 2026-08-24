@@ -240,7 +240,7 @@ const SPEC = {
     ],
     "objects": [
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-03:retail-security"
         ],
@@ -248,12 +248,12 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": -1125,
-          "y": -220
+          "y": -205
         },
         "presentationId": "world-object:story-display"
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-03:route-state"
         ],
@@ -261,12 +261,12 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": -1024,
-          "y": -794
+          "y": -770
         },
         "presentationId": "world-object:story-display"
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-03:patrol-status"
         ],
@@ -274,7 +274,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": 410,
-          "y": -1125
+          "y": -1120
         },
         "presentationId": "world-object:story-display"
       },

@@ -463,7 +463,7 @@ const SPEC = {
         ]
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-08:market-gate"
         ],
@@ -471,7 +471,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": -530,
-          "y": -660
+          "y": -640
         },
         "presentationId": "world-object:story-display"
       },

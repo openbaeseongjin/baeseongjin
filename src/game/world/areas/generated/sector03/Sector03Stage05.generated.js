@@ -267,7 +267,7 @@ const SPEC = {
         ]
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-05:node-id"
         ],
@@ -275,12 +275,12 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": 280,
-          "y": -570
+          "y": -555
         },
         "presentationId": "world-object:story-display"
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-05:access-summary"
         ],
@@ -288,7 +288,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": 520,
-          "y": -970
+          "y": -960
         },
         "presentationId": "world-object:story-display"
       },

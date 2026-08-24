@@ -112,7 +112,7 @@ const SPEC = {
     ],
     "objects": [
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-01:district-sign"
         ],
@@ -120,7 +120,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": -870,
-          "y": -230
+          "y": -224
         },
         "presentationId": "world-object:story-display"
       },

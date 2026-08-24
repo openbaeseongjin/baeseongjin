@@ -448,7 +448,7 @@ const SPEC = {
         "objectiveId": "routing-authorization",
         "position": {
           "x": 950,
-          "y": -1320
+          "y": -1315
         },
         "presentationId": "world-object:story-display"
       },

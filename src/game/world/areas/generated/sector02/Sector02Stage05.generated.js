@@ -201,7 +201,7 @@ const SPEC = {
         "presentationId": "world-object:gate"
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "assembly-complete",
           "transfer-authorization-pending",
@@ -211,7 +211,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": 720,
-          "y": -475
+          "y": -460
         },
         "presentationId": "world-object:story-display"
       },

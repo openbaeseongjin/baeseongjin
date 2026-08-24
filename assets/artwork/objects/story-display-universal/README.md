@@ -15,7 +15,7 @@
 - 36개 `story-display`의 공지·경로·보안·기록 의미는 Runtime presentation이 소유한다.
 - 실제 논리 제작 크기는 `64×48 RGBA`이며 반투명 픽셀 없이 정수 픽셀 경계를 사용한다.
 - 내부 디테일은 외곽 프레임·화면·두 정보 블록·양쪽 상태등·하부 bracket으로 제한한다.
-- 벽 rail과 바닥 pedestal 어느 쪽에도 결합 가능한 중립 하부 bracket을 가진다.
+- 벽 rail과 바닥 pedestal 어느 쪽에도 결합 가능한 중립 하부 bracket을 가지며, 바닥형은 발의 마지막 불투명 행을 `bottom-center` 접점으로 사용한다.
 - 정적 오브젝트 한 상태만 제공하며 화면의 의미별 내용은 별도 Runtime overlay가 소유한다.
 - Sector 01~06은 공용 `world-object:story-display` presentation ID를 통해 같은 외형을 사용한다.
 
@@ -42,7 +42,7 @@
 ## 검증 상태
 
 - export 크기 `64×48`, RGBA, alpha 값 `0/255`만 사용, 반투명 픽셀 `0`개 확인 완료
-- 비투명 경계 `(1, 4)~(62, 45)`, 불투명 팔레트 `11`색 확인 완료
+- 비투명 경계 `(1, 4)~(62, 47)`, 불투명 팔레트 `11`색 확인 완료
 - 실제 `1×`와 최근접 보간 `8×`에서 정면 실루엣·무문자 화면·제한 팔레트 육안 확인 완료
 - 이 저장소에는 일반 world-object 전용 Runtime asset contract·validator가 없어 Runtime 검증은 미수행
 - Stage 3-4에서 실제 데스크톱 `1280×720`·모바일 `390×844` sprite 배치와 강제 로드 실패 fallback 검수 완료
@@ -51,12 +51,12 @@
 
 - 승격 경로: `assets/runtime/objects/story-display-universal/story-display.png`
 - 로더 경계: `RuntimeAssetCatalog`와 `WorldObjectSpriteAssetCatalog`
-- 좌표 기준점: 각 authored object의 기존 `coordinateAnchor`를 유지한다.
+- 좌표 기준점: 발판 위 pedestal 배치는 `bottom-center`, 벽 rail 배치는 `center`를 사용한다. 바닥형 position Y는 발판의 `top-center` Y와 같아야 한다.
 - 로드 실패: `AuthoredWorldObjectRenderer`의 기존 mock 패널로 독립 fallback한다.
 - PNG 교체로 collision·interaction·story cue·network 상태를 변경하지 않는다.
 
 ## 비범위
 
 - `story-display`별 문구·아이콘·상태 animation 제작
-- authored `story-display`의 좌표·anchor·문구·cue 변경
+- authored `story-display`의 문구·cue 변경
 - collision·interaction·network 변경
