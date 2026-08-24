@@ -31,12 +31,6 @@ class RopeReleaseFeedbackState extends PlayerRopeFeedbackRule {
     }
 }
 
-class RopeLinkFeedbackState extends PlayerRopeFeedbackRule {
-    constructor() {
-        super(ROPE_FEEDBACK_RULE.LINK);
-    }
-}
-
 class PlayerSwingFeedbackState extends PlayerRopeFeedbackRule {
     constructor() {
         super(PLAYER_FEEDBACK_RULE.SWING);
@@ -61,18 +55,6 @@ class PlayerAccelerationFeedbackState extends PlayerRopeFeedbackRule {
     }
 }
 
-class PlayerActiveActionFeedbackState extends PlayerRopeFeedbackRule {
-    constructor() {
-        super(PLAYER_FEEDBACK_RULE.ACTIVE_ACTION);
-    }
-}
-
-class PlayerRemoteActionFeedbackState extends PlayerRopeFeedbackRule {
-    constructor() {
-        super(PLAYER_FEEDBACK_RULE.REMOTE_ACTION);
-    }
-}
-
 export function createRopeFeedbackStates() {
     return Object.freeze([
         new RopeLaunchFeedbackState(),
@@ -80,7 +62,6 @@ export function createRopeFeedbackStates() {
         new RopeAttachFeedbackState(),
         new RopeDissipateFeedbackState(),
         new RopeReleaseFeedbackState(),
-        new RopeLinkFeedbackState(),
         new RopeTensionFeedbackState()
     ]);
 }
@@ -89,8 +70,6 @@ export function createPlayerFeedbackStates() {
     return Object.freeze([
         new PlayerSwingFeedbackState(),
         new PlayerMotionFeedbackState(),
-        new PlayerAccelerationFeedbackState(),
-        new PlayerActiveActionFeedbackState(),
-        new PlayerRemoteActionFeedbackState()
+        new PlayerAccelerationFeedbackState()
     ]);
 }

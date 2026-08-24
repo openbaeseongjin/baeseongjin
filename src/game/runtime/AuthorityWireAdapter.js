@@ -1,8 +1,7 @@
 import { serializeCommandReceipt } from "../network/CommandReceipt.js";
 import { deserializeAugmentImpactClaim } from "../network/AugmentImpactClaim.js";
-import { deserializeAugmentOfferClaim } from "../network/AugmentOfferClaim.js";
 import { deserializeCheckpointClaim } from "../network/CheckpointClaim.js";
-import { deserializeFoundationSelectionClaim } from "../network/FoundationSelectionClaim.js";
+import { deserializeAugmentSelectionClaim } from "../network/AugmentSelectionClaim.js";
 import { deserializePlayerCommandBatch } from "../network/PlayerCommandBatch.js";
 import { deserializeProjectileHitClaim } from "../network/ProjectileHitClaim.js";
 import { deserializePlayerImpactClaim } from "../network/PlayerImpactClaim.js";
@@ -42,22 +41,17 @@ export class AuthorityWireAdapter {
         return this.session.submitImpactClaim(authenticatedPlayerId, deserializePlayerImpactClaim(serializedClaim));
     }
 
-    receiveFoundationSelection(authenticatedPlayerId, serializedClaim) {
+    receiveAugmentSelection(authenticatedPlayerId, serializedClaim) {
         if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
-        return this.session.submitFoundationSelection(
+        return this.session.submitAugmentSelection(
             authenticatedPlayerId,
-            deserializeFoundationSelectionClaim(serializedClaim)
+            deserializeAugmentSelectionClaim(serializedClaim)
         );
     }
 
     receiveRopeImpact(authenticatedPlayerId, serializedClaim) {
         if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
         return this.session.submitRopeImpact(authenticatedPlayerId, deserializeRopeImpactClaim(serializedClaim));
-    }
-
-    receiveAugmentOffer(authenticatedPlayerId, serializedClaim) {
-        if (typeof serializedClaim !== "string") throw new Error("serializedClaim must be a string");
-        return this.session.submitAugmentOffer(authenticatedPlayerId, deserializeAugmentOfferClaim(serializedClaim));
     }
 
     receiveAugmentImpact(authenticatedPlayerId, serializedClaim) {

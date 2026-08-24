@@ -1,6 +1,6 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const AUGMENT_IMPACT_CLAIM_PROTOCOL_VERSION = 3;
+export const AUGMENT_IMPACT_CLAIM_PROTOCOL_VERSION = 4;
 
 const ACCEPTED_RESOLUTIONS = new Set(["applied", "shield-blocked", "target-already-dead", "duplicate"]);
 const REJECTED_REASONS = new Set(["target-missing", "tick-window", "invalid"]);

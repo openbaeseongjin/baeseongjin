@@ -1,6 +1,7 @@
 import { createPlayerCommand } from "../commands/PlayerCommand.js";
+import { POINTER_SPELL_COMMAND_BY_TOKENS } from "../../core/input/PointerSpellCommandBuffer.js";
 
-export const PLAYER_COMMAND_PROTOCOL_VERSION = 5;
+export const PLAYER_COMMAND_PROTOCOL_VERSION = 7;
 
 function assertFinite(value, label) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -19,8 +20,18 @@ function normalizeCommand(command) {
         throw new Error("movement axes must stay between -1 and 1");
     }
     if (typeof command.pointer.down !== "boolean") throw new Error("pointer.down must be boolean");
-    if (command.action !== undefined && typeof command.action !== "boolean") {
-        throw new Error("action must be boolean");
+    if (
+        !Number.isSafeInteger(command.spellCommand?.commandSequence ?? 0) ||
+        (command.spellCommand?.commandSequence ?? 0) < 0
+    ) {
+        throw new Error("spellCommand.commandSequence must be a non-negative safe integer");
+    }
+    if (
+        command.spellCommand?.commandKey !== null &&
+        command.spellCommand?.commandKey !== undefined &&
+        !Object.hasOwn(POINTER_SPELL_COMMAND_BY_TOKENS, command.spellCommand.commandKey)
+    ) {
+        throw new Error("spellCommand.commandKey must be null or a known spell command");
     }
     if (!Number.isSafeInteger(command.interactSequence ?? 0) || (command.interactSequence ?? 0) < 0) {
         throw new Error("interactSequence must be a non-negative safe integer");

@@ -63,6 +63,7 @@ const DEFINITIONS = Object.freeze([
     Object.freeze({
         id: ENEMY_TYPE.PURSUIT_DRONE_T1,
         displayName: "추격 드론",
+        experienceReward: 25,
         behaviorKind: ENEMY_BEHAVIOR_KIND.PURSUIT,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.PURSUIT],
         usesProjectileAttack: true,
@@ -71,6 +72,7 @@ const DEFINITIONS = Object.freeze([
     Object.freeze({
         id: ENEMY_TYPE.SHIELD_DRONE_T1,
         displayName: "방패 드론",
+        experienceReward: 30,
         behaviorKind: ENEMY_BEHAVIOR_KIND.SHIELD,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SHIELD],
         usesProjectileAttack: true,
@@ -79,6 +81,7 @@ const DEFINITIONS = Object.freeze([
     Object.freeze({
         id: ENEMY_TYPE.ARTILLERY_DRONE_T1,
         displayName: "포격 드론",
+        experienceReward: 35,
         behaviorKind: ENEMY_BEHAVIOR_KIND.ARTILLERY,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.ARTILLERY],
         usesProjectileAttack: false,
@@ -87,6 +90,7 @@ const DEFINITIONS = Object.freeze([
     Object.freeze({
         id: ENEMY_TYPE.HARDPOINT_JAMMER_V1,
         displayName: "하드포인트 재머",
+        experienceReward: 35,
         behaviorKind: ENEMY_BEHAVIOR_KIND.JAMMER,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.JAMMER],
         usesProjectileAttack: false,
@@ -95,6 +99,7 @@ const DEFINITIONS = Object.freeze([
     Object.freeze({
         id: ENEMY_TYPE.SUPPORT_DRONE_T1,
         displayName: "지원 드론",
+        experienceReward: 30,
         behaviorKind: ENEMY_BEHAVIOR_KIND.SUPPORT,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SUPPORT],
         usesProjectileAttack: false,
@@ -103,6 +108,7 @@ const DEFINITIONS = Object.freeze([
     Object.freeze({
         id: ENEMY_TYPE.SWARM_DRONE_T1,
         displayName: "군집 드론",
+        experienceReward: 10,
         behaviorKind: ENEMY_BEHAVIOR_KIND.SWARM,
         behaviorStates: ENEMY_BEHAVIOR_STATES[ENEMY_BEHAVIOR_KIND.SWARM],
         usesProjectileAttack: false,
@@ -126,11 +132,11 @@ function swarmGroupId(properties) {
 const DEFINITIONS_BY_ID = Object.freeze(
     Object.fromEntries(DEFINITIONS.map((definition) => [definition.id, definition]))
 );
-const LEGACY_DISPLAY_NAMES = Object.freeze({
-    [ENEMY_TYPE.SENTRY]: "경계 포탑",
-    [ENEMY_TYPE.SENTRY_T1]: "경계 포탑",
-    [ENEMY_TYPE.PATROL_DRONE]: "순찰 드론",
-    [ENEMY_TYPE.PATROL_DRONE_T1]: "순찰 드론"
+const STATIC_ENEMY_DEFINITIONS = Object.freeze({
+    [ENEMY_TYPE.SENTRY]: Object.freeze({ displayName: "경계 포탑", experienceReward: 25 }),
+    [ENEMY_TYPE.SENTRY_T1]: Object.freeze({ displayName: "경계 포탑", experienceReward: 25 }),
+    [ENEMY_TYPE.PATROL_DRONE]: Object.freeze({ displayName: "순찰 드론", experienceReward: 25 }),
+    [ENEMY_TYPE.PATROL_DRONE_T1]: Object.freeze({ displayName: "순찰 드론", experienceReward: 25 })
 });
 
 export const ENEMY_ARCHETYPE_IDS = Object.freeze(DEFINITIONS.map(({ id }) => id));
@@ -149,7 +155,7 @@ export function isKnownEnemyType(enemyType) {
         enemyType === undefined ||
         enemyType === null ||
         isEnemyArchetype(enemyType) ||
-        Object.hasOwn(LEGACY_DISPLAY_NAMES, enemyType)
+        Object.hasOwn(STATIC_ENEMY_DEFINITIONS, enemyType)
     );
 }
 
@@ -161,7 +167,14 @@ export function enemyArchetypeDefinition(enemyType) {
 
 export function enemyDisplayName(enemyType) {
     if (enemyType === undefined || enemyType === null) return "경계 포탑";
-    return DEFINITIONS_BY_ID[enemyType]?.displayName ?? LEGACY_DISPLAY_NAMES[enemyType] ?? enemyType;
+    return DEFINITIONS_BY_ID[enemyType]?.displayName ?? STATIC_ENEMY_DEFINITIONS[enemyType]?.displayName ?? enemyType;
+}
+
+export function enemyExperienceReward(enemyType) {
+    if (enemyType === undefined || enemyType === null) {
+        return STATIC_ENEMY_DEFINITIONS[ENEMY_TYPE.SENTRY_T1].experienceReward;
+    }
+    return DEFINITIONS_BY_ID[enemyType]?.experienceReward ?? STATIC_ENEMY_DEFINITIONS[enemyType]?.experienceReward;
 }
 
 export function enemySpawnMembers(properties) {
@@ -183,6 +196,7 @@ export function createEnemyArchetype({ enemyType, behaviorState = null, rules = 
         ...properties,
         enemyType,
         displayName: definition.displayName,
+        experienceReward: definition.experienceReward,
         behavior: definition.createBehavior(behaviorState ?? {}),
         weaponRange: definition.weaponRange ?? properties.weaponRange ?? null,
         swarmGroupId: definition.resolveSwarmGroupId?.(properties) ?? properties.swarmGroupId ?? null,

@@ -31,17 +31,13 @@ const CLIENT_MESSAGE_HANDLER = Object.freeze({
         "receiveImpactClaim",
         MULTIPLAYER_MESSAGE_TYPE.IMPACT_CLAIM_RECEIPT
     ),
-    [MULTIPLAYER_MESSAGE_TYPE.FOUNDATION_SELECTION]: serialized(
-        "receiveFoundationSelection",
-        MULTIPLAYER_MESSAGE_TYPE.FOUNDATION_SELECTION_RECEIPT
+    [MULTIPLAYER_MESSAGE_TYPE.AUGMENT_SELECTION]: serialized(
+        "receiveAugmentSelection",
+        MULTIPLAYER_MESSAGE_TYPE.AUGMENT_SELECTION_RECEIPT
     ),
     [MULTIPLAYER_MESSAGE_TYPE.ROPE_IMPACT]: serialized(
         "receiveRopeImpact",
         MULTIPLAYER_MESSAGE_TYPE.ROPE_IMPACT_RECEIPT
-    ),
-    [MULTIPLAYER_MESSAGE_TYPE.AUGMENT_OFFER]: serialized(
-        "receiveAugmentOffer",
-        MULTIPLAYER_MESSAGE_TYPE.AUGMENT_OFFER_RECEIPT
     ),
     [MULTIPLAYER_MESSAGE_TYPE.AUGMENT_IMPACT]: serialized(
         "receiveAugmentImpact",

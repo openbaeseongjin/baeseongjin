@@ -5,7 +5,7 @@ import {
     ropeHookFlightSeconds,
     ropeHookReach
 } from "../config.js";
-import { AUGMENT_CATALOG, isAugmentCompatibleWithSelection } from "../augments/FoundationAugmentCatalog.js";
+import { AUGMENT_CATALOG, isAugmentCompatibleWithSelection } from "../augments/AugmentCatalog.js";
 import { MAX_DEBUG_AUGMENT_COUNT } from "../metrics/DebugSettings.js";
 
 export const DEBUG_PANEL_HOLD_MS = 1000;
@@ -159,6 +159,7 @@ export class DebugPanel {
         for (const select of this.augmentSelects) {
             const existingAugmentIds = new Set([...select.options].map(({ value }) => value));
             for (const augment of AUGMENT_CATALOG) {
+                if (augment.category !== "rope" && augment.category !== "spell") continue;
                 if (existingAugmentIds.has(augment.id)) continue;
                 const option = this.documentTarget.createElement("option");
                 option.value = augment.id;
@@ -253,7 +254,7 @@ export class DebugPanel {
             }
         }
         this.augmentModeOutput.textContent = this.ropeTuningEnabled
-            ? `선택 ${selected.length}/${MAX_DEBUG_AUGMENT_COUNT} · 중복, 기본 Action 2개, Action 불일치 Signature와 Action 없는 범용 강화는 선택할 수 없습니다.`
+            ? `선택 ${selected.length}/${MAX_DEBUG_AUGMENT_COUNT} · 로프 패시브와 마법 슬롯 교체 카드만 선택할 수 있습니다.`
             : "멀티 세션에서는 비활성 · 공유 증강 loadout 프로토콜 미구현";
     }
 

@@ -18,7 +18,7 @@
 | Sector 개인 부활                    | 피해·낙사 플레이어 소유 클라이언트 | receipt 전 Sector entry로 즉시 부활하고 공용 진행은 유지                                   |
 | Sector 전원 사망                    | 각 피해·소유 클라이언트            | 각자 자기 checkpoint에서 부활하고 Timer·Purge 결정 전에는 공용 reset을 만들지 않음         |
 | 저작 objective                      | 서버                               | 각 objective trigger/source/prerequisite 결과를 `worldProgress` snapshot으로 수렴          |
-| generic Augment 선택·효과           | 행동 클라이언트                    | 개인 chooser와 효과를 즉시 적용하고 서버가 호환 `foundation-selection` claim으로 검증·공유 |
+| generic Augment 선택·효과           | 행동 클라이언트                    | 개인 chooser와 효과를 즉시 적용하고 서버가 호환 `augment-selection` claim으로 검증·공유 |
 | 파티클·화면 흔들림·경고             | 각 클라이언트                      | 서버는 의미 사건만 공유하고 각 화면이 audience에 맞춰 재생                                 |
 
 핵심 원칙은 다음과 같다.
@@ -72,7 +72,7 @@
 | 몹·적 투사체·공용 월드         | 서버 상태                                   | 서버 스냅샷과 생성·해결 사건을 적용하고 연속 위치만 보간·제한 외삽                                                                                |
 | 최초 입장·재접속               | 서버가 보존한 최신 공유 상태                | 전체 소유자 상태를 한 번 복원한 뒤 다시 클라이언트 우선 시뮬레이션 시작                                                                           |
 
-현재 player-impact 프로토콜 v13의 정상 메시지는 일반화한 impact ID(기존 projectile 소비자는 같은 값을 `projectileId` 호환 별칭으로도 받음), client tick, impact 종류, 충돌 위치·속도, 관측 대미지, 부활 여부와 64비트 상태 지문을 운반한다. 서버에 탄환이 있으면 서버 대미지로 같은 전이를 시도하고, 이미 만료됐으면 피해 클라이언트가 관측한 대미지로 시도한다. `fall-damage`는 공용 안전·최대 피해 속도와 50% 배율로 대미지를 다시 계산한다. `jammer-shock`은 서버 Jam group/phase/sequence와 owner-motion v9의 Rope `anchorSurfaceId`·`attachmentId`, 총 피해 25를 검증한다. 결과 지문이 다를 때만 두 번째 메시지에 `recoveryId`, 최신 소유자 상태와 `stateTick`을 함께 싣는다. 복구 상태는 서버가 실제로 복원하는 ID·위치·속도·각도·각속도·접지·HP·타이머·생명·Rope attachment ID/surface/local anchor/length·Hook tip·감전 상태·입력 제어·무기와 generic Augment 호환 필드 전체의 타입·유한값·기본 범위·내부 관계를 검증한다. 인증된 피해자 ID와 상태 ID가 다르거나, `stateTick`이 이전 승인 owner tick보다 오래됐거나 서버 허용 미래 tick을 넘으면 복구를 적용하지 않는다. 형식이 깨졌거나 인증된 플레이어가 없는 메시지는 정상 gameplay 거부 receipt가 아니라 프로토콜 오류로 연결을 종료한다.
+현재 player-impact 프로토콜 v14는 impact ID, client tick, 충돌 자료, 관측 피해, 부활 여부와 공통 상태이상·Spell·Experience를 포함한 상태 지문을 운반한다. `jammer-shock`은 owner-motion v10의 Rope attachment와 감전 Pool 상태를 검증한다. 결과 지문이 다를 때만 최신 피해자 상태를 한 번 요청한다.
 
 상태 지문은 raw 플레이어 객체 전체의 정확 일치 해시가 아니다. impact가 소유하는 지속 결과만 결정적 순서로 투영하고, 위치·속도·로프 기하는 0.1 단위, 타이머는 1/120초 tick, 체력·무기 수치는 0.001 단위로 양자화한 뒤 비암호학적 64비트 FNV-1a를 계산한다. 일반 본체 피격은 HP·속도·피격 무적, 로프 절단은 부착 여부·재부착 제한, 치명 피격은 여기에 체크포인트 위치·생명·로프·무기·generic Augment 순간 상태를 포함한다. 입력 포인터·렌더 상태와 다른 동기화 경계가 소유한 값은 제외한다. 이 지문은 불일치 감지용이며 인증이나 치트 방지 증거가 아니다.
 
@@ -178,9 +178,9 @@
 | Boss kinematic body·Beam/Ram/Charge/Slam/Dive 피격 | Boss motion은 서버, Player 반응은 피해 클라이언트 | 활성 Boss Stage ID와 mechanism snapshot을 결정적으로 진행해 공통 actor collision·피해를 즉시 적용하고 `boss-hazard` state digest claim으로 수렴 |
 | 예측 가능한 투사체·낙하물              | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                         |
 | 자기 사망·active Stage checkpoint 부활 | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                                  |
-| 월드 시드·지형·Sector entry            | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v15 검증                                                              |
-| Sector objective                       | 서버                                              | 독립 trigger/source/prerequisite 결과와 `foundationRewards`를 공유하며 마지막 objective는 content boundary 유지               |
-| 플레이어별 generic Augment 선택·효과   | 행동 클라이언트 선행, 서버 검증·공유              | 개인 chooser와 효과를 즉시 적용하고 호환 `foundation-selection`·generic `augment-impact` 뒤 개인 상태와 공용 objective를 수렴 |
+| 월드 시드·지형·Sector entry            | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v16 검증                                                              |
+| Sector objective                       | 서버                                              | 독립 trigger/source/prerequisite 결과를 공유하며 마지막 objective는 content boundary 유지                                   |
+| 플레이어별 Augment 선택·효과           | 행동·피해 클라이언트 선행, 서버 검증·공유         | 경험치 보상 선택과 효과를 즉시 적용하고 `augment-selection`·`augment-impact` 뒤 Player별 상태를 수렴                         |
 | 카메라·HUD·파티클                      | 클라이언트                                        | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용                                                                         |
 
 충돌 broad phase와 화면 기반 Enemy 활성화도 권위별로 같은 결정적 world-space 규칙을 사용한다. 소유 클라이언트는 자기 Player 주변 관심 영역에서 즉시 Player↔Enemy 후보를 조회하고, 서버는 채널의 모든 active Player 관심 영역을 합쳐 중립 Enemy 활성 집합을 정한다. 실제 viewport 크기·카메라 zoom을 전송하거나 한 대표 Player에게 중립 활성 판단을 맡기지 않는다. 관심 영역 밖 Enemy는 서버에서 전체 fixed-step을 동결하고 snapshot 위치를 유지하되 공개 velocity와 충돌 잔류 속도는 0으로 보내 원격 외삽이 잠든 Enemy를 이동시키지 않게 한다. 행동·Patrol·knockback 잔여 상태는 소비하지 않으며 영역 안으로 다시 들어오면 전역 surface Quadtree와 동적 actor Quadtree에서 swept bounds 후보를 조회해 재개한다.
@@ -193,19 +193,19 @@ Boss 입장은 Player별 위치 주도 사건이다. source Gate trigger에 들�
 
 Boss06 승리 뒤 Boarding은 Player별 위치 주도 사건과 공용 완료 상태를 분리한다. 각 소유 Player는 Gate/Bridge를 직접 건너 boarding zone에 들어가고 서버는 Player별 ready ID를 공유한다. 연결된 모든 참가자가 ready일 때만 run completion을 확정하며 첫 ready Player가 동료를 순간이동시키지 않는다. Boss spectator는 승리 시 ID 순서로 final safe Bridge deck에 간격을 두고 복귀하며 참가 상태도 `active`로 함께 전환한 뒤 같은 Boarding 경로를 사용한다. Wipe respawn도 같은 정렬·간격 계약을 사용한다.
 
-generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. `FoundationAugmentState`, `foundation-selection`, `foundationRewards`는 이전 snapshot과 wire 호환을 위한 이름이며 과거 Foundation 3종 gameplay를 뜻하지 않는다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 호환 `foundation-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 대상 Player state의 `respawnAnchorId`가 가리키는 최근 직접 접촉 Stage checkpoint로 되돌리며 선택 카드와 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
+generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. `AugmentLoadoutState`, `augment-selection`, `augmentRewards`는 이전 snapshot과 wire 호환을 위한 이름이며 과거 Augment 3종 gameplay를 뜻하지 않는다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 호환 `augment-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 대상 Player state의 `respawnAnchorId`가 가리키는 최근 직접 접촉 Stage checkpoint로 되돌리며 선택 카드와 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
-기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. 소유 클라이언트가 자기 collider와 save trigger의 겹침을 먼저 적용해 개인 `respawnAnchorId`를 갱신하고 서버가 owner motion·anchor ID·접촉 bounds를 검증해 동료에게 공유한다. 피해·낙사 소유 클라이언트는 전체 authored world 하단 아래의 치명 결과에서 자기 anchor로 즉시 부활하고 서버·동료가 player-impact 결과를 따른다. WorldSnapshot v15는 각 `players[]` state에 개인 anchor·non-null Action·감전 상태를 포함하며, `completedBossStageIds`를 포함한 공용 Sector 진행, 활성 Boss Stage의 Rope attachment actor transform, content boundary 이력·Hardpoint Jammer target/phase/sequence를 복제한다.
+기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. WorldSnapshot v16은 각 Player의 개인 anchor, Spell 슬롯·쿨다운, Experience, 공통 상태이상 Pool과 Augment loadout을 복제한다.
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·authorityTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
 현재 저작 시나리오는 영구 Stage cursor나 summit claim을 사용하지 않는다. 서버와 owner prediction의 같은 `GameSimulation`은 authored Gate objective·trigger를 통과한 Player 한 명에게 `gate-portal-entered`를 만들고 다음 authored Entry로 즉시 이동한다. Player별 savepoint 충돌은 owner-first claim으로 수렴한다. 3-8·4-8·5-8은 각각 4-1·5-1·6-1 Entry로 직접 이동하고 6-8은 terminal Boss06 entry만 연다.
 
-1-4·2-3·3-5 explicit Augment Node 선택은 개인 입력 중립화와 공용 시계 지속 원칙을 사용한다. owner client는 Node 근처에서 공식 `runSeed + stablePlayerId + selectionIndex` offer를 즉시 열고 `augment-offer` claim으로 pending entitlement를 서버에 보존한다. 확정은 호환 `foundation-selection` claim을 사용하지만 의미는 generic Augment다. 서버는 연결 소유권·tick·stable source ID·반경·공식 offer membership·Player별 source 소비를 검증하고 멱등 확정한다. 현재 채널 Player 전원이 source를 소비한 뒤 공유 objective를 한 번 완료하며, 완료 전 퇴장한 Player는 요구 집합에서 제거해 route 교착을 막는다. 완료 뒤 합류 Player도 Node에서 자기 offer를 독립 확정할 수 있지만 열린 route를 다시 잠그지 않는다. 사망·Stage 세이브 포인트 부활·landmark 이동과 전원 사망은 선택·consumed source·공용 objective를 보존하고 순간 Action/Rope window만 초기화한다.
+서버가 중립 Enemy의 막타를 확정하면 해당 Player에게 Enemy definition의 XP를 한 번 지급한다. 레벨 도달 시 서버와 owner가 같은 seed·Player ID·reward level로 offer를 계산하고, owner가 즉시 선택한 `augment-selection` claim을 서버가 공식 offer membership으로 검증한다. Node source·`augment-offer` claim·공용 objective는 없다.
 
-해제 추진·로프 연동·감전 로프 같은 generic Augment 효과는 소유 클라이언트가 Rope/Action 사건에 즉시 적용하고 `owner-motion`, `augment-impact`와 snapshot으로 공유한다. 과거 `Impulse Coil`·`Relay Link`·`Shear Current` ID는 migration 때 현재 카드로 정규화하며 Foundation Shear 전용 claim은 전송하지 않는다.
+해제 추진·감전 로프 같은 Rope Augment 효과와 Spell은 소유 클라이언트가 즉시 적용하고 `owner-motion`, `augment-impact`와 snapshot으로 공유한다.
 
-멀티 서버 fixed tick은 원시 게임 명령에 선택 입력이 포함돼도 보상 선택을 처리하지 않는다. generic Augment 선택의 유일한 서버 전이는 이름을 호환 유지한 `foundation-selection` claim이며, 체력 0을 스캔해 사망·부활을 보조 발생시키지도 않는다. 피해와 사망·부활은 피해 클라이언트의 `player-impact` claim 안에서 함께 확정한다. 싱글은 네트워크 claim 왕복이 없으므로 같은 `GameSimulation` 옵션의 기본값으로 로컬 보상 입력과 체력 복구를 직접 수행한다.
+멀티 서버 fixed tick은 원시 게임 명령에 선택 입력이 포함돼도 보상 선택을 처리하지 않는다. generic Augment 선택의 유일한 서버 전이는 이름을 호환 유지한 `augment-selection` claim이며, 체력 0을 스캔해 사망·부활을 보조 발생시키지도 않는다. 피해와 사망·부활은 피해 클라이언트의 `player-impact` claim 안에서 함께 확정한다. 싱글은 네트워크 claim 왕복이 없으므로 같은 `GameSimulation` 옵션의 기본값으로 로컬 보상 입력과 체력 복구를 직접 수행한다.
 
 현재 권위 복귀 구현은 사망한 플레이어 한 명의 물리·로프·입력·체력·무기 상태만 자기 active Stage checkpoint에서 초기화한다. 해당 플레이어의 `player-respawned` 사건을 남기며 다른 플레이어와 공용 진행·적·투사체 상태는 유지한다. 같은 tick에 모든 플레이어가 부활해도 공용 상태를 reset하지 않는다.
 
@@ -219,8 +219,8 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 
 각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
 
-- `owner-motion` protocol v9는 `angle`, `angularVelocity`, 부착 중인 Rope의 `attachmentId`·`anchorSurfaceId`·고정 `length`·`attachmentOffset`·선택적 `anchorOwnerId + anchorLocalOffset`, `RopeImpactState`, Hook의 실제 `tip`·target point velocity, owner Action runtime과 개인 `respawnAnchorId`를 위치·속도·anchor와 함께 보낸다. 서버는 새 attachment ID에서 actor anchor의 capability surface와 최초 reach/LOS를 검증하고, 재머 감전 claim에서는 shared target surface와 같은 세대인지 확인한다. 같은 세대는 서버가 확정한 rest length를 유지하며 Boss 이동 때문에 reach가 달라졌다는 이유로 해제하지 않는다.
-- `WorldSnapshot` protocol v15의 각 player는 `angle`, `angularVelocity`, Rope joint, `RopeImpactState`, launcher, `foundationAugment`, non-null `actionState`, `augmentRuntimeState`, `statusEffects`, `respawnAnchorId`를 포함한다. 활성 Boss snapshot은 ropeable actor의 stable ID·position·velocity·angle·angularVelocity를 포함하고 원격 renderer는 Player Rope의 local anchor를 같은 Boss transform 시점에서 재구성한다. authored enemy는 `worldRevision + objectId`로 정적 정의를 복원한다.
+- `owner-motion` protocol v10은 Rope joint와 함께 Spell·Experience·공통 상태이상 Pool을 보낸다.
+- `WorldSnapshot` protocol v16의 각 Player는 Rope joint, `selectedAugmentIds`, `augmentRuntimeState`, Experience와 공통 `statusEffects`를 포함한다.
 - 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
 - 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 도착한 최신 detached `owner-motion`은 같은 tick의 위치·속도·각도와 함께 해제를 원자적으로 확정하며, 이후 도착한 과거 tick은 성공한 no-op으로 무시한다.
 - `player-impact` protocol v13의 `recovery-required` 전체 상태에는 angle·angularVelocity·Rope attachment ID/surface/local anchor/length·Hook tip·`RopeImpactState`·개인 `respawnAnchorId`·`lifeState`·감전 상태와 generic Augment 선택·순간 상태가 포함된다. Boss hazard claim은 Stage·hazard kind·sequence를, Jammer claim은 field group·target surface·cycle sequence를 서버 중립 상태와 대조한다. 부활 결과 지문에도 회전·부착 손·상태 효과·Augment·checkpoint 상태를 포함하지만, 정상 비치명 impact마다 전체 상태를 별도 전송하지 않는다.
@@ -240,12 +240,12 @@ players[]
   id, ownerMotionTick, position, velocity, angle, angularVelocity, isGrounded, health, lifeState
   rope(anchor, anchorSurfaceId, attachmentOffset, length, currentLength, tension), weaponCooldown
   control(aimWorld, lastPointer, lastViewport, wasPointerDown, attachBufferRemaining, swingDrag)
-  launcher(shot, cooldownRemaining), foundationAugment, augmentRuntimeState, statusEffects
+  launcher(shot, cooldownRemaining), selectedAugmentIds, augmentRuntimeState, statusEffects
 enemies[]
 progressKind: sector
 players[].respawnAnchorId
 worldProgress(objective/route-prerequisite/encounter sets)
-foundationRewards
+augmentRewards
 completed
 ackSequenceByPlayer
 events[]
@@ -340,7 +340,7 @@ GameApp
 
 각 명령 제출 응답은 `CommandReceipt`로 serverTick·targetTick과 승인·거부된 playerId·sequence만 돌려준다. 명령 본문은 반사하지 않는다. 승인된 입력은 권위 스냅샷 ACK까지 예측 큐에 남고, 명시적으로 거부된 자기 입력만 receipt 수신 즉시 제거한다. 같은 receipt를 다시 받아도 이미 제거된 sequence에는 영향이 없다.
 
-원격 클라이언트는 명령 sequence별 전송 시각과 receipt 수신 시각으로 왕복 시간을 측정하고, 연속 스냅샷의 수신 간격과 명령·`owner-motion` 승인 누계를 함께 보관한다. 구버전·프로토콜 이상 진단을 위한 `owner-motion` 거부 누계는 호환 지표로 남기되 receipt가 소유자 복원이나 재시뮬레이션을 시작하지 않는다. 보정 거리와 hard-snap 누계는 legacy Area checkpoint rollback 진단을 위해 남아 있으며 정상 Sector owner snapshot에서는 증가하지 않아야 한다. 원격 상태 버퍼는 현재·최대 외삽 시간을, 예측 투사체 저장소는 권위 해결 선행이나 claim 거부로 로컬 예측을 취소하거나 재무장한 횟수를 제공한다. 활성 시간·체크포인트·처치·피해·로프 절단·패배·첫 Augment 선택 같은 런 지표는 예측 시뮬레이션에서 추정하지 않고 권위 서버의 `RunMetrics`를 전체 스냅샷에 포함한다. 기존 지표 필드명이 Foundation을 포함해도 의미는 generic Augment 최초 선택이다. 이 값은 게임 규칙이나 물리 보정값을 자동 변경하지 않으며 설정 버튼 길게 누르기로 여는 디버그 수치 패널에서만 확인한다.
+원격 클라이언트는 명령 sequence별 전송 시각과 receipt 수신 시각으로 왕복 시간을 측정하고, 연속 스냅샷의 수신 간격과 명령·`owner-motion` 승인 누계를 함께 보관한다. 구버전·프로토콜 이상 진단을 위한 `owner-motion` 거부 누계는 호환 지표로 남기되 receipt가 소유자 복원이나 재시뮬레이션을 시작하지 않는다. 보정 거리와 hard-snap 누계는 legacy Area checkpoint rollback 진단을 위해 남아 있으며 정상 Sector owner snapshot에서는 증가하지 않아야 한다. 원격 상태 버퍼는 현재·최대 외삽 시간을, 예측 투사체 저장소는 권위 해결 선행이나 claim 거부로 로컬 예측을 취소하거나 재무장한 횟수를 제공한다. 활성 시간·체크포인트·처치·피해·로프 절단·패배·첫 Augment 선택 같은 런 지표는 예측 시뮬레이션에서 추정하지 않고 권위 서버의 `RunMetrics`를 전체 스냅샷에 포함한다. 기존 지표 필드명이 Augment을 포함해도 의미는 generic Augment 최초 선택이다. 이 값은 게임 규칙이나 물리 보정값을 자동 변경하지 않으며 설정 버튼 길게 누르기로 여는 디버그 수치 패널에서만 확인한다.
 
 RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 제거하고, receipt가 손실된 기록은 이후 권위 snapshot의 승인 sequence 이하를 정리한다. ACK도 장시간 도착하지 않는 경우를 위해 송신 순서 기준 최근 2,048개만 유지한다. 이 상한은 계측 메모리만 제한하며 명령 재적용 큐나 서버 승인 규칙을 바꾸지 않는다.
 
@@ -379,12 +379,13 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 ## 증강 선택·피해 동기화
 
-- offer는 owner와 서버가 `runSeed + stablePlayerId + selectionIndex`로 독립 재계산한다. `augment-offer`는 pending source와 같은 세 장을 재접속 snapshot에 남기고, 확정 claim은 membership과 source 1회 소비를 검증한다.
-- Rope·Action 피해와 넉백은 공격 owner가 먼저 시뮬레이션한다. 서버 fixed tick은 지연된 owner 위치로 같은 충돌을 다시 만들지 않는다.
+- offer는 owner와 서버가 `runSeed + stablePlayerId + rewardLevel`로 독립 재계산하고 snapshot의 pending XP reward를 보존한다.
+- Rope·Spell의 Enemy·Boss 적중은 공격 owner가 먼저 시뮬레이션하고 서버가 확정한다. 다른 Player 피격은 피해 Player가 먼저 적용해 claim하며, 막타 XP는 서버 확정 결과에서 한 번 귀속한다.
+- 피해 클라이언트의 `IncomingSpellImpactDetector`는 owner-motion에 복제된 원격 Spell projectile의 이전·현재 위치를 공통 선분 충돌로 검사한다. 피해·상태이상·넉백을 로컬 `GameSimulation`에 먼저 적용하고, 인증된 피해 Player가 `AugmentImpactClaim`을 보내며 서버는 원인 Spell definition과 source Player loadout을 검증한다. 같은 event ID는 서버에서 한 번만 확정한다.
 - `augment-impact`는 event ID, tick, source/target/effect, 접촉 위치, 공식 damage와 선택적 movement intent만 보낸다. 서버는 source card 보유와 수치 공식을 다시 계산한다.
 - live enemy는 `blocksImpactFrom`을 먼저 호출하고, lethal event의 own knockback을 적용하지 않는다. Boss displacement 면역은 public reaction에서 처리한다.
 - 같은 event ID는 같은 receipt를 반환한다. known tombstone은 accepted `target-already-dead` silent no-op, never-known ID는 rejected `target-missing`이다.
-- owner가 이미 시작한 Action·피해·전기·반사 VFX는 정상 receipt와 resolve 사건 때문에 다시 재생하거나 되감지 않는다.
+- owner가 이미 시작한 Spell·피해·상태이상 VFX는 정상 receipt와 resolve 사건 때문에 다시 재생하거나 되감지 않는다.
 
 ## 구현 순서와 검증 기준
 
@@ -393,6 +394,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 3. [완료] 지연·중복·순서 뒤바뀜을 흉내 내는 전송 테스트를 유지한다.
 4. [완료] 원격 클라이언트의 예측·재적용·보정과 투사체 이벤트 재생을 테스트한다.
 5. [완료] 실제 2인 WebSocket에서 입력 종료 뒤 소유자·서버·동료의 위치·속도·로프 상태 수렴을 테스트한다.
+6. [완료] `npm run simulate:multiplayer-combat`은 브라우저 없이 실제 command batch·GameSimulation·피해자 claim·WorldSnapshot v16을 사용해 두 Player 직접/지형 폭발 마법 피격, 상태이상, 중복 억제, 막타 XP, 보상 선택과 복원 수렴을 반복 검증한다.
 6. [완료] 장시간 로컬 수신 시계 드리프트에서도 최신 표본이 계속 오면 원격 시간축이 지속 외삽으로 밀리지 않는지 테스트한다.
 7. [완료] Node 권위 서버와 실제 WebSocket 클라이언트 두 개를 같은 오픈월드에 연결한다.
 8. [완료] impact 전체 상태는 서버가 먼저 발급한 일회용 challenge 뒤에만 받고, 복구 상태와 `stateTick`을 원자적으로 수용하며 실제 복원 필드 전체의 wire schema를 검증한다.

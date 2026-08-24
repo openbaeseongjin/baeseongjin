@@ -165,34 +165,15 @@ const SPEC = {
         "type": "reach"
       },
       {
-        "id": "sector-03-05:augment-selected",
-        "sourceObjectId": "sector-03-05:service-calibration-frame",
-        "type": "interact-choice"
-      },
-      {
         "id": "sector-03-05:exit-panel-engaged",
         "requiredObjectiveIds": [
-          "sector-03-05:final-deck-reached",
-          "sector-03-05:augment-selected"
+          "sector-03-05:final-deck-reached"
         ],
         "sourceObjectId": "sector-03-05:exit-panel",
         "type": "interact"
       }
     ],
     "objects": [
-      {
-        "coordinateAnchor": "center",
-        "id": "sector-03-05:service-calibration-frame",
-        "interactionRadius": 72,
-        "kind": "augment-node",
-        "objectiveId": "sector-03-05:augment-selected",
-        "offerContract": "generic Augment v1",
-        "position": {
-          "x": -530,
-          "y": -565
-        },
-        "presentationId": "world-object:augment-node"
-      },
       {
         "activationSpec": {
           "anchor": "center",
@@ -318,8 +299,7 @@ const SPEC = {
         },
         "presentationId": "world-object:gate-panel",
         "requiredObjectiveIds": [
-          "sector-03-05:final-deck-reached",
-          "sector-03-05:augment-selected"
+          "sector-03-05:final-deck-reached"
         ]
       },
       {

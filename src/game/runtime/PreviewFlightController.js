@@ -22,7 +22,6 @@ export class PreviewFlightController {
             horizontal: 0,
             vertical: 0,
             interact: false,
-            action: false,
             pointer: Object.freeze({ ...input.pointer, down: false })
         });
     }

@@ -43,7 +43,7 @@ export class AuthorityServerSession {
         this.resolvedProjectileSpawnClaims = new Map();
         this.resolvedImpactClaims = new Map();
         this.pendingImpactRecoveries = new Map();
-        this.resolvedFoundationSelections = new Map();
+        this.resolvedAugmentSelections = new Map();
         this.resolvedRopeImpactClaims = new Map();
         this.resolvedAugmentImpactClaims = new Map();
         this.resolvedCheckpointClaims = new Map();
@@ -201,17 +201,17 @@ export class AuthorityServerSession {
         return result;
     }
 
-    submitFoundationSelection(authenticatedPlayerId, claim) {
+    submitAugmentSelection(authenticatedPlayerId, claim) {
         if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
             throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
         }
         const selectionKey = `${authenticatedPlayerId}:${claim.sourceId}`;
-        const existing = this.resolvedFoundationSelections.get(selectionKey);
+        const existing = this.resolvedAugmentSelections.get(selectionKey);
         if (existing) {
-            if (existing.foundationId === claim.foundationId) return existing;
+            if (existing.augmentId === claim.augmentId) return existing;
             return Object.freeze({
                 sourceId: claim.sourceId,
-                foundationId: claim.foundationId,
+                augmentId: claim.augmentId,
                 accepted: false,
                 reason: "selection-conflict"
             });
@@ -221,19 +221,19 @@ export class AuthorityServerSession {
         if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
             return Object.freeze({
                 sourceId: claim.sourceId,
-                foundationId: claim.foundationId,
+                augmentId: claim.augmentId,
                 accepted: false,
                 reason: "tick-window"
             });
         }
         const receipt = Object.freeze({
             sourceId: claim.sourceId,
-            foundationId: claim.foundationId,
-            ...this.simulation.resolveFoundationSelection(authenticatedPlayerId, claim, {
+            augmentId: claim.augmentId,
+            ...this.simulation.resolveAugmentSelection(authenticatedPlayerId, claim, {
                 requireOpenReward: false
             })
         });
-        if (receipt.accepted) this.resolvedFoundationSelections.set(selectionKey, receipt);
+        if (receipt.accepted) this.resolvedAugmentSelections.set(selectionKey, receipt);
         return receipt;
     }
 
@@ -261,28 +261,6 @@ export class AuthorityServerSession {
             resolvedAtTick: this.simulation.getTick()
         });
         return receipt;
-    }
-
-    submitAugmentOffer(authenticatedPlayerId, claim) {
-        if (!this.simulation.hasPlayer(authenticatedPlayerId)) {
-            throw new Error(`unknown authenticated playerId: ${authenticatedPlayerId}`);
-        }
-        const minimumTick = this.simulation.getTick() - MULTIPLAYER_TIMING.maxHitClaimPastTicks;
-        const maximumTick = this.simulation.getTick() + MULTIPLAYER_TIMING.maxFutureTicks;
-        if (claim.authorityTick < minimumTick || claim.authorityTick > maximumTick) {
-            return Object.freeze({ sourceId: claim.sourceId, accepted: false, reason: "tick-window" });
-        }
-        const source = this.simulation.world.objects?.find(({ id }) => id === claim.sourceId);
-        const accepted = this.simulation.beginFoundationReward(
-            authenticatedPlayerId,
-            claim.sourceId,
-            source?.objectiveId ?? null
-        );
-        return Object.freeze({
-            sourceId: claim.sourceId,
-            accepted,
-            ...(accepted ? {} : { reason: "offer-unavailable" })
-        });
     }
 
     submitAugmentImpact(authenticatedPlayerId, claim) {
@@ -500,8 +478,7 @@ export class AuthorityServerSession {
             resolvePlayerProjectileHits: false,
             spawnPlayerProjectiles: false,
             recoverPlayerDeaths: false,
-            advanceInputDrivenObjects: false,
-            resolveInteractChoice: false
+            advanceInputDrivenObjects: false
         });
         for (const playerId of this.simulation.playerIds()) {
             const portalTick = this.simulation.portalTransitionTick(playerId);
@@ -558,8 +535,8 @@ export class AuthorityServerSession {
         for (const key of this.pendingImpactRecoveries.keys()) {
             if (key.startsWith(`${playerId}\u0000`)) this.pendingImpactRecoveries.delete(key);
         }
-        for (const selectionKey of this.resolvedFoundationSelections.keys()) {
-            if (selectionKey.startsWith(`${playerId}:`)) this.resolvedFoundationSelections.delete(selectionKey);
+        for (const selectionKey of this.resolvedAugmentSelections.keys()) {
+            if (selectionKey.startsWith(`${playerId}:`)) this.resolvedAugmentSelections.delete(selectionKey);
         }
         for (const predictionId of this.resolvedRopeImpactClaims.keys()) {
             if (predictionId.startsWith(`${playerId}:`)) this.resolvedRopeImpactClaims.delete(predictionId);

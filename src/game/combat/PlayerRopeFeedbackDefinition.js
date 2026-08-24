@@ -1,11 +1,9 @@
-import { ACTION_MODIFIER_ID } from "../augments/actions/ActionAugmentDefinition.js";
 import { CLIENT_FEEDBACK_PRESET_ID } from "./ClientFeedbackEventDefinition.js";
 
 export const PLAYER_LIFE_STATE = Object.freeze({ ACTIVE: "active" });
 
 export const PLAYER_ROPE_AUGMENT_ID = Object.freeze({
     RELEASE_PROPULSION: "release-propulsion",
-    ROPE_LINK: ACTION_MODIFIER_ID.ROPE_LINK,
     ELECTRIFIED_ROPE: "electrified-rope"
 });
 
@@ -24,7 +22,6 @@ export const PLAYER_ROPE_FEEDBACK_CONFIG = Object.freeze({
     FLIGHT_DENSITY: 0.42,
     BASE_RELEASE_DENSITY: 1,
     RELEASE_PROPULSION_DENSITY: 1.45,
-    ACTIVE_WINDOW_THRESHOLD: 0,
     TENSION_START: 180,
     TENSION_RANGE: 820,
     TENSION_MAX_DENSITY: 0.8,
@@ -50,7 +47,6 @@ const TRANSITION_EFFECT = Object.freeze({
     DISSIPATE: "dissipate",
     RELEASE: "release",
     RELEASE_IMPULSE: "release-impulse",
-    LINK: "link",
     SWING: "swing",
     ACCELERATION: "acceleration"
 });
@@ -59,8 +55,6 @@ export const PLAYER_ROPE_FEEDBACK_KEY = Object.freeze({
     motionSample: (tick) => `motion:${tick}`,
     frameSample: (position, velocity, player) =>
         `frame:${position.x}:${position.y}:${velocity.x}:${velocity.y}:${player.rope?.isAttached}:${player.launcher?.shot?.elapsed ?? "-"}`,
-    activeAction: (playerId, activationId) => `player-action:${playerId}:${activationId}`,
-    actionSequence: (playerId, sequence) => `${playerId}:${sequence}`,
     transition: (playerId, sequence) => `${playerId}:${sequence}`,
     transitionEffect: (transitionId, effect) => `${transitionId}:${effect}`,
     acceleration: (transitionId, sampleId) => `${transitionId}:${TRANSITION_EFFECT.ACCELERATION}:${sampleId}`,
@@ -83,7 +77,6 @@ export const PLAYER_ROPE_FEEDBACK = Object.freeze({
         presetId: CLIENT_FEEDBACK_PRESET_ID.PLAYER_IMPULSE,
         key: TRANSITION_EFFECT.RELEASE_IMPULSE
     }),
-    LINK: Object.freeze({ presetId: CLIENT_FEEDBACK_PRESET_ID.ROPE_LINK, key: TRANSITION_EFFECT.LINK }),
     SWING: Object.freeze({ presetId: CLIENT_FEEDBACK_PRESET_ID.PLAYER_IMPULSE, key: TRANSITION_EFFECT.SWING }),
     TENSION: Object.freeze({ presetId: CLIENT_FEEDBACK_PRESET_ID.ROPE_TENSION }),
     TENSION_ELECTRIC: Object.freeze({ presetId: CLIENT_FEEDBACK_PRESET_ID.ROPE_TENSION_ELECTRIC }),
@@ -109,13 +102,10 @@ const FEEDBACK_ORDER = Object.freeze({
     ROPE_ATTACH: 30,
     ROPE_DISSIPATE: 40,
     ROPE_RELEASE: 50,
-    ROPE_LINK: 60,
-    PLAYER_SWING: 70,
-    ROPE_TENSION: 80,
-    PLAYER_MOTION: 90,
-    PLAYER_ACCELERATION: 100,
-    PLAYER_ACTIVE_ACTION: 110,
-    PLAYER_REMOTE_ACTION: 120
+    PLAYER_SWING: 60,
+    ROPE_TENSION: 70,
+    PLAYER_MOTION: 80,
+    PLAYER_ACCELERATION: 90
 });
 
 function directionTo(from, to) {
@@ -339,19 +329,6 @@ export const ROPE_FEEDBACK_RULE = Object.freeze({
             });
         }
     }),
-    LINK: new PlayerRopeRuleDefinition({
-        order: FEEDBACK_ORDER.ROPE_LINK,
-        predicate: (frame, context) =>
-            releasePredicate(frame, context) &&
-            hasAugment(frame.player, PLAYER_ROPE_AUGMENT_ID.ROPE_LINK) &&
-            (frame.player.actionState?.ropeLinkWindowRemaining ?? PLAYER_ROPE_FEEDBACK_CONFIG.ACTIVE_WINDOW_THRESHOLD) >
-                PLAYER_ROPE_FEEDBACK_CONFIG.ACTIVE_WINDOW_THRESHOLD,
-        present: (frame, context) =>
-            appendTransitionParticle(frame, context, PLAYER_ROPE_FEEDBACK.LINK, {
-                position: frame.player.position,
-                direction: frame.previous.shot?.direction ?? frame.velocity
-            })
-    }),
     TENSION: new PlayerRopeRuleDefinition({
         order: FEEDBACK_ORDER.ROPE_TENSION,
         predicate: (frame) =>
@@ -423,38 +400,6 @@ export const PLAYER_FEEDBACK_RULE = Object.freeze({
                 position: frame.player.position,
                 direction: acceleration(frame),
                 identity: PLAYER_ROPE_FEEDBACK_KEY.acceleration(transitionId(frame), frame.current.sampleId)
-            })
-    }),
-    ACTIVE_ACTION: new PlayerRopeRuleDefinition({
-        order: FEEDBACK_ORDER.PLAYER_ACTIVE_ACTION,
-        predicate: (frame) => Boolean(frame.player.actionState?.activeAction),
-        present: (frame, context) => {
-            const action = frame.player.actionState.activeAction;
-            context.emit(
-                PLAYER_ROPE_FEEDBACK_KEY.activeAction(frame.player.id, action.activationId),
-                context.actionParticlePreset(action.baseActionId),
-                frame.player.position,
-                action.direction ?? directionTo(frame.player.position, frame.player.control?.aimWorld)
-            );
-        }
-    }),
-    REMOTE_ACTION: new PlayerRopeRuleDefinition({
-        order: FEEDBACK_ORDER.PLAYER_REMOTE_ACTION,
-        predicate: (frame, context) =>
-            Boolean(
-                frame.actionSequence &&
-                frame.actionSequence.previous !== undefined &&
-                frame.actionSequence.previous < frame.actionSequence.sequence &&
-                frame.player.id !== context.viewerId
-            ),
-        present: (frame, context) =>
-            context.appendParticle({
-                presetId: context.actionParticlePreset(frame.player.actionState?.loadout?.baseActionId),
-                position: frame.player.position,
-                direction: frame.player.control?.aimWorld
-                    ? directionTo(frame.player.position, frame.player.control.aimWorld)
-                    : null,
-                identity: PLAYER_ROPE_FEEDBACK_KEY.actionSequence(frame.player.id, frame.actionSequence.sequence)
             })
     })
 });

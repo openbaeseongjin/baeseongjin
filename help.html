@@ -665,7 +665,7 @@
                                 </div>
                                 <div class="control-row">
                                     <dt>마우스 오른쪽</dt>
-                                    <dd>조준 위치 방향으로 액션 사용</dd>
+                                    <dd>마법 입력 시작 · 이어서 좌/우 클릭 두 번</dd>
                                 </div>
                             </dl>
                         </article>
@@ -694,8 +694,8 @@
                                     <dd>로프를 해제하고 현재 속도로 비행</dd>
                                 </div>
                                 <div class="control-row">
-                                    <dt>액션 조준</dt>
-                                    <dd>토글 후 월드를 눌러 액션 사용</dd>
+                                    <dt>마법</dt>
+                                    <dd>1차 버전은 PC 좌·우 클릭 입력만 지원</dd>
                                 </div>
                             </dl>
                         </article>
@@ -896,52 +896,55 @@
                     data-slide="augment"
                     role="group"
                     aria-roledescription="도움말 카드"
-                    aria-label="6 / 7 · 액션과 증강"
+                    aria-label="6 / 7 · 마법과 증강"
                     hidden
                 >
                     <div class="slide-heading">
                         <div>
-                            <p class="eyebrow">06 · 액션과 증강</p>
-                            <h2>기본 액션(펀치)과 증강</h2>
+                            <p class="eyebrow">06 · 마법과 증강</p>
+                            <h2>네 가지 커맨드 마법과 증강</h2>
                         </div>
                         <p class="slide-summary">
-                            기본 액션은 증강에 따라 새로운 액션으로 교체하거나 효과를 강화할 수 있습니다.
+                            우클릭으로 시작해 좌·우 클릭 두 번을 이어 입력합니다. 각 슬롯의 쿨다운은 하단에서
+                            확인합니다.
                         </p>
                     </div>
                     <div class="controls">
                         <article class="control-card">
-                            <span class="tag">액션</span>
-                            <h3>조준한 방향으로 즉시 사용</h3>
+                            <span class="tag">마법</span>
+                            <h3>우좌좌 · 우좌우 · 우우좌 · 우우우</h3>
                             <dl class="control-list">
                                 <div class="control-row">
-                                    <dt>PC</dt>
-                                    <dd>마우스 오른쪽 버튼으로 기본 액션(펀치) 사용</dd>
+                                    <dt>우좌좌</dt>
+                                    <dd>짧은 사거리 에너지 공</dd>
                                 </div>
                                 <div class="control-row">
-                                    <dt>모바일</dt>
-                                    <dd>액션 조준으로 전환한 뒤 월드를 눌러 사용</dd>
+                                    <dt>우우우</dt>
+                                    <dd>조준 방향 물리 대시</dd>
                                 </div>
                                 <div class="control-row">
-                                    <dt>방향</dt>
-                                    <dd>마우스 또는 터치로 지정한 위치를 향해 실행</dd>
+                                    <dt>잠긴 슬롯</dt>
+                                    <dd>레벨업 증강으로 메테오와 기동 증폭 해금</dd>
                                 </div>
                             </dl>
                         </article>
                         <article class="control-card">
                             <span class="tag amber">증강</span>
-                            <h3>강화 장비에서 3장 중 1장 선택</h3>
+                            <h3>몹 처치 경험치로 레벨업</h3>
                             <ol class="combat-rules">
                                 <li><strong>로프 강화</strong>발사·사거리·회수·해제·충돌 효과를 바꿉니다.</li>
-                                <li><strong>액션 교체</strong>기본 펀치를 이동·방어·원거리 액션으로 교체합니다.</li>
-                                <li><strong>액션 강화</strong>선택한 액션에 추가 효과와 연계 방식을 더합니다.</li>
+                                <li><strong>마법 교체</strong>획득한 마법은 정해진 슬롯에 즉시 자동 장착됩니다.</li>
+                                <li>
+                                    <strong>막타 경험치</strong>협동에서는 몹을 제거한 플레이어가 경험치를 얻습니다.
+                                </li>
                             </ol>
                         </article>
                     </div>
                     <div class="flow-strip">
-                        <div>우클릭 / 액션 조준</div>
-                        <div>기본 펀치</div>
-                        <div>증강 선택</div>
-                        <div>교체 · 강화</div>
+                        <div>우클릭 시작</div>
+                        <div>좌·우 입력 2회</div>
+                        <div>마법 시전</div>
+                        <div>독립 쿨다운</div>
                     </div>
                 </section>
 
@@ -1006,7 +1009,7 @@
                     <button class="deck-dot" type="button" data-deck-slide="controls" aria-label="3. 조작키">3</button>
                     <button class="deck-dot" type="button" data-deck-slide="rope" aria-label="4. 로프 이동">4</button>
                     <button class="deck-dot" type="button" data-deck-slide="combat" aria-label="5. 전투">5</button>
-                    <button class="deck-dot" type="button" data-deck-slide="augment" aria-label="6. 액션과 증강">
+                    <button class="deck-dot" type="button" data-deck-slide="augment" aria-label="6. 마법과 증강">
                         6
                     </button>
                     <button class="deck-dot" type="button" data-deck-slide="growth" aria-label="7. 저장과 협동">

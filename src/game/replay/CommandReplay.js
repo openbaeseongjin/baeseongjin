@@ -4,7 +4,7 @@ function cloneCommand(command) {
         vertical: command.vertical,
         interact: Boolean(command.interact),
         interactSequence: Number.isSafeInteger(command.interactSequence) ? command.interactSequence : 0,
-        action: Boolean(command.action),
+        spellCommand: Object.freeze({ ...(command.spellCommand ?? { commandSequence: 0, commandKey: null }) }),
         pointer: Object.freeze({ ...command.pointer }),
         viewport: Object.freeze({ ...command.viewport }),
         aimWorld: Object.freeze({ ...command.aimWorld })
@@ -46,7 +46,6 @@ export function createDeterminismDigest(state) {
             ? { respawnAnchorId: state.activeRespawnAnchor?.id ?? null }
             : { activeCheckpointId: state.activeCheckpoint?.id ?? null }),
         worldProgress: state.worldProgress,
-        foundationAugment: state.foundationAugment,
         selectedAugmentIds: Object.freeze([...(state.selectedAugmentIds ?? [])]),
         augmentRuntimeState: Object.freeze({ ...state.augmentRuntimeState }),
         enemies: Object.freeze(

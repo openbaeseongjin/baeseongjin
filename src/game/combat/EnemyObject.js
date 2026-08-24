@@ -19,6 +19,7 @@ import {
 import { withEnemyPhysicsSimulation, withEnemyWeaponSimulation } from "./enemy-weapon/EnemyWeaponSimulation.js";
 import { directionFromEnemyToTarget, visibleEnemyTargets } from "./enemy-weapon/EnemyWeaponTargeting.js";
 import { EnemyActivationState } from "./EnemyActivationState.js";
+import { CombatStatusEffectPool } from "../status-effects/CombatStatusEffectPool.js";
 
 function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false } = {}) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -111,6 +112,7 @@ class EnemyBodyObject extends withSurfacePhysics(
         collider = null,
         health,
         maxHealth,
+        experienceReward,
         fireCooldown,
         attackState = ENEMY_ATTACK_STATE.IDLE,
         attackStateRemaining = ENEMY_WEAPON_CONFIG.ZERO,
@@ -120,7 +122,8 @@ class EnemyBodyObject extends withSurfacePhysics(
         weaponRange = null,
         impactDisplacementEnabled = null,
         knockbackState = null,
-        velocity = null
+        velocity = null,
+        statusEffects = new CombatStatusEffectPool()
     }) {
         super({ id });
         const resolvedCollider = createCollider(collider, { fallbackRadius: radius });
@@ -155,6 +158,9 @@ class EnemyBodyObject extends withSurfacePhysics(
                 : colliderSnapshotBoundingRadius(resolvedCollider.snapshot());
         this.health = health;
         this.maxHealth = maxHealth;
+        this.experienceReward = assertFinite(experienceReward, "experienceReward", { minimum: 0 });
+        this.defeatedByPlayerId = null;
+        this.statusEffects = statusEffects;
         this.presentationAimDirection = presentationAimDirection
             ? Object.freeze({ x: presentationAimDirection.x, y: presentationAimDirection.y })
             : null;
@@ -181,6 +187,7 @@ class EnemyBodyObject extends withSurfacePhysics(
                 order: ENEMY_WEAPON_CONFIG.BEHAVIOR_ORDER,
                 apply: (context) => {
                     this.beginSurfacePhysicsStep();
+                    if (!this.statusEffects.canAct()) return Object.freeze([]);
                     return behavior.advance(this, context);
                 }
             });
@@ -274,6 +281,14 @@ class EnemyBodyObject extends withSurfacePhysics(
         this.lastActorCollisionIds = Object.freeze([]);
         this.health = assertFinite(state.health, "enemy.health", { minimum: 0 });
         this.maxHealth = assertFinite(state.maxHealth, "enemy.maxHealth", { minimum: 0, exclusiveMinimum: true });
+        this.experienceReward = assertFinite(
+            state.experienceReward ?? this.experienceReward,
+            "enemy.experienceReward",
+            {
+                minimum: 0
+            }
+        );
+        this.defeatedByPlayerId = null;
         const aimDirection = state.aimDirection
             ? {
                   x: assertFinite(state.aimDirection.x, "enemy.aimDirection.x"),
@@ -300,6 +315,7 @@ class EnemyBodyObject extends withSurfacePhysics(
               })
             : null;
         this.knockbackState = createKnockbackState(state.knockbackState);
+        this.statusEffects.restore(state.statusEffects ?? null);
         this.behavior?.restore(behaviorState);
         return true;
     }

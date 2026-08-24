@@ -2,7 +2,6 @@ export const WORLD_OBJECT_KIND = Object.freeze({
     GATE_PANEL: "gate-panel",
     GATE: "gate",
     ACCESS_TRANSIT_LOCK: "access-transit-lock",
-    AUGMENT_NODE: "augment-node",
     TERMINAL: "terminal",
     GRAPPLE_LANDMARK: "grapple-landmark",
     WIND_SOURCE: "wind-source",
@@ -58,17 +57,6 @@ class AccessTransitLockRenderer extends WorldObjectRendererDefinition {
         );
     }
 }
-class AugmentNodeRenderer extends WorldObjectRendererDefinition {
-    draw(a) {
-        center(a.context, a.bounds);
-        a.painter.drawAugmentNode(
-            a.context,
-            a.style,
-            a.bounds,
-            a.scene.player?.augmentRuntimeState?.consumedSourceIds?.includes(a.object.id) ?? false
-        );
-    }
-}
 class TerminalRenderer extends WorldObjectRendererDefinition {
     draw(a) {
         center(a.context, a.bounds);
@@ -101,8 +89,7 @@ class TestTargetRenderer extends WorldObjectRendererDefinition {
     draw(a) {
         center(a.context, a.bounds);
         a.painter.drawTestTarget(a.context, a.style, {
-            contactRegistered:
-                a.scene.eventFlash?.type === "foundation-shear-hit" && a.scene.eventFlash.targetId === a.object.id,
+            contactRegistered: false,
             age: a.scene.eventFlash?.age ?? 0
         });
     }
@@ -137,7 +124,6 @@ export const WORLD_OBJECT_RENDERER = Object.freeze({
     [WORLD_OBJECT_KIND.GATE_PANEL]: Object.freeze(new GatePanelRenderer()),
     [WORLD_OBJECT_KIND.GATE]: Object.freeze(new GateRenderer()),
     [WORLD_OBJECT_KIND.ACCESS_TRANSIT_LOCK]: Object.freeze(new AccessTransitLockRenderer()),
-    [WORLD_OBJECT_KIND.AUGMENT_NODE]: Object.freeze(new AugmentNodeRenderer()),
     [WORLD_OBJECT_KIND.TERMINAL]: Object.freeze(new TerminalRenderer()),
     [WORLD_OBJECT_KIND.GRAPPLE_LANDMARK]: Object.freeze(new GrappleLandmarkRenderer()),
     [WORLD_OBJECT_KIND.WIND_SOURCE]: Object.freeze(new WindSourceRenderer()),

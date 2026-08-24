@@ -26,7 +26,7 @@ import {
     PolygonRemotePlayerRenderer
 } from "./polygon/PolygonActorRenderers.js";
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
-import { ActorStatusRenderer, ElectrifiedStatusRenderer } from "./ActorStatusPresentation.js";
+import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
 
 export class PolygonSceneRenderer {
@@ -77,7 +77,6 @@ export class PolygonSceneRenderer {
                     new EventEffectRenderer(),
                     new AttachmentCandidateRenderer(),
                     new PolygonLocalPlayerRenderer(),
-                    new ElectrifiedStatusRenderer(),
                     new ActorStatusRenderer()
                 ])
             ]

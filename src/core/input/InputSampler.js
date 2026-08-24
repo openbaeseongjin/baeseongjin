@@ -1,4 +1,5 @@
 import { findMobileControl } from "./MobileControlLayout.js";
+import { PointerSpellCommandBuffer, POINTER_SPELL_TOKEN } from "./PointerSpellCommandBuffer.js";
 
 const movementKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS"]);
 export class InputSampler {
@@ -9,10 +10,8 @@ export class InputSampler {
         this.onRopeRelease = onRopeRelease;
         this.keys = new Set();
         this.pointer = { x: 0, y: 0, down: false };
-        this.actionDown = false;
+        this.pointerSpellCommands = new PointerSpellCommandBuffer();
         this.ropePointerId = null;
-        this.actionPointerId = null;
-        this.mobileAimMode = "rope";
         this.controlPointers = new Map();
         this.interactSequence = 0;
         this.touchActive = false;
@@ -35,11 +34,24 @@ export class InputSampler {
         };
         this.onPointerDown = (event) => {
             if (event.pointerType !== "touch") {
+                const nowSeconds = (event.timeStamp ?? globalThis.performance?.now?.() ?? 0) / 1000;
                 if (event.button === 2) {
                     event.preventDefault?.();
                     this.pointer.x = event.clientX ?? this.pointer.x;
                     this.pointer.y = event.clientY ?? this.pointer.y;
-                    this.actionDown = true;
+                    if (this.pointer.down) {
+                        this.pointer.down = false;
+                        this.notifyRopeRelease("spell-command-start");
+                    }
+                    this.pointerSpellCommands.input(POINTER_SPELL_TOKEN.RIGHT, nowSeconds);
+                    return;
+                }
+                const spellInput = this.pointerSpellCommands.input(POINTER_SPELL_TOKEN.LEFT, nowSeconds);
+                if (spellInput.consumed) {
+                    event.preventDefault?.();
+                    this.pointer.x = event.clientX ?? this.pointer.x;
+                    this.pointer.y = event.clientY ?? this.pointer.y;
+                    this.pointer.down = false;
                     return;
                 }
                 this.pointer = { x: event.clientX ?? this.pointer.x, y: event.clientY ?? this.pointer.y, down: true };
@@ -51,22 +63,8 @@ export class InputSampler {
             const control = findMobileControl(point.x, point.y, this.viewportWidth(), this.viewportHeight());
             if (control) {
                 this.surface?.setPointerCapture?.(event.pointerId);
-                if (control === "action") {
-                    if (this.ropePointerId === null && this.actionPointerId === null) {
-                        this.mobileAimMode = this.mobileAimMode === "rope" ? "action" : "rope";
-                    }
-                    this.controlPointers.set(event.pointerId, "action-toggle");
-                } else {
-                    this.controlPointers.set(event.pointerId, control);
-                    if (control === "jump") this.interactSequence += 1;
-                }
-                return;
-            }
-            if (this.mobileAimMode === "action" && this.actionPointerId === null) {
-                this.surface?.setPointerCapture?.(event.pointerId);
-                this.actionPointerId = event.pointerId;
-                this.pointer = { x: event.clientX, y: event.clientY, down: false };
-                this.actionDown = true;
+                this.controlPointers.set(event.pointerId, control);
+                if (control === "jump") this.interactSequence += 1;
                 return;
             }
             if (this.ropePointerId === null) {
@@ -77,7 +75,6 @@ export class InputSampler {
         };
         this.onPointerUp = (event) => {
             if (event.pointerType !== "touch" && event.button === 2) {
-                this.actionDown = false;
                 return;
             }
             this.releasePointer(event.pointerId, event.pointerType, "pointerup");
@@ -85,7 +82,6 @@ export class InputSampler {
         this.onPointerCancel = (event) => this.releasePointer(event.pointerId, event.pointerType, "pointercancel");
         this.onPointerLeave = (event) => {
             if (event.pointerType !== "touch" && event.relatedTarget === null) {
-                this.actionDown = false;
                 this.releasePointer(event.pointerId, event.pointerType, "pointer-leave");
             }
         };
@@ -110,7 +106,7 @@ export class InputSampler {
     }
 
     updateTouchPointer(event) {
-        if (this.ropePointerId === event.pointerId || this.actionPointerId === event.pointerId) {
+        if (this.ropePointerId === event.pointerId) {
             this.pointer.x = event.clientX;
             this.pointer.y = event.clientY;
         }
@@ -124,11 +120,6 @@ export class InputSampler {
             return;
         }
         if (this.controlPointers.delete(pointerId)) return;
-        if (this.actionPointerId === pointerId) {
-            this.actionPointerId = null;
-            this.actionDown = false;
-            return;
-        }
         if (this.ropePointerId === pointerId) {
             this.ropePointerId = null;
             this.pointer.down = false;
@@ -140,10 +131,9 @@ export class InputSampler {
         const releasedRope = this.pointer.down || this.ropePointerId !== null;
         this.keys.clear();
         this.ropePointerId = null;
-        this.actionPointerId = null;
         this.controlPointers.clear();
-        this.actionDown = false;
         this.pointer.down = false;
+        this.pointerSpellCommands.cancel();
         if (releasedRope && reason) this.notifyRopeRelease(reason);
     }
 
@@ -183,6 +173,8 @@ export class InputSampler {
     }
 
     snapshot() {
+        const nowSeconds = (globalThis.performance?.now?.() ?? 0) / 1000;
+        const spellCommand = this.pointerSpellCommands.snapshot(nowSeconds);
         const keyboardHorizontal =
             Number(this.keys.has("ArrowRight") || this.keys.has("KeyD")) -
             Number(this.keys.has("ArrowLeft") || this.keys.has("KeyA"));
@@ -195,19 +187,16 @@ export class InputSampler {
         const mobileControls = Object.freeze({
             visible: this.touchActive,
             ropePointerDown: this.ropePointerId !== null,
-            actionPointerDown: this.actionPointerId !== null,
-            aimMode: this.mobileAimMode,
             left: mobileLeft,
             right: mobileRight,
-            jump: mobileJump,
-            action: this.mobileAimMode === "action"
+            jump: mobileJump
         });
         return Object.freeze({
             horizontal: Math.max(-1, Math.min(1, keyboardHorizontal + Number(mobileRight) - Number(mobileLeft))),
             vertical: Math.max(-1, Math.min(1, keyboardVertical - Number(mobileJump))),
             interact: keyboardVertical < 0 || mobileJump,
             interactSequence: this.interactSequence,
-            action: this.actionDown,
+            spellCommand,
             pointer: Object.freeze({ ...this.pointer }),
             viewport: Object.freeze({ width: this.viewportWidth(), height: this.viewportHeight() }),
             mobileControls

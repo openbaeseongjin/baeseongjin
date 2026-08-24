@@ -40,7 +40,7 @@ export function buildAuthoritySnapshot({
                       progressKind: "area",
                       activeCheckpointId: simulation.activeCheckpoint?.id ?? null
                   }),
-            foundationRewards: Object.fromEntries(simulation.foundationRewards),
+            augmentRewards: Object.fromEntries(simulation.augmentRewards),
             runState: simulation.runState,
             metrics: simulation.metrics.snapshot(),
             worldProgress: simulation.worldProgress?.snapshot() ?? null,

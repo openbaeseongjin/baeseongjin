@@ -12,7 +12,7 @@
 
 0.45.0 gameplay package의 `direction-*` cue 일곱 개는 1-1/1-2 Direction Runtime의 relay, rope/air, cable/brake, free-air attach와 security 전환 adapter를 검증하는 procedural mock이다. 기획 action token은 `DirectionDefinition` authoring adapter가 cue ID로 변환하며 gameplay trigger를 manifest에 넣지 않는다.
 
-현재 gameplay package의 `gameplay-action-swing`은 Action 시작 연결을 검증하기 위해 기존 짧은 mock 변형을 재사용한다. 이는 정식 주먹·Action 음색이 아니며, 후속 오디오 작업자는 stable cue ID를 유지한 채 전용 48 kHz master와 runtime source로 교체한다.
+현재 gameplay package의 `gameplay-spell-cast`는 마법 시전 연결을 검증하기 위해 기존 짧은 mock 변형을 재사용한다. 이는 정식 마법 음색이 아니며, 후속 오디오 작업자는 stable cue ID를 유지한 채 전용 48 kHz master와 runtime source로 교체한다.
 
 Boss06은 기존 procedural clip을 재사용한 Boss telegraph·attack·break·completion mock cue를 사용한다. 이는 상태 구분 검증용이며 최종 음원은 stable cue ID를 유지한 채 교체한다.
 

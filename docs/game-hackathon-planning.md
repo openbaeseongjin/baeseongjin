@@ -31,7 +31,7 @@
 - 기본 공격도 자동 사격이 아니라 로프 이동의 속도·충돌 진입을 사용해, 이동 숙련이 전투 성과로 직접 이어지게 한다.
 - 정상 짧은 낙하는 허용하되 큰 추락 착지에는 체력 위험을 두어 고도 관리와 안전한 Recovery 선택에 의미를 준다.
 
-초기 안내는 시작 화면과 설정에서 여는 통합 `help.html`이 소유한다. Help는 기존 Scenario Map Preview의 카드·SVG 시각 문법으로 세계관·게임 목표·기본 진행·PC/모바일 조작키·로프 이동·전투·액션과 증강·저장·협동을 한 화면 한 주제의 7장 카드로 설명하고, 이전·다음·번호·좌우 방향키로 이동한다. 액션 카드는 우클릭 기본 펀치와 모바일 액션 조준, 증강에 따른 액션 교체·강화를 설명한다. 플레이어용 문구는 가능한 한 한글을 우선하고 실제 Stage 좌표나 조정 중인 수치를 복제하지 않는다. 시작 화면은 최초 실행 상태를 저장하지 않고 `처음 플레이하시나요?` 안내와 Help 링크를 항상 제공한다. 게임 중 설정의 도움말은 같은 `help.html?embedded=1`을 별도 모달 안에 표시하고 닫으면 설정으로 초점을 돌려준다. Help는 gameplay authority·Objective·멀티플레이 동기화에 관여하지 않는다. 멀티 서버가 꺼진 상태는 시작 화면 공용 상태를 오류로 바꾸지 않고 멀티 플레이 버튼의 hover·focus 도움말로만 사유를 알린다.
+초기 안내는 시작 화면과 설정에서 여는 통합 `help.html`이 소유한다. Help는 PC 좌·우 클릭 Spell 커맨드, 하단 네 슬롯 쿨다운, 몹 처치 경험치와 자동 장착 Augment를 현재 Runtime과 동일하게 설명한다. 모바일 1차는 이동·점프·Rope만 안내한다. 시작 화면은 `처음 플레이하시나요?` 안내와 Help 링크를 항상 제공하고 게임 중에는 같은 `help.html?embedded=1`을 연다.
 
 ## 4. 확정된 장르 구조
 
@@ -137,8 +137,8 @@
 - 정기 회의: 매일 22:00~23:00, Discord
 - `SECTOR 01`~`06`의 상세 Stage 문서는 48/48 작성됐다. 문서 작성과 Runtime 연결은 별도 상태이며, 현재 연결 수·차단 요소·마지막 확인 근거는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 - 메인 개발은 문서 수를 완료 수치로 사용하지 않고 섹터 순서대로 mock Runtime을 연결한다. 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름·오브젝트 요구·전환 계약과 실제 검증이 모두 필요하다.
-- 증강 v1 기획과 topology-independent Runtime은 0.26.0에 완료됐고 0.28.0에서 현재 Runtime Sector 01~~03의 명시적 장비 Node를 `1-4 → 2-3 → 3-5` 순서의 Player별 획득원으로 연결한다. Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer와 Player별 최대 6장을 사용한다. Sector 04~~06 획득 Node, Quest·순수 이동 카드·Specialization은 별도 확장이다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
-- 0.31.0 모바일 조작은 우측 토글로 Rope Aim과 Action Aim을 분리한다. Action Aim의 월드 터치는 실제 접촉 위치로 방향을 정하고 Rope를 발사하지 않으며, 유효 Action 시작은 적 명중 여부와 별개로 잔상·mock SFX를 먼저 제공한다.
+- 0.67.0은 authored 장비 Node를 제거하고 몹 막타 경험치·자동 계산 레벨업·Player별 Augment 선택으로 전환한다. Catalog는 Rope 패시브 6장과 메테오·기동 증폭을 소유하며 시작 마법은 에너지 공과 물리 대시다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
+- 0.67.0의 마법 입력은 PC 우클릭 시작 뒤 좌·우 클릭 두 번이며 모바일 마법 입력은 1차 범위에서 제외한다.
 - NPC는 온라인 예선 핵심 범위에서 제외한다. 코어 완료 뒤 여유가 있을 때만 2-6의 선택지 없는 3줄 stationary NPC를 검토한다.
 - Ending은 Final Security 처치 뒤 개별 Boarding, 전원 준비, Door Close, City Pullback, Run Complete 순서로 확정됐으며 상세 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)가 소유한다.
 - 그래픽·오디오 담당자는 메인 개발자가 맵별로 정리한 오브젝트·cue 목록을 받아 8월 19일에 정식 리소스 1차 생산분을 인계한다. 1차 생산분은 전체 자산 완료가 아니라 앞서 정리된 우선 오브젝트의 교체 가능한 첫 묶음이다.
@@ -170,7 +170,7 @@
 3. 고정 반경, 접선 드래그 충격, 중력 진자 운동, 해제 관성
 4. 시드 기반 간단한 대형 맵으로 로프 코어를 검증하고, 이후 하나의 연속 월드 안에 저작된 진행 영역을 조립
 5. 단순한 적 1종
-6. Foundation Augment 3종
+6. 몹 처치 경험치와 교체형 마법·Rope 증강
 7. 최근 도달 Stage checkpoint 복귀와 빠른 재개
 
 ### 제외
@@ -219,7 +219,7 @@
 
 - [x] 장르 중심: 로그라이크
 - [x] 로프 역할: 전투 중 필수 이동·생존 수단
-- [x] 핵심 성장 축: 로프 숙련 + Foundation Augment
+- [x] 핵심 성장 축: 로프 숙련 + 몹 처치 경험치 기반 Spell·Rope Augment
 - [x] 그래픽 방향: 혼합 도트 `sprite` 기본, Canvas 플랫 도형 fallback
 - [x] 첫 프로토타입 포함·제외 범위
 - [x] 로프 물리의 초기 수치
@@ -233,7 +233,7 @@
 - [x] Sector 03·06 끝의 Boss 두 개
 - [ ] Timer/Purge의 재접속과 최종 UI/오디오 cue
 - [x] 3-8→4-1, 6-8→Boss06→Boarding
-- [x] 증강 v1 22장과 Player별 결정적 3장 offer·최대 6장 loadout
+- [x] 현행 Augment 8장: Rope 패시브 6장, 메테오·기동 증폭과 카탈로그 파생 레벨 상한
 - [x] 적 행동과 공격 방식: 플레이어를 향한 투사체, 로프 절단 우선 판정, 본체 피해. 위치 넉백은 직접 플레이어를 추격·돌진하는 적만 받고 고정·고정경로 적은 authored 위치를 유지한다.
 - [x] 적 roster 기본형: 기존 `경계 포탑`·`순찰 드론`, 경계 포탑 확장형 `절단 포탑`, 신규 `추격 드론`·`방패 드론`·`포격 드론`·`지원 드론`·`군집 드론`
 - [x] 적 분류·구현 순서: 행동 요소별 대표 기본형 하나를 먼저 단독 안정화하고 같은 계열 확장형과 복합 조합은 그 뒤에 추가
@@ -243,7 +243,7 @@
 - [x] #623 canonical `SectorDefinition`·encounter validator·build/startup-only preview adapter를 enemy selector에 연결하고 preview corpus 전체에서 areaId 없는 결정 선택 검증
 - [x] City Phase 3 wide Runtime에서 canonical encounter를 shipped world enemy spawn으로 사용하고 legacy Patrol route·Cutter rules를 새 schema에 보존
 - [x] 검증 정책: 안정적인 코드 계약만 자동화하고 roster 목록·가중치·수치·배치·색은 고정하지 않으며 브라우저 검증 제외
-- [x] Foundation 선택 중에도 월드 시간과 협동 위험은 계속 흐르고 선택 입력만 플레이어 조작과 분리
+- [x] 경험치 Augment 선택 중에도 월드 시간과 협동 위험은 계속 흐르고 선택 Player 입력만 분리
 
 ## 13. 아직 열려 있는 질문
 
@@ -253,6 +253,6 @@
 - 최소 관전 HUD와 타이머·붕괴 경고의 최종 그래픽·오디오 cue는 무엇인가?
 - `SECTOR 06` 보스 이후 최종 런 종료를 어떤 장면으로 표현할 것인가?
 - 로프 자체도 적에게 피해나 상태 이상을 주는가?
-- 첫 Foundation Augment 3종은 어떤 빌드 차이를 보여줘야 하는가?
+- 각 역할 슬롯의 후속 교체 마법은 어떤 빌드 차이를 보여줘야 하는가?
 - 절차 생성 결과의 통과 가능성을 어떤 규칙이나 자동 검사로 보장할 것인가?
 - 3명의 작업을 병렬화하기 위해 가장 먼저 고정해야 할 인터페이스는 무엇인가?

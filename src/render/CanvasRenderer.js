@@ -1,5 +1,5 @@
 import { getMobileControlLayout } from "../core/input/MobileControlLayout.js";
-import { foundationAugmentById } from "../game/augments/FoundationAugmentCatalog.js";
+import { augmentById } from "../game/augments/AugmentCatalog.js";
 import { authoredRegionForPosition } from "../game/world/AuthoredLandmarkResolver.js";
 import {
     DEFAULT_CANVAS_PERFORMANCE_POLICY,
@@ -9,7 +9,10 @@ import {
 } from "./RenderPerformanceMetrics.js";
 import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewport.js";
 import { assertSceneRenderer } from "./SceneRenderer.js";
-import { ACTOR_STATUS_COLORS, resolveActionCooldownStatus, resolveHealthStatus } from "./ActorStatusPresentation.js";
+import { ACTOR_STATUS_COLORS, resolveHealthStatus } from "./ActorStatusPresentation.js";
+import { spellDefinition } from "../game/spells/SpellCatalog.js";
+import { SPELL_COMMAND_LABEL, SPELL_SLOT_ORDER } from "../game/spells/SpellDefinition.js";
+import { POINTER_SPELL_TOKEN } from "../core/input/PointerSpellCommandBuffer.js";
 import { layoutAccessEdgeGuides, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
 import { ROPE_IMPACT_EVENT_TYPE, ROPE_IMPACT_REJECTION_REASON } from "../game/combat/RopeImpactAttack.js";
@@ -18,7 +21,7 @@ const BOSS_HUD_BLOCKING_STATUS = Object.freeze({
     "checkpoint-respawn": true,
     "sector-respawn": true,
     "stage-saved": true,
-    "foundation-selected": true
+    "augment-selected": true
 });
 
 const ROPE_IMPACT_REJECTION_STATUS = Object.freeze({
@@ -48,9 +51,7 @@ function bossHudBlocked(scene) {
     const statusVisible =
         BOSS_HUD_BLOCKING_STATUS[scene.eventFlash?.type] === true &&
         (scene.eventFlash?.age ?? CLIENT_STATUS_FEEDBACK_SECONDS) < CLIENT_STATUS_FEEDBACK_SECONDS;
-    return Boolean(
-        scene.foundationReward || scene.storyPresentation || scene.runState === "completed" || statusVisible
-    );
+    return Boolean(scene.augmentReward || scene.storyPresentation || scene.runState === "completed" || statusVisible);
 }
 
 export class CanvasRenderer {
@@ -137,13 +138,12 @@ export class CanvasRenderer {
             if (!bossHudBlocked(scene)) this.drawBossHud(scene.bossStagePresentation?.hud, scene);
             this.drawAccessGuide(scene);
             this.drawLocalStatusHud(scene);
-            this.drawCalibrationHud(scene.calibrationPresentation?.hud, scene);
+            this.drawSpellHotbar(scene);
             this.drawAccessHud(scene);
         }
-        this.drawRewardSelectionOverlay(scene.foundationReward);
+        this.drawRewardSelectionOverlay(scene.augmentReward);
         this.drawMobileControls(scene.mobileControls);
         this.drawStoryPresentation(scene.storyPresentation);
-        this.drawCalibrationToast(scene.calibrationPresentation?.toast);
         this.drawPlayerMessagePresentation(scene.playerMessagePresentation, scene);
         this.drawStatusFeedback(scene.eventFlash);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
@@ -314,7 +314,7 @@ export class CanvasRenderer {
             ctx.strokeRect(x, startY, cardWidth, cardHeight);
             ctx.fillStyle = selected ? "#fde68a" : "#e2e8f0";
             ctx.font = `900 ${cardWidth < 150 ? 11 : 16}px system-ui, sans-serif`;
-            this.drawFoundationChoiceIcon(choice.id, x + cardWidth * 0.5, startY + 48, selected);
+            this.drawAugmentChoiceIcon(choice.id, x + cardWidth * 0.5, startY + 48, selected);
             ctx.fillText(choice.name, x + cardWidth * 0.5, startY + 92);
             ctx.fillStyle = selected ? "#67e8f9" : "#94a3b8";
             ctx.font = `900 ${cardWidth < 150 ? 8 : 11}px ui-monospace, monospace`;
@@ -414,15 +414,15 @@ export class CanvasRenderer {
         lines.forEach((value, index) => ctx.fillText(value, x, y + index * lineHeight));
     }
 
-    drawFoundationChoiceIcon(id, x, y, selected) {
+    drawAugmentChoiceIcon(id, x, y, selected) {
         const ctx = this.context;
         ctx.save();
         ctx.translate(x, y);
         ctx.strokeStyle = selected ? "#67e8f9" : "#94a3b8";
         ctx.fillStyle = selected ? "rgba(103, 232, 249, 0.22)" : "rgba(148, 163, 184, 0.14)";
         ctx.lineWidth = 3;
-        const augment = foundationAugmentById(id);
-        if (augment?.category === "action") {
+        const augment = augmentById(id);
+        if (augment?.category === "spell") {
             ctx.strokeRect(-18, -12, 22, 24);
             ctx.beginPath();
             ctx.moveTo(-13, -7);
@@ -456,7 +456,6 @@ export class CanvasRenderer {
         player,
         playerHealth,
         playerMaxHealth,
-        actionState,
         selectedAugmentIds = [],
         mobileView = false,
         bossStagePresentation = null
@@ -466,21 +465,18 @@ export class CanvasRenderer {
         const width = compactView ? Math.min(240, this.cssWidth - 36) : 360;
         const x = 18;
         const y = compactView && bossStagePresentation?.hud ? 94 : 54;
-        const height = compactView ? 92 : 112;
+        const height = compactView ? 66 : 82;
         const innerWidth = width - 28;
         const stageY = y + (compactView ? 16 : 19);
         const healthLabelY = y + (compactView ? 31 : 38);
         const healthBarY = y + (compactView ? 35 : 43);
-        const actionLabelY = y + (compactView ? 53 : 67);
-        const actionBarY = y + (compactView ? 57 : 72);
-        const augmentY = y + (compactView ? 83 : 101);
+        const augmentY = y + (compactView ? 57 : 71);
         const barHeight = compactView ? 7 : 9;
         const health = resolveHealthStatus(playerHealth, playerMaxHealth);
-        const action = resolveActionCooldownStatus(actionState);
         const region = authoredRegionForPosition(world, player?.position);
         const stage = bossStagePresentation?.stageId ?? region?.stageId ?? region?.areaId ?? region?.id ?? "-";
         const augmentNames = selectedAugmentIds
-            .map((id) => foundationAugmentById(id)?.name)
+            .map((id) => augmentById(id)?.name)
             .filter(Boolean)
             .join(" · ");
 
@@ -506,16 +502,6 @@ export class CanvasRenderer {
         ctx.fillStyle = health.ratio > 0.35 ? ACTOR_STATUS_COLORS.healthSafe : ACTOR_STATUS_COLORS.healthDanger;
         ctx.fillRect(x + 14, healthBarY, innerWidth * health.ratio, barHeight);
 
-        ctx.fillStyle = "#f8fafc";
-        ctx.fillText("ACTION", x + 14, actionLabelY);
-        ctx.textAlign = "right";
-        ctx.fillText(`${action.charges}/${action.maximum}`, x + width - 14, actionLabelY);
-        ctx.textAlign = "left";
-        ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
-        ctx.fillRect(x + 14, actionBarY, innerWidth, barHeight);
-        ctx.fillStyle = ACTOR_STATUS_COLORS.actionReady;
-        ctx.fillRect(x + 14, actionBarY, innerWidth * action.ratio, barHeight);
-
         ctx.fillStyle = "#cbd5e1";
         ctx.font = `700 ${compactView ? 8 : 9}px system-ui, sans-serif`;
         const augmentText = augmentNames || "없음";
@@ -523,58 +509,77 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawCalibrationHud(presentation, { mobileView = false, bossStagePresentation = null } = {}) {
-        if (!presentation) return;
+    drawSpellHotbar(scene) {
+        const spellState =
+            scene.augmentRuntimeState?.combat?.spellState ?? scene.player?.augmentRuntimeState?.combat?.spellState;
+        if (!spellState) return;
+        const experience =
+            scene.experience ??
+            scene.augmentRuntimeState?.experience ??
+            scene.player?.augmentRuntimeState?.experience ??
+            null;
         const ctx = this.context;
-        const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
-        const width = compactView ? Math.min(240, this.cssWidth - 36) : 360;
-        const x = 18;
-        const y = compactView ? (bossStagePresentation?.hud ? 196 : 154) : 174;
-        const height = compactView ? 44 : 50;
-        const status = presentation.verified ? "검증 완료" : "대기 중";
-
+        const cellSize = 58;
+        const gap = 8;
+        const totalWidth = cellSize * SPELL_SLOT_ORDER.length + gap * (SPELL_SLOT_ORDER.length - 1);
+        const startX = (this.cssWidth - totalWidth) * 0.5;
+        const y = this.cssHeight - cellSize - 26;
         ctx.save();
-        ctx.fillStyle = "rgba(8, 22, 32, 0.92)";
-        ctx.fillRect(x, y, width, height);
-        ctx.strokeStyle = presentation.verified ? "rgba(52, 211, 153, 0.82)" : "rgba(103, 232, 249, 0.72)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, width, height);
+        for (const [index, slotId] of SPELL_SLOT_ORDER.entries()) {
+            const x = startX + index * (cellSize + gap);
+            const spellId = spellState.slots?.[slotId] ?? null;
+            const definition = spellDefinition(spellId);
+            const remaining = Math.max(0, spellState.cooldowns?.[slotId] ?? 0);
+            const duration = definition?.spec.cooldownSeconds ?? 0;
+            const cooldownRatio = duration > 0 ? Math.min(1, remaining / duration) : 0;
+            ctx.fillStyle = definition ? "rgba(7, 18, 30, 0.94)" : "rgba(12, 16, 24, 0.82)";
+            ctx.fillRect(x, y, cellSize, cellSize);
+            ctx.strokeStyle = definition ? "rgba(103, 232, 249, 0.82)" : "rgba(100, 116, 139, 0.55)";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, cellSize, cellSize);
+            if (cooldownRatio > 0) {
+                ctx.fillStyle = "rgba(2, 6, 23, 0.72)";
+                ctx.fillRect(x, y, cellSize, cellSize * cooldownRatio);
+            }
+            ctx.textAlign = "center";
+            ctx.fillStyle = definition ? "#e0f2fe" : "#64748b";
+            ctx.font = "800 10px system-ui, sans-serif";
+            ctx.fillText(definition?.spec.displayName ?? "잠김", x + cellSize * 0.5, y + 24, cellSize - 8);
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "800 9px ui-monospace, monospace";
+            ctx.fillText(SPELL_COMMAND_LABEL[slotId], x + cellSize * 0.5, y + cellSize - 8);
+            if (remaining > 0) {
+                ctx.fillStyle = "#f8fafc";
+                ctx.font = "900 15px ui-monospace, monospace";
+                ctx.fillText(remaining.toFixed(1), x + cellSize * 0.5, y + 42);
+            }
+        }
+        const experienceWidth = totalWidth;
+        const experienceY = y + cellSize + 8;
+        const nextRequirement = Math.max(0, experience?.nextLevelRequirement ?? 0);
+        const experienceRatio =
+            nextRequirement > 0 ? Math.min(1, (experience?.experienceIntoLevel ?? 0) / nextRequirement) : 1;
+        ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+        ctx.fillRect(startX, experienceY, experienceWidth, 7);
+        ctx.fillStyle = "#a78bfa";
+        ctx.fillRect(startX, experienceY, experienceWidth * experienceRatio, 7);
+        ctx.strokeStyle = "rgba(226, 232, 240, 0.55)";
+        ctx.strokeRect(startX, experienceY, experienceWidth, 7);
         ctx.textAlign = "left";
-        ctx.fillStyle = "#9fb7c7";
-        ctx.font = `900 ${compactView ? 8 : 9}px ui-monospace, monospace`;
-        ctx.fillText("CALIBRATION", x + 12, y + (compactView ? 14 : 16));
-        ctx.fillStyle = "#e0f2fe";
-        ctx.font = `800 ${compactView ? 10 : 11}px system-ui, sans-serif`;
-        ctx.fillText(`${presentation.family} · ${presentation.name}`, x + 12, y + (compactView ? 31 : 35), width - 100);
-        ctx.textAlign = "right";
-        ctx.fillStyle = presentation.verified ? "#6ee7b7" : "#fde68a";
-        ctx.fillText(status, x + width - 12, y + (compactView ? 31 : 35));
-        ctx.restore();
-    }
-
-    drawCalibrationToast(toast) {
-        if (!toast) return;
-        const ctx = this.context;
-        const margin = 12;
-        const compactView = this.cssWidth <= 900 && this.cssHeight <= 500;
-        const width = Math.min(compactView ? 320 : 440, this.cssWidth - margin * 2);
-        const height = compactView ? 38 : 42;
-        const x = (this.cssWidth - width) * 0.5;
-        const y = 92;
-        const fadeIn = Math.min(1, toast.age / 0.12);
-        const fadeOut = Math.min(1, (toast.durationSeconds - toast.age) / 0.16);
-
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, Math.min(fadeIn, fadeOut));
-        ctx.fillStyle = "rgba(7, 17, 30, 0.9)";
-        ctx.fillRect(x, y, width, height);
-        ctx.strokeStyle = "rgba(103, 232, 249, 0.72)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, width, height);
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#d9f4ff";
-        ctx.font = `900 ${compactView ? 10 : 12}px ui-monospace, monospace`;
-        ctx.fillText(toast.text, this.cssWidth * 0.5, y + (compactView ? 24 : 26), width - 20);
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "800 9px ui-monospace, monospace";
+        ctx.fillText(`LV ${experience?.level ?? 0}`, startX, experienceY - 3);
+        const inputTokens = scene.spellInput?.tokens ?? [];
+        if (inputTokens.length > 0) {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#fde68a";
+            ctx.font = "900 13px ui-monospace, monospace";
+            ctx.fillText(
+                inputTokens.map((token) => (token === POINTER_SPELL_TOKEN.RIGHT ? "R" : "L")).join(" → "),
+                this.cssWidth * 0.5,
+                y - 10
+            );
+        }
         ctx.restore();
     }
 
@@ -662,7 +667,7 @@ export class CanvasRenderer {
         let title;
         let detail;
         let color;
-        let foundationFeedback = false;
+        let augmentFeedback = false;
         if (eventFlash.type === "checkpoint-respawn" || eventFlash.type === "sector-respawn") {
             title = eventFlash.type === "sector-respawn" ? "Stage 세이브 포인트 부활" : "체크포인트 부활";
             detail = eventFlash.reason === "fall" ? "낙사 · 최대 체력으로 복귀" : "사망 · 최대 체력으로 복귀";
@@ -671,22 +676,17 @@ export class CanvasRenderer {
             title = "STAGE SAVE";
             detail = `${eventFlash.stageId ?? "새 Stage"} · 부활 지점 저장 완료`;
             color = "#d9f4ff";
-        } else if (eventFlash.type === "foundation-selected") {
-            const foundation = foundationAugmentById(eventFlash.foundationId);
+        } else if (eventFlash.type === "augment-selected") {
+            const augment = augmentById(eventFlash.augmentId);
             title = "증강 획득";
-            detail = foundation?.name ?? eventFlash.foundationId;
+            detail = augment?.name ?? eventFlash.augmentId;
             color = "#67e8f9";
-            foundationFeedback = true;
+            augmentFeedback = true;
         } else if (eventFlash.type === "augment-release-propulsion") {
             title = "해제 추진";
             detail = "속도 ×1.25";
             color = "#fbbf24";
-            foundationFeedback = true;
-        } else if (eventFlash.type === "augment-rope-link-ready") {
-            title = "로프 연동";
-            detail = "다음 액션 쿨다운 50%";
-            color = "#67e8f9";
-            foundationFeedback = true;
+            augmentFeedback = true;
         } else if (eventFlash.type === ROPE_IMPACT_EVENT_TYPE.REJECTED) {
             const rejection = ROPE_IMPACT_REJECTION_STATUS[eventFlash.reason];
             if (!rejection) return;
@@ -698,7 +698,7 @@ export class CanvasRenderer {
         }
         const ctx = this.context;
         const alpha = Math.min(1, eventFlash.age / 0.15, (CLIENT_STATUS_FEEDBACK_SECONDS - eventFlash.age) / 0.35);
-        const top = foundationFeedback ? 92 : 18;
+        const top = augmentFeedback ? 92 : 18;
         ctx.save();
         ctx.globalAlpha = Math.max(0, alpha);
         ctx.fillStyle = "rgba(7, 11, 20, 0.92)";
@@ -720,8 +720,7 @@ export class CanvasRenderer {
         if (!metrics) return;
         const ctx = this.context;
         const x = Math.max(8, this.cssWidth - 248);
-        const firstAugment =
-            metrics.firstFoundationSeconds === null ? "-" : `${metrics.firstFoundationSeconds.toFixed(1)}초`;
+        const firstAugment = metrics.firstAugmentSeconds === null ? "-" : `${metrics.firstAugmentSeconds.toFixed(1)}초`;
         const progressTiming = metrics.landmarkTiming ?? metrics.areaTiming;
         const areaOffset = progressTiming ? 19 : 0;
         ctx.save();
@@ -884,19 +883,11 @@ export class CanvasRenderer {
         if (controls.ropePointerDown) {
             ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
             ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
-        } else if (controls.actionPointerDown) {
-            ctx.fillStyle = "rgba(103, 232, 249, 0.12)";
-            ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         }
         const layout = getMobileControlLayout(this.cssWidth, this.cssHeight);
         this.drawMobileButton(layout.left, "←", controls.left);
         this.drawMobileButton(layout.jump, "점프", controls.jump);
         this.drawMobileButton(layout.right, "→", controls.right);
-        this.drawMobileButton(
-            layout.action,
-            controls.aimMode === "action" ? "액션 조준" : "로프 조준",
-            controls.aimMode === "action"
-        );
     }
 
     drawMobileButton(bounds, label, active) {

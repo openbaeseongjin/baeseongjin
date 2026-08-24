@@ -10,6 +10,7 @@ import { KinematicPhysicsBody } from "../physics/KinematicPhysicsBody.js";
 import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
 import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
 import { bossBodyPolygonVertices } from "./BossBodyPolygon.js";
+import { CombatStatusEffectPool } from "../status-effects/CombatStatusEffectPool.js";
 
 export const CONTINUITY_WARDEN_STATE = Object.freeze({
     NEUTRAL: "neutral",
@@ -249,6 +250,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.victoryCameraRemaining = 0;
         this.chainDepth = 0;
         this.pendingChainPattern = null;
+        this.statusEffects = new CombatStatusEffectPool();
         this.resetAttempt({ preserveCompleted: false });
         this.body = new KinematicPhysicsBody({
             id: TARGET_ID,
@@ -727,6 +729,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             return freezeComposite({ accepted: true, changed: this.victoryCameraRemaining > 0 });
         }
         if (this.status !== "active") return freezeComposite({ accepted: false, changed: false });
+        for (const outcome of this.statusEffects.advance(dt)) {
+            if (outcome.type === "damage") this.health = Math.max(0, this.health - outcome.damage);
+        }
+        if (!this.statusEffects.canAct()) {
+            this.body.holdKinematicPosition();
+            return freezeComposite({ accepted: true, changed: true });
+        }
         this.#updateRecoveries(context);
         this.#updateTarget(context);
         this.timer = Math.max(0, this.timer - dt);
@@ -1300,7 +1309,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             victoryCameraRemaining: this.victoryCameraRemaining,
             chainDepth: this.chainDepth,
             pendingChainPattern: this.pendingChainPattern,
-            body: this.body.snapshot()
+            body: this.body.snapshot(),
+            statusEffects: this.statusEffects.snapshot()
         });
     }
 
@@ -1331,6 +1341,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.victoryCameraRemaining = snapshot.victoryCameraRemaining ?? 0;
         this.chainDepth = snapshot.chainDepth ?? 0;
         this.pendingChainPattern = snapshot.pendingChainPattern ?? null;
+        this.statusEffects.restore(snapshot.statusEffects ?? null);
         this.body.restore(snapshot.body);
         this.bodyPosition = { x: this.body.position.x, y: this.body.position.y };
         return this;

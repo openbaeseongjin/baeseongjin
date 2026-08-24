@@ -1,4 +1,3 @@
-import { actionParticlePreset } from "./ClientFeedbackEventDefinition.js";
 import { ClientFeedbackObject } from "./ClientFeedbackObject.js";
 import { PlayerCombatFeedback } from "./PlayerCombatFeedback.js";
 import { PlayerRopeFeedbackLifecycle } from "./PlayerRopeFeedbackLifecycle.js";
@@ -23,14 +22,12 @@ export class PlayerRopeCombatFeedback extends ClientFeedbackObject {
         const ruleContext = {
             ...context,
             lifecycle: this.lifecycle,
-            actionParticlePreset,
             appendParticle: (request) =>
                 context.effectBuffer.appendParticle({ ...request, visibleWorldBounds: context.visibleWorldBounds })
         };
         for (const player of players) {
             const frame = this.lifecycle.sample(player, context.dt);
             if (!frame) continue;
-            frame.actionSequence = this.lifecycle.actionSequence(player);
             for (const state of this.states) state.apply(frame, ruleContext);
         }
         this.lifecycle.removeMissing(players);

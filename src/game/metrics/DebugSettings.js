@@ -1,13 +1,9 @@
 import { normalizeRopeTuningOverride } from "../config.js";
-import {
-    augmentById,
-    isAugmentCompatibleWithSelection,
-    selectedBaseActionId
-} from "../augments/FoundationAugmentCatalog.js";
+import { augmentById, isAugmentCompatibleWithSelection, MAX_AUGMENT_SELECTIONS } from "../augments/AugmentCatalog.js";
 
-export const DEBUG_SETTINGS_STORAGE_KEY = "baeseongjin.debug-settings.v1";
-export const DEBUG_SETTINGS_VERSION = 1;
-export const MAX_DEBUG_AUGMENT_COUNT = 6;
+export const DEBUG_SETTINGS_STORAGE_KEY = "baeseongjin.debug-settings.v2";
+export const DEBUG_SETTINGS_VERSION = 2;
+export const MAX_DEBUG_AUGMENT_COUNT = MAX_AUGMENT_SELECTIONS;
 
 export const DEFAULT_DEBUG_SETTINGS = Object.freeze({
     version: DEBUG_SETTINGS_VERSION,
@@ -18,8 +14,10 @@ export const DEFAULT_DEBUG_SETTINGS = Object.freeze({
 });
 
 function augmentSelectionError(ids) {
-    if (!Array.isArray(ids)) return "증강 테스트 loadout은 배열이어야 합니다.";
-    if (ids.length > MAX_DEBUG_AUGMENT_COUNT) return "증강 테스트 loadout은 최대 6장입니다.";
+    if (!Array.isArray(ids)) return "획득 증강 목록은 배열이어야 합니다.";
+    if (ids.length > MAX_DEBUG_AUGMENT_COUNT) {
+        return `획득 증강은 최대 ${MAX_DEBUG_AUGMENT_COUNT}장입니다.`;
+    }
     const selected = [];
     for (const id of ids) {
         if (typeof id !== "string" || !id.trim()) return "증강 ID는 비어 있지 않은 문자열이어야 합니다.";
@@ -27,13 +25,6 @@ function augmentSelectionError(ids) {
         if (!augment) return `알 수 없는 증강 '${id}'입니다.`;
         if (selected.includes(augment.id)) return `증강 '${augment.name}'을 중복 선택할 수 없습니다.`;
         if (!isAugmentCompatibleWithSelection(augment.id, selected)) {
-            if (augment.category === "action") return "기본 Action은 하나만 선택할 수 있습니다.";
-            if (augment.category === "signature") {
-                return selectedBaseActionId(selected)
-                    ? `선택한 Action과 '${augment.name}' Signature가 호환되지 않습니다.`
-                    : "Signature보다 호환되는 기본 Action을 먼저 선택해야 합니다.";
-            }
-            if (augment.category === "modifier") return "범용 강화보다 기본 Action을 먼저 선택해야 합니다.";
             return `증강 '${augment.name}'을 현재 순서에 추가할 수 없습니다.`;
         }
         selected.push(augment.id);

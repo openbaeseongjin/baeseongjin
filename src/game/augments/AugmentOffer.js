@@ -1,8 +1,10 @@
-import { compatibleAugmentsForSelection } from "./FoundationAugmentCatalog.js";
+import { compatibleAugmentsForSelection } from "./AugmentCatalog.js";
+import { augmentById } from "./AugmentCatalog.js";
+import { SPELL_ID } from "../spells/SpellDefinition.js";
 
 function requireIndex(value) {
-    if (!Number.isSafeInteger(value) || value < 0 || value > 5) {
-        throw new Error("selectionIndex must be a safe integer from 0 to 5");
+    if (!Number.isSafeInteger(value) || value < 0) {
+        throw new Error("selectionIndex must be a non-negative safe integer");
     }
     return value;
 }
@@ -30,14 +32,20 @@ export function deterministicAugmentOffer({ runSeed, playerId, selectionIndex, s
     }
     if (typeof playerId !== "string" || playerId.length === 0) throw new Error("playerId must be non-empty");
     requireIndex(selectionIndex);
-    const pool = compatibleAugmentsForSelection(selectedAugmentIds).map(({ id }) => id);
-    if (pool.length < 3) throw new Error("compatible Augment pool must contain at least three cards");
+    const guaranteedSpellId = Object.freeze({ 0: SPELL_ID.METEOR, 1: SPELL_ID.MOBILITY_SURGE })[selectionIndex] ?? null;
+    if (guaranteedSpellId && !selectedAugmentIds.includes(guaranteedSpellId)) {
+        return Object.freeze([augmentById(guaranteedSpellId).id]);
+    }
+    const pool = compatibleAugmentsForSelection(selectedAugmentIds)
+        .filter(({ category }) => category === "rope")
+        .map(({ id }) => id);
+    if (pool.length === 0) return Object.freeze([]);
     const randomState = { value: hashOfferSeed(runSeed, playerId, selectionIndex) };
     for (let index = pool.length - 1; index > 0; index -= 1) {
         const swapIndex = Math.floor(nextRandom(randomState) * (index + 1));
         [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
     }
-    return Object.freeze(pool.slice(0, 3));
+    return Object.freeze(pool.slice(0, Math.min(3, pool.length)));
 }
 
 export function createLogicalAugmentEntitlement({

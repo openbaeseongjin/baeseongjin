@@ -8,6 +8,7 @@ const withWeaponCapability = createSimulationCapabilityMixin({
     id: ENEMY_SIMULATION_CAPABILITY.WEAPON,
     order: ENEMY_WEAPON_CONFIG.WEAPON_ORDER,
     apply({ targets, registerProjectile, registry, config, surfaces = [], dt }) {
+        if (!this.statusEffects?.canAct()) return null;
         const result = this.weaponState.advance(this, {
             visibleTargets: visibleEnemyTargets(this, targets, surfaces),
             range: this.weaponRange ?? config.enemyAttackRange,

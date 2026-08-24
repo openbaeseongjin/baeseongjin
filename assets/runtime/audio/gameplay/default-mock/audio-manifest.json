@@ -96,7 +96,7 @@
             "pitchRandomizationPercent": 2,
             "gainRandomizationDb": 1
         },
-        "gameplay-action-swing": {
+        "gameplay-spell-cast": {
             "group": "gameplay",
             "kind": "one-shot",
             "clips": [

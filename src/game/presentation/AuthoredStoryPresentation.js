@@ -1,4 +1,4 @@
-import { foundationAugmentById } from "../augments/FoundationAugmentCatalog.js";
+import { augmentById } from "../augments/AugmentCatalog.js";
 
 const ENTRY_PRESENTATIONS = Object.freeze({
     "sector-01-04": Object.freeze([
@@ -59,7 +59,7 @@ const ENTRY_PRESENTATIONS = Object.freeze({
     ]),
     "sector-02-03": Object.freeze([
         Object.freeze({
-            id: "sector-02-03:foundation-detected",
+            id: "sector-02-03:augment-detected",
             title: "AUGMENT SERVICE NODE",
             detail: "OFFER 2 AVAILABLE",
             durationSeconds: 1.4
@@ -1321,19 +1321,19 @@ function triggerInsideBounds(triggerObject, localX, localY) {
     );
 }
 
-function foundationSelectionPresentations(foundationId) {
-    const foundation = foundationAugmentById(foundationId);
-    if (!foundation) return Object.freeze([]);
+function augmentSelectionPresentations(augmentId) {
+    const augment = augmentById(augmentId);
+    if (!augment) return Object.freeze([]);
     return Object.freeze([
         Object.freeze({
-            id: `sector-01-04:augment-selected:${foundationId}`,
+            id: `sector-01-04:augment-selected:${augmentId}`,
             title: "AUGMENT PROTOCOL",
             detail: "ACCEPTED",
             durationSeconds: 0.9
         }),
         Object.freeze({
-            id: `sector-01-04:firmware-applied:${foundationId}`,
-            title: foundation.name,
+            id: `sector-01-04:firmware-applied:${augmentId}`,
+            title: augment.name,
             detail: "ONLINE",
             durationSeconds: 1.2
         })
@@ -1423,10 +1423,10 @@ export class AuthoredStoryPresentation {
                     this.#enqueue(`gate:${event.gateId}`, GATE_PRESENTATIONS[event.gateId]);
                 }
             }
-            if (event.eventType === "foundation-selected" || event.eventType === "predicted-foundation-selected") {
+            if (event.eventType === "augment-selected" || event.eventType === "predicted-augment-selected") {
                 this.#enqueue(
-                    `foundation:${event.playerId ?? event.ownerId}:${event.sourceId}`,
-                    foundationSelectionPresentations(event.foundationId)
+                    `augment:${event.playerId ?? event.ownerId}:${event.sourceId}`,
+                    augmentSelectionPresentations(event.augmentId)
                 );
             }
         }

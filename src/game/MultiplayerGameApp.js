@@ -10,11 +10,7 @@ import { createBossStagePresentation } from "../render/boss/BossStagePresentatio
 import { bossStageSpecById } from "./boss-authoring/BossStageCatalog.js";
 import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
-import {
-    advanceFoundationRewardSelection,
-    createFoundationRewardSelection,
-    openFoundationChooserCandidate
-} from "./rewards/FoundationRewardSelection.js";
+import { advanceAugmentRewardSelection, createAugmentRewardSelection } from "./rewards/AugmentRewardSelection.js";
 import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore.js";
 import { createPlayerPresentationEvents } from "../render/sprites/PlayerPresentationEvent.js";
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
@@ -25,7 +21,6 @@ import {
     resolveAuthoredCameraShot
 } from "./camera/AuthoredCameraDirector.js";
 import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
-import { CalibrationPresentation } from "./presentation/CalibrationPresentation.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
 import {
@@ -65,7 +60,6 @@ export function commandForLocalSimulation(command, choosingChoice) {
         horizontal: 0,
         vertical: 0,
         interact: false,
-        action: false,
         pointer: Object.freeze({ ...command.pointer, down: false })
     });
 }
@@ -137,11 +131,10 @@ export class MultiplayerGameApp {
         this.directionLightingPresentation = direction.lightingPresentation;
         this.directionCharacterPresentation = direction.characterPresentation;
         this.directionCoverage = direction.coverage;
-        this.calibrationPresentation = new CalibrationPresentation({ viewerId: this.authority.playerId });
         this.localRunCompleted = false;
-        this.localFoundationReward = null;
-        this.pendingFoundationSelection = null;
-        this.foundationFeedback = null;
+        this.localAugmentReward = null;
+        this.pendingAugmentSelection = null;
+        this.augmentFeedback = null;
         this.runner = new FixedStepRunner({ step: (dt, input) => this.update(dt, input), render: () => this.render() });
         this.tick = (time) => {
             this.stats = { ...this.stats, ...this.runner.frame(time, this.input.snapshot()) };
@@ -181,83 +174,45 @@ export class MultiplayerGameApp {
         if (startAreaId) this.authority.requestDebugTeleport(startAreaId);
     }
 
-    syncFoundationReward(authoritativeReward, selectedAugmentIds = []) {
-        if (
-            this.pendingFoundationSelection &&
-            selectedAugmentIds.includes(this.pendingFoundationSelection.foundationId)
-        ) {
-            this.localFoundationReward = null;
-            this.pendingFoundationSelection = null;
+    syncAugmentReward(authoritativeReward, selectedAugmentIds = []) {
+        if (this.pendingAugmentSelection && selectedAugmentIds.includes(this.pendingAugmentSelection.augmentId)) {
+            this.localAugmentReward = null;
+            this.pendingAugmentSelection = null;
             return;
         }
-        if (this.pendingFoundationSelection) return;
-        if (this.localFoundationReward) return;
+        if (this.pendingAugmentSelection) return;
+        if (this.localAugmentReward) return;
         if (!authoritativeReward) return;
-        this.localFoundationReward = createFoundationRewardSelection(authoritativeReward);
+        this.localAugmentReward = createAugmentRewardSelection(authoritativeReward);
     }
 
-    maybeOpenLocalChooser(command, owner, predicted) {
-        if (
-            this.localFoundationReward ||
-            this.pendingFoundationSelection ||
-            (owner?.selectedAugmentIds?.length ?? 0) >= 6
-        ) {
-            return false;
-        }
-        if (!command.interact) return false;
-        const world = this.authority.worldSnapshot();
-        const candidate = openFoundationChooserCandidate({
-            world,
-            position: predicted?.position ?? null,
-            command,
-            playerId: this.authority.playerId,
-            runSeed: world?.seed,
-            selectedAugmentIds: owner?.selectedAugmentIds ?? [],
-            consumedSourceIds: owner?.augmentRuntimeState?.consumedSourceIds ?? []
-        });
-        if (!candidate) return false;
-        this.localFoundationReward = candidate;
-        this.authority.releasePredictedRope();
-        this.authority.submitAugmentOfferOpen(candidate);
-        return true;
-    }
-
-    applyFoundationSelectionReceipts(authoritativeReward) {
-        for (const receipt of this.authority.drainFoundationSelectionReceipts()) {
-            if (receipt.sourceId !== this.pendingFoundationSelection?.sourceId) continue;
-            const pending = this.pendingFoundationSelection;
-            this.pendingFoundationSelection = null;
+    applyAugmentSelectionReceipts(authoritativeReward) {
+        for (const receipt of this.authority.drainAugmentSelectionReceipts()) {
+            if (receipt.sourceId !== this.pendingAugmentSelection?.sourceId) continue;
+            const pending = this.pendingAugmentSelection;
+            this.pendingAugmentSelection = null;
             if (receipt.accepted) {
-                this.localFoundationReward = null;
+                this.localAugmentReward = null;
                 continue;
             }
-            this.authority.rejectPredictedFoundationSelection(pending.sourceId);
-            this.localFoundationReward = authoritativeReward
-                ? createFoundationRewardSelection(authoritativeReward)
-                : null;
+            this.authority.rejectPredictedAugmentSelection(pending.sourceId);
+            this.localAugmentReward = authoritativeReward ? createAugmentRewardSelection(authoritativeReward) : null;
         }
     }
 
-    applyAugmentOfferReceipts() {
-        for (const receipt of this.authority.drainAugmentOfferReceipts()) {
-            if (receipt.accepted || receipt.sourceId !== this.localFoundationReward?.sourceId) continue;
-            this.localFoundationReward = null;
-        }
-    }
-
-    applyFoundationFeedback(events, dt) {
+    applyAugmentFeedback(events, dt) {
         const latest = [...events]
             .reverse()
-            .find(({ eventType }) => eventType?.includes("foundation-") || eventType === "foundation-selected");
+            .find(({ eventType }) => eventType?.includes("augment-") || eventType === "augment-selected");
         if (latest) {
-            this.foundationFeedback = {
+            this.augmentFeedback = {
                 ...latest,
                 type: latest.eventType.replace(/^predicted-/, ""),
                 age: 0
             };
-        } else if (this.foundationFeedback) {
-            this.foundationFeedback.age += dt;
-            if (this.foundationFeedback.age >= 2.2) this.foundationFeedback = null;
+        } else if (this.augmentFeedback) {
+            this.augmentFeedback.age += dt;
+            if (this.augmentFeedback.age >= 2.2) this.augmentFeedback = null;
         }
     }
 
@@ -358,36 +313,34 @@ export class MultiplayerGameApp {
         }
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
         const command = createPlayerCommand(input, aimWorld);
-        this.maybeOpenLocalChooser(command, current.owner, current.predicted);
-        const authoritativeFoundationReward =
-            current.ownerFoundationReward ?? current.state.foundationRewards?.[this.authority.playerId] ?? null;
-        this.applyFoundationSelectionReceipts(authoritativeFoundationReward);
-        this.applyAugmentOfferReceipts();
-        this.syncFoundationReward(authoritativeFoundationReward, current.owner.selectedAugmentIds ?? []);
-        const choosingFoundation = Boolean(this.localFoundationReward || this.pendingFoundationSelection);
-        if (this.localFoundationReward) {
-            const outcome = advanceFoundationRewardSelection(this.localFoundationReward, command);
-            this.localFoundationReward = outcome.selection;
-            if (outcome.confirmedFoundationId) {
-                this.pendingFoundationSelection = Object.freeze({
-                    sourceId: this.localFoundationReward.sourceId,
-                    foundationId: outcome.confirmedFoundationId
+        const authoritativeAugmentReward =
+            current.ownerAugmentReward ?? current.state.augmentRewards?.[this.authority.playerId] ?? null;
+        this.applyAugmentSelectionReceipts(authoritativeAugmentReward);
+        this.syncAugmentReward(authoritativeAugmentReward, current.owner.selectedAugmentIds ?? []);
+        const choosingAugment = Boolean(this.localAugmentReward || this.pendingAugmentSelection);
+        if (this.localAugmentReward) {
+            const outcome = advanceAugmentRewardSelection(this.localAugmentReward, command);
+            this.localAugmentReward = outcome.selection;
+            if (outcome.confirmedAugmentId) {
+                this.pendingAugmentSelection = Object.freeze({
+                    sourceId: this.localAugmentReward.sourceId,
+                    augmentId: outcome.confirmedAugmentId
                 });
-                this.localFoundationReward = null;
+                this.localAugmentReward = null;
                 if (
-                    !this.authority.applyPredictedFoundationSelection(this.pendingFoundationSelection) ||
-                    !this.authority.submitFoundationSelection(this.pendingFoundationSelection)
+                    !this.authority.applyPredictedAugmentSelection(this.pendingAugmentSelection) ||
+                    !this.authority.submitAugmentSelection(this.pendingAugmentSelection)
                 ) {
-                    const sourceId = this.pendingFoundationSelection.sourceId;
-                    this.pendingFoundationSelection = null;
-                    this.authority.rejectPredictedFoundationSelection(sourceId);
-                    this.localFoundationReward = authoritativeFoundationReward
-                        ? createFoundationRewardSelection(authoritativeFoundationReward)
+                    const sourceId = this.pendingAugmentSelection.sourceId;
+                    this.pendingAugmentSelection = null;
+                    this.authority.rejectPredictedAugmentSelection(sourceId);
+                    this.localAugmentReward = authoritativeAugmentReward
+                        ? createAugmentRewardSelection(authoritativeAugmentReward)
                         : null;
                 }
             }
         }
-        const gameplayCommand = commandForLocalSimulation(command, choosingFoundation);
+        const gameplayCommand = commandForLocalSimulation(command, choosingAugment);
         this.authority.advance(gameplayCommand);
         if (current.state.progressKind === "area") {
             const checkpointClaim = this.authority.submitReachedCheckpoint();
@@ -410,10 +363,15 @@ export class MultiplayerGameApp {
                 return;
             }
         }
-        this.authority.resolveOwnerCollisions(current.state.players.filter(({ id }) => id !== this.authority.playerId));
+        const ownerCollisionOutcome = this.authority.resolveOwnerCollisions(
+            current.state.players.filter(({ id }) => id !== this.authority.playerId)
+        );
+        for (const event of ownerCollisionOutcome?.incomingSpellImpacts ?? []) {
+            this.authority.submitIncomingSpellImpact(event);
+        }
         const predictedEvents = this.authority.drainPredictedEvents();
         this.queuePlayerPresentationEvents(predictedEvents);
-        this.applyFoundationFeedback([...events, ...predictedEvents], dt);
+        this.applyAugmentFeedback([...events, ...predictedEvents], dt);
         this.authority.drainRopeImpactReceipts();
         this.audioBindings?.presentFrame({ events: predictedEvents, context: initialAudioContext });
         this.combatFeedback.apply(predictedEvents, { visibleWorldBounds: particleBounds });
@@ -489,7 +447,7 @@ export class MultiplayerGameApp {
                     augmentProjectiles: [
                         ...(presentationState.augmentProjectiles ?? []),
                         ...current.state.players.flatMap(
-                            (player) => player.augmentRuntimeState?.combat?.actionProjectiles ?? []
+                            (player) => player.augmentRuntimeState?.combat?.spellProjectiles ?? []
                         )
                     ]
                 },
@@ -539,11 +497,6 @@ export class MultiplayerGameApp {
         });
         this.directionLightingPresentation.update(dt, { areaId: cameraShot.areaId });
         this.directionCharacterPresentation.update(dt);
-        this.calibrationPresentation.update(dt, {
-            currentAreaId: cameraShot.areaId,
-            player,
-            events: [...events, ...predictedEvents]
-        });
         this.audioBindings?.presentFrame({
             scene: directionAudioContext
         });
@@ -644,7 +597,7 @@ export class MultiplayerGameApp {
             enemies: remote.state.enemies,
             augmentProjectiles: [
                 ...(base.augmentProjectiles ?? []),
-                ...otherPlayers.flatMap((other) => other.augmentRuntimeState?.combat?.actionProjectiles ?? [])
+                ...otherPlayers.flatMap((other) => other.augmentRuntimeState?.combat?.spellProjectiles ?? [])
             ],
             ...predictableProjectiles,
             ...combatFeedback,
@@ -652,13 +605,12 @@ export class MultiplayerGameApp {
             bossStagePresentation,
             playerPresentationEvents,
             storyPresentation: this.storyPresentation.snapshot(),
-            calibrationPresentation: this.calibrationPresentation.snapshot(),
             playerMessagePresentation: this.playerMessagePresentation.snapshot(),
             directionLightingPresentation: this.directionLightingPresentation.snapshot(),
             directionCharacterPresentation: this.directionCharacterPresentation.snapshot(),
             eventFlash:
                 combatFeedback.eventFlash ??
-                this.foundationFeedback ??
+                this.augmentFeedback ??
                 this.checkpointFeedback ??
                 this.statusFeedback.snapshot() ??
                 selectClientStatusFeedback(base.eventFlash, this.authority.playerId),
@@ -670,7 +622,7 @@ export class MultiplayerGameApp {
             ropeShot: remote.predicted.launcher,
             activeCheckpoint,
             activeRespawnAnchor,
-            foundationReward: this.localFoundationReward,
+            augmentReward: this.localAugmentReward,
             runState: this.localRunCompleted ? "completed" : remote.state.runState,
             camera: this.camera,
             stats: this.stats,
@@ -682,7 +634,8 @@ export class MultiplayerGameApp {
             mobileControls: {
                 ...this.latestInput.mobileControls,
                 visible: this.mobileView || this.latestInput.mobileControls.visible
-            }
+            },
+            spellInput: this.latestInput.spellCommand
         });
         if (this.metricsVisible) {
             this.onDiagnostics({

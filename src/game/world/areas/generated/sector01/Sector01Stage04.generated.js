@@ -69,9 +69,7 @@ const SPEC = {
     "checkpoints": [],
     "cueIds": [
       "maintenance-node",
-      "foundation-augment-choice",
-      "calibration-frame",
-      "calibration-verified"
+      "calibration-frame"
     ],
     "entry": {
       "id": "sector-01-04:entry",
@@ -101,53 +99,12 @@ const SPEC = {
     "nextAreaId": "sector-01-05",
     "objectives": [
       {
-        "id": "sector-01-04:augment-selected",
-        "sourceObjectId": "sector-01-04:maintenance-node",
-        "type": "interact-choice"
-      },
-      {
-        "id": "sector-01-04:augment-calibrated",
-        "requiredObjectiveIds": [
-          "sector-01-04:augment-selected"
-        ],
-        "sourceObjectId": "sector-01-04:universal-calibration-frame",
-        "type": "augment-calibration"
-      },
-      {
         "id": "sector-01-04:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-01-04:augment-selected",
-          "sector-01-04:augment-calibrated"
-        ],
         "sourceObjectId": "sector-01-04:exit-panel",
         "type": "interact"
       }
     ],
     "objects": [
-      {
-        "coordinateAnchor": "bottom-center",
-        "id": "sector-01-04:maintenance-node",
-        "interactionRadius": 80,
-        "kind": "augment-node",
-        "objectiveId": "sector-01-04:augment-selected",
-        "position": {
-          "x": -96,
-          "y": -288
-        },
-        "presentationId": "world-object:augment-node"
-      },
-      {
-        "coordinateAnchor": "center",
-        "id": "sector-01-04:universal-calibration-frame",
-        "interactionRadius": 400,
-        "kind": "calibration-frame",
-        "objectiveId": "sector-01-04:augment-calibrated",
-        "position": {
-          "x": 32,
-          "y": -512
-        },
-        "presentationId": "world-object:calibration-frame"
-      },
       {
         "coordinateAnchor": "center",
         "cueIds": [],
@@ -239,11 +196,7 @@ const SPEC = {
           "x": -240,
           "y": -768
         },
-        "presentationId": "world-object:gate-panel",
-        "requiredObjectiveIds": [
-          "sector-01-04:augment-selected",
-          "sector-01-04:augment-calibrated"
-        ]
+        "presentationId": "world-object:gate-panel"
       },
       {
         "coordinateAnchor": "bottom-center",
@@ -307,9 +260,6 @@ const SPEC = {
       "grapple-detected",
       "telemetry-analyzed",
       "override-available",
-      "augment-selected",
-      "calibration-profile-loaded",
-      "calibration-verified",
       "firmware-applied"
     ],
     "subtitle": "EMERGENCY CALIBRATION",

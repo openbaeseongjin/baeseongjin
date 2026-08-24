@@ -1,4 +1,5 @@
 export const IMPACT_TARGET_KIND = Object.freeze({
+    PLAYER: "player",
     ENEMY: "enemy",
     BOSS: "boss"
 });

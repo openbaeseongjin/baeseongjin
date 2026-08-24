@@ -28,11 +28,11 @@
 - 공용 명령·시뮬레이션 경계, PWA 설치와 자동 최신 배포 적용
 - [과거 절차 프로토타입] 마지막 암석의 정상 목표와 최종 완료 상태
 - [과거 절차 프로토타입] 8레벨 간격 체크포인트 생성·활성화·시각 표시. 현재 기본 Runtime은 48개 Stage마다 진입 세이브 포인트를 사용한다.
-- [0.26.0] Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, 결정적 3장 offer, Player별 최대 6장, owner-first damage/movement claim
+- [0.67.0] Rope 6장과 마법 2장, XP 기반 자동 레벨 곡선, 네 마법 슬롯, 하단 쿨다운·XP HUD와 공통 상태이상 Pool
 - 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 generic Augment 선택 지표 수집
 - 원격 배포에서 설정 버튼 길게 누르기로 여는 옵트인 런 지표 패널
 - 첫 화면의 싱글·멀티 선택, 고정 게임 서버 연결과 모바일 4자리 채널 생성·참가
-- 시작 화면·설정에서 여는 통합 Help: 세계관·목표·진행·PC/모바일 조작키·로프 이동·전투·액션과 증강·저장·협동을 한 화면 한 주제의 7장 SVG 카드로 제공하고 이전·다음·번호·좌우 방향키로 이동한다. 플레이어용 문구는 가능한 한 한글을 우선해 구현 용어 `Node` 대신 강화 장비·상호작용, 공중 재부착 대신 연속 로프 액션을 사용한다. 전투는 적의 공격과 일정 속도 이상 로프 스윙 충돌의 속도 비례 데미지를, 액션은 우클릭 기본 펀치와 모바일 액션 조준 및 증강에 따른 교체·강화를 설명한다. 설정의 도움말은 같은 페이지의 embedded 모드를 인게임 모달로 열고 닫을 때 설정 초점을 복구하며, 오프라인 멀티 사유는 공용 오류 대신 멀티 플레이 버튼 hover·focus 도움말로 표시한다.
+- 시작 화면·설정의 통합 Help는 PC 좌·우 클릭 마법 커맨드, 하단 네 슬롯 쿨다운, 몹 처치 경험치와 자동 장착 증강을 현재 Runtime과 동일하게 설명한다. 모바일 1차는 이동·점프·Rope만 안내하고 마법 직접 탭은 후속 범위로 명시한다.
 - 2인 권위 서버의 명령 receipt, 20Hz 스냅샷, 자기 예측과 동료 보간
 - 1인·2인 멀티 공통 Enemy stable-ID in-place prediction restore, indexed history sampling과 fixed-step 단일 remote sample
 - 1-1/1-2 local Player Bark data catalog·queue·causal dedupe·speaker 머리 위 타이핑 말풍선과 future party-chat audience 확장 seam
@@ -41,7 +41,7 @@
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.
 - [0.62.0 / #934] 움직이는 Boss Polygon Rope는 손→조준 ray의 앞면 교점, body-local anchor, 선속도+회전 접선속도 joint와 owner/server/remote 동일 transform 복원을 사용한다. Boss06의 정적 Main/Ledge/Gate는 collision platform으로서 Ropeable이며, Warden body는 플랫폼이 아닌 actor라 부착 대상이 아니다.
 - [0.65.0 / #936] Boss06은 표현 경고와 실제 hazard geometry, ID 순서의 wipe·승리 복귀, local Player 우선 camera, 검증된 participant restore와 단일 authority Boss DTO 계약을 사용한다.
-- Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Gameplay View와 production Runtime은 authored bounds·surface·world object만 사용하며 Runtime 자동 geometry는 0개다. Entry·Save 표현, Exit portal 복합 객체, Story display·Augment Node 위치, Enemy·Wind·Boss, Route·activation, 메모리 초안과 read-only 보호를 지원한다.
+- Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Gameplay View와 production Runtime은 authored bounds·surface·world object만 사용하며 Runtime 자동 geometry는 0개다. Entry·Save 표현, Exit portal 복합 객체, Story display, Enemy·Wind·Boss, Route·activation, 메모리 초안과 read-only 보호를 지원한다.
 - `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, 47개 gap-0 경계의 통과·하단 복구, authored Gate→Entry portal, Access/Jammer/proof 권위를 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
 - 생성·해결 이벤트만 공유하고 클라이언트에서 재생하는 플레이어·적 투사체
@@ -63,7 +63,7 @@
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
 3. **Phase 3 · #625 / #637 / #816 / #922, 0.60.0에서 공간 계약 완결:** Player별 checkpoint와 독립 Boss Stage는 유지하되 4,800px city wing·connector collision과 Stage 격리 gap을 제거했다. 일반 Stage authored Bounds는 위아래 edge가 맞닿고 Gate portal로 전진한다.
-4. [완료 #628, #633] topology-independent 증강 v1 core와 현재 Runtime Sector 01~~03의 explicit `augment-node` adapter를 연결했다. Player별 획득 순서는 `1-4 Maintenance Node → 2-3 Residential Service Node → 3-5 Commercial Service Node`이며 legacy alias 순서로 자동 생성하지 않는다. Timer +10 trigger, Purge origin/rejoin과 Sector 04~~06 획득 Node는 별도 결정한다.
+4. [0.67.0 전환] authored `augment-node` 획득과 출구 선행조건을 제거하고, 서버가 확정한 몹 막타 XP로 개인 레벨업 선택을 연다.
 5. **Sector Access 3-of-3 · 0.43.2 / portal 정렬 0.60.0:** Sector 01·02·03의 기존 Carrier와 공용 Module 진행은 유지한다. outgoing route가 잠긴 동안 authored Gate portal만 사용할 수 없으며 자동 transit barrier collision·visual은 생성하지 않는다. 수집 진행과 Player별 checkpoint는 보존한다.
 6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
 7. **Stage 공간 권위 · 0.60.0:** 일반 Stage surface·벽·격벽·world object 위치와 경계 개구부는 Editor source만 소유한다. Player는 아래 Stage들로 계속 낙하·착지·Rope 복구하고 전체 월드 하단 아래에서만 사망한다. Gate는 위치 기반 Player 한 명만 전진시키며 현재 Stage ID는 저장하지 않는다.
@@ -76,27 +76,27 @@ TO BE → Sector 01~05는 마지막 일반 Stage에서 다음 Sector로 직접 �
 
 진행은 `1-8→2-1`, `2-8→3-1`, `3-8→4-1`, `4-8→5-1`, `5-8→6-1`, `6-8→Boss06→Gate/Bridge/Shuttle→전원 Boarding→Escape`다. 일반 Timer/Purge와 Boss Timer/Arena collapse는 계속 HOLD다.
 
-`2-3`의 과거 Foundation별 Specialization은 0.26.0 generic 증강 v1로 대체됐다. 2-3 stable Node ID는 0.28.0 두 번째 generic offer source로 재사용하며, 고정 Specialization tier를 복구하지 않는다.
+`2-3`의 과거 Specialization과 Node offer는 제거됐다. 공간은 유지하지만 증강 획득·출구 진행과 연결하지 않는다.
 
 Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합한다. 맵은 결정적인 corridor/route·activation band를 제공하며, 디버그 더미처럼 authored Patrol이 없으면 짧은 기본 왕복 경로를 사용한다. acquire·track·cooldown 중에는 이동하고 lock·fire 동안만 정지한다. Patrol 자료가 없는 Sentry는 정지 동작을 유지한다. 각 Drone은 자기 band 안에서 target을 유지해 다른 band 플레이어 때문에 재조준하거나 지속 crossfire를 만들지 않는다.
 
 월드 선택도 실행 방식별로 나누지 않는다. 로컬 실행과 네트워크 서버·예측은 하나의 `GameSimulationFactory`와 현재 authored catalog를 공유한다. 네트워크는 같은 world revision과 진행 상태를 복제할 뿐 별도 맵을 생성하지 않는다. 맵 definition은 stable object/state/event/presentation/cue ID만 소유하고 이미지·atlas·음원 경로는 소유하지 않는다. 현재 표현은 environment/audio runtime catalog와 world-object mock presentation catalog를 통해 연결하며 정식 package가 준비되면 같은 ID의 표현만 교체한다.
 
-재사용 Canvas particle/VFX foundation은 완료됐다. Player action/shot/impact와 Enemy one-shot, Shield·Support·Swarm·Pursuit·Artillery 및 Wind의 복제 상태 기반 continuous 표현에 더해 Rope launch·flight·attach·tension·swing·release·miss와 Player high-speed/impulse 표현도 동일 preset DTO와 Polygon/Sprite 공통 renderer를 사용한다. Rope Augment는 resolved material/actual-event accent로 합성하고 particle state는 multiplayer protocol에 추가하지 않는다. 기준은 [`particle-system.md`](./particle-system.md)다.
+재사용 Canvas particle/VFX 기반은 완료됐다. Player Spell/shot/impact와 Enemy one-shot, Rope launch·flight·attach·tension·swing·release·miss 표현은 동일 preset DTO와 Polygon/Sprite 공통 renderer를 사용한다. 상태이상은 각 구체 runtime effect의 공통 draw 계약으로 particle을 만들고 actor renderer는 상태 ID를 해석하지 않는다. 기준은 [`particle-system.md`](./particle-system.md)다.
 
 현재 순서는 `Boss06 Playtest → Timer/Purge mapping`이다. Boss06은 단일 base HP 1000·0.5 인원 multiplier·별도 weakpoint 0을 유지한다. Map Editor 공개 계약 안의 위치·수치·Phase·mechanic·HUD·전환은 사람이 편집하고 새 mechanic만 코드 Registry로 확장한다. Timer/Purge HOLD와 NPC 우선순위는 유지한다.
 
 ### P0. 로그라이크 한 판의 순환 완성
 
 1. [완료] 하나의 큰 월드 정상에 최종 목표와 `completed` 상태를 추가한다. 완료 후 자동으로 다음 스테이지를 시작하지 않는다.
-2. [완료 #628, #633] 1-4·2-3·3-5 explicit Node에서 generic Augment 3장 offer를 Player별 한 번씩 제공한다.
+2. [0.67.0] 몹 처치 XP가 첫 두 레벨의 메테오·기동 증폭과 이후 Rope 패시브 offer를 Player별로 제공한다.
     - [실시간 선택 완료] 선택은 월드 시간을 멈추지 않고 해당 플레이어의 메뉴 입력만 이동·점프·로프 조작과 분리한다.
-3. [완료] Player별 generic Augment loadout과 런 한정 효과 적용 경계를 만든다. `FoundationAugmentState`는 호환 클래스명으로만 유지한다.
+3. [0.67.0] Player별 `AugmentLoadoutState`, `SpellRuntimeState`, `PlayerExperienceState`가 선택·슬롯·쿨다운·성장을 각각 소유한다.
 4. [완료] 사망 시 Player별 active Stage checkpoint 복귀를 적용한다. Timer·Purge가 미정인 현재는 같은 tick 전원 사망도 current Sector를 reset하지 않는다.
 
 완료 기준: 시작 → 등반·전투 → generic Augment 선택 → 빌드 변화 체감 → 사망 시 최근 Stage checkpoint 부활 → content boundary 도달을 한 흐름으로 플레이할 수 있다.
 
-과거 Foundation 3종(`Impulse Coil`, `Relay Link`, `Shear Current`)은 0.26.0 generic Augment v1으로 대체됐다. 현재 Catalog는 Rope 6·기본 Action 6·Signature 6·범용 modifier 4의 22장이며, legacy ID는 이전 snapshot을 읽는 migration 입력으로만 정규화한다. 어떤 Augment도 로프 숙련이나 기본 Safe Route를 대체하지 않는다.
+현재 Catalog는 Rope 패시브 6장과 메테오·기동 증폭 2장만 소유한다. 과거 Action·Signature·Modifier와 Foundation 호환 경계는 제거됐다.
 
 ### P1. 초기 절차 프로토타입과 초반 난이도 검증
 

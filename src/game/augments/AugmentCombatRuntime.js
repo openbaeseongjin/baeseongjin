@@ -1,62 +1,40 @@
 import { distancePointToSegment } from "../combat/CombatSystems.js";
 import { AUGMENT_IMPACT_CONFIG } from "../config.js";
 import { ropeAttachmentPoint } from "../rope/RopeAttachment.js";
-import { ActionAugmentState } from "./actions/ActionAugmentState.js";
-import { actionAugmentById } from "./actions/ActionAugmentCatalog.js";
+import { SpellRuntimeState } from "../spells/SpellRuntimeState.js";
 import {
-    ACTION_AUGMENT_CATEGORY,
-    ACTION_EVENT_TYPE,
-    ACTION_KEY,
-    ACTION_MODIFIER_ID,
-    ACTION_PREDICTED_RESOLUTION,
-    ACTION_SIGNATURE_ID,
-    ACTION_SOURCE_KIND,
-    ACTION_STATE_CONFIG,
-    BASE_ACTION_ID
-} from "./actions/ActionAugmentDefinition.js";
-import { ACTION_RUNTIME_EVENT_HANDLER } from "./actions/ActionRuntimeEventDefinition.js";
-import { directionBetween } from "./actions/ActionRuntimeSupport.js";
-import { migrateLegacyActionStateSnapshot } from "./actions/ActionLegacySnapshotMigration.js";
-import { ActionContactState } from "./actions/state/ActionContactState.js";
-import { ActionProjectileState } from "./actions/state/ActionProjectileState.js";
+    SPELL_EVENT_TYPE,
+    SPELL_IMPACT_RESOLUTION,
+    SPELL_KEY,
+    SPELL_RUNTIME_SPEC
+} from "../spells/SpellRuntimeDefinition.js";
+import { directionBetween } from "../spells/SpellRuntimeSupport.js";
+import { SpellProjectileState } from "../spells/SpellProjectileState.js";
 import { ElectrifiedRopeContactState } from "./rope/ElectrifiedRopeContactState.js";
 import { resolveCollisionExplosion } from "./rope/CollisionExplosionState.js";
-
-const IMPACT_DAMAGE = AUGMENT_IMPACT_CONFIG.baseDamage;
-
-function actionLoadout(foundation) {
-    const baseActionId = foundation.selectedBaseActionId() ?? BASE_ACTION_ID.DEFAULT_PUNCH;
-    return Object.freeze({
-        baseActionId,
-        signatureId: foundation.selectedSignatureId(),
-        modifierIds: foundation.selectedIds.filter(
-            (id) => actionAugmentById(id)?.category === ACTION_AUGMENT_CATEGORY.UNIVERSAL_MODIFIER
-        )
-    });
-}
-
-function loadoutKey(loadout) {
-    return ACTION_KEY.loadout(loadout);
-}
 
 function impactEvent({
     eventId,
     player,
-    enemy,
+    enemy = null,
+    target = enemy,
     tick,
     effectId,
     sourceKind,
     damage,
     impactSpeed,
     sourcePosition = player.physics.position,
-    contactPosition = enemy.position,
-    knockback = null
+    contactPosition = target?.position,
+    knockback = null,
+    statusEffectId = null
 }) {
+    if (!target) throw new Error("impact event requires a target");
     return Object.freeze({
         eventId,
         predictionId: eventId,
         sourcePlayerId: player.id,
-        targetId: enemy.id,
+        targetId: target.id,
+        targetKind: target.impactTargetKind ?? (target.ropeObject ? "player" : "enemy"),
         clientTick: tick,
         effectId,
         sourceKind,
@@ -64,141 +42,114 @@ function impactEvent({
         contactPosition: Object.freeze({ x: contactPosition.x, y: contactPosition.y }),
         position: Object.freeze({ x: contactPosition.x, y: contactPosition.y }),
         damage,
+        ...(statusEffectId ? { statusEffectId } : {}),
         ...(impactSpeed === undefined ? {} : { impactSpeed }),
         ...(knockback ? { knockback: Object.freeze(knockback) } : {}),
-        predictedResolution: enemy.blocksImpactFrom?.(sourcePosition)
-            ? ACTION_PREDICTED_RESOLUTION.SHIELD_BLOCKED
-            : enemy.health <= damage
-              ? ACTION_PREDICTED_RESOLUTION.ENEMY_DEFEATED
-              : ACTION_PREDICTED_RESOLUTION.ENEMY_HIT
+        predictedResolution: target.blocksImpactFrom?.(sourcePosition)
+            ? SPELL_IMPACT_RESOLUTION.SHIELD_BLOCKED
+            : target.health <= damage
+              ? SPELL_IMPACT_RESOLUTION.ENEMY_DEFEATED
+              : SPELL_IMPACT_RESOLUTION.ENEMY_HIT
     });
 }
 
 export class AugmentCombatRuntime {
-    constructor({ maxHealth = ACTION_STATE_CONFIG.DEFAULT_MAX_HEALTH } = {}) {
-        this.actionState = null;
-        this.actionLoadoutKey = ACTION_KEY.loadout(null);
-        this.wasActionDown = false;
+    constructor() {
         this.electrified = new ElectrifiedRopeContactState({
             damagePerSecond: AUGMENT_IMPACT_CONFIG.electrifiedDamagePerSecond,
             pulseSeconds: AUGMENT_IMPACT_CONFIG.electrifiedPulseSeconds
         });
-        this.projectileState = new ActionProjectileState();
-        this.contactState = new ActionContactState();
-        this.maxHealth = maxHealth;
-        this.eventSequence = ACTION_STATE_CONFIG.ZERO;
-        this.queuedImpactEvents = [];
+        this.projectileState = new SpellProjectileState();
+        this.spellState = new SpellRuntimeState();
+        this.eventSequence = 0;
     }
 
-    syncLoadout(foundation, maxHealth = this.maxHealth) {
-        const loadout = actionLoadout(foundation);
-        const nextKey = loadoutKey(loadout);
-        this.maxHealth = maxHealth;
-        if (nextKey === this.actionLoadoutKey) return;
-        const previous = this.actionState?.snapshot() ?? null;
-        const previousModifiers = previous?.loadout?.modifierIds ?? [];
-        this.actionLoadoutKey = nextKey;
-        const next = new ActionAugmentState({ ...loadout, maxHealth });
-        if (previous && previous.loadout.baseActionId === loadout.baseActionId) {
-            next.restore({
-                ...previous,
-                loadout,
-                maxHealth,
-                ...(loadout.modifierIds.includes(ACTION_MODIFIER_ID.EXTRA_CHARGE) &&
-                !previousModifiers.includes(ACTION_MODIFIER_ID.EXTRA_CHARGE)
-                    ? {
-                          chargesRemaining: ACTION_STATE_CONFIG.BASE_CHARGES + ACTION_STATE_CONFIG.EXTRA_CHARGES,
-                          rechargeRemaining: ACTION_STATE_CONFIG.ZERO,
-                          rechargeQueue: []
-                      }
-                    : {})
-            });
-        }
-        this.actionState = next;
+    syncLoadout(loadout) {
+        for (const spellId of loadout.selectedSpellIds()) this.spellState.equip(spellId);
     }
 
-    prepareCommand(player, foundation, command) {
-        this.syncLoadout(foundation, player.maxHealth);
-        const modifiers = this.actionState.commandModifiers(command.action);
+    prepareCommand(player, loadout, command) {
+        this.syncLoadout(loadout);
         return Object.freeze({
             ...command,
-            gravityScale: modifiers.gravityScale,
-            preserveActionImpulse: modifiers.preserveActionImpulse
+            gravityScale: 1,
+            preserveMovementImpulse: this.spellState.consumeMovementImpulsePreservation(),
+            movementMultiplier: this.spellState.movementMultiplier()
         });
     }
 
     onRopeReleased() {
-        return this.actionState?.onRopeReleased() ?? false;
+        return false;
     }
 
     absorbPlayerDamage(details) {
-        return (
-            this.actionState?.absorbIncomingDamage(details) ?? {
-                appliedDamage: details.amount,
-                absorbedByShield: ACTION_STATE_CONFIG.ZERO,
-                blockedByGuard: false,
-                events: Object.freeze([])
-            }
-        );
+        return Object.freeze({
+            appliedDamage: details.amount,
+            absorbedByShield: 0,
+            blockedByGuard: false,
+            events: Object.freeze([])
+        });
     }
 
-    queueDamageReflection({ player, attacker, damage, tick, sourceKind = ACTION_SOURCE_KIND.PROJECTILE }) {
-        if (!attacker || !Number.isFinite(damage) || damage <= ACTION_STATE_CONFIG.ZERO) return null;
-        const event = impactEvent({
-            eventId: this.#nextEventId(player.id, ACTION_SIGNATURE_ID.DAMAGE_REFLECT, tick, attacker.id),
-            player,
-            enemy: attacker,
-            tick,
-            effectId: ACTION_SIGNATURE_ID.DAMAGE_REFLECT,
-            sourceKind,
-            damage,
-            sourcePosition: player.physics.position,
-            contactPosition: attacker.position
-        });
-        this.queuedImpactEvents.push(event);
-        return event;
+    queueDamageReflection() {
+        return null;
     }
 
     drainQueuedImpactEvents() {
-        const events = Object.freeze([...this.queuedImpactEvents]);
-        this.queuedImpactEvents.length = ACTION_STATE_CONFIG.ZERO;
-        return events;
+        return Object.freeze([]);
     }
 
-    advance({ player, foundation, command, dt, enemies, surfaces, collisionBroadPhase = null, tick }) {
-        this.syncLoadout(foundation, player.maxHealth);
+    advance({ player, loadout, command, dt, enemies, targets = enemies, surfaces, collisionBroadPhase = null, tick }) {
+        this.syncLoadout(loadout);
         const impactEvents = [];
         const presentationEvents = [];
-        const activeBefore = this.actionState?.activeAction ? { ...this.actionState.activeAction } : null;
-        const executionContext = this.#actionExecutionContext({
-            player,
-            enemies,
-            surfaces,
-            collisionBroadPhase,
-            tick,
-            impactEvents,
-            presentationEvents
+        const emitImpact = ({ eventId = null, enemy = null, target = enemy, effectId, ...details }) =>
+            impactEvents.push(
+                impactEvent({
+                    eventId: eventId ?? this.#nextEventId(player.id, effectId, tick, target.id),
+                    player,
+                    target,
+                    tick,
+                    effectId,
+                    ...details
+                })
+            );
+
+        this.spellState.advance(dt);
+        const direction = directionBetween(player.physics.position, player.ropeObject.aimWorld, {
+            x: Math.sign(player.physics.velocity.x) || 1,
+            y: 0
         });
-
-        this.actionState?.advanceActiveRuntime(activeBefore, executionContext);
-
-        const stateEvents =
-            this.actionState?.advance(dt, {
-                isGrounded: player.physics.isGrounded,
-                cancelSlowFall: !command.action
-            }) ?? Object.freeze([]);
-        this.#resolveActionStateEvents(stateEvents, executionContext);
-
-        const pressed = command.action && !this.wasActionDown;
-        if (pressed) this.#beginAction(executionContext);
-        this.wasActionDown = command.action;
+        const cast = this.spellState.cast(command.spellCommand, {
+            player,
+            direction,
+            spawnProjectile: (definition) =>
+                this.projectileState.spawn({
+                    id: SPELL_KEY.projectile(player.id, tick, this.eventSequence++),
+                    ownerId: player.id,
+                    ...definition
+                })
+        });
+        if (cast) {
+            presentationEvents.push(
+                Object.freeze({
+                    eventType: SPELL_EVENT_TYPE.CAST_STARTED,
+                    activationId: `${player.id}:${cast.spellId}:${tick}:${command.spellCommand.commandSequence}`,
+                    spellId: cast.spellId,
+                    slotId: cast.slotId,
+                    position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y }),
+                    direction
+                })
+            );
+        }
         this.projectileState.advance({
             enemies,
+            targets,
             surfaces,
             collisionBroadPhase,
             dt,
             distancePointToSegment,
-            emitImpact: executionContext.emitImpact,
+            emitImpact,
             presentationEvents
         });
         return Object.freeze({
@@ -207,8 +158,8 @@ export class AugmentCombatRuntime {
         });
     }
 
-    observeAttachedRope({ player, foundation, enemies, dt, tick }) {
-        if (!foundation.has("electrified-rope") || !player.ropeObject.rope.isAttached) return Object.freeze([]);
+    observeAttachedRope({ player, loadout, enemies, dt, tick }) {
+        if (!loadout.has("electrified-rope") || !player.ropeObject.rope.isAttached) return Object.freeze([]);
         const rope = player.ropeObject.rope;
         const attachment = ropeAttachmentPoint(player.physics, rope);
         return this.electrified
@@ -234,8 +185,8 @@ export class AugmentCombatRuntime {
             );
     }
 
-    collisionExplosionEvents({ player, foundation, baseImpactEvents, enemies, tick }) {
-        if (!foundation.has("collision-explosion")) return null;
+    collisionExplosionEvents({ player, loadout, baseImpactEvents, enemies, tick }) {
+        if (!loadout.has("collision-explosion")) return null;
         const events = [];
         for (const baseImpact of baseImpactEvents) {
             const primaryTarget = enemies.find(({ id }) => id === baseImpact.targetId);
@@ -276,126 +227,44 @@ export class AugmentCombatRuntime {
 
     snapshot() {
         return Object.freeze({
-            actionLoadoutKey: this.actionLoadoutKey,
-            actionState: this.actionState?.snapshot() ?? null,
-            wasActionDown: this.wasActionDown,
             electrified: this.electrified.snapshot(),
-            actionProjectiles: this.projectileState.snapshot(),
+            spellProjectiles: this.projectileState.snapshot(),
+            spellState: this.spellState.snapshot(),
             eventSequence: this.eventSequence
         });
     }
 
-    restore(snapshot = null, foundation = null, maxHealth = this.maxHealth) {
-        this.wasActionDown = snapshot?.wasActionDown === true;
-        this.electrified.restore(snapshot?.electrified ?? null);
-        this.projectileState.restore(snapshot?.actionProjectiles ?? []);
-        this.eventSequence = Math.max(ACTION_STATE_CONFIG.ZERO, snapshot?.eventSequence ?? ACTION_STATE_CONFIG.ZERO);
-        if (foundation) {
-            this.actionLoadoutKey = ACTION_KEY.loadout(null);
-            this.syncLoadout(foundation, maxHealth);
-            if (
-                this.actionState &&
-                snapshot?.actionState &&
-                loadoutKey(snapshot.actionState.loadout) === this.actionLoadoutKey
-            ) {
-                this.actionState.restore(snapshot.actionState);
-            } else {
-                const migrated = migrateLegacyActionStateSnapshot(snapshot, this.actionState);
-                if (migrated) this.actionState.restore(migrated);
-            }
+    restore(snapshot = null, loadout = null) {
+        if (!snapshot) {
+            this.electrified.reset();
+            this.projectileState.reset();
+            this.spellState.reset();
+            this.eventSequence = 0;
+            if (loadout) this.syncLoadout(loadout);
+            return this.snapshot();
         }
+        this.electrified.restore(snapshot?.electrified ?? null);
+        this.projectileState.restore(snapshot?.spellProjectiles ?? []);
+        this.spellState.restore(snapshot?.spellState ?? null);
+        if (!Number.isSafeInteger(snapshot.eventSequence) || snapshot.eventSequence < 0) {
+            throw new Error("spell eventSequence must be a non-negative integer");
+        }
+        this.eventSequence = snapshot.eventSequence;
+        if (loadout) this.syncLoadout(loadout);
         return this.snapshot();
     }
 
-    resetForRespawn(foundation, maxHealth = this.maxHealth) {
-        this.actionState = null;
-        this.actionLoadoutKey = ACTION_KEY.loadout(null);
-        this.wasActionDown = false;
+    resetForRespawn(loadout) {
         this.electrified.reset();
         this.projectileState.reset();
-        this.contactState.clear();
-        this.queuedImpactEvents.length = ACTION_STATE_CONFIG.ZERO;
-        this.syncLoadout(foundation, maxHealth);
+        this.spellState.reset();
+        this.syncLoadout(loadout);
         return this.snapshot();
     }
 
     #nextEventId(playerId, effectId, tick, targetId) {
         const id = `${playerId}:${effectId}:${tick}:${targetId}:${this.eventSequence}`;
-        this.eventSequence += ACTION_STATE_CONFIG.UNIT;
+        this.eventSequence += SPELL_RUNTIME_SPEC.UNIT;
         return id;
-    }
-
-    #beginAction(context) {
-        const direction = directionBetween(context.player.physics.position, context.player.ropeObject.aimWorld, {
-            x: Math.sign(context.player.physics.velocity.x) || ACTION_STATE_CONFIG.UNIT,
-            y: ACTION_STATE_CONFIG.ZERO
-        });
-        const result = this.actionState.beginAction({
-            direction,
-            airborne: !context.player.physics.isGrounded
-        });
-        if (!result.accepted) return;
-        const activation = result.activation;
-        context.presentationEvents.push({
-            eventType: ACTION_EVENT_TYPE.STARTED,
-            activationId: activation.activationId,
-            actionId: activation.baseActionId,
-            position: Object.freeze({
-                x: context.player.physics.position.x,
-                y: context.player.physics.position.y
-            }),
-            direction
-        });
-        this.actionState.executeActivation(activation, context);
-        this.#resolveActionStateEvents(result.events, context);
-    }
-
-    #resolveActionStateEvents(events, context) {
-        for (const event of events) {
-            context.presentationEvents.push({
-                ...event,
-                position: { x: context.player.physics.position.x, y: context.player.physics.position.y }
-            });
-            ACTION_RUNTIME_EVENT_HANDLER[event.eventType]?.(event, context);
-        }
-    }
-
-    #actionExecutionContext({
-        player,
-        enemies,
-        surfaces,
-        collisionBroadPhase,
-        tick,
-        impactEvents,
-        presentationEvents
-    }) {
-        const emitImpact = ({ eventId = null, enemy, effectId, ...details }) =>
-            impactEvents.push(
-                impactEvent({
-                    eventId: eventId ?? this.#nextEventId(player.id, effectId, tick, enemy.id),
-                    player,
-                    enemy,
-                    tick,
-                    effectId,
-                    ...details
-                })
-            );
-        return Object.freeze({
-            player,
-            enemies,
-            surfaces,
-            collisionBroadPhase,
-            tick,
-            impactDamage: IMPACT_DAMAGE,
-            damageFromPercent: (percent) => IMPACT_DAMAGE * (percent / ACTION_STATE_CONFIG.DEFAULT_MAX_HEALTH),
-            impactEvents,
-            presentationEvents,
-            actionState: this.actionState,
-            projectileState: this.projectileState,
-            contactState: this.contactState,
-            distancePointToSegment,
-            emitImpact,
-            projectileId: () => ACTION_KEY.projectile(player.id, tick, this.eventSequence)
-        });
     }
 }

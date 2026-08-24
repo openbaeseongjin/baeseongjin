@@ -27,17 +27,17 @@ function projectileSpawnBinding(event, context) {
     });
 }
 
-function actionStartBinding(event, context) {
-    if (event.eventType !== "augment-action-started" && event.eventType !== "predicted-augment-action-started") {
+function spellCastBinding(event, context) {
+    if (event.eventType !== "spell-cast-started" && event.eventType !== "predicted-spell-cast-started") {
         return null;
     }
     const activationId = event.activationId ?? event.parameters?.activationId;
     return Object.freeze({
-        cueId: "gameplay-action-swing",
+        cueId: "gameplay-spell-cast",
         request: Object.freeze({
             ...context,
-            emitterId: event.playerId ?? event.ownerId ?? event.parameters?.playerId ?? "action",
-            causalId: activationId ? `action-start:${activationId}` : eventCausalId("action-start", event),
+            emitterId: event.playerId ?? event.ownerId ?? event.parameters?.playerId ?? "spell",
+            causalId: activationId ? `spell-cast:${activationId}` : eventCausalId("spell-cast", event),
             position: eventPosition(event) ?? context.listener
         })
     });
@@ -130,7 +130,7 @@ function authoredProgressBinding(event, context) {
 }
 
 export const DEFAULT_AUDIO_EVENT_HANDLERS = Object.freeze([
-    actionStartBinding,
+    spellCastBinding,
     projectileSpawnBinding,
     playerHitBinding,
     bossEventBinding,

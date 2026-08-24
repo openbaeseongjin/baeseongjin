@@ -53,12 +53,6 @@ const DEFAULT_DEFINITIONS = {
         size: GATE_CONTROL_PANEL_SIZE,
         sprites: GATE_CONTROL_PANEL_SPRITES
     },
-    "world-object:augment-node": {
-        renderMode: "mock-shape",
-        color: "#c084fc",
-        radius: 36,
-        size: { width: 168, height: 120 }
-    },
     "world-object:gate": {
         renderMode: "mock-shape",
         color: "#fb7185",
@@ -85,7 +79,6 @@ const DEFAULT_DEFINITIONS = {
         sprite: STORY_DISPLAY_SPRITE
     },
     "world-object:maintenance-frame": { renderMode: "mock-shape", color: "#94a3b8", radius: 26 },
-    "world-object:calibration-frame": { renderMode: "mock-shape", color: "#38bdf8", radius: 32 },
     "world-object:access-transit-lock": { renderMode: "mock-shape", color: "#fbbf24", radius: 30 },
     "world-object:trigger": { renderMode: "hidden" }
 };

@@ -1,7 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 9;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 10;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
