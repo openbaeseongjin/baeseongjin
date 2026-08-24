@@ -3,8 +3,8 @@
     "formatVersion": 1,
     "id": "environment-sector-04-upper-residential",
     "generator": {
-        "tool": "openai-imagegen-offline-depth-far-mid-near",
-        "exportVersion": "2026-08-23-v3-open-ascent-fmn",
+        "tool": "openai-imagegen-offline-depth-far-mid-near-and-sector-terrain-normalization",
+        "exportVersion": "2026-08-24-v3-open-ascent-fmn-terrain-v2",
         "sourceExport": "assets/artwork/environments/sector-04-upper-residential-background/export/far-mid-near-v3-open-ascent-attached-master"
     },
     "atlases": {
@@ -25,13 +25,13 @@
         },
         "sector-04-upper-residential-terrain-fill": {
             "image": "terrain-fill.png",
-            "size": { "width": 48, "height": 48 },
-            "frameSize": { "width": 24, "height": 24 }
+            "size": { "width": 32, "height": 32 },
+            "frameSize": { "width": 32, "height": 32 }
         },
         "sector-04-upper-residential-terrain-edge": {
             "image": "terrain-edge.png",
-            "size": { "width": 48, "height": 24 },
-            "frameSize": { "width": 24, "height": 24 }
+            "size": { "width": 32, "height": 8 },
+            "frameSize": { "width": 32, "height": 8 }
         },
         "sector-04-upper-residential-decoration": {
             "image": "decoration.png",
@@ -52,8 +52,8 @@
                 "silhouetteNear": "#111820",
                 "terrainFill": "#303938",
                 "terrainEdge": "#69756f",
-                "oneWayEdge": "#82d7e8",
-                "accent": "#d8c18f"
+                "oneWayEdge": "#6c7a70",
+                "accent": "#65725d"
             },
             "backdropVariant": "sector-04-transition",
             "terrainMaterial": "sector-04-residential",
@@ -71,8 +71,8 @@
                 "silhouetteNear": "#151c22",
                 "terrainFill": "#3b4440",
                 "terrainEdge": "#7b867d",
-                "oneWayEdge": "#82d7e8",
-                "accent": "#dfc88f"
+                "oneWayEdge": "#708075",
+                "accent": "#697661"
             },
             "backdropVariant": "sector-04-amenity",
             "terrainMaterial": "sector-04-residential",
@@ -90,8 +90,8 @@
                 "silhouetteNear": "#182027",
                 "terrainFill": "#454e48",
                 "terrainEdge": "#89938a",
-                "oneWayEdge": "#82d7e8",
-                "accent": "#e5cd93"
+                "oneWayEdge": "#748477",
+                "accent": "#6d7a65"
             },
             "backdropVariant": "sector-04-residential",
             "terrainMaterial": "sector-04-residential",
@@ -109,8 +109,8 @@
                 "silhouetteNear": "#1b2429",
                 "terrainFill": "#4e574f",
                 "terrainEdge": "#969f95",
-                "oneWayEdge": "#82d7e8",
-                "accent": "#ead49b"
+                "oneWayEdge": "#78887b",
+                "accent": "#717e69"
             },
             "backdropVariant": "sector-04-refuge",
             "terrainMaterial": "sector-04-residential",
@@ -128,8 +128,8 @@
                 "silhouetteNear": "#1e282c",
                 "terrainFill": "#576057",
                 "terrainEdge": "#a2aa9f",
-                "oneWayEdge": "#82d7e8",
-                "accent": "#efdaa2"
+                "oneWayEdge": "#7c8c80",
+                "accent": "#75826d"
             },
             "backdropVariant": "sector-04-ascent",
             "terrainMaterial": "sector-04-residential",
@@ -173,9 +173,9 @@
     "terrain": {
         "materials": {
             "sector-04-residential": {
-                "fill": { "atlas": "sector-04-upper-residential-terrain-fill", "cell": { "column": 1, "row": 0 } },
+                "fill": { "atlas": "sector-04-upper-residential-terrain-fill", "cell": { "column": 0, "row": 0 } },
                 "edge": { "atlas": "sector-04-upper-residential-terrain-edge", "cell": { "column": 0, "row": 0 } },
-                "oneWayColor": "#82d7e8"
+                "oneWayColor": "#748477"
             }
         },
         "blockPool": {
