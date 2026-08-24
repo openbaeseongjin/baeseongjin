@@ -506,7 +506,7 @@ const SPEC = {
         "label": "INCIDENT CONTINUITY CONTROL",
         "position": {
           "x": -490,
-          "y": -2265
+          "y": -2255
         },
         "presentationId": "world-object:story-display"
       },

@@ -405,7 +405,7 @@ const SPEC = {
         "objectiveId": "priority-directive",
         "position": {
           "x": -960,
-          "y": -1745
+          "y": -1730
         },
         "presentationId": "world-object:story-display"
       },

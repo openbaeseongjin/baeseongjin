@@ -514,7 +514,7 @@ const SPEC = {
         "presentationId": "world-object:story-display"
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-06:power-state"
         ],
@@ -522,12 +522,12 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": 1460,
-          "y": -940
+          "y": -928
         },
         "presentationId": "world-object:story-display"
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-06:upper-concourse"
         ],
@@ -535,7 +535,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": -845,
-          "y": -1685
+          "y": -1675
         },
         "presentationId": "world-object:story-display"
       },

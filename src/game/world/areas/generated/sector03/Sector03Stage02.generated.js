@@ -220,7 +220,7 @@ const SPEC = {
     ],
     "objects": [
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-02:access-control"
         ],
@@ -228,7 +228,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": -955,
-          "y": -135
+          "y": -130
         },
         "presentationId": "world-object:story-display"
       },

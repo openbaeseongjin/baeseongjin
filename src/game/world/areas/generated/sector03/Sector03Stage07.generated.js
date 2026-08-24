@@ -361,7 +361,7 @@ const SPEC = {
         "presentationId": "world-object:story-display"
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "sector-03-07:access-directory"
         ],
@@ -369,7 +369,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": 810,
-          "y": -1280
+          "y": -1264
         },
         "presentationId": "world-object:story-display"
       },
