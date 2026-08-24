@@ -7,7 +7,25 @@ export const GENERATED_AREA_ID = "sector-02-04";
 // JSON ordering and formatting are deterministic generator output.
 // prettier-ignore
 const SPEC = {
-  "anchors": [],
+  "anchors": [
+    {
+      "landmark": {
+        "id": "sector-02-04:editor-anchor-1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "NEW"
+        },
+        "x": 380,
+        "y": -905
+      },
+      "target": {
+        "id": "sector-02-04:editor-anchor-1-surface",
+        "properties": {},
+        "x": 380,
+        "y": -905
+      }
+    }
+  ],
   "behaviorRefs": [],
   "definition": {
     "bounds": {
@@ -93,8 +111,8 @@ const SPEC = {
         "id": "sector-02-04:route-choice-guard",
         "kind": "sentry",
         "position": {
-          "x": 96,
-          "y": -352
+          "x": -440,
+          "y": -300
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -135,8 +153,8 @@ const SPEC = {
           "waitSeconds": 0.45
         },
         "position": {
-          "x": -128,
-          "y": -736
+          "x": -5,
+          "y": -640
         },
         "presentationId": "world-object:patrol-drone",
         "rules": [
@@ -385,116 +403,29 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-02-04:safe-a",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -672,
-          "y": -384
-        },
-        "vertices": [
-          {
-            "x": -816,
-            "y": -384
-          },
-          {
-            "x": -528,
-            "y": -384
-          },
-          {
-            "x": -528,
-            "y": -362
-          },
-          {
-            "x": -816,
-            "y": -362
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "sector-02-04:flow-a",
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": -176,
-          "y": -416
+          "x": -215,
+          "y": -310
         },
         "vertices": [
           {
-            "x": -304,
-            "y": -416
+            "x": -343,
+            "y": -310
           },
           {
-            "x": -48,
-            "y": -416
+            "x": -87,
+            "y": -310
           },
           {
-            "x": -48,
-            "y": -394
+            "x": -87,
+            "y": -288
           },
           {
-            "x": -304,
-            "y": -394
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-04:pressure-a",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": 64,
-          "y": -352
-        },
-        "vertices": [
-          {
-            "x": -96,
-            "y": -352
-          },
-          {
-            "x": 224,
-            "y": -352
-          },
-          {
-            "x": 224,
-            "y": -330
-          },
-          {
-            "x": -96,
-            "y": -330
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-04:recovery-a",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": -224,
-          "y": -480
-        },
-        "vertices": [
-          {
-            "x": -400,
-            "y": -480
-          },
-          {
-            "x": -48,
-            "y": -480
-          },
-          {
-            "x": -48,
-            "y": -462
-          },
-          {
-            "x": -400,
-            "y": -462
+            "x": -343,
+            "y": -288
           }
         ]
       },
@@ -505,54 +436,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -64,
-          "y": -544
+          "x": 85,
+          "y": -470
         },
         "vertices": [
           {
-            "x": -288,
-            "y": -544
+            "x": -139,
+            "y": -470
           },
           {
-            "x": 160,
-            "y": -544
+            "x": 309,
+            "y": -470
           },
           {
-            "x": 160,
-            "y": -518
+            "x": 309,
+            "y": -444
           },
           {
-            "x": -288,
-            "y": -518
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-04:safe-b",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -448,
-          "y": -768
-        },
-        "vertices": [
-          {
-            "x": -608,
-            "y": -768
-          },
-          {
-            "x": -288,
-            "y": -768
-          },
-          {
-            "x": -288,
-            "y": -746
-          },
-          {
-            "x": -608,
-            "y": -746
+            "x": -139,
+            "y": -444
           }
         ]
       },
@@ -563,25 +465,25 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 176,
-          "y": -832
+          "x": 100,
+          "y": -755
         },
         "vertices": [
           {
-            "x": 48,
-            "y": -832
+            "x": -28,
+            "y": -755
           },
           {
-            "x": 304,
-            "y": -832
+            "x": 228,
+            "y": -755
           },
           {
-            "x": 304,
-            "y": -810
+            "x": 228,
+            "y": -733
           },
           {
-            "x": 48,
-            "y": -810
+            "x": -28,
+            "y": -733
           }
         ]
       },
@@ -592,112 +494,25 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 512,
-          "y": -672
+          "x": 670,
+          "y": -595
         },
         "vertices": [
           {
-            "x": 336,
-            "y": -672
+            "x": 494,
+            "y": -595
           },
           {
-            "x": 688,
-            "y": -672
+            "x": 846,
+            "y": -595
           },
           {
-            "x": 688,
-            "y": -650
+            "x": 846,
+            "y": -573
           },
           {
-            "x": 336,
-            "y": -650
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-04:recovery-b",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": 64,
-          "y": -704
-        },
-        "vertices": [
-          {
-            "x": -112,
-            "y": -704
-          },
-          {
-            "x": 240,
-            "y": -704
-          },
-          {
-            "x": 240,
-            "y": -686
-          },
-          {
-            "x": -112,
-            "y": -686
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-04:right-recovery",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": 416,
-          "y": -832
-        },
-        "vertices": [
-          {
-            "x": 272,
-            "y": -832
-          },
-          {
-            "x": 560,
-            "y": -832
-          },
-          {
-            "x": 560,
-            "y": -814
-          },
-          {
-            "x": 272,
-            "y": -814
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-04:merge-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": 288,
-          "y": -928
-        },
-        "vertices": [
-          {
-            "x": 32,
-            "y": -928
-          },
-          {
-            "x": 544,
-            "y": -928
-          },
-          {
-            "x": 544,
-            "y": -902
-          },
-          {
-            "x": 32,
-            "y": -902
+            "x": 494,
+            "y": -573
           }
         ]
       },
@@ -727,347 +542,6 @@ const SPEC = {
           {
             "x": 560,
             "y": -960
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-safe-a-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": -560,
-          "y": -320
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": -572,
-            "y": -332
-          },
-          {
-            "x": -548,
-            "y": -332
-          },
-          {
-            "x": -548,
-            "y": -308
-          },
-          {
-            "x": -572,
-            "y": -308
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-safe-x-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": -352,
-          "y": -480
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": -364,
-            "y": -492
-          },
-          {
-            "x": -340,
-            "y": -492
-          },
-          {
-            "x": -340,
-            "y": -468
-          },
-          {
-            "x": -364,
-            "y": -468
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-flow-a-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": -336,
-          "y": -352
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": -348,
-            "y": -364
-          },
-          {
-            "x": -324,
-            "y": -364
-          },
-          {
-            "x": -324,
-            "y": -340
-          },
-          {
-            "x": -348,
-            "y": -340
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-press-a-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": -304,
-          "y": -256
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": -316,
-            "y": -268
-          },
-          {
-            "x": -292,
-            "y": -268
-          },
-          {
-            "x": -292,
-            "y": -244
-          },
-          {
-            "x": -316,
-            "y": -244
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-safe-b-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": -352,
-          "y": -672
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": -364,
-            "y": -684
-          },
-          {
-            "x": -340,
-            "y": -684
-          },
-          {
-            "x": -340,
-            "y": -660
-          },
-          {
-            "x": -364,
-            "y": -660
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-safe-m1-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": -192,
-          "y": -848
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": -204,
-            "y": -860
-          },
-          {
-            "x": -180,
-            "y": -860
-          },
-          {
-            "x": -180,
-            "y": -836
-          },
-          {
-            "x": -204,
-            "y": -836
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-safe-m2-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": 96,
-          "y": -896
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": 84,
-            "y": -908
-          },
-          {
-            "x": 108,
-            "y": -908
-          },
-          {
-            "x": 108,
-            "y": -884
-          },
-          {
-            "x": 84,
-            "y": -884
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-flow-b1-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": 64,
-          "y": -672
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": 52,
-            "y": -684
-          },
-          {
-            "x": 76,
-            "y": -684
-          },
-          {
-            "x": 76,
-            "y": -660
-          },
-          {
-            "x": 52,
-            "y": -660
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-flow-b2-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": 320,
-          "y": -768
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": 308,
-            "y": -780
-          },
-          {
-            "x": 332,
-            "y": -780
-          },
-          {
-            "x": 332,
-            "y": -756
-          },
-          {
-            "x": 308,
-            "y": -756
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-press-b-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": 224,
-          "y": -608
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": 212,
-            "y": -620
-          },
-          {
-            "x": 236,
-            "y": -620
-          },
-          {
-            "x": 236,
-            "y": -596
-          },
-          {
-            "x": 212,
-            "y": -596
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-04:g-final-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": 560,
-          "y": -960
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": 548,
-            "y": -972
-          },
-          {
-            "x": 572,
-            "y": -972
-          },
-          {
-            "x": 572,
-            "y": -948
-          },
-          {
-            "x": 548,
-            "y": -948
           }
         ]
       }

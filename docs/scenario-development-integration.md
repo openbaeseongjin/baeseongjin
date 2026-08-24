@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 713813a14d965c4ae22f9726f316e5a82653c1b42af62e721a74f110185ce9ee
-authored-area-sha256: aa1d52028da6a0d5f68a2bbdb15e4a96552f8882e8f4c301422fe1c3df7dc2d5
+scenario-source-sha256: aa09640898bdddb8d906f9422f5f773a7551d231b2af48c9afb464a9b54e90c1
+authored-area-sha256: f3179e3de495369295979fef75aa984d0905f1ab725af8378e24a2298f75cbad
 authored-sector-sha256: 271b92fbe6401162663a85cf3f04df0309affedba4d402bccf7b9f327c56472d
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: e9c9c6cb3deb019f6a4e8ff11b7d51dc2809c103
+reviewed-upstream: 8e694ed8c4785537ca5af45e1b0403b56c361219
 -->
 
 ## 현재 확인 체크포인트
@@ -30,6 +30,7 @@ reviewed-upstream: e9c9c6cb3deb019f6a4e8ff11b7d51dc2809c103
 
 ## 최근 반영된 시나리오 변화
 
+- Map Editor에서 저장한 Sector 02 2-1~2-8의 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. Runtime은 이 8개 `AREA-SPEC.v2.json`을 단일 권위로 compile하며, 실제 traversal 체감은 아직 별도 검증 범위다.
 - Map Editor에서 저장한 Sector 01 1-1~1-8의 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. Runtime은 이 8개 `AREA-SPEC.v2.json`을 단일 권위로 compile하며, 실제 traversal 체감은 아직 별도 검증 범위다.
 - 0.66.0은 최신 two-Boss Runtime 위에서 Hardpoint Jammer를 범용 Enemy로 통합한다. 일반 Hook-reachable surface를 자동 선택하고, active target 부착은 `jammer-shock` 한 번으로 Rope 절단·재부착 제한·0.5초/25 피해 Electrified 상태를 시작한다. pulse별 network 사건은 만들지 않는다.
 - Issue #946은 Sector 02~05 authored geometry를 유지한 채 environment package의 role·stable surface ID로 terrain/decoration preset을 결정한다.

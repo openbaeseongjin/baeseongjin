@@ -30,62 +30,22 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "sector-02-02:g2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G2",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": -240,
-        "y": -352
-      },
-      "objectIndex": 1,
-      "surfaceIndex": 14,
-      "target": {
-        "id": "sector-02-02:g2-surface",
-        "properties": {},
-        "x": -240,
-        "y": -352
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-02-02:g4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G4",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": 368,
-        "y": -448
-      },
-      "objectIndex": 2,
-      "surfaceIndex": 16,
-      "target": {
-        "id": "sector-02-02:g4-surface",
-        "properties": {},
-        "x": 368,
-        "y": -448
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-02-02:g5",
         "properties": {
           "coordinateAnchor": "center",
           "label": "G5",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": 608,
-        "y": -640
+        "x": 545,
+        "y": -660
       },
       "objectIndex": 3,
       "surfaceIndex": 17,
       "target": {
         "id": "sector-02-02:g5-surface",
         "properties": {},
-        "x": 608,
-        "y": -640
+        "x": 545,
+        "y": -660
       }
     }
   ],
@@ -181,8 +141,8 @@ const SPEC = {
           "waitSeconds": 0.45
         },
         "position": {
-          "x": -320,
-          "y": -384
+          "x": -295,
+          "y": -320
         },
         "presentationId": "world-object:patrol-drone",
         "rules": [
@@ -217,8 +177,8 @@ const SPEC = {
         "id": "sector-02-02:upper-walkway-guard",
         "kind": "sentry",
         "position": {
-          "x": 256,
-          "y": -800
+          "x": 250,
+          "y": -600
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -338,11 +298,6 @@ const SPEC = {
         "y": -640
       },
       {
-        "id": "sector-02-02:route-upper-landing",
-        "x": 608,
-        "y": -704
-      },
-      {
         "id": "sector-02-02:route-exit",
         "x": 768,
         "y": -832
@@ -394,58 +349,29 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-02-02:observation-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -464,
-          "y": -224
-        },
-        "vertices": [
-          {
-            "x": -640,
-            "y": -224
-          },
-          {
-            "x": -288,
-            "y": -224
-          },
-          {
-            "x": -288,
-            "y": -200
-          },
-          {
-            "x": -640,
-            "y": -200
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "sector-02-02:recovery-lower",
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": -320,
-          "y": -288
+          "x": -280,
+          "y": -235
         },
         "vertices": [
           {
-            "x": -432,
-            "y": -288
+            "x": -392,
+            "y": -235
           },
           {
-            "x": -208,
-            "y": -288
+            "x": -168,
+            "y": -235
           },
           {
-            "x": -208,
-            "y": -272
+            "x": -168,
+            "y": -219
           },
           {
-            "x": -432,
-            "y": -272
+            "x": -392,
+            "y": -219
           }
         ]
       },
@@ -481,93 +407,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-02-02:recovery-middle",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": 64,
-          "y": -320
-        },
-        "vertices": [
-          {
-            "x": -48,
-            "y": -320
-          },
-          {
-            "x": 176,
-            "y": -320
-          },
-          {
-            "x": 176,
-            "y": -304
-          },
-          {
-            "x": -48,
-            "y": -304
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-02:central-deck",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": 64,
-          "y": -416
-        },
-        "vertices": [
-          {
-            "x": -48,
-            "y": -416
-          },
-          {
-            "x": 176,
-            "y": -416
-          },
-          {
-            "x": 176,
-            "y": -394
-          },
-          {
-            "x": -48,
-            "y": -394
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-02:recovery-far",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": 400,
-          "y": -448
-        },
-        "vertices": [
-          {
-            "x": 288,
-            "y": -448
-          },
-          {
-            "x": 512,
-            "y": -448
-          },
-          {
-            "x": 512,
-            "y": -432
-          },
-          {
-            "x": 288,
-            "y": -432
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "sector-02-02:disengage-deck",
         "kind": "safe-deck",
         "oneWay": true,
@@ -595,64 +434,6 @@ const SPEC = {
         ]
       },
       {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-02:upper-landing",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": 608,
-          "y": -704
-        },
-        "vertices": [
-          {
-            "x": 464,
-            "y": -704
-          },
-          {
-            "x": 752,
-            "y": -704
-          },
-          {
-            "x": 752,
-            "y": -680
-          },
-          {
-            "x": 464,
-            "y": -680
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-02:access-carrier-balcony",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": 256,
-          "y": -800
-        },
-        "vertices": [
-          {
-            "x": 144,
-            "y": -800
-          },
-          {
-            "x": 368,
-            "y": -800
-          },
-          {
-            "x": 368,
-            "y": -776
-          },
-          {
-            "x": 144,
-            "y": -776
-          }
-        ]
-      },
-      {
         "coordinateAnchor": "bottom-center",
         "grappleable": true,
         "id": "sector-02-02:cover-a",
@@ -660,25 +441,25 @@ const SPEC = {
         "losBlocker": true,
         "oneWay": false,
         "position": {
-          "x": -112,
-          "y": -352
+          "x": -5,
+          "y": -395
         },
         "vertices": [
           {
-            "x": -152,
-            "y": -512
+            "x": -45,
+            "y": -555
           },
           {
-            "x": -72,
-            "y": -512
+            "x": 35,
+            "y": -555
           },
           {
-            "x": -72,
-            "y": -352
+            "x": 35,
+            "y": -395
           },
           {
-            "x": -152,
-            "y": -352
+            "x": -45,
+            "y": -395
           }
         ]
       },
@@ -738,68 +519,6 @@ const SPEC = {
           {
             "x": 608,
             "y": -768
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-02:g3-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": 80,
-          "y": -352
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": 68,
-            "y": -364
-          },
-          {
-            "x": 92,
-            "y": -364
-          },
-          {
-            "x": 92,
-            "y": -340
-          },
-          {
-            "x": 68,
-            "y": -340
-          }
-        ]
-      },
-      {
-        "collision": true,
-        "coordinateAnchor": "center",
-        "grappleable": true,
-        "id": "sector-02-02:access-anchor-surface",
-        "kind": "structural-grapple-target",
-        "oneWay": false,
-        "position": {
-          "x": 416,
-          "y": -752
-        },
-        "renderable": true,
-        "vertices": [
-          {
-            "x": 404,
-            "y": -764
-          },
-          {
-            "x": 428,
-            "y": -764
-          },
-          {
-            "x": 428,
-            "y": -740
-          },
-          {
-            "x": 404,
-            "y": -740
           }
         ]
       }
