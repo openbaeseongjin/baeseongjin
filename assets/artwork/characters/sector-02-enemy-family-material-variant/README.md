@@ -40,7 +40,7 @@ Role and behavior colors remain exact source RGB values: Shield blue; Support gr
 
 ## Approval and non-scope
 
-The user required the rugged cast-iron replacement to match the supplied material structure, not only its colors. Issue #987 supersedes Issue #941's too-subtle periodic brightness treatment. The eight exports are copied without further image changes into `assets/runtime/characters/sector-02-enemies/`; the existing immutable `sectorId → package` selection registers only `sector-02`. Sector 01, Sector 03, Sector 04, gameplay, AI, collision and networking remain outside its scope. Issue #898 remains the history of the earlier restrained treatment.
+The user required the rugged cast-iron replacement to match the supplied material structure, not only its colors. Issue #999 raises the body-relative clustered treatment to cover 30% of eligible neutral metal so the approved pitting, oxidation, dust and worn-edge structure remains visible at actual game size. It supersedes Issue #987's sparse clusters, Issue #941's too-subtle periodic brightness treatment and Issue #898's earlier restrained treatment. The eight exports are copied without further image changes into `assets/runtime/characters/sector-02-enemies/`; the existing immutable `sectorId → package` selection registers only `sector-02`. Sector 01, Sector 03, Sector 04, gameplay, AI, collision and networking remain outside its scope.
 
 ## Validation
 
@@ -48,6 +48,6 @@ The user required the rugged cast-iron replacement to match the supplied materia
 - Atlas contract: `PASS` — 8 RGBA PNGs, exact source dimensions, unchanged `32x32` cell grids and frame/layer order.
 - Pixel contract: `PASS` — source alpha bytes and opaque masks are identical; output alpha values are only `0` and `255`.
 - Role-color contract: `PASS` — protected role, sensor, exhaust, telegraph and healing RGB counts are identical to the approved source atlases.
-- Surface-structure contract: `PASS` — every populated neutral-metal frame has body-relative clustered pits, oxidation, dust and edge wear; Shield role-blue body pixels remain untouched.
+- Surface-structure contract: `PASS` — every populated neutral-metal frame gives 30% of eligible pixels to body-relative clustered pits, oxidation, dust and edge wear; Shield role-blue body pixels remain untouched.
 - Visual review: `PASS` for the rugged cast-iron authoring comparison, all enlarged animation atlases and exact `56x56`, `60x60` and `18x18` world-output sizes on the Sector 02 reference crop.
-- Runtime validator/browser gameplay: `PASS` against the integrated `sector-02-enemies` package at Stage 2-3 desktop `1280x720` and mobile landscape `844x390`; the new pitting, oxidation and dust clusters remain visible on the Support housing with its green role core preserved, and the browser reported no warnings or errors.
+- Runtime validator/browser gameplay: `PASS` against the integrated `sector-02-enemies` package at Stage 2-3 desktop `1280x720` and mobile landscape `844x390`; the denser pitting, oxidation and dust clusters remain visible on Patrol and Support housing with their role colors preserved, and the browser reported no warnings or errors.

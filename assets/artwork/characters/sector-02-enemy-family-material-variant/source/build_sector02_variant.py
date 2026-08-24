@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections import Counter
 from pathlib import Path
 
@@ -162,6 +163,16 @@ SURFACE_ANCHORS = (
     (0.40, 0.79, "dust"),
     (0.64, 0.83, "rust"),
     (0.70, 0.80, "rust"),
+    (0.10, 0.38, "wear"),
+    (0.27, 0.14, "rust"),
+    (0.36, 0.30, "dust"),
+    (0.53, 0.33, "pit"),
+    (0.84, 0.42, "rust"),
+    (0.12, 0.76, "pit"),
+    (0.31, 0.56, "wear"),
+    (0.55, 0.60, "rust"),
+    (0.67, 0.56, "dust"),
+    (0.86, 0.76, "wear"),
 )
 
 SURFACE_MIN_BRIGHTNESS = {
@@ -170,6 +181,18 @@ SURFACE_MIN_BRIGHTNESS = {
     "dust": 165,
     "wear": 190,
 }
+
+# The approved contact sheet shows broad, clustered cast-iron mottling rather
+# than isolated single-pixel noise. Keep the clusters small enough for the
+# 32px runtime cell, but dense enough to remain visible at actual world size.
+SURFACE_CLUSTER_OFFSETS = {
+    "pit": ((0, 0), (1, 0), (0, 1)),
+    "rust": ((0, 0), (1, 0), (0, 1)),
+    "dust": ((0, 0), (1, 0), (-1, 0)),
+    "wear": ((0, 0), (1, 0)),
+}
+SURFACE_TARGET_RATIO = 0.3
+SURFACE_MIN_PIXELS = 3
 
 
 def clamp_channel(value: int) -> int:
@@ -181,7 +204,7 @@ def surface_color(color: tuple[int, int, int], mode: str) -> tuple[int, int, int
     if mode == "pit":
         return (clamp_channel(red - 42), clamp_channel(green - 38), clamp_channel(blue - 32))
     if mode == "rust":
-        return (clamp_channel(red + 46), clamp_channel(green - 15), clamp_channel(blue - 29))
+        return (clamp_channel(red + 32), clamp_channel(green - 8), clamp_channel(blue - 20))
     if mode == "dust":
         return (clamp_channel(red + 32), clamp_channel(green + 24), clamp_channel(blue + 13))
     if mode == "wear":
@@ -232,42 +255,59 @@ def apply_cast_iron_surface(
             max_x = max(point[0] for point in eligible)
             min_y = min(point[1] for point in eligible)
             max_y = max(point[1] for point in eligible)
-            target_count = min(len(SURFACE_ANCHORS), max(2, len(eligible) // 7))
+            target_surface_pixels = min(
+                len(eligible),
+                max(SURFACE_MIN_PIXELS, math.ceil(len(eligible) * SURFACE_TARGET_RATIO)),
+            )
+            minimum_cluster_size = min(len(offsets) for offsets in SURFACE_CLUSTER_OFFSETS.values())
+            target_count = min(
+                len(SURFACE_ANCHORS),
+                max(2, math.ceil(target_surface_pixels / minimum_cluster_size)),
+            )
             anchor_indexes = {
                 round(index * (len(SURFACE_ANCHORS) - 1) / (target_count - 1))
                 for index in range(target_count)
             }
             selected_anchors = tuple(SURFACE_ANCHORS[index] for index in sorted(anchor_indexes))
             remaining = set(eligible)
+            surface_pixel_count = 0
             for normalized_x, normalized_y, mode in selected_anchors:
                 anchor_x = min_x + round((max_x - min_x) * normalized_x)
                 anchor_y = min_y + round((max_y - min_y) * normalized_y)
-                bright_enough = [
-                    point
-                    for point in remaining
-                    if sum(
-                        output_pixels[
-                            cell_column * 32 + point[0],
-                            cell_row * 32 + point[1],
-                        ][:3]
+                for offset_x, offset_y in SURFACE_CLUSTER_OFFSETS[mode]:
+                    if not remaining or surface_pixel_count >= target_surface_pixels:
+                        break
+                    target_x = anchor_x + offset_x
+                    target_y = anchor_y + offset_y
+                    bright_enough = [
+                        point
+                        for point in remaining
+                        if sum(
+                            output_pixels[
+                                cell_column * 32 + point[0],
+                                cell_row * 32 + point[1],
+                            ][:3]
+                        )
+                        >= SURFACE_MIN_BRIGHTNESS[mode]
+                    ]
+                    candidates = bright_enough or list(remaining)
+                    local_x, local_y = min(
+                        candidates,
+                        key=lambda point: (
+                            abs(point[0] - target_x) + abs(point[1] - target_y),
+                            (point[0] - target_x) ** 2 + (point[1] - target_y) ** 2,
+                            point[1],
+                            point[0],
+                        ),
                     )
-                    >= SURFACE_MIN_BRIGHTNESS[mode]
-                ]
-                candidates = bright_enough or list(remaining)
-                local_x, local_y = min(
-                    candidates,
-                    key=lambda point: (
-                        abs(point[0] - anchor_x) + abs(point[1] - anchor_y),
-                        (point[0] - anchor_x) ** 2 + (point[1] - anchor_y) ** 2,
-                        point[1],
-                        point[0],
-                    ),
-                )
-                remaining.remove((local_x, local_y))
-                x = cell_column * 32 + local_x
-                y = cell_row * 32 + local_y
-                red, green, blue = surface_color(output_pixels[x, y][:3], mode)
-                output_pixels[x, y] = (red, green, blue, 255)
+                    remaining.remove((local_x, local_y))
+                    x = cell_column * 32 + local_x
+                    y = cell_row * 32 + local_y
+                    red, green, blue = surface_color(output_pixels[x, y][:3], mode)
+                    output_pixels[x, y] = (red, green, blue, 255)
+                    surface_pixel_count += 1
+                if surface_pixel_count >= target_surface_pixels:
+                    break
     return output
 
 
@@ -433,7 +473,11 @@ def validate_pair(
         if surface_pixels:
             raise AssertionError(f"{name}: protected Shield body received cast-iron surface pixels")
     elif not surface_pixels or any(
-        eligible_count > 0 and surface_count < 2
+        eligible_count > 0
+        and surface_count < min(
+            eligible_count,
+            max(SURFACE_MIN_PIXELS, math.ceil(eligible_count * SURFACE_TARGET_RATIO)),
+        )
         for eligible_count, surface_count in zip(frame_eligible_pixel_counts, frame_surface_pixel_counts)
     ):
         raise AssertionError(f"{name}: cast-iron surface pattern is missing or too weak in one or more cells")

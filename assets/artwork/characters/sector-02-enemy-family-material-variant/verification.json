@@ -11,28 +11,28 @@
     "opaquePixels": 5880,
     "changedPixels": 5608,
     "changedOpaqueRatio": 0.953741,
-    "surfacePixels": 192,
+    "surfacePixels": 436,
     "frameSurfacePixelCounts": [
-      9,
-      11,
-      8,
-      9,
-      11,
-      11,
-      12,
-      11,
-      8,
-      9,
-      9,
-      8,
-      12,
-      8,
-      9,
-      12,
-      9,
-      7,
-      9,
-      10
+      21,
+      24,
+      19,
+      21,
+      25,
+      25,
+      27,
+      25,
+      19,
+      21,
+      20,
+      18,
+      27,
+      18,
+      21,
+      26,
+      21,
+      16,
+      20,
+      22
     ],
     "frameEligiblePixelCounts": [
       68,
@@ -57,7 +57,7 @@
       73
     ],
     "sourceSha256": "9dcacd787c0692ec0fe5f3b937d0ae0f4627e533d49860b19ae2318c7c86e037",
-    "exportSha256": "3f65fe66d3075f3104d0ebb18113ef7a052b7381e1e95a94f9276f7f670e87b0",
+    "exportSha256": "cf74f4049961167f9f3aa50ba06d0f73770bae1c0d78f4cdf6a59d67583ebbf2",
     "materialReferenceSha256": "7a1d64c004e728d6363fd0e38be6a1af8e16b9203f4c07a9c5a086778044b096"
   },
   "sentry-upright-aim.png": {
@@ -72,17 +72,17 @@
     "opaquePixels": 475,
     "changedPixels": 463,
     "changedOpaqueRatio": 0.974737,
-    "surfacePixels": 35,
+    "surfacePixels": 76,
     "frameSurfacePixelCounts": [
-      17,
-      18
+      37,
+      39
     ],
     "frameEligiblePixelCounts": [
       122,
       127
     ],
     "sourceSha256": "25f313ffcbc6cd5297f3606a8ce16841529bfd571780ae0d2a5b7d4755ee9b4c",
-    "exportSha256": "8a299d1fe55cfff1e512d4794b41614cc6ab52085ee631dbc5d4a6711b8b3990",
+    "exportSha256": "d08b56ff34c8bdb668076be143d86bc0c3a0f17ce99afee3b38398be93ee235b",
     "materialReferenceSha256": "7a1d64c004e728d6363fd0e38be6a1af8e16b9203f4c07a9c5a086778044b096"
   },
   "artillery-acquisition-motion.png": {
@@ -97,20 +97,20 @@
     "opaquePixels": 5418,
     "changedPixels": 4872,
     "changedOpaqueRatio": 0.899225,
-    "surfacePixels": 264,
+    "surfacePixels": 866,
     "frameSurfacePixelCounts": [
-      22,
-      22,
-      22,
-      22,
-      22,
-      22,
-      22,
-      22,
-      22,
-      22,
-      22,
-      22
+      75,
+      75,
+      75,
+      73,
+      69,
+      68,
+      68,
+      69,
+      69,
+      73,
+      77,
+      75
     ],
     "frameEligiblePixelCounts": [
       250,
@@ -127,7 +127,7 @@
       250
     ],
     "sourceSha256": "07275f03e29f28e00ea4386fbe72f4506ea76138b1551755ec8a3529bbf2419c",
-    "exportSha256": "508b1ec4f5618541f68f2ec11f57ea6aa3d02e6b5df293c5c45e77b8c18dcfcc",
+    "exportSha256": "2fd063b25aa1dfbf39af0107311a0459fe5505cf099d2c0dd05d87229c24dd1a",
     "materialReferenceSha256": "7a1d64c004e728d6363fd0e38be6a1af8e16b9203f4c07a9c5a086778044b096"
   },
   "shield-body.png": {
@@ -171,16 +171,16 @@
     "opaquePixels": 405,
     "changedPixels": 204,
     "changedOpaqueRatio": 0.503704,
-    "surfacePixels": 25,
+    "surfacePixels": 64,
     "frameSurfacePixelCounts": [
-      4,
-      3,
-      3,
-      3,
-      3,
-      3,
-      3,
-      3
+      10,
+      8,
+      8,
+      8,
+      8,
+      7,
+      8,
+      7
     ],
     "frameEligiblePixelCounts": [
       31,
@@ -193,7 +193,7 @@
       22
     ],
     "sourceSha256": "0e2fcf3ca83322e216303451dcfddc172906abaa61009fe886dc57d1cace5e73",
-    "exportSha256": "9794378b10c25e6ad97f348aee12dc12c7c3d63807b3871157191507a99f65e4",
+    "exportSha256": "c9af0ebcc30e20c9cbf280cee5f53335393b17fd6d8c0f0428831063bd4bab5f",
     "materialReferenceSha256": "7a1d64c004e728d6363fd0e38be6a1af8e16b9203f4c07a9c5a086778044b096"
   },
   "patrol-motion-attack.png": {
@@ -208,32 +208,32 @@
     "opaquePixels": 6058,
     "changedPixels": 5574,
     "changedOpaqueRatio": 0.920106,
-    "surfacePixels": 313,
+    "surfacePixels": 677,
     "frameSurfacePixelCounts": [
-      15,
-      15,
-      15,
-      15,
-      15,
-      15,
-      15,
-      15,
-      15,
-      15,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      32,
+      33,
+      33,
       0,
       0,
-      14,
-      14,
-      14,
-      14,
-      13,
-      13,
-      13,
-      13,
-      13,
-      13,
-      14,
-      15
+      31,
+      31,
+      31,
+      31,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      31,
+      32
     ],
     "frameEligiblePixelCounts": [
       105,
@@ -262,7 +262,7 @@
       105
     ],
     "sourceSha256": "624497332a4d470a183c40701c0c588cb43c028abbf159919df2c06c725412ff",
-    "exportSha256": "a8c8df5c75199dfa0ba125cf75f4667daa9f779d15963734bc9646fd5cf08d4a",
+    "exportSha256": "6a59f984ddc78cae1a7d25534f2276434bcb947004f4cc47be046bbc39a931c2",
     "materialReferenceSha256": "7a1d64c004e728d6363fd0e38be6a1af8e16b9203f4c07a9c5a086778044b096"
   },
   "support-motion.png": {
@@ -277,16 +277,16 @@
     "opaquePixels": 2644,
     "changedPixels": 2380,
     "changedOpaqueRatio": 0.900151,
-    "surfacePixels": 96,
+    "surfacePixels": 210,
     "frameSurfacePixelCounts": [
-      12,
-      12,
-      12,
-      12,
-      12,
-      12,
-      12,
-      12
+      26,
+      26,
+      26,
+      26,
+      26,
+      27,
+      26,
+      27
     ],
     "frameEligiblePixelCounts": [
       85,
@@ -299,7 +299,7 @@
       88
     ],
     "sourceSha256": "5a82cba4a6646f7f3e631771572325a3edf004920a3b8ed59ceabf22b498c143",
-    "exportSha256": "f0a6355d8676a4fa2011620e129b90e7641129c3f300306025871b5efe8b5dab",
+    "exportSha256": "2da66512e64eb2d054d054e7a53d05b746468e8ac53fea5f505477d3903bf41b",
     "materialReferenceSha256": "7a1d64c004e728d6363fd0e38be6a1af8e16b9203f4c07a9c5a086778044b096"
   },
   "swarm-motion.png": {
@@ -314,20 +314,20 @@
     "opaquePixels": 3525,
     "changedPixels": 3138,
     "changedOpaqueRatio": 0.890213,
-    "surfacePixels": 197,
+    "surfacePixels": 427,
     "frameSurfacePixelCounts": [
-      22,
-      21,
+      48,
+      46,
+      42,
+      47,
+      25,
       20,
-      22,
-      11,
-      9,
-      9,
-      11,
-      19,
-      17,
-      17,
-      19
+      20,
+      24,
+      41,
+      36,
+      36,
+      42
     ],
     "frameEligiblePixelCounts": [
       159,
@@ -344,7 +344,7 @@
       137
     ],
     "sourceSha256": "bff6120823c1b57b8e011aa8a68ca263f5f8ef7f4fe94a992816cd5aa6d0bfb3",
-    "exportSha256": "24ba2af5dba5aac0cbd0762a293fd59ebba345477fc980f7c4f1e274ef1d7304",
+    "exportSha256": "83c1f13c6b730f3ede06260dc66f0b8583aba63733fd699b3bea6f3a399c93cc",
     "materialReferenceSha256": "7a1d64c004e728d6363fd0e38be6a1af8e16b9203f4c07a9c5a086778044b096"
   }
 }
