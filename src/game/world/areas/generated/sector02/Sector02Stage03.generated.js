@@ -17,7 +17,7 @@ const SPEC = {
           "presentationId": "world-object:grapple-landmark"
         },
         "x": -160,
-        "y": -352
+        "y": -235
       },
       "objectIndex": 0,
       "surfaceIndex": 5,
@@ -25,7 +25,7 @@ const SPEC = {
         "id": "sector-02-03:g1-surface",
         "properties": {},
         "x": -160,
-        "y": -352
+        "y": -235
       }
     }
   ],
@@ -48,8 +48,8 @@ const SPEC = {
     },
     "exit": {
       "id": "sector-02-03:exit",
-      "x": 640,
-      "y": -320
+      "x": 580,
+      "y": -472
     },
     "gate": {
       "id": "sector-02-03:gate",
@@ -60,8 +60,8 @@ const SPEC = {
       "trigger": {
         "height": 62,
         "width": 52,
-        "x": 614,
-        "y": -350
+        "x": 554,
+        "y": -502
       }
     },
     "id": "sector-02-03",
@@ -142,8 +142,8 @@ const SPEC = {
         "kind": "gate-panel",
         "objectiveId": "sector-02-03:exit-panel-engaged",
         "position": {
-          "x": 528,
-          "y": -288
+          "x": 468,
+          "y": -440
         },
         "presentationId": "world-object:gate-panel",
         "requiredObjectiveIds": [
@@ -156,8 +156,8 @@ const SPEC = {
         "id": "sector-02-03:exit-gate",
         "kind": "gate",
         "position": {
-          "x": 640,
-          "y": -288
+          "x": 580,
+          "y": -440
         },
         "presentationId": "world-object:gate"
       }
@@ -199,8 +199,8 @@ const SPEC = {
       },
       {
         "id": "sector-02-03:route-exit",
-        "x": 576,
-        "y": -320
+        "x": 516,
+        "y": -472
       }
     ],
     "routes": [
@@ -252,55 +252,25 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": -416,
-          "y": -128
+          "x": -335,
+          "y": -100
         },
         "vertices": [
           {
-            "x": -544,
-            "y": -128
+            "x": -463,
+            "y": -100
           },
           {
-            "x": -288,
-            "y": -128
+            "x": -207,
+            "y": -100
           },
           {
-            "x": -288,
-            "y": -106
+            "x": -207,
+            "y": -78
           },
           {
-            "x": -544,
-            "y": -106
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "bottom-center",
-        "grappleable": true,
-        "id": "sector-02-03:service-core",
-        "kind": "solid",
-        "losBlocker": true,
-        "oneWay": false,
-        "position": {
-          "x": -64,
-          "y": -64
-        },
-        "vertices": [
-          {
-            "x": -96,
-            "y": -352
-          },
-          {
-            "x": -32,
-            "y": -352
-          },
-          {
-            "x": -32,
-            "y": -64
-          },
-          {
-            "x": -96,
-            "y": -64
+            "x": -463,
+            "y": -78
           }
         ]
       },
@@ -340,25 +310,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 560,
-          "y": -288
+          "x": 500,
+          "y": -440
         },
         "vertices": [
           {
-            "x": 448,
-            "y": -288
+            "x": 388,
+            "y": -440
           },
           {
-            "x": 672,
-            "y": -288
+            "x": 612,
+            "y": -440
           },
           {
-            "x": 672,
-            "y": -256
+            "x": 612,
+            "y": -408
           },
           {
-            "x": 448,
-            "y": -256
+            "x": 388,
+            "y": -408
           }
         ]
       }

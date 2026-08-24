@@ -16,16 +16,16 @@ const SPEC = {
           "label": "G1",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": -704,
-        "y": -224
+        "x": -640,
+        "y": -195
       },
       "objectIndex": 0,
       "surfaceIndex": 10,
       "target": {
         "id": "sector-02-06:g1-surface",
         "properties": {},
-        "x": -704,
-        "y": -224
+        "x": -640,
+        "y": -195
       }
     },
     {
@@ -36,16 +36,16 @@ const SPEC = {
           "label": "G2",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": -608,
-        "y": -480
+        "x": -485,
+        "y": -400
       },
       "objectIndex": 1,
       "surfaceIndex": 11,
       "target": {
         "id": "sector-02-06:g2-surface",
         "properties": {},
-        "x": -608,
-        "y": -480
+        "x": -485,
+        "y": -400
       }
     },
     {
@@ -56,36 +56,16 @@ const SPEC = {
           "label": "G3",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": 192,
-        "y": -576
+        "x": 100,
+        "y": -705
       },
       "objectIndex": 2,
       "surfaceIndex": 12,
       "target": {
         "id": "sector-02-06:g3-surface",
         "properties": {},
-        "x": 192,
-        "y": -576
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-02-06:g4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G4",
-          "presentationId": "world-object:grapple-landmark"
-        },
-        "x": 640,
-        "y": -608
-      },
-      "objectIndex": 3,
-      "surfaceIndex": 13,
-      "target": {
-        "id": "sector-02-06:g4-surface",
-        "properties": {},
-        "x": 640,
-        "y": -608
+        "x": 100,
+        "y": -705
       }
     }
   ],
@@ -110,8 +90,8 @@ const SPEC = {
     },
     "exit": {
       "id": "sector-02-06:exit",
-      "x": 896,
-      "y": -672
+      "x": 886,
+      "y": -747
     },
     "gate": {
       "id": "sector-02-06:gate",
@@ -122,8 +102,8 @@ const SPEC = {
       "trigger": {
         "height": 62,
         "width": 52,
-        "x": 870,
-        "y": -702
+        "x": 860,
+        "y": -777
       }
     },
     "id": "sector-02-06",
@@ -174,8 +154,8 @@ const SPEC = {
         "id": "sector-02-06:courtyard-left-guard",
         "kind": "sentry",
         "position": {
-          "x": 352,
-          "y": -544
+          "x": -215,
+          "y": -265
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -209,8 +189,8 @@ const SPEC = {
         "id": "sector-02-06:courtyard-right-guard",
         "kind": "sentry",
         "position": {
-          "x": 704,
-          "y": -576
+          "x": 385,
+          "y": -585
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -229,8 +209,8 @@ const SPEC = {
         "id": "sector-02-06:courtyard-void",
         "kind": "background-prop",
         "position": {
-          "x": -160,
-          "y": -560
+          "x": 20,
+          "y": -545
         },
         "presentationId": "world-object:background-prop"
       },
@@ -242,8 +222,8 @@ const SPEC = {
         "kind": "gate-panel",
         "objectiveId": "sector-02-06:exit-panel-engaged",
         "position": {
-          "x": 784,
-          "y": -640
+          "x": 774,
+          "y": -715
         },
         "presentationId": "world-object:gate-panel",
         "requiredObjectiveIds": [
@@ -256,8 +236,8 @@ const SPEC = {
         "id": "sector-02-06:exit-gate",
         "kind": "gate",
         "position": {
-          "x": 896,
-          "y": -640
+          "x": 886,
+          "y": -715
         },
         "presentationId": "world-object:gate"
       }
@@ -328,7 +308,7 @@ const SPEC = {
         "id": "sector-02-06:route-g4",
         "landmark": "G4",
         "x": 640,
-        "y": -608
+        "y": -610
       },
       {
         "id": "sector-02-06:route-final-rim",
@@ -337,8 +317,8 @@ const SPEC = {
       },
       {
         "id": "sector-02-06:route-exit",
-        "x": 832,
-        "y": -672
+        "x": 822,
+        "y": -747
       }
     ],
     "routes": [
@@ -390,54 +370,25 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": -640,
-          "y": -288
+          "x": -250,
+          "y": -185
         },
         "vertices": [
           {
-            "x": -768,
-            "y": -288
+            "x": -378,
+            "y": -185
           },
           {
-            "x": -512,
-            "y": -288
+            "x": -122,
+            "y": -185
           },
           {
-            "x": -512,
-            "y": -266
+            "x": -122,
+            "y": -163
           },
           {
-            "x": -768,
-            "y": -266
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-06:reveal-overlook",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -448,
-          "y": -512
-        },
-        "vertices": [
-          {
-            "x": -640,
-            "y": -512
-          },
-          {
-            "x": -256,
-            "y": -512
-          },
-          {
-            "x": -256,
-            "y": -488
-          },
-          {
-            "x": -640,
-            "y": -488
+            "x": -378,
+            "y": -163
           }
         ]
       },
@@ -448,54 +399,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -128,
-          "y": -512
+          "x": -135,
+          "y": -540
         },
         "vertices": [
           {
-            "x": -288,
-            "y": -512
+            "x": -295,
+            "y": -540
           },
           {
-            "x": 32,
-            "y": -512
+            "x": 25,
+            "y": -540
           },
           {
-            "x": 32,
-            "y": -488
+            "x": 25,
+            "y": -516
           },
           {
-            "x": -288,
-            "y": -488
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "sector-02-06:rim-landing-a",
-        "kind": "platform",
-        "oneWay": true,
-        "position": {
-          "x": 320,
-          "y": -544
-        },
-        "vertices": [
-          {
-            "x": 192,
-            "y": -544
-          },
-          {
-            "x": 448,
-            "y": -544
-          },
-          {
-            "x": 448,
-            "y": -522
-          },
-          {
-            "x": 192,
-            "y": -522
+            "x": -295,
+            "y": -516
           }
         ]
       },
@@ -506,25 +428,25 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": 128,
-          "y": -384
+          "x": 275,
+          "y": -295
         },
         "vertices": [
           {
-            "x": 0,
-            "y": -384
+            "x": 147,
+            "y": -295
           },
           {
-            "x": 256,
-            "y": -384
+            "x": 403,
+            "y": -295
           },
           {
-            "x": 256,
-            "y": -366
+            "x": 403,
+            "y": -277
           },
           {
-            "x": 0,
-            "y": -366
+            "x": 147,
+            "y": -277
           }
         ]
       },
@@ -535,25 +457,25 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 480,
-          "y": -544
+          "x": 340,
+          "y": -545
         },
         "vertices": [
           {
-            "x": 368,
-            "y": -544
+            "x": 228,
+            "y": -545
           },
           {
-            "x": 592,
-            "y": -544
+            "x": 452,
+            "y": -545
           },
           {
-            "x": 592,
-            "y": -522
+            "x": 452,
+            "y": -523
           },
           {
-            "x": 368,
-            "y": -522
+            "x": 228,
+            "y": -523
           }
         ]
       },
@@ -564,25 +486,25 @@ const SPEC = {
         "kind": "recovery",
         "oneWay": true,
         "position": {
-          "x": 512,
-          "y": -448
+          "x": 685,
+          "y": -385
         },
         "vertices": [
           {
-            "x": 400,
-            "y": -448
+            "x": 573,
+            "y": -385
           },
           {
-            "x": 624,
-            "y": -448
+            "x": 797,
+            "y": -385
           },
           {
-            "x": 624,
-            "y": -430
+            "x": 797,
+            "y": -367
           },
           {
-            "x": 400,
-            "y": -430
+            "x": 573,
+            "y": -367
           }
         ]
       },
@@ -593,25 +515,25 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 736,
-          "y": -576
+          "x": 780,
+          "y": -550
         },
         "vertices": [
           {
-            "x": 576,
-            "y": -576
+            "x": 620,
+            "y": -550
           },
           {
-            "x": 896,
-            "y": -576
+            "x": 940,
+            "y": -550
           },
           {
-            "x": 896,
-            "y": -554
+            "x": 940,
+            "y": -528
           },
           {
-            "x": 576,
-            "y": -554
+            "x": 620,
+            "y": -528
           }
         ]
       },
@@ -622,25 +544,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 800,
-          "y": -640
+          "x": 790,
+          "y": -715
         },
         "vertices": [
           {
-            "x": 672,
-            "y": -640
+            "x": 662,
+            "y": -715
           },
           {
-            "x": 928,
-            "y": -640
+            "x": 918,
+            "y": -715
           },
           {
-            "x": 928,
-            "y": -608
+            "x": 918,
+            "y": -683
           },
           {
-            "x": 672,
-            "y": -608
+            "x": 662,
+            "y": -683
           }
         ]
       }
