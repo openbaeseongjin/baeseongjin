@@ -374,7 +374,7 @@ const SPEC = {
         "objectiveId": "exit-panel-engaged",
         "position": {
           "x": -332,
-          "y": -2248
+          "y": -2240
         },
         "presentationId": "world-object:gate-panel"
       },
@@ -385,7 +385,7 @@ const SPEC = {
         "kind": "gate",
         "position": {
           "x": -220,
-          "y": -2248
+          "y": -2240
         },
         "presentationId": "world-object:gate"
       }

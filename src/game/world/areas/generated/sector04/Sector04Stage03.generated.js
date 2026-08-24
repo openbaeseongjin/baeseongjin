@@ -215,13 +215,13 @@ const SPEC = {
         "coordinateAnchor": "center",
         "id": "sector-04-03:service-relay-b03-panel",
         "interactionRadius": 72,
-        "kind": "gate-panel",
+        "kind": "terminal",
         "objectiveId": "sector-04-03:service-relay-b03",
         "position": {
           "x": 577,
           "y": -554
         },
-        "presentationId": "world-object:gate-panel"
+        "presentationId": "world-object:terminal"
       },
       {
         "coordinateAnchor": "bottom-center",
@@ -232,7 +232,7 @@ const SPEC = {
         "objectiveId": "sector-04-03:exit-panel-engaged",
         "position": {
           "x": 1948,
-          "y": -2028
+          "y": -2010
         },
         "presentationId": "world-object:gate-panel"
       }

@@ -96,6 +96,10 @@ const EXPECTED_SECTOR_05_JAMMER_IDS = Object.freeze([
 const SECTOR_05_PROOF_OBJECT_ID = "sector-05-08:continuity-proof-synthesis:display";
 const STAGE_BOUNDARY_EPSILON = 0.01;
 const MIN_STAGE_BOUNDARY_PASSAGE_WIDTH = PLAYER_CONFIG.radius * 2 + 2;
+const GROUNDED_WORLD_OBJECT_KIND_BY_PRESENTATION_ID = Object.freeze({
+    "world-object:gate": "gate",
+    "world-object:gate-panel": "gate-panel"
+});
 const EXPECTED_SECTOR_06_RECALL = Object.freeze({
     windStageId: "6-2",
     standardStageId: "6-3",
@@ -518,6 +522,49 @@ function surfaceBounds(surface) {
         width: Math.max(...surface.vertices.map(({ x }) => x)) - Math.min(...surface.vertices.map(({ x }) => x)),
         height: Math.max(...surface.vertices.map(({ y }) => y)) - Math.min(...surface.vertices.map(({ y }) => y))
     };
+}
+
+function validateGroundedWorldObjectPresentations(area, stageId, issues) {
+    for (const object of area.objects ?? []) {
+        const expectedKind = GROUNDED_WORLD_OBJECT_KIND_BY_PRESENTATION_ID[object.presentationId];
+        if (!expectedKind) continue;
+        if (object.kind !== expectedKind) {
+            issue(issues, "grounded-world-object-kind-mismatch", {
+                stageId,
+                objectId: object.id,
+                expectedKind,
+                actualKind: object.kind
+            });
+        }
+        if (object.presentationId === "world-object:gate-panel" && typeof object.gateId !== "string") {
+            issue(issues, "gate-panel-identity-mismatch", { stageId, objectId: object.id });
+        }
+        if (object.coordinateAnchor !== "bottom-center") {
+            issue(issues, "grounded-world-object-anchor-mismatch", {
+                stageId,
+                objectId: object.id,
+                actualAnchor: object.coordinateAnchor ?? null
+            });
+            continue;
+        }
+        const support = (area.surfaces ?? []).find((surface) => {
+            if (surface.collision === false || surface.renderable === false) return false;
+            const bounds = surfaceBounds(surface);
+            return (
+                bounds.width > bounds.height &&
+                object.position.x >= bounds.x - STAGE_BOUNDARY_EPSILON &&
+                object.position.x <= bounds.x + bounds.width + STAGE_BOUNDARY_EPSILON &&
+                Math.abs(object.position.y - bounds.y) <= STAGE_BOUNDARY_EPSILON
+            );
+        });
+        if (!support) {
+            issue(issues, "grounded-world-object-support-missing", {
+                stageId,
+                objectId: object.id,
+                position: object.position
+            });
+        }
+    }
 }
 
 function normalizedCollisionFootprint(vertices) {
@@ -953,6 +1000,7 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
         validateEditorEntityCoverage(spec, issues);
         const generatedArea = areaIndex[entry.areaId];
         const compiledArea = createAreaDefinitionFromV2(spec);
+        validateGroundedWorldObjectPresentations(compiledArea, entry.stageId, issues);
         const firstRoutePoint = compiledArea.routePoints[0];
         const entryRouteDistance = firstRoutePoint
             ? Math.hypot(compiledArea.entry.x - firstRoutePoint.x, compiledArea.entry.y - firstRoutePoint.y)

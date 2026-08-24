@@ -566,13 +566,13 @@ const SPEC = {
         "coordinateAnchor": "center",
         "id": "sector-04-05:override-b-panel",
         "interactionRadius": 72,
-        "kind": "gate-panel",
+        "kind": "terminal",
         "objectiveId": "sector-04-05:override-b-acquired",
         "position": {
           "x": 640,
           "y": -1790
         },
-        "presentationId": "world-object:gate-panel"
+        "presentationId": "world-object:terminal"
       },
       {
         "coordinateAnchor": "bottom-center",
@@ -583,7 +583,7 @@ const SPEC = {
         "objectiveId": "sector-04-05:exit-panel-engaged",
         "position": {
           "x": 1548,
-          "y": -2108
+          "y": -2170
         },
         "presentationId": "world-object:gate-panel"
       }

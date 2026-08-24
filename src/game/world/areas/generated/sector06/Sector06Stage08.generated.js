@@ -303,7 +303,7 @@ const SPEC = {
         "objectiveId": "pad-access-denied",
         "position": {
           "x": 1750,
-          "y": -1680
+          "y": -1705
         },
         "presentationId": "world-object:gate-panel"
       }
