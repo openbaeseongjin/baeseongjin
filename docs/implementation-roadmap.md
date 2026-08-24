@@ -20,7 +20,7 @@
 - 시드 기반 48단계 수직 월드와 카메라 추적 프로토타입
 - 기본 자동 공격은 비활성화하고 성공한 로프 스윙 뒤 부착 또는 해제 carry 안의 고속 몸체 충돌을 기본 공격으로 사용한다. `AutomaticWeaponObject`는 후속 기능용으로 보존한다.
 - authored activation·Cover LOS를 유지한 체력 100·인식 760px·탄속 520px/s·재사격 1.0초 Sentry
-- 적 투사체의 본체 피해·무적 시간과 `cutter-fire` opt-in 로프 절단. Cutter는 별도 몹이 아니라 일반 발사형 Enemy에 붙는 투사체 capability다. 적 위치 넉백은 직접 추격·돌진형만 허용하고 자기 이동 경로를 가진 다른 Enemy는 피해만 받는다.
+- 적 투사체의 본체 피해와 `cutter-fire` opt-in 로프 절단. Player는 피격 후 시간 기반 무적 없이 서로 다른 유효 impact를 각각 받는다. Cutter는 별도 몹이 아니라 일반 발사형 Enemy에 붙는 투사체 capability다. 적 위치 넉백은 직접 추격·돌진형만 허용하고 자기 이동 경로를 가진 다른 Enemy는 피해만 받는다.
 - 고정 `sentry` Turret만 정지하고 Patrol·Pursuit·Shield·Artillery·Hardpoint Jammer·Support·Swarm은 authored Patrol, 직접 추격 또는 공용 Roaming 상태를 각 Behavior에서 조합해 이동한다.
 - [0.66.0] Hardpoint Jammer는 맵별 전용 후보 Anchor 없이 일반 ropeable surface를 Hook reach 공간 질의로 자동 선택한다. Active Jam 표면 부착은 owner-first `jammer-shock` 하나로 Rope를 즉시 절단하고, 공용 감전 상태가 0.05초마다 2.5씩 0.5초 동안 총 25 피해를 적용한다. 재적용은 stack 없이 남은 시간만 초기화하며 pulse별 네트워크 사건은 보내지 않는다.
 - 체력, 사망·낙사와 플레이어별 활성 체크포인트 즉시 부활
@@ -66,7 +66,7 @@
 3. **Phase 3 · #625 / #637 / #816 / #922, 0.60.0에서 공간 계약 완결:** Player별 checkpoint와 독립 Boss Stage는 유지하되 4,800px city wing·connector collision과 Stage 격리 gap을 제거했다. 일반 Stage authored Bounds는 위아래 edge가 맞닿고 Gate portal로 전진한다.
 4. [0.67.0 전환] authored `augment-node` 획득과 출구 선행조건을 제거하고, 서버가 확정한 몹 막타 XP로 개인 레벨업 선택을 연다.
 5. **Sector Access 3-of-3 · 0.43.2 / portal 정렬 0.60.0:** Sector 01·02·03의 기존 Carrier와 공용 Module 진행은 유지한다. outgoing route가 잠긴 동안 authored Gate portal만 사용할 수 없으며 자동 transit barrier collision·visual은 생성하지 않는다. 수집 진행과 Player별 checkpoint는 보존한다.
-6. **Sector 01~03 combat density:** authored safe slot을 `16 → 18 → 22`로 늘리고, 기존 selector가 pool type만 결정하게 한다. runtime director·생성 좌표·slot enablement state는 추가하지 않는다.
+6. **Sector 01~06 combat density · 0.68.0:** `1-1·1-2`를 제외한 Stage를 Sector별 최소 `3 → 3 → 4 → 4 → 5 → 5` slot로 늘려 총 189개를 사용한다. 기존 selector와 Stage-local activation을 유지하고 runtime director·동적 생성 좌표는 추가하지 않는다.
 7. **Stage 공간 권위 · 0.60.0:** 일반 Stage surface·벽·격벽·world object 위치와 경계 개구부는 Editor source만 소유한다. Player는 아래 Stage들로 계속 낙하·착지·Rope 복구하고 전체 월드 하단 아래에서만 사망한다. Gate는 위치 기반 Player 한 명만 전진시키며 현재 Stage ID는 저장하지 않는다.
 
 ### 제출 전 시나리오 구현 트랙

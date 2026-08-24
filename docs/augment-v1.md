@@ -48,11 +48,11 @@ Player·Enemy·Boss는 같은 `CombatStatusEffectPool`을 Has-A로 소유한다.
 
 투사체·범위 효과는 Player·Enemy·Boss를 같은 combat target 계약으로 조회한다. 시전자는 기본 제외하며 자기 피격 허용 여부는 마법 target policy가 소유한다. Player 피해는 피해 클라이언트, 중립 Enemy·Boss 피해와 막타 경험치는 서버가 확정한다. 상태 pulse를 네트워크 사건으로 매번 보내지 않고 상태 적용 원인과 snapshot으로 진행한다.
 
-원격 Player 마법은 피해 클라이언트가 복제된 Spell projectile의 선분 충돌을 감지해 피해·상태이상·넉백을 즉시 적용한 뒤 Augment impact v4 claim을 보낸다. 서버는 인증된 피해 Player, source Player, 마법 수치와 event ID를 검증하고 중복 claim을 한 번만 확정한다.
+원격 Player 마법은 피해 클라이언트가 복제된 Spell projectile의 선분 충돌을 감지해 피해·상태이상·넉백을 즉시 적용한 뒤 Augment impact v5 claim을 보낸다. 서버는 인증된 피해 Player, source Player, 마법 수치와 event ID를 검증하고 중복 claim을 한 번만 확정한다.
 
-Player command v7은 완성된 spell command sequence와 key만 전송한다. Owner motion v10은 Spell·Experience 상태를, player-impact v14는 공통 상태이상을 포함한 recovery 검증을 사용한다. 디버그 패널은 현행 8장만 선택하며 과거 Action·Signature·Modifier와 Node offer protocol은 존재하지 않는다.
+Player command v7은 완성된 spell command sequence와 key만 전송한다. Owner motion v10은 Spell·Experience 상태를, player-impact v15는 공통 상태이상을 포함하되 피격 후 무적 타이머가 없는 recovery 검증을 사용한다. augment-impact v5는 시간 기반 무적에 의한 `duplicate` 성공 결과를 허용하지 않는다. 디버그 패널은 현행 8장만 선택하며 과거 Action·Signature·Modifier와 Node offer protocol은 존재하지 않는다.
 
-`npm run simulate:multiplayer-combat`은 DOM 없이 실제 `PlayerCommandBatch` 직렬화, `GameSimulation.stepCommandBatch()`, WorldSnapshot v16 직렬화·복원과 보상 resolver를 사용한다. 두 Player를 명시 배치해 상대 피격·시전자 제외·피해자 선행 적용과 중복 claim·지형 충돌 메테오 범위 피해·점화·냉동 입력 차단과 물리 지속·대시 impulse 보존·막타 경험치·자동 장착·최종 snapshot 수렴을 검사한다.
+`npm run simulate:multiplayer-combat`은 DOM 없이 실제 `PlayerCommandBatch` 직렬화, `GameSimulation.stepCommandBatch()`, WorldSnapshot v17 직렬화·복원과 보상 resolver를 사용한다. 두 Player를 명시 배치해 상대 피격·시전자 제외·피해자 선행 적용과 중복 claim·지형 충돌 메테오 범위 피해·점화·냉동 입력 차단과 물리 지속·대시 impulse 보존·막타 경험치·자동 장착·최종 snapshot 수렴을 검사한다.
 
 ## HUD
 

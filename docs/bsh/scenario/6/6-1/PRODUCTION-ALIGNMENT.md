@@ -1,6 +1,6 @@
 # 6-1 PRODUCTION ALIGNMENT REV3.0
 
-Runtime: `AREA-SPEC.v2.json` generated source, threat-free, five visible recovery catches; browser tuning pending.
+Runtime: `AREA-SPEC.v2.json` generated source with five route-distributed Enemy slots and five visible recovery catches; browser tuning pending.
 
 Entry authority: 5-8 objective 완료 뒤 authored Gate portal이 6-1 Entry로 직접 전환한다.
 

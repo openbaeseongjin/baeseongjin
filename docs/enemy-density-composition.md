@@ -1,11 +1,13 @@
-# Sector 01~03 적 밀도·조합
+# Sector 01~06 적 밀도·조합
 
-0.32.0 기본 Runtime은 Stage-local 안전 slot을 공간 권위로 사용하고, slot의 적 종류만 `slotId + runSeed + worldRevision`으로 결정한다. Runtime density director, 생성 좌표, 화면 점유 기반 spawn은 사용하지 않는다.
+0.68.0 Runtime은 Stage-local 안전 slot을 공간 권위로 사용하고, slot의 적 종류만 `slotId + runSeed + worldRevision`으로 결정한다. Runtime density director, 생성 좌표, 화면 점유 기반 spawn은 사용하지 않는다.
 
 ## 밀도 기준
 
 - `1-1`, `1-2`: 로프 학습을 위해 적 0.
-- `1-3` 이후: 대표 Gameplay 화면당 약 1기가 읽히도록 세로 구간에 분산.
+- `1-3` 이후: 모든 일반 Stage는 Enemy slot을 최소 3개 사용한다.
+- 상승 밀도: Sector 01~02는 최소 3개, Sector 03~04는 최소 4개, Sector 05~06은 최소 5개를 사용하며 이미 더 많은 Stage는 줄이지 않는다.
+- 추가 slot은 Entry·Exit·Story·Safe 지점을 피하고 기존 route point 사이와 Stage-local activation band에 분산한다.
 - Sector 후반: 단순 수량보다 서로 다른 역할의 동시 압박을 증가.
 - Sector 01의 `1-3·1-6·1-7`, Sector 02의 `2-2·2-5·2-7`, Sector 03의 `3-2·3-5·3-7`: 기존 경비 slot 한 기가 Access Carrier이며 Sector당 정확히 3개다.
 - Node `1-4`, `2-3`, `3-5`: 적 처치 조건 없이 chooser 즉시 개방. 선택 중 Player 입력만 멈추고 월드·적·동료는 계속 진행.
@@ -14,9 +16,12 @@
 
 | Sector | Stage별 slot 수 | 합계 | 역할 곡선 |
 | --- | --- | ---: | --- |
-| 01 | `0, 0, 3, 1, 2, 3, 3, 4` | 16 | Sentry/Pursuit 도입 → Shield/Artillery 제한 조합 |
-| 02 | `1, 2, 1, 2, 3, 2, 3, 4` | 18 | Patrol 중심 → Shield/Support/Artillery 조합 |
-| 03 | `1, 2, 2, 3, 2, 3, 4, 5` | 22 | Scanner/Patrol → Artillery/Support/Swarm 누적 |
+| 01 | `0, 0, 3, 3, 3, 3, 3, 4` | 19 | Sentry/Pursuit 도입 → Shield/Artillery 제한 조합 |
+| 02 | `3, 3, 3, 3, 3, 3, 3, 4` | 25 | Patrol 중심 → Shield/Support/Artillery 조합 |
+| 03 | `4, 4, 4, 4, 4, 4, 4, 5` | 33 | Scanner/Patrol → Artillery/Support/Swarm 누적 |
+| 04 | `4, 4, 4, 4, 4, 4, 4, 4` | 32 | Patrol/Pursuit 중심, 기존 Cutter 분리 유지 |
+| 05 | `5, 5, 5, 5, 5, 5, 5, 5` | 40 | Shield/Artillery/Support 압박, 기존 Jammer/Cutter 유지 |
+| 06 | `5, 5, 5, 5, 5, 5, 5, 5` | 40 | 기존 Sentry/Patrol/Cutter 회상 위에 전 계열 숙련 조합 |
 
 정확한 pool 결과는 seed에 따라 바뀌지만 slot 수·위치·activation·Stable ID는 바뀌지 않는다. 전체 exact roster를 테스트 snapshot으로 고정하지 않고 안전 구간, Access 3기, Sector coarse tier, family 도달과 결정성을 검증한다.
 
@@ -32,7 +37,7 @@
 - TO-BE 공략: 특정 제거 수단은 몹 계약으로 정하지 않으며 Player가 로프·일반 공격·지형을 자유롭게 사용한다.
 - TO-BE 인식: 화면 안의 몹이 반응하지 않는 구간을 없애도록 공용 사격과 각 행동의 인식 범위를 reference viewport 기준으로 확장하되 authored activation 경계는 넘지 않는다.
 
-멀티 snapshot은 현재 56개 slot의 정적 authored 정의를 `world revision + objectId` 인덱스로 재사용한다. 축약 state hydration은 runtime을 만들거나 slot을 다시 선택하지 않고 동적 state만 합성한다. prediction 복원은 stable ID가 같은 기존 Enemy runtime에 동적 상태를 in-place restore하며 실제 spawn/despawn 또는 identity 변경에만 runtime을 만든다. 이 최적화는 20Hz snapshot·중립 Enemy 권위·slot 수와 pool 결과를 바꾸지 않는다.
+멀티 snapshot은 현재 189개 slot의 정적 authored 정의를 `world revision + objectId` 인덱스로 재사용한다. 축약 state hydration은 runtime을 만들거나 slot을 다시 선택하지 않고 동적 state만 합성한다. prediction 복원은 stable ID가 같은 기존 Enemy runtime에 동적 상태를 in-place restore하며 실제 spawn/despawn 또는 identity 변경에만 runtime을 만든다. 이 최적화는 20Hz snapshot·중립 Enemy 권위·slot 수와 pool 결과를 바꾸지 않는다.
 
 ## Authoring 계약
 
@@ -49,4 +54,4 @@
 - 개인·전원 사망 모두 shared progress/처치/module/route를 보존하고 각 Player의 마지막 Stage savepoint에서 부활한다.
 - 모든 적 이동은 행동·돌진·Patrol 종류와 무관하게 Player와 같은 공개 physics/collider 경계로 현재 활성 collision surface, Player body와 다른 Enemy body를 해결한다. 일반 몹은 circle, 대형·Boss형은 convex polygon 또는 box collider를 조립할 수 있으며 Player↔Enemy·Enemy↔Enemy도 Player↔Player와 같은 shape contact·질량·상대 속도 actor collision을 사용한다. `sentry`/`sentry-t1` 고정형 Turret만 inverse mass 0의 정적 body라 위치가 바뀌지 않으며, 다른 Enemy는 authored 경로나 위치 넉백 정책과 별개로 충돌 impulse를 받는 동적 body다. 정적 Turret도 collision body 자체를 제거하거나 Player 통과를 허용하지 않는다.
 - 고정·고정경로·제자리 지원형의 위치 넉백 면역, Pursuit/Swarm의 직접 추격형 displacement.
-- Boss·Timer/Purge·Sector 04~06은 이 범위 밖이다.
+- Boss·Timer/Purge는 이 범위 밖이다.

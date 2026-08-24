@@ -1,6 +1,6 @@
 # 6-6 PRODUCTION ALIGNMENT REV2.2
 
-Runtime: generated source with one optional Patrol using the approved ping-pong path; browser tuning pending.
+Runtime: generated source with five Enemy slots including the optional Patrol on its approved ping-pong path; browser tuning pending.
 
 Latest checked main:
 `8b344f0f7a2309bfb316655668ed180718db7781`

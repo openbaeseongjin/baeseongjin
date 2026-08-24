@@ -1096,7 +1096,6 @@ export class GameSimulation {
                 player.ropeObject.rope.detach();
                 player.ropeObject.swingDrag = null;
                 player.ropeImpactState.reset();
-                player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
                 this.recordReplicationEvent("boss-player-recovered", {
                     bossStageId: stage.id,
                     playerId: player.id,
@@ -1305,7 +1304,6 @@ export class GameSimulation {
                 if (
                     player.lifeState !== "active" ||
                     player.health <= 0 ||
-                    player.hitInvulnerabilityRemaining > 0 ||
                     this.bossRuntime?.recoveryProtected?.(player.id) === true
                 )
                     continue;
@@ -1325,7 +1323,6 @@ export class GameSimulation {
                 });
                 const appliedDamage = protection.appliedDamage;
                 player.health = Math.max(0, player.health - appliedDamage);
-                player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
                 if (hazard.kind === "counter-bash" && hazard.bounds) {
                     const originX = hazard.bounds.x + hazard.bounds.width * 0.5;
                     const originY = hazard.bounds.y + hazard.bounds.height * 0.5;
@@ -2100,7 +2097,6 @@ export class GameSimulation {
                 COMBAT_CONFIG.playerHitKnockback
             );
         }
-        player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
         const damage = Number.isFinite(event.parameters?.damage) ? Math.max(0, event.parameters.damage) : 0;
         const protection = player.augmentCombat.absorbPlayerDamage({
             amount: damage,
@@ -2131,12 +2127,7 @@ export class GameSimulation {
 
     applyPredictedIncomingSpellImpact(ownerId, event) {
         const player = this.#requirePlayer(ownerId);
-        if (
-            player.lifeState !== "active" ||
-            event.targetId !== ownerId ||
-            event.sourcePlayerId === ownerId ||
-            player.hitInvulnerabilityRemaining > 0
-        ) {
+        if (player.lifeState !== "active" || event.targetId !== ownerId || event.sourcePlayerId === ownerId) {
             return false;
         }
         const protection = player.augmentCombat.absorbPlayerDamage({
@@ -2170,7 +2161,6 @@ export class GameSimulation {
             collider: state.collider,
             health: state.health,
             maxHealth: state.maxHealth,
-            hitInvulnerabilityRemaining: state.hitInvulnerabilityRemaining,
             ropeDisabledRemaining: state.ropeDisabledRemaining,
             lifeState: state.lifeState,
             rope: state.rope,
@@ -2238,7 +2228,6 @@ export class GameSimulation {
         player.ropeImpactState.restore(state.ropeImpactState ?? null);
         player.health = state.health;
         player.maxHealth = state.maxHealth;
-        player.hitInvulnerabilityRemaining = state.hitInvulnerabilityRemaining;
         player.ropeDisabledRemaining = state.ropeDisabledRemaining;
         player.lifeState = state.lifeState;
         player.weapon.range = state.weapon.range;
@@ -2887,7 +2876,6 @@ export class GameSimulation {
         if (this.debugTrainingDummy.matches(enemyId)) {
             return Object.freeze({ safeTraining: true, damage: 0 });
         }
-        if (player.hitInvulnerabilityRemaining > 0) return null;
         const protection = player.augmentCombat.absorbPlayerDamage({
             amount: result.damage,
             type: "combat-hp",
@@ -2896,7 +2884,6 @@ export class GameSimulation {
         });
         const damage = protection.appliedDamage;
         player.health = Math.max(0, player.health - damage);
-        player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
         for (const reflected of protection.events) {
             const attacker = this.objects.enemies.find(reflected.attackerId);
             if (!attacker) continue;
@@ -3012,25 +2999,21 @@ export class GameSimulation {
             if (!validateAugmentImpactFormula(sourcePlayer, claim, playerTarget, { positionTolerance }).valid) {
                 return Object.freeze({ accepted: false, reason: "invalid" });
             }
-            const blockedByInvulnerability = playerTarget.hitInvulnerabilityRemaining > 0;
-            const protection = blockedByInvulnerability
-                ? { appliedDamage: 0 }
-                : playerTarget.augmentCombat.absorbPlayerDamage({
-                      amount: claim.damage,
-                      type: "combat-hp",
-                      sourceKind: claim.effectId,
-                      attackerId: claim.sourcePlayerId
-                  });
+            const protection = playerTarget.augmentCombat.absorbPlayerDamage({
+                amount: claim.damage,
+                type: "combat-hp",
+                sourceKind: claim.effectId,
+                attackerId: claim.sourcePlayerId
+            });
             playerTarget.health = Math.max(0, playerTarget.health - protection.appliedDamage);
             const statusEffectId = SPELL_STATUS_EFFECT[claim.effectId] ?? null;
-            if (!blockedByInvulnerability && statusEffectId) {
+            if (statusEffectId) {
                 playerTarget.statusEffects.apply(statusEffectId, { sourceId: claim.sourcePlayerId });
             }
-            const knockbackApplied =
-                !blockedByInvulnerability && applyPlayerSpellKnockback(playerTarget, claim.knockback);
+            const knockbackApplied = applyPlayerSpellKnockback(playerTarget, claim.knockback);
             const resolution = Object.freeze({
                 accepted: true,
-                resolution: blockedByInvulnerability ? "duplicate" : "applied",
+                resolution: "applied",
                 damage: protection.appliedDamage,
                 knockbackApplied
             });
@@ -3238,7 +3221,6 @@ export class GameSimulation {
 
     #prepareOwnerStep(player, dt) {
         player.ropeDisabledRemaining = Math.max(0, player.ropeDisabledRemaining - dt);
-        player.hitInvulnerabilityRemaining = Math.max(0, player.hitInvulnerabilityRemaining - dt);
         player.ropeImpactState.advance(dt);
         player.augmentLoadout.advance(dt);
         for (const outcome of player.statusEffects.advance(dt)) {
@@ -4105,7 +4087,7 @@ export class GameSimulation {
                 playerId: player.id
             };
         } else {
-            if (player.health <= 0 || player.hitInvulnerabilityRemaining > 0) {
+            if (player.health <= 0) {
                 return Object.freeze({ accepted: false, reason: "player-ineligible" });
             }
             const protection = player.augmentCombat.absorbPlayerDamage({
@@ -4122,7 +4104,6 @@ export class GameSimulation {
                     COMBAT_CONFIG.playerHitKnockback
                 );
             }
-            player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
             for (const reflected of protection.events) {
                 const attacker = this.objects.enemies.find(reflected.attackerId);
                 if (!attacker) continue;
@@ -4208,7 +4189,6 @@ export class GameSimulation {
                 );
             }
         }
-        player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
         if (bossHazard && player.health <= 0) {
             this.#resolveBossParticipantDefeat(player, `boss-${claim.sourceType}`);
         } else if (claim.outcome.respawned) {
@@ -4371,7 +4351,6 @@ export class GameSimulation {
         player.ropeImpactState.reset();
         player.health = player.maxHealth;
         player.weapon.cooldown = 0;
-        player.hitInvulnerabilityRemaining = 0;
         player.ropeDisabledRemaining = 0;
         player.lifeState = "active";
         player.augmentCombat.resetForRespawn(player.augmentLoadout, player.maxHealth);

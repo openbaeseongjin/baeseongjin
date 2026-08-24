@@ -340,6 +340,103 @@
           "y": -1856
         },
         "presentationId": "world-object:gate-panel"
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "patrol-drone-t1",
+            "pursuit-drone-t1"
+          ]
+        },
+        "id": "sector-04-02:route-guard-01",
+        "kind": "sentry",
+        "position": {
+          "x": 752,
+          "y": -784
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "patrol-drone-t1",
+            "pursuit-drone-t1"
+          ]
+        },
+        "id": "sector-04-02:route-guard-02",
+        "kind": "sentry",
+        "position": {
+          "x": 1264,
+          "y": -1488
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "patrol-drone-t1",
+            "pursuit-drone-t1"
+          ]
+        },
+        "id": "sector-04-02:route-guard-03",
+        "kind": "sentry",
+        "position": {
+          "x": -16,
+          "y": -816
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
       }
     ],
     "order": 2,

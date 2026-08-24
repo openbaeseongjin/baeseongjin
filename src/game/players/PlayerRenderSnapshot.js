@@ -14,7 +14,6 @@ export const withPlayerRenderSnapshot = createRenderSnapshotCapabilityMixin({
             collider: this.physics.collider.snapshot(),
             health: this.health,
             maxHealth: this.maxHealth,
-            hitInvulnerabilityRemaining: this.hitInvulnerabilityRemaining,
             ropeDisabledRemaining: this.ropeDisabledRemaining,
             lifeState: this.lifeState,
             ropeImpactState: this.ropeImpactState.snapshot(),

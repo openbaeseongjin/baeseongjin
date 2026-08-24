@@ -1,5 +1,7 @@
 # 3-1 PRODUCTION ALIGNMENT — REV8.0
 
+> **CURRENT RUNTIME OVERRIDE — 0.68.0:** Enemy slot은 4개이며 아래 exact one 기록을 대체한다.
+
 > **CURRENT RUNTIME:** 2-8 objective와 Sector 02 Access 3/3을 완료한 Player가 authored Gate portal로 3-1 Entry에 직접 진입한다. 3-1 내부 REV8 geometry·Story·Enemy·3-2 exit 계약은 바뀌지 않는다.
 
 Baseline:

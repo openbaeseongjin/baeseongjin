@@ -1,5 +1,7 @@
 # SECTOR 06 — ROOFTOP / EVACUATION MASTER PLAN
 
+> **CURRENT RUNTIME ENEMY DENSITY — 0.68.0:** 각 Stage는 5개 slot을 사용한다. 아래 authored snapshot의 `Enemy 0`·`threat-free`·1기 exact count는 대체되며 고유 Wind/Scanner/Sentry/Patrol/Cutter와 공간 역할은 유지한다. 현재 권위는 [`../../../enemy-density-composition.md`](../../../enemy-density-composition.md)다.
+
 *RUNTIME GENERATED · PLAYTEST TUNING PENDING*
 
 `SECTOR 06 ROOFTOP / EVACUATION` · `THE GOAL IS VISIBLE; THE ROOM IS GONE` · `OPEN SKY / STRUCTURAL ISLANDS` · `FINAL BUILD EXAM` · `ESCAPE`

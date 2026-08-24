@@ -417,7 +417,6 @@ export class MultiplayerGameApp {
                       angle: predictedPlayer.angle,
                       angularVelocity: predictedPlayer.angularVelocity,
                       rope: predictedPlayer.rope,
-                      hitInvulnerabilityRemaining: predictedPlayer.hitInvulnerabilityRemaining,
                       collider: predictedPlayer.collider
                   }
                 : null

@@ -1,6 +1,8 @@
 # SECTOR 04 — UPPER RESIDENTIAL / AMENITY DISTRICT
 ## MASTER PLAN REV 1.0 — PRIVILEGE IS PROTECTED
 
+> **CURRENT RUNTIME ENEMY DENSITY — 0.68.0:** 각 Stage는 4개 slot을 사용한다. 아래 authored snapshot의 exact enemy count는 대체되며 기존 Patrol/Pursuit/Cutter 분리와 현재 권위는 [`../../../enemy-density-composition.md`](../../../enemy-density-composition.md)를 따른다.
+
 > **Status**
 >
 > - Sector Identity / Theme: **DESIGN DIRECTION LOCKED**

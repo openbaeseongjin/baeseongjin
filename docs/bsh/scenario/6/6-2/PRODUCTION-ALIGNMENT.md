@@ -1,6 +1,6 @@
 # 6-2 PRODUCTION ALIGNMENT REV3.1
 
-Runtime: generated source with one approved continuous Wind and Wind-excluded Lee pocket; browser tuning pending.
+Runtime: generated source with five Enemy slots, one approved continuous Wind and a Wind-excluded Lee pocket; browser tuning pending.
 
 Latest checked main:
 `8b344f0f7a2309bfb316655668ed180718db7781`

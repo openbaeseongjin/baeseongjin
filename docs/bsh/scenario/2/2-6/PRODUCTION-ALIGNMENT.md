@@ -1,5 +1,7 @@
 # 2-6 PRODUCTION ALIGNMENT — REV8.0
 
+> **CURRENT RUNTIME OVERRIDE — 0.68.0:** Enemy slot은 3개이며 아래 packaging-time 2-slot 기록을 대체한다.
+
 Baseline:
 `2ea921fed1fee27a4b3837ecde3281d5cd3390dd`
 

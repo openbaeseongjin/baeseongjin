@@ -1,5 +1,7 @@
 # 4-2 PRODUCTION ALIGNMENT — REV1.0
 
+> **CURRENT RUNTIME OVERRIDE — 0.68.0:** Enemy slot은 4개이며 아래 Pursuit 1기 authoring 기록을 대체한다.
+
 Baseline: `4551798860193a16e53814aae5c3a42022b4e1cf`
 
 ## Current Runtime — VERIFIED
