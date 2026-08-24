@@ -184,7 +184,7 @@ const SPEC = {
         ]
       },
       {
-        "coordinateAnchor": "center",
+        "coordinateAnchor": "bottom-center",
         "cueIds": [
           "upper-transit-restricted",
           "transfer-authorization-pending"
@@ -196,7 +196,7 @@ const SPEC = {
         "opensInStage": false,
         "position": {
           "x": 820,
-          "y": -305
+          "y": -290
         },
         "presentationId": "world-object:gate"
       },

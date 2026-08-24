@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 316969d1aec3ad69d60a33efbe130938a0e145ab19f801c386c801bd430daf6b
-authored-area-sha256: a673cafc78238723bee52f23571236f8049b5c8953dc19f1fb25707c7e2a9ba0
+scenario-source-sha256: 4bcee55ac2be61411683cd2f51979e9056d915dd6d2df3ca0a47de4e886660c0
+authored-area-sha256: a719b997601f8d6ff6cb9b9cc0e202e1bc35f8c8584300d6e6940ef6b4887762
 authored-sector-sha256: 9a896e7dc3ea516853888afb5245194daf7ab607644e4d0ae665b60e02837bec
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 2d6c062fbda83674a28d67f204aaafb71d0c18c9
+reviewed-upstream: 99e8b77524378c23040b0661bac5dd4a4864d2f5
 -->
 
 ## 현재 확인 체크포인트
@@ -30,6 +30,7 @@ reviewed-upstream: 2d6c062fbda83674a28d67f204aaafb71d0c18c9
 
 ## 최근 반영된 시나리오 변화
 
+- Sector 01~06의 Gate/Exit Panel 73개를 전수 감사해 이미 정확한 62개는 유지하고, 2-5 보조 Gate·Sector 04 Exit Panel 7개·5-7 Gate/Panel·6-8 Panel의 11개 `bottom-center`를 실제 collision surface top에 맞췄다. Resident Override A/B/C와 Service Relay B-03은 Gate Panel이 아닌 벽 장착 `terminal` 정체성으로 분리해 pedestal sprite가 공중에 표시되지 않게 했다. surface geometry·objective·interaction·portal·network 계약은 변경하지 않았으며 production map parity가 이 접지와 정체성 불변식을 검사한다.
 - 0.67.0은 `sector-01-04:maintenance-node`, `sector-02-03:specialization-node`, `sector-03-05:service-calibration-frame`과 관련 선택 objective·Augment 선택 cue를 canonical AREA-SPEC에서 제거했다. 해당 공간·Guard·Exit topology는 유지하며 Exit Panel은 증강 선택을 요구하지 않는다.
 - Sector 02·03·05의 `story-display` 36개를 발판 pedestal 19개와 벽 rail 17개로 구분했다. 기존에 발판 근처에서 `center` 또는 어긋난 Y를 쓰던 17개를 `bottom-center`와 해당 surface top Y로 맞췄고, 이미 정확했던 2개는 유지했다. Story cue·상호작용·collision·surface geometry는 변경하지 않았다.
 - 전수 공간 감사에서 발견한 2-8의 Final Control 이중 발판을 Editor 소유 `exit-deck` 하나로 정리하고, 5-1 인접 Entry Deck의 1px 내부 겹침을 맞닿는 경계로 보정했다. Anchor의 collision 부착 target이 발판에 물리는 구조는 Rope capability 계약을 유지하므로 변경하지 않았다.
