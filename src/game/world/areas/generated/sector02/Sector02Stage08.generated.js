@@ -624,35 +624,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-02-08:final-control-apron",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": 0,
-          "y": -1248
-        },
-        "vertices": [
-          {
-            "x": -224,
-            "y": -1248
-          },
-          {
-            "x": 224,
-            "y": -1248
-          },
-          {
-            "x": 224,
-            "y": -1220
-          },
-          {
-            "x": -224,
-            "y": -1220
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "sector-02-08:exit-deck",
         "kind": "safe-deck",
         "oneWay": true,
