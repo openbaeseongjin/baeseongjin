@@ -25,6 +25,7 @@ import { interpolateRenderSnapshot } from "../render/interpolateRenderSnapshot.j
 import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "../render/sprites/PlayerSpriteCatalog.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
+import { FinalEscapeCinematic } from "./presentation/FinalEscapeCinematic.js";
 import {
     BOSS_CAMERA_ZOOM_RATIO,
     bossCameraFocusPlayer,
@@ -97,6 +98,7 @@ export class GameApp {
             spriteSize: deathPresentation.size
         });
         this.worldUnlockPresentation = new WorldUnlockPresentation();
+        this.finalEscapeCinematic = new FinalEscapeCinematic(canvas);
         const direction = createLocalDirectionRuntime({
             viewerId: this.authority.playerId,
             definitions: directionDefinitions,
@@ -287,6 +289,7 @@ export class GameApp {
         this.input.detach();
         this.frameId = null;
         this.onDebugTrainingDummyChange(null);
+        this.finalEscapeCinematic.dispose();
     }
 
     update(dt, input) {
@@ -331,6 +334,7 @@ export class GameApp {
         this.combatFeedback.apply([...authorityFeedback, ...predictedImpacts], { visibleWorldBounds: particleBounds });
         if (predictedImpacts.length > 0) state = this.authority.snapshot();
         this.currentRenderSnapshot = state;
+        this.finalEscapeCinematic.sync(state.runState);
         const cameraShot = this.updatePresentationCamera(
             dt,
             state.player,
