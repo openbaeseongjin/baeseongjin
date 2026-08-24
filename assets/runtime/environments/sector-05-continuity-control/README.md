@@ -4,11 +4,13 @@
 
 - Package ID: `environment-sector-05-continuity-control`
 - 적용 범위: `sector-05-01`~`sector-05-08` 및 seamless Runtime의 대응 Area ID
-- 상태: 수동 검수 Far/Mid/Near Runtime 통합 후보
+- 상태: 수동 검수 Far/Mid/Near 배경 + 게임 규격 우선 V2 Sector 05 terrain skin Runtime 통합 완료
 - 원본: `assets/artwork/environments/sector-05-continuity-control-vertical-master/source/layer-split-dense-city-transition/`
 - Runtime export: `assets/artwork/environments/sector-05-continuity-control-vertical-master/export/layer-split-dense-city-transition/`
+- Terrain 원본·export: `assets/artwork/environments/sector-05-continuity-control-platforms/`
 - Runtime 크기: 세 backdrop layer 각각 `1024×1536`
-- 비범위: Collision, Terrain geometry, Camera, Stage progression, Enemy, Rope, Network authority
+- Terrain 크기: RGBA fill `32×32`, RGBA edge `32×8`
+- 비범위: Collision, one-way edge chain, surface kind, grappleable, Rope, Physics, Camera, Stage progression, Enemy, Network authority
 
 | 레이어 | 역할 | Parallax X/Y | 형식 |
 |---|---|---:|---|
@@ -16,7 +18,9 @@
 | `mid-structure` | Near를 제외한 좌우 건물 전체 | `0.045 / 0.055` | `backdrop-mid.png`, RGBA |
 | `near-frame` | 화면 양끝의 가장 가까운 좌우 프레임 | `0.075 / 0.090` | `backdrop-near.png`, RGBA |
 
-Runtime은 캐시된 PNG만 nearest sampling과 제한된 시차로 그린다. depth pixel 재계산, 동적 mask, texture 재생성과 WebGL은 사용하지 않는다. Terrain과 Decoration PNG는 manifest v1 계약을 유지하는 fallback 자료이며 이 package가 collision geometry를 만들지 않는다.
+Runtime은 캐시된 PNG만 nearest sampling과 제한된 시차로 그린다. depth pixel 재계산, 동적 mask, texture 재생성과 WebGL은 사용하지 않는다. Terrain V2는 warm-neutral pale-titanium walking cap·cool sealed composite body·graphite precision seam·제한된 violet-gray service recess를 기존 collision polygon과 one-way edge chain 위에 그린다. Decoration PNG는 manifest v1 계약을 유지하며 collision을 만들지 않는다.
+
+solid platform은 두꺼운 밀폐 control-deck body와 넓은 load shell, one-way platform은 authored polygon의 얇은 두께와 중성 pale-steel chain stroke로 구분한다. 일반 terrain에는 socket·jaw·hook·post·rail을 넣지 않아 기존 grappleable hardpoint만 돌출된 기계 실루엣으로 남긴다. Cyan Rope·Anchor 및 Red/Orange Telegraph와 경쟁하는 terrain accent는 사용하지 않는다. 위치·크기·collision·grappleable·Rope·Physics·맵 동선·멀티플레이 상태는 변경하지 않는다.
 
 ## 합성 검수
 
