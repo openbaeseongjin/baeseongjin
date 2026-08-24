@@ -59,7 +59,7 @@ class SpellProjectile extends withPhysics(class {}) {
         speed,
         radius = SPELL_RUNTIME_SPEC.PROJECTILE_RADIUS,
         damage,
-        piercing,
+        piercing = false,
         explosionRadius = 0,
         splashDamage = 0,
         splashEffectId = null,

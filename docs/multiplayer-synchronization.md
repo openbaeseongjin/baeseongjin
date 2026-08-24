@@ -394,7 +394,8 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 3. [완료] 지연·중복·순서 뒤바뀜을 흉내 내는 전송 테스트를 유지한다.
 4. [완료] 원격 클라이언트의 예측·재적용·보정과 투사체 이벤트 재생을 테스트한다.
 5. [완료] 실제 2인 WebSocket에서 입력 종료 뒤 소유자·서버·동료의 위치·속도·로프 상태 수렴을 테스트한다.
-6. [완료] `npm run simulate:multiplayer-combat`은 브라우저 없이 실제 command batch·GameSimulation·피해자 claim·WorldSnapshot v16을 사용해 두 Player 직접/지형 폭발 마법 피격, 상태이상, 중복 억제, 막타 XP, 보상 선택과 복원 수렴을 반복 검증한다.
+6. [검증 보강] `npm run simulate:multiplayer-combat`은 인프로세스 combat 수치·상태 수렴 뒤 실제 WebSocket `RemoteGameAuthority` 두 개로 일반 사용자 흐름을 실행한다. 2인 참가·1인 잔류·빈 방 삭제, owner-motion 이동과 동료·Enemy snapshot 수렴, live Spell 직렬화와 피해자 claim, Energy Orb·Meteor particle, Ignited 상태 수렴, 개별 사망·부활과 동료 보존, 사건 뒤 `/health`까지 통과해야 PASS다. 접속만 확인하거나 투사체 만료 뒤 snapshot만 확인하는 검사로 이 항목을 대신하지 않는다.
+    - `npm run simulate:multiplayer-combat:coverage`는 `MULTIPLAYER_COMBAT_SIMULATION_COVERAGE` 고정 object를 출력한다. 이 object에 등록된 test ID와 `verifies`만 현재 증거이며 `notCovered`는 검증하지 않은 범위다. 시뮬레이션을 추가·제거할 때 실행 코드와 이 대응표를 같은 변경에서 갱신한다.
 6. [완료] 장시간 로컬 수신 시계 드리프트에서도 최신 표본이 계속 오면 원격 시간축이 지속 외삽으로 밀리지 않는지 테스트한다.
 7. [완료] Node 권위 서버와 실제 WebSocket 클라이언트 두 개를 같은 오픈월드에 연결한다.
 8. [완료] impact 전체 상태는 서버가 먼저 발급한 일회용 challenge 뒤에만 받고, 복구 상태와 `stateTick`을 원자적으로 수용하며 실제 복원 필드 전체의 wire schema를 검증한다.
