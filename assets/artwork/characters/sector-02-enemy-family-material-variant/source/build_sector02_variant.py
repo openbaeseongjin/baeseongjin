@@ -139,30 +139,136 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+SURFACE_ANCHORS = (
+    (0.16, 0.24, "pit"),
+    (0.22, 0.27, "pit"),
+    (0.43, 0.18, "dust"),
+    (0.50, 0.20, "wear"),
+    (0.69, 0.24, "rust"),
+    (0.75, 0.28, "rust"),
+    (0.33, 0.41, "pit"),
+    (0.39, 0.45, "pit"),
+    (0.57, 0.46, "dust"),
+    (0.63, 0.49, "dust"),
+    (0.18, 0.60, "rust"),
+    (0.23, 0.64, "rust"),
+    (0.28, 0.66, "pit"),
+    (0.44, 0.69, "wear"),
+    (0.51, 0.72, "wear"),
+    (0.58, 0.70, "dust"),
+    (0.73, 0.68, "pit"),
+    (0.79, 0.63, "pit"),
+    (0.34, 0.82, "dust"),
+    (0.40, 0.79, "dust"),
+    (0.64, 0.83, "rust"),
+    (0.70, 0.80, "rust"),
+)
+
+SURFACE_MIN_BRIGHTNESS = {
+    "pit": 95,
+    "rust": 115,
+    "dust": 165,
+    "wear": 190,
+}
+
+
 def clamp_channel(value: int) -> int:
     return max(0, min(255, value))
 
 
-def cast_iron_texture(color: tuple[int, int, int], x: int, y: int) -> tuple[int, int, int]:
-    if sum(color) < 90:
-        return color
-    phase = ((x % 32) * 5 + (y % 32) * 3) % 17
-    delta = 10 if phase == 0 else -7 if phase == 7 else 4 if phase == 12 else 0
-    if delta == 0:
-        return color
-    return tuple(clamp_channel(channel + delta) for channel in color)
+def surface_color(color: tuple[int, int, int], mode: str) -> tuple[int, int, int]:
+    red, green, blue = color
+    if mode == "pit":
+        return (clamp_channel(red - 42), clamp_channel(green - 38), clamp_channel(blue - 32))
+    if mode == "rust":
+        return (clamp_channel(red + 46), clamp_channel(green - 15), clamp_channel(blue - 29))
+    if mode == "dust":
+        return (clamp_channel(red + 32), clamp_channel(green + 24), clamp_channel(blue + 13))
+    if mode == "wear":
+        return (clamp_channel(red + 47), clamp_channel(green + 43), clamp_channel(blue + 37))
+    raise AssertionError(f"unsupported cast-iron surface mode: {mode}")
 
 
 def apply_palette(source: Image.Image, palette: dict[tuple[int, int, int], tuple[int, int, int]]) -> Image.Image:
     pixels = []
-    for index, (red, green, blue, alpha) in enumerate(source.convert("RGBA").get_flattened_data()):
+    for red, green, blue, alpha in source.convert("RGBA").get_flattened_data():
         mapped = palette.get((red, green, blue), (red, green, blue))
-        if (red, green, blue) in palette:
-            mapped = cast_iron_texture(mapped, index % source.width, index // source.width)
         pixels.append((*mapped, alpha))
     result = Image.new("RGBA", source.size)
     result.putdata(pixels)
     return result
+
+
+def apply_cast_iron_surface(
+    name: str,
+    source: Image.Image,
+    palette_result: Image.Image,
+) -> Image.Image:
+    palette = PALETTE_MAPS[name]
+    if not palette:
+        return palette_result
+
+    output = palette_result.copy()
+    source_pixels = source.load()
+    output_pixels = output.load()
+    columns = source.width // 32
+    rows = source.height // 32
+    for cell_row in range(rows):
+        for cell_column in range(columns):
+            eligible = []
+            for local_y in range(32):
+                for local_x in range(32):
+                    x = cell_column * 32 + local_x
+                    y = cell_row * 32 + local_y
+                    red, green, blue, alpha = source_pixels[x, y]
+                    if alpha == 255 and (red, green, blue) in palette:
+                        mapped = output_pixels[x, y][:3]
+                        if sum(mapped) >= min(SURFACE_MIN_BRIGHTNESS.values()):
+                            eligible.append((local_x, local_y))
+            if not eligible:
+                continue
+
+            min_x = min(point[0] for point in eligible)
+            max_x = max(point[0] for point in eligible)
+            min_y = min(point[1] for point in eligible)
+            max_y = max(point[1] for point in eligible)
+            target_count = min(len(SURFACE_ANCHORS), max(2, len(eligible) // 7))
+            anchor_indexes = {
+                round(index * (len(SURFACE_ANCHORS) - 1) / (target_count - 1))
+                for index in range(target_count)
+            }
+            selected_anchors = tuple(SURFACE_ANCHORS[index] for index in sorted(anchor_indexes))
+            remaining = set(eligible)
+            for normalized_x, normalized_y, mode in selected_anchors:
+                anchor_x = min_x + round((max_x - min_x) * normalized_x)
+                anchor_y = min_y + round((max_y - min_y) * normalized_y)
+                bright_enough = [
+                    point
+                    for point in remaining
+                    if sum(
+                        output_pixels[
+                            cell_column * 32 + point[0],
+                            cell_row * 32 + point[1],
+                        ][:3]
+                    )
+                    >= SURFACE_MIN_BRIGHTNESS[mode]
+                ]
+                candidates = bright_enough or list(remaining)
+                local_x, local_y = min(
+                    candidates,
+                    key=lambda point: (
+                        abs(point[0] - anchor_x) + abs(point[1] - anchor_y),
+                        (point[0] - anchor_x) ** 2 + (point[1] - anchor_y) ** 2,
+                        point[1],
+                        point[0],
+                    ),
+                )
+                remaining.remove((local_x, local_y))
+                x = cell_column * 32 + local_x
+                y = cell_row * 32 + local_y
+                red, green, blue = surface_color(output_pixels[x, y][:3], mode)
+                output_pixels[x, y] = (red, green, blue, 255)
+    return output
 
 
 def frame(atlas: Image.Image, cell_index: int) -> Image.Image:
@@ -264,7 +370,12 @@ def make_runtime_size_preview() -> None:
     canvas.convert("RGB").save(PREVIEW_ROOT / "sector-02-runtime-size-comparison.png", optimize=True)
 
 
-def validate_pair(name: str, source: Image.Image, result: Image.Image) -> dict[str, object]:
+def validate_pair(
+    name: str,
+    source: Image.Image,
+    palette_result: Image.Image,
+    result: Image.Image,
+) -> dict[str, object]:
     if source.size != EXPECTED_SIZES[name] or result.size != source.size:
         raise AssertionError(f"{name}: size changed")
     source_pixels = list(source.convert("RGBA").get_flattened_data())
@@ -286,12 +397,55 @@ def validate_pair(name: str, source: Image.Image, result: Image.Image) -> dict[s
     opaque = sum(1 for alpha in source_alpha if alpha == 255)
     if name != "shield-body.png" and changed == 0:
         raise AssertionError(f"{name}: no material pixels changed")
+    palette_pixels = list(palette_result.convert("RGBA").get_flattened_data())
+    surface_pixels = sum(1 for palette_pixel, result_pixel in zip(palette_pixels, result_pixels) if palette_pixel != result_pixel)
+    frame_surface_pixel_counts = []
+    frame_eligible_pixel_counts = []
+    columns = result.width // 32
+    rows = result.height // 32
+    for cell_row in range(rows):
+        for cell_column in range(columns):
+            bounds = (cell_column * 32, cell_row * 32, cell_column * 32 + 32, cell_row * 32 + 32)
+            palette_cell = palette_result.crop(bounds)
+            result_cell = result.crop(bounds)
+            source_cell = source.crop(bounds)
+            frame_eligible_pixel_counts.append(
+                sum(
+                    1
+                    for source_pixel, palette_pixel in zip(
+                        source_cell.get_flattened_data(), palette_cell.get_flattened_data()
+                    )
+                    if source_pixel[3] == 255
+                    and source_pixel[:3] in PALETTE_MAPS[name]
+                    and sum(palette_pixel[:3]) >= min(SURFACE_MIN_BRIGHTNESS.values())
+                )
+            )
+            frame_surface_pixel_counts.append(
+                sum(
+                    1
+                    for palette_pixel, result_pixel in zip(
+                        palette_cell.get_flattened_data(), result_cell.get_flattened_data()
+                    )
+                    if palette_pixel != result_pixel
+                )
+            )
+    if name == "shield-body.png":
+        if surface_pixels:
+            raise AssertionError(f"{name}: protected Shield body received cast-iron surface pixels")
+    elif not surface_pixels or any(
+        eligible_count > 0 and surface_count < 2
+        for eligible_count, surface_count in zip(frame_eligible_pixel_counts, frame_surface_pixel_counts)
+    ):
+        raise AssertionError(f"{name}: cast-iron surface pattern is missing or too weak in one or more cells")
     return {
         "size": list(source.size),
         "alphaValues": sorted(set(result_alpha)),
         "opaquePixels": opaque,
         "changedPixels": changed,
         "changedOpaqueRatio": round(changed / opaque, 6) if opaque else 0,
+        "surfacePixels": surface_pixels,
+        "frameSurfacePixelCounts": frame_surface_pixel_counts,
+        "frameEligiblePixelCounts": frame_eligible_pixel_counts,
         "sourceSha256": sha256(SOURCE_ROOT / name),
         "exportSha256": sha256(EXPORT_ROOT / name),
         "materialReferenceSha256": sha256(USER_MATERIAL_REFERENCE),
@@ -304,18 +458,22 @@ def main() -> None:
     report = {}
     for name in ATLAS_NAMES:
         source = Image.open(SOURCE_ROOT / name).convert("RGBA")
-        result = apply_palette(source, PALETTE_MAPS[name])
+        palette_result = apply_palette(source, PALETTE_MAPS[name])
+        result = apply_cast_iron_surface(name, source, palette_result)
         result.save(EXPORT_ROOT / name, optimize=True)
-        report[name] = validate_pair(name, source, result)
+        report[name] = validate_pair(name, source, palette_result, result)
 
     make_atlas_reviews()
     make_side_by_side()
     make_runtime_size_preview()
     (PACKAGE_ROOT / "verification.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print("PASS sector-02 enemy material authoring variant")
-    print("atlases=8 enemies=7 cell=32x32 alpha=binary geometry=unchanged roleColors=preserved")
+    print("atlases=8 enemies=7 cell=32x32 alpha=binary geometry=unchanged roleColors=preserved castIron=clustered")
     for name, values in report.items():
-        print(f"{name}: size={tuple(values['size'])} changed={values['changedPixels']} ratio={values['changedOpaqueRatio']}")
+        print(
+            f"{name}: size={tuple(values['size'])} changed={values['changedPixels']} "
+            f"ratio={values['changedOpaqueRatio']} surface={values['surfacePixels']}"
+        )
 
 
 if __name__ == "__main__":

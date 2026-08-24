@@ -5,12 +5,12 @@
 - Status: `USER APPROVED / RUNTIME INTEGRATED FOR SECTOR 02`
 - Target: the current Sector 01 approved seven-enemy Runtime family, given the user-selected rugged Sector 02 material treatment
 - Source: repository Runtime atlases copied without resampling from `assets/runtime/characters/sector-01-enemies/`
-- Tool chain: user-supplied material reference plus deterministic Pillow palette and fixed cell-local surface normalization
+- Tool chain: user-supplied material reference plus deterministic Pillow palette and body-relative clustered surface normalization
 - Source/license: repository-owned approved project assets; no external artwork
 
 ## Scope
 
-This is an identity-preserving image-to-image authoring pass. It keeps every existing silhouette, proportion, equipment shape, facing, pose, cell, atlas dimension, frame order, anchor intent, transparent padding and binary alpha. The user-selected comparison sheet is the current material authority: neutral housing uses near-black cast-iron recesses, mottled graphite-brown midtones, dry gray-beige worn edges and restrained Worker District dust. No new weapon, limb, attachment, effect, motion, gameplay timing or collider information is introduced.
+This is an identity-preserving image-to-image authoring pass. It keeps every existing silhouette, proportion, equipment shape, facing, pose, cell, atlas dimension, frame order, anchor intent, transparent padding and binary alpha. The user-selected comparison sheet is the current material authority: neutral housing uses near-black cast-iron recesses, mottled graphite-brown midtones, dry gray-beige worn edges and restrained Worker District dust. Body-relative clustered masks now make the material readable through blocky pits, brown oxidation spots, dust bands and worn highlights at actual game size; the superseded global periodic brightness noise did not meet this requirement. No new weapon, limb, attachment, effect, motion, gameplay timing or collider information is introduced.
 
 Role and behavior colors remain exact source RGB values: Shield blue; Support green; Swarm purple; Patrol red/orange; Artillery orange/red warning colors; Sentry and Pursuit sensors, exhaust and warning highlights. No sector marking is added because a new 1-pixel marking would compete with the role cues at the `32x32` cell scale.
 
@@ -20,7 +20,7 @@ Role and behavior colors remain exact source RGB values: Shield blue; Support gr
 - `source/imagegen/`: generated material-treatment references; not atlas inputs
 - `source/user-reference/sector-02-rugged-cast-iron-user-reference.png`: current user-selected material authority; comparison sheet only, not copied into atlas geometry
 - `source/generation-prompt.md`: ImageGen edit contract and reference roles
-- `source/build_sector02_variant.py`: deterministic palette and fixed cell-local surface normalization plus preview builder
+- `source/build_sector02_variant.py`: deterministic palette and body-relative clustered surface normalization plus preview builder
 - `export/`: eight transparent PNG atlases with the same dimensions as their sources
 - `preview/sector-01-vs-sector-02-comparison.png`: side-by-side representative comparison
 - `preview/sector-02-runtime-size-comparison.png`: exact intended world-output comparison on a Sector 02 crop
@@ -40,13 +40,14 @@ Role and behavior colors remain exact source RGB values: Shield blue; Support gr
 
 ## Approval and non-scope
 
-The user approved the rugged cast-iron replacement for Sector 02 Runtime integration on 2026-08-23. The eight exports are copied without further image changes into `assets/runtime/characters/sector-02-enemies/`; the existing immutable `sectorId → package` selection registers only `sector-02`. GitHub Issue #941 records this replacement, while Sector 01, Sector 03, Sector 04, gameplay, AI, collision and networking remain outside its scope. Issue #898 remains the history of the superseded restrained treatment.
+The user required the rugged cast-iron replacement to match the supplied material structure, not only its colors. Issue #987 supersedes Issue #941's too-subtle periodic brightness treatment. The eight exports are copied without further image changes into `assets/runtime/characters/sector-02-enemies/`; the existing immutable `sectorId → package` selection registers only `sector-02`. Sector 01, Sector 03, Sector 04, gameplay, AI, collision and networking remain outside its scope. Issue #898 remains the history of the earlier restrained treatment.
 
 ## Validation
 
-- Deterministic build: `PASS` with Python `3.14` and bundled Pillow `12.3.0`; the current user-reference SHA-256 is recorded per atlas in `verification.json`.
+- Deterministic build: `PASS` with Python `3.14.3` and Pillow `12.1.1`; the current user-reference SHA-256 is recorded per atlas in `verification.json`.
 - Atlas contract: `PASS` — 8 RGBA PNGs, exact source dimensions, unchanged `32x32` cell grids and frame/layer order.
 - Pixel contract: `PASS` — source alpha bytes and opaque masks are identical; output alpha values are only `0` and `255`.
 - Role-color contract: `PASS` — protected role, sensor, exhaust, telegraph and healing RGB counts are identical to the approved source atlases.
+- Surface-structure contract: `PASS` — every populated neutral-metal frame has body-relative clustered pits, oxidation, dust and edge wear; Shield role-blue body pixels remain untouched.
 - Visual review: `PASS` for the rugged cast-iron authoring comparison, all enlarged animation atlases and exact `56x56`, `60x60` and `18x18` world-output sizes on the Sector 02 reference crop.
-- Runtime validator/browser gameplay: `PASS` against the integrated `sector-02-enemies` package at Stage 2-3 desktop `1280x720` and mobile landscape `844x390`; final results are recorded in its Runtime package README.
+- Runtime validator/browser gameplay: `PASS` against the integrated `sector-02-enemies` package at Stage 2-3 desktop `1280x720` and mobile landscape `844x390`; the new pitting, oxidation and dust clusters remain visible on the Support housing with its green role core preserved, and the browser reported no warnings or errors.
