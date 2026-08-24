@@ -1,0 +1,13 @@
+Use case: stylized-concept
+Asset type: single game world-object pixel sprite concept for Baeseongjin
+Primary request: create one universal mid-map story display / public information sign that can appear naturally in all six sectors of a closed vertical corporate city, from industrial maintenance through residential, commercial, corporate security, and rooftop evacuation
+Scene/backdrop: genuinely transparent background, isolated object only
+Subject: one compact front-facing rectangular information display module; dark graphite armored chassis, dull iron edge trim, recessed dark glass or e-paper screen, thick readable outer silhouette, small side mounting clamps, and a short neutral underside mounting bracket that can plausibly attach to either a wall rail or a floor pedestal
+Style/medium: crisp handcrafted 2D pixel art game prop, orthographic front view, hard square pixels, no antialiasing, restrained detail; designed for a logical 64x48-pixel sprite and shown enlarged cleanly
+Composition/framing: exactly one centered object, straight-on view, generous transparent padding, no perspective tilt
+Lighting/mood: neutral low-key industrial lighting, readable silhouette without dramatic glow
+Color palette: mostly graphite black, charcoal, gunmetal, and cool gray; tiny restrained cyan and amber service indicator pixels only; no sector-specific dominant accent
+Materials/textures: painted metal housing, subtle wear on edges, inset screen
+Text: no readable letters, numbers, words, logos, or symbols; use only a few broad abstract horizontal information blocks on the screen so different story content can be overlaid later
+Constraints: suitable across Sectors 1 through 6; visually lower contrast than an interactive gate panel but still readable as an information display; screen and chassis must remain distinct at small mobile size; preserve a simple 64x48-scale silhouette; genuinely transparent alpha; no animation sheet; no variants
+Avoid: characters, doors, gates, weapons, cables, wall, floor, background scene, cast shadow, hologram, large neon glow, ornate cyberpunk clutter, storefront styling, hazard stripes, arrows, language-specific signage, logos, trademarks, watermark, blur, gradients, antialiasing
