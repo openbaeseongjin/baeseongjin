@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: f5c186683df4de2c3120ce669d5926fbf45d116fa00595979d97c4ace328a2f6
-authored-area-sha256: 2a8f2a7bbacc2ff4716de4b08ab86294cb3db8b9123ecb383a08ea6dc25a2cd2
+scenario-source-sha256: ef5896c5272debfceb0081ebe3e1f1d81e1034c0590af257f7d88dc1811fd7cf
+authored-area-sha256: 4a4ef4d3e5c6a66f3e890aca9d1e21f91a974033f879b9145d39fed6218d2249
 authored-sector-sha256: 271b92fbe6401162663a85cf3f04df0309affedba4d402bccf7b9f327c56472d
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: efc3cfa2a1e23dcc8cce6e1eb7e9a90e067c2efa
+reviewed-upstream: 941cb95707d963733a75718fffad78ac37d75cad
 -->
 
 ## 현재 확인 체크포인트
@@ -38,6 +38,7 @@ reviewed-upstream: efc3cfa2a1e23dcc8cce6e1eb7e9a90e067c2efa
 - Issue #934는 canonical Area와 남은 Boss arena의 모든 정적 collision platform·wall을 Ropeable로 정렬했다. Boss 본체·적·투사체·hazard actor는 별도 capability를 유지한다.
 - `1-2:p0` 진입 Platform의 오른쪽 32px(x 608~640)가 seam 건너 `1-1:shaft-shell-right` solid wall과 world 좌표에서 겹쳐 있어(Runtime 조립 후 x:608~640, y:-672~-640 정사각형) one-way platform과 solid wall이 같은 칸에 공존하던 collision 결함을 수정했다. `1-2:p0` 오른쪽 경계를 640→608로 정리해 겹침을 제거했으며, 그 칸은 `1-1`의 solid wall이 그대로 경계를 담당한다. 이 수정 전 48개 Stage 전수 검사에서 이 한 쌍 외의 cross-stage collision surface 겹침은 없었다.
 - Sector 02 environment package에서 이전 far/mid/near 3-layer 배경 세대(`backdrop-far.png`/`backdrop-mid.png`/`backdrop-near.png`)가 `backdrop-fixed` + island 2장 세대로 교체된 뒤에도 정리되지 않고 남아 있던 것을 확인해 삭제했다. `sprite-manifest.json` 어떤 atlas도 참조하지 않던 미사용 자산이었다.
+- Sector 03-2의 `media-wall-body`(`kind: design-reference`, `collision: false`, `renderable: false` — 순수 미술 참조용 surface)가 Issue #934(`52901df`, 정적 충돌 표면 로프 부착 일괄 보장)의 일괄 처리 과정에서 `grappleable: false → true`로 잘못 뒤집혔던 것을 원상복구했다. `collision: false`인 surface는 `isRopeableCollisionSurface`가 이미 걸러내 현재 Runtime 동작에는 영향이 없지만, 48개 canonical Stage 전수 검사 결과 `collision:false`이면서 `grappleable:true`인 유일한 사례였다.
 
 ## 열린 기획·구현 게이트
 
