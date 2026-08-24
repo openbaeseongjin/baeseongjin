@@ -1,4 +1,5 @@
-import { findMobileControl } from "./MobileControlLayout.js";
+import { findMobileControl, isMobileMovementControl, MOBILE_CONTROL_ID } from "./MobileControlLayout.js";
+import { MobileGameplayInputAdapter, MOBILE_GAMEPLAY_ACTION_ID } from "./MobileGameplayInputAdapter.js";
 import { PointerSpellCommandBuffer, POINTER_SPELL_TOKEN } from "./PointerSpellCommandBuffer.js";
 
 const movementKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS"]);
@@ -11,6 +12,7 @@ export class InputSampler {
         this.keys = new Set();
         this.pointer = { x: 0, y: 0, down: false };
         this.pointerSpellCommands = new PointerSpellCommandBuffer();
+        this.mobileGameplayInput = new MobileGameplayInputAdapter();
         this.ropePointerId = null;
         this.controlPointers = new Map();
         this.interactSequence = 0;
@@ -61,10 +63,17 @@ export class InputSampler {
             this.touchActive = true;
             const point = this.surfacePoint(event);
             const control = findMobileControl(point.x, point.y, this.viewportWidth(), this.viewportHeight());
-            if (control) {
+            if (isMobileMovementControl(control)) {
                 this.surface?.setPointerCapture?.(event.pointerId);
                 this.controlPointers.set(event.pointerId, control);
-                if (control === "jump") this.interactSequence += 1;
+                if (control === MOBILE_CONTROL_ID.JUMP) this.interactSequence += 1;
+                return;
+            }
+            if (control) return this.selectMobileGameplayAction(control);
+            const spellCommandKey = this.mobileGameplayInput.consumeSpellTarget();
+            if (spellCommandKey) {
+                this.pointer = { x: event.clientX, y: event.clientY, down: false };
+                this.pointerSpellCommands.issue(spellCommandKey);
                 return;
             }
             if (this.ropePointerId === null) {
@@ -112,6 +121,19 @@ export class InputSampler {
         }
     }
 
+    selectMobileGameplayAction(actionId) {
+        if (actionId === MOBILE_GAMEPLAY_ACTION_ID.ROPE) {
+            this.mobileGameplayInput.reset();
+            return;
+        }
+        const releasedRope = this.pointer.down || this.ropePointerId !== null;
+        if (this.ropePointerId !== null) this.surface?.releasePointerCapture?.(this.ropePointerId);
+        this.ropePointerId = null;
+        this.pointer.down = false;
+        this.mobileGameplayInput.select(actionId);
+        if (releasedRope) this.notifyRopeRelease("spell-command-start");
+    }
+
     releasePointer(pointerId, pointerType, reason) {
         if (pointerType !== "touch") {
             const releasedRope = this.pointer.down;
@@ -134,6 +156,7 @@ export class InputSampler {
         this.controlPointers.clear();
         this.pointer.down = false;
         this.pointerSpellCommands.cancel();
+        this.mobileGameplayInput.reset();
         if (releasedRope && reason) this.notifyRopeRelease(reason);
     }
 
@@ -181,15 +204,17 @@ export class InputSampler {
         const keyboardVertical =
             Number(this.keys.has("ArrowDown") || this.keys.has("KeyS")) -
             Number(this.keys.has("ArrowUp") || this.keys.has("KeyW"));
-        const mobileLeft = [...this.controlPointers.values()].includes("left");
-        const mobileRight = [...this.controlPointers.values()].includes("right");
-        const mobileJump = [...this.controlPointers.values()].includes("jump");
+        const mobileLeft = [...this.controlPointers.values()].includes(MOBILE_CONTROL_ID.LEFT);
+        const mobileRight = [...this.controlPointers.values()].includes(MOBILE_CONTROL_ID.RIGHT);
+        const mobileJump = [...this.controlPointers.values()].includes(MOBILE_CONTROL_ID.JUMP);
+        const mobileGameplay = this.mobileGameplayInput.snapshot();
         const mobileControls = Object.freeze({
             visible: this.touchActive,
             ropePointerDown: this.ropePointerId !== null,
             left: mobileLeft,
             right: mobileRight,
-            jump: mobileJump
+            jump: mobileJump,
+            selectedActionId: mobileGameplay.selectedActionId
         });
         return Object.freeze({
             horizontal: Math.max(-1, Math.min(1, keyboardHorizontal + Number(mobileRight) - Number(mobileLeft))),

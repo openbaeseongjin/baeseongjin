@@ -1,4 +1,5 @@
 import { getMobileControlLayout } from "../core/input/MobileControlLayout.js";
+import { MOBILE_GAMEPLAY_ACTION_ID } from "../core/input/MobileGameplayInputAdapter.js";
 import { augmentById } from "../game/augments/AugmentCatalog.js";
 import { authoredRegionForPosition } from "../game/world/AuthoredLandmarkResolver.js";
 import {
@@ -11,7 +12,7 @@ import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewpo
 import { assertSceneRenderer } from "./SceneRenderer.js";
 import { ACTOR_STATUS_COLORS, resolveHealthStatus } from "./ActorStatusPresentation.js";
 import { spellDefinition } from "../game/spells/SpellCatalog.js";
-import { SPELL_COMMAND_LABEL, SPELL_SLOT_ORDER } from "../game/spells/SpellDefinition.js";
+import { SPELL_COMMAND_LABEL, SPELL_SLOT_LABEL, SPELL_SLOT_ORDER } from "../game/spells/SpellDefinition.js";
 import { POINTER_SPELL_TOKEN } from "../core/input/PointerSpellCommandBuffer.js";
 import { layoutAccessEdgeGuides, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
@@ -125,6 +126,9 @@ export class CanvasRenderer {
             cullMargin: this.cullMargin
         });
         const renderStats = metricsEnabled ? new RenderFrameStats() : null;
+        const mobileControlLayout = scene.mobileControls?.visible
+            ? getMobileControlLayout(this.cssWidth, this.cssHeight)
+            : null;
         this.sceneRenderer.draw({
             context: this.context,
             scene,
@@ -138,11 +142,12 @@ export class CanvasRenderer {
             if (!bossHudBlocked(scene)) this.drawBossHud(scene.bossStagePresentation?.hud, scene);
             this.drawAccessGuide(scene);
             this.drawLocalStatusHud(scene);
-            this.drawSpellHotbar(scene);
+            if (!mobileControlLayout) this.drawSpellHotbar(scene);
             this.drawAccessHud(scene);
         }
+        if (mobileControlLayout) this.drawSpellHotbar(scene, mobileControlLayout);
         this.drawRewardSelectionOverlay(scene.augmentReward);
-        this.drawMobileControls(scene.mobileControls);
+        this.drawMobileControls(scene.mobileControls, mobileControlLayout);
         this.drawStoryPresentation(scene.storyPresentation);
         this.drawPlayerMessagePresentation(scene.playerMessagePresentation, scene);
         this.drawStatusFeedback(scene.eventFlash);
@@ -509,7 +514,7 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawSpellHotbar(scene) {
+    drawSpellHotbar(scene, mobileControlLayout = null) {
         const spellState =
             scene.augmentRuntimeState?.combat?.spellState ?? scene.player?.augmentRuntimeState?.combat?.spellState;
         if (!spellState) return;
@@ -519,11 +524,19 @@ export class CanvasRenderer {
             scene.player?.augmentRuntimeState?.experience ??
             null;
         const ctx = this.context;
-        const cellSize = 58;
-        const gap = 8;
+        const cellSize = mobileControlLayout?.actionSize ?? 58;
+        const gap = mobileControlLayout
+            ? mobileControlLayout.spellSlots[SPELL_SLOT_ORDER[1]].x -
+              mobileControlLayout.spellSlots[SPELL_SLOT_ORDER[0]].x -
+              cellSize
+            : 8;
         const totalWidth = cellSize * SPELL_SLOT_ORDER.length + gap * (SPELL_SLOT_ORDER.length - 1);
-        const startX = (this.cssWidth - totalWidth) * 0.5;
-        const y = this.cssHeight - cellSize - 26;
+        const startX = mobileControlLayout
+            ? mobileControlLayout.spellSlots[SPELL_SLOT_ORDER[0]].x
+            : (this.cssWidth - totalWidth) * 0.5;
+        const y = mobileControlLayout
+            ? mobileControlLayout.spellSlots[SPELL_SLOT_ORDER[0]].y
+            : this.cssHeight - cellSize - 26;
         ctx.save();
         for (const [index, slotId] of SPELL_SLOT_ORDER.entries()) {
             const x = startX + index * (cellSize + gap);
@@ -533,10 +546,19 @@ export class CanvasRenderer {
             const charges = spellId ? spellState.charges?.[spellId] : null;
             const duration = definition?.spec.cooldownSeconds ?? 0;
             const cooldownRatio = duration > 0 ? Math.min(1, remaining / duration) : 0;
-            ctx.fillStyle = definition ? "rgba(7, 18, 30, 0.94)" : "rgba(12, 16, 24, 0.82)";
+            const selected = mobileControlLayout && scene.mobileControls?.selectedActionId === slotId;
+            ctx.fillStyle = selected
+                ? "rgba(120, 83, 20, 0.94)"
+                : definition
+                  ? "rgba(7, 18, 30, 0.94)"
+                  : "rgba(12, 16, 24, 0.82)";
             ctx.fillRect(x, y, cellSize, cellSize);
-            ctx.strokeStyle = definition ? "rgba(103, 232, 249, 0.82)" : "rgba(100, 116, 139, 0.55)";
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = selected
+                ? "#fde68a"
+                : definition
+                  ? "rgba(103, 232, 249, 0.82)"
+                  : "rgba(100, 116, 139, 0.55)";
+            ctx.lineWidth = selected ? 3 : 2;
             ctx.strokeRect(x, y, cellSize, cellSize);
             if (cooldownRatio > 0) {
                 ctx.fillStyle = "rgba(2, 6, 23, 0.72)";
@@ -548,7 +570,11 @@ export class CanvasRenderer {
             ctx.fillText(definition?.spec.displayName ?? "잠김", x + cellSize * 0.5, y + 24, cellSize - 8);
             ctx.fillStyle = "#94a3b8";
             ctx.font = "800 9px ui-monospace, monospace";
-            ctx.fillText(SPELL_COMMAND_LABEL[slotId], x + cellSize * 0.5, y + cellSize - 8);
+            ctx.fillText(
+                mobileControlLayout ? SPELL_SLOT_LABEL[slotId] : SPELL_COMMAND_LABEL[slotId],
+                x + cellSize * 0.5,
+                y + cellSize - 8
+            );
             if (Number.isSafeInteger(charges)) ctx.fillText(`×${charges}`, x + cellSize - 12, y + 18);
             if (remaining > 0) {
                 ctx.fillStyle = "#f8fafc";
@@ -557,7 +583,7 @@ export class CanvasRenderer {
             }
         }
         const experienceWidth = totalWidth;
-        const experienceY = y + cellSize + 8;
+        const experienceY = mobileControlLayout ? y - 8 : y + cellSize + 8;
         const nextRequirement = Math.max(0, experience?.nextLevelRequirement ?? 0);
         const experienceRatio =
             nextRequirement > 0 ? Math.min(1, (experience?.experienceIntoLevel ?? 0) / nextRequirement) : 1;
@@ -571,7 +597,7 @@ export class CanvasRenderer {
         ctx.fillStyle = "#e2e8f0";
         ctx.font = "800 9px ui-monospace, monospace";
         ctx.fillText(`LV ${experience?.level ?? 0}`, startX, experienceY - 3);
-        const inputTokens = scene.spellInput?.tokens ?? [];
+        const inputTokens = mobileControlLayout ? [] : (scene.spellInput?.tokens ?? []);
         if (inputTokens.length > 0) {
             ctx.textAlign = "center";
             ctx.fillStyle = "#fde68a";
@@ -879,14 +905,19 @@ export class CanvasRenderer {
         ctx.textAlign = "start";
     }
 
-    drawMobileControls(controls) {
+    drawMobileControls(controls, layout = null) {
         if (!controls?.visible) return;
         const ctx = this.context;
         if (controls.ropePointerDown) {
             ctx.fillStyle = "rgba(251, 191, 36, 0.12)";
             ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
         }
-        const layout = getMobileControlLayout(this.cssWidth, this.cssHeight);
+        layout ??= getMobileControlLayout(this.cssWidth, this.cssHeight);
+        this.drawMobileButton(
+            layout.rope,
+            "로프",
+            controls.selectedActionId === MOBILE_GAMEPLAY_ACTION_ID.ROPE && !controls.ropePointerDown
+        );
         this.drawMobileButton(layout.left, "←", controls.left);
         this.drawMobileButton(layout.jump, "점프", controls.jump);
         this.drawMobileButton(layout.right, "→", controls.right);
@@ -901,7 +932,7 @@ export class CanvasRenderer {
         ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         ctx.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
         ctx.fillStyle = active ? "#111827" : "#f8fafc";
-        ctx.font = `800 ${label === "점프" ? 16 : label.includes("조준") ? 11 : 30}px system-ui, sans-serif`;
+        ctx.font = `800 ${label === "점프" ? 16 : label === "로프" ? 12 : 30}px system-ui, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(label, bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.5);

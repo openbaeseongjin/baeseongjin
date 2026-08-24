@@ -10,6 +10,8 @@ export const POINTER_SPELL_COMMAND = Object.freeze({
     RIGHT_RIGHT_RIGHT: "right-right-right"
 });
 
+export const POINTER_SPELL_COMMAND_ORDER = Object.freeze(Object.values(POINTER_SPELL_COMMAND));
+
 export const POINTER_SPELL_COMMAND_BY_TOKENS = Object.freeze({
     [POINTER_SPELL_COMMAND.RIGHT_LEFT_LEFT]: POINTER_SPELL_COMMAND.RIGHT_LEFT_LEFT,
     [POINTER_SPELL_COMMAND.RIGHT_LEFT_RIGHT]: POINTER_SPELL_COMMAND.RIGHT_LEFT_RIGHT,
@@ -27,6 +29,13 @@ function requireToken(token) {
         throw new Error(`unsupported pointer spell token: ${token}`);
     }
     return token;
+}
+
+function requireCommandKey(commandKey) {
+    if (!POINTER_SPELL_COMMAND_BY_TOKENS[commandKey]) {
+        throw new Error(`unsupported pointer spell command: ${commandKey}`);
+    }
+    return commandKey;
 }
 
 export class PointerSpellCommandBuffer {
@@ -66,6 +75,13 @@ export class PointerSpellCommandBuffer {
         this.commandSequence += 1;
         this.commandKey = commandKey;
         return Object.freeze({ consumed: true, completed: true, commandKey });
+    }
+
+    issue(commandKey) {
+        this.cancel();
+        this.commandSequence += 1;
+        this.commandKey = requireCommandKey(commandKey);
+        return this.commandKey;
     }
 
     cancel() {

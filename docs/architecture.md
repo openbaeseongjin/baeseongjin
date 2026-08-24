@@ -207,11 +207,11 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 
 - PC: A/D 또는 방향키 이동, W 또는 위 방향키 점프, 마우스 누르기·드래그·해제로 로프 조작
 - 기본 Hook은 `1200px/s × 1/3초 = 400px`를 비행하며, 빗나감·비행 중 해제·취소 뒤 재발사 대기는 `0.50초`다. Rope Cut의 별도 차단시간과 부착 성공 상태는 이 reload를 대신하지 않는다.
-- 모바일 가로 화면의 1차 조작은 화면 하단 중앙 `좌 이동 · 점프 · 우 이동`과 나머지 화면의 Rope 부착·드래그·해제만 제공한다. Spell 직접 탭 UI는 후속 범위다.
+- 모바일 가로 화면은 화면 하단 중앙 `좌 이동 · 점프 · 우 이동`, 그 위의 `Rope · 네 Spell 슬롯` 선택과 나머지 화면의 조준 터치를 제공한다. Gameplay 진입과 Spell 1회 시전 뒤 기본 선택은 Rope다.
 - 모바일 이동·점프는 PC 키보드와 동일한 `horizontal`, `vertical` 명령을 만들며 별도 게임 규칙을 두지 않는다.
-- 버튼 판정과 Canvas 표시는 `MobileControlLayout`의 같은 사각형 정보를 사용한다.
+- 이동·Rope·Spell 슬롯의 버튼 판정과 Canvas 표시는 `MobileControlLayout`의 같은 사각형 정보를 사용한다. 모바일 선택 수명주기는 `MobileGameplayInputAdapter`만 소유한다.
 - 로프 손가락은 `pointerId`로 추적하며 다른 터치가 기존 로프 조작을 빼앗지 않는다.
-- 모바일 1차 입력은 이동·점프·Rope만 제공한다. 네 마법 슬롯의 직접 탭 입력은 PC 커맨드와 같은 Spell 계약을 재사용하는 후속 범위다.
+- 모바일은 Spell 슬롯을 누르면 선택만 하고 다음 월드 터치 위치를 조준점으로 해당 슬롯을 한 번 시전한 뒤 Rope 선택으로 돌아간다. 모바일 어댑터는 기존 단조 `spellCommand` sequence와 slot command key를 직접 발행하며 PC 좌·우 클릭 토큰, 공용 `PlayerCommand`, Spell Runtime과 네트워크 계약을 바꾸지 않는다.
 - 스윙 드래그 임계값은 고정 픽셀이 아니라 현재 Canvas의 짧은 변에 대한 비율로 계산한다. 화면 크기는 `PlayerCommand.viewport`에 포함되어 권한 주체에서도 같은 판정을 재현한다.
 - 활성 로프 드래그가 브라우저 상단 UI로 빠지는 `pointerleave`, `pointercancel`, 창 포커스 상실 또는 문서 숨김으로 끝나면 로프 유지가 아니라 사용자의 해제 의도로 처리한다. 입력 상태를 먼저 정리하고, 렌더 프레임이 멈추기 전에 싱글의 공용 시뮬레이션과 멀티의 로컬 예측·즉시 전송을 한 번 실행한다. 화면 안의 정상 `pointerup`은 기존 고정 스텝에서 처리한다.
 
