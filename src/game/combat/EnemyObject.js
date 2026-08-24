@@ -42,6 +42,7 @@ function cloneKnockbackState(state) {
     if (!state) return null;
     return Object.freeze({
         direction: Object.freeze({ x: state.direction.x, y: state.direction.y }),
+        impulse: state.impulse,
         distance: state.distance,
         durationSeconds: state.durationSeconds,
         remainingSeconds: state.remainingSeconds,
@@ -56,6 +57,11 @@ function createKnockbackState(knockbackState) {
     if (!knockbackState) return null;
     return {
         direction: normalizeImpactDirection(knockbackState.direction, "knockbackState.direction"),
+        impulse: assertFinite(
+            knockbackState.impulse ?? knockbackState.distance / knockbackState.durationSeconds,
+            "knockbackState.impulse",
+            { minimum: 0, exclusiveMinimum: true }
+        ),
         distance: assertFinite(knockbackState.distance, "knockbackState.distance", {
             minimum: 0,
             exclusiveMinimum: true
@@ -178,6 +184,11 @@ class EnemyBodyObject extends withSurfacePhysics(
             enumerable: false,
             writable: true
         });
+        Object.defineProperty(this, "lastSurfaceCollisionNormals", {
+            value: Object.freeze([]),
+            enumerable: false,
+            writable: true
+        });
         if (behavior !== null) {
             if (typeof behavior.advance !== "function" || typeof behavior.snapshot !== "function") {
                 throw new Error("enemy behavior must expose advance and snapshot");
@@ -242,6 +253,7 @@ class EnemyBodyObject extends withSurfacePhysics(
             broadPhase: collisionBroadPhase
         });
         this.lastActorCollisionIds = resolution.collidedActorIds;
+        this.lastSurfaceCollisionNormals = resolution.collisionNormals;
         this.carryActorCollisionVelocity(
             {
                 x: this.velocity.x - this.surfaceControlVelocity.x,
@@ -332,15 +344,35 @@ class EnemyBodyObject extends withSurfacePhysics(
         return this.impactDisplacementEnabled;
     }
 
-    applyImpactKnockback({ direction, distance, durationSeconds }) {
-        if (!this.canApplyImpactKnockback()) return false;
+    canApplyExternalImpulse() {
+        return this.impactDisplacementEnabled;
+    }
+
+    applyExternalImpulse({ direction, impulse, observationSeconds = 0.25 }) {
+        if (!this.canApplyExternalImpulse()) return false;
+        const normalizedDirection = normalizeImpactDirection(direction, "direction");
+        const magnitude = assertFinite(impulse, "impulse", { minimum: 0, exclusiveMinimum: true });
+        const durationSeconds = assertFinite(observationSeconds, "observationSeconds", {
+            minimum: 0,
+            exclusiveMinimum: true
+        });
+        this.applyImpulse(normalizedDirection, magnitude);
         this.knockbackState = {
-            direction: normalizeImpactDirection(direction, "direction"),
-            distance: assertFinite(distance, "distance", { minimum: 0, exclusiveMinimum: true }),
-            durationSeconds: assertFinite(durationSeconds, "durationSeconds", { minimum: 0, exclusiveMinimum: true }),
-            remainingSeconds: assertFinite(durationSeconds, "durationSeconds", { minimum: 0, exclusiveMinimum: true })
+            direction: normalizedDirection,
+            impulse: magnitude,
+            distance: magnitude * durationSeconds,
+            durationSeconds,
+            remainingSeconds: durationSeconds
         };
         return true;
+    }
+
+    applyImpactKnockback({ direction, distance, durationSeconds }) {
+        return this.applyExternalImpulse({
+            direction,
+            impulse: distance / durationSeconds,
+            observationSeconds: durationSeconds
+        });
     }
 
     advanceImpactKnockback(dt, surfaces = [], collisionActors = [], collisionBroadPhase = null) {
@@ -348,14 +380,9 @@ class EnemyBodyObject extends withSurfacePhysics(
         const stepDt = assertFinite(dt, "dt", { minimum: 0 });
         if (stepDt <= 0) return Object.freeze({ moved: false, collided: false });
         const state = this.knockbackState;
-        const appliedSeconds = Math.min(stepDt, state.remainingSeconds);
-        const speed = state.distance / state.durationSeconds;
-        this.beginSurfacePhysicsStep();
-        this.queueSurfaceDisplacement(state.direction.clone().scale(speed * appliedSeconds), appliedSeconds);
-        const resolution = this.advanceEnemyPhysicsStep(appliedSeconds, surfaces, collisionActors, collisionBroadPhase);
-        state.remainingSeconds = Math.max(0, state.remainingSeconds - appliedSeconds);
+        state.remainingSeconds = Math.max(0, state.remainingSeconds - stepDt);
         if (state.remainingSeconds <= 0) this.knockbackState = null;
-        return Object.freeze({ moved: true, collided: resolution.collisionNormals.length > 0 });
+        return Object.freeze({ moved: false, collided: this.lastSurfaceCollisionNormals.length > 0 });
     }
 }
 

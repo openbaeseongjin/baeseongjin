@@ -17,6 +17,7 @@ import { WorldObjectSpriteAssetCatalog } from "../assets/WorldObjectSpriteAssetC
 import { worldObjectRenderer } from "../world-object/WorldObjectRendererDefinition.js";
 import { drawCheckpointBeacon, drawExitBeacon } from "../world/WorldMarkerPrimitives.js";
 import { drawElectricArc } from "../effects/ElectricArc.js";
+import { SPELL_ID } from "../../game/spells/SpellDefinition.js";
 
 const COLORS = Object.freeze({
     backgroundTop: "#171d2a",
@@ -1105,10 +1106,101 @@ export class CombatEffectRenderer {
     }
 }
 
+export class SpellEffectRenderer {
+    draw({ context, scene }) {
+        for (const projectile of scene.augmentProjectiles ?? []) {
+            if (projectile.spellId === SPELL_ID.METEOR) this.drawMeteor(context, projectile);
+            if (projectile.spellId === SPELL_ID.ELECTRIC_ORB) this.drawElectricOrb(context, projectile);
+        }
+        for (const area of scene.augmentAreas ?? []) this.drawArea(context, area);
+    }
+
+    drawMeteor(context, projectile) {
+        const radius = projectile.radius ?? 20;
+        const tail = radius * 4;
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        context.strokeStyle = "#ff6b1a";
+        context.shadowColor = "#ff3d00";
+        context.shadowBlur = radius;
+        context.lineWidth = radius * 1.2;
+        context.beginPath();
+        context.moveTo(projectile.position.x, projectile.position.y);
+        context.lineTo(
+            projectile.position.x - projectile.direction.x * tail,
+            projectile.position.y - projectile.direction.y * tail
+        );
+        context.stroke();
+        context.globalCompositeOperation = "source-over";
+        context.fillStyle = "#3f2b24";
+        context.strokeStyle = "#ffb347";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.arc(projectile.position.x, projectile.position.y, radius, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.restore();
+    }
+
+    drawElectricOrb(context, projectile) {
+        const radius = projectile.auraRadius ?? 175;
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        context.fillStyle = "rgba(34, 211, 238, 0.09)";
+        context.strokeStyle = "rgba(96, 165, 250, 0.72)";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.arc(projectile.position.x, projectile.position.y, radius, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+        context.fillStyle = "#e0f2fe";
+        context.beginPath();
+        context.arc(projectile.position.x, projectile.position.y, projectile.radius ?? 20, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+    }
+
+    drawArea(context, area) {
+        context.save();
+        context.globalCompositeOperation = "lighter";
+        if (area.spellId === SPELL_ID.THERMAL_LASER) {
+            context.strokeStyle = "rgba(255, 92, 40, 0.7)";
+            context.shadowColor = "#ff3d00";
+            context.shadowBlur = 18;
+            context.lineWidth = area.radius * 2;
+            context.beginPath();
+            context.moveTo(area.position.x, area.position.y);
+            context.lineTo(
+                area.position.x + area.direction.x * area.range,
+                area.position.y + area.direction.y * area.range
+            );
+            context.stroke();
+        } else if (area.spellId === SPELL_ID.FROST_BURST) {
+            context.fillStyle = "rgba(111, 159, 255, 0.2)";
+            context.beginPath();
+            context.arc(area.position.x, area.position.y, area.radius, 0, Math.PI * 2);
+            context.fill();
+        } else if (area.spellId === SPELL_ID.ARCANE_SLASH) {
+            const angle = Math.atan2(area.direction.y, area.direction.x);
+            const half = (area.halfAngleDegrees * Math.PI) / 180;
+            context.fillStyle = "rgba(226, 232, 240, 0.3)";
+            context.beginPath();
+            context.moveTo(area.position.x, area.position.y);
+            context.arc(area.position.x, area.position.y, area.range, angle - half, angle + half);
+            context.closePath();
+            context.fill();
+        }
+        context.restore();
+    }
+}
+
 const LARGE_AUGMENT_EFFECTS = Object.freeze({
     "collision-explosion-direct": true,
     "collision-explosion-splash": true,
-    "meteor-splash": true
+    "meteor-splash": true,
+    "shatter-splash": true,
+    "gathering-splash": true,
+    "electric-orb-aura": true
 });
 
 export class EventEffectRenderer {

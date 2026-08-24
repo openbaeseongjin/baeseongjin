@@ -36,9 +36,7 @@ export function deterministicAugmentOffer({ runSeed, playerId, selectionIndex, s
     if (guaranteedSpellId && !selectedAugmentIds.includes(guaranteedSpellId)) {
         return Object.freeze([augmentById(guaranteedSpellId).id]);
     }
-    const pool = compatibleAugmentsForSelection(selectedAugmentIds)
-        .filter(({ category }) => category === "rope")
-        .map(({ id }) => id);
+    const pool = compatibleAugmentsForSelection(selectedAugmentIds).map(({ id }) => id);
     if (pool.length === 0) return Object.freeze([]);
     const randomState = { value: hashOfferSeed(runSeed, playerId, selectionIndex) };
     for (let index = pool.length - 1; index > 0; index -= 1) {

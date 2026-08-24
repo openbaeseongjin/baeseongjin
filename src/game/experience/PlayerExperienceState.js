@@ -28,7 +28,10 @@ export class PlayerExperienceState {
     add(amount) {
         if (!Number.isFinite(amount) || amount < 0) throw new Error("experience reward must be non-negative");
         const previousLevel = this.level;
-        this.totalExperience += amount;
+        this.totalExperience = Math.min(
+            this.progression.cumulativeRequirement(this.progression.maximumRewardLevel),
+            this.totalExperience + amount
+        );
         return Object.freeze({
             amount,
             previousLevel,
@@ -36,6 +39,14 @@ export class PlayerExperienceState {
             gainedLevels: this.level - previousLevel,
             pendingRewardCount: this.pendingRewardCount
         });
+    }
+
+    loseForDeath() {
+        const previousLevel = this.level;
+        const requestedLoss = this.progression.deathPenaltyForLevel(previousLevel);
+        const amount = Math.min(this.totalExperience, requestedLoss);
+        this.totalExperience -= amount;
+        return Object.freeze({ amount, previousLevel, level: this.level, totalExperience: this.totalExperience });
     }
 
     resolveNextReward() {
@@ -72,8 +83,8 @@ export class PlayerExperienceState {
         }
         this.totalExperience = snapshot.totalExperience;
         this.resolvedRewardLevel = snapshot.resolvedRewardLevel;
-        if (this.resolvedRewardLevel > this.level)
-            throw new Error("resolved reward level cannot exceed experience level");
+        if (this.resolvedRewardLevel > this.progression.maximumRewardLevel)
+            throw new Error("resolved reward level cannot exceed maximum reward level");
         return this.snapshot();
     }
 

@@ -42,6 +42,8 @@ function requireVector(value, label) {
 function requireKnockback(value) {
     if (value === undefined) return undefined;
     const direction = requireVector(value.direction, "knockback.direction");
+    if (value.impulse !== undefined)
+        return Object.freeze({ direction, impulse: requireNonNegativeNumber(value.impulse, "knockback.impulse") });
     return Object.freeze({
         direction,
         distance: requireNonNegativeNumber(value.distance, "knockback.distance"),

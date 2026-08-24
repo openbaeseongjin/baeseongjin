@@ -530,6 +530,7 @@ export class CanvasRenderer {
             const spellId = spellState.slots?.[slotId] ?? null;
             const definition = spellDefinition(spellId);
             const remaining = Math.max(0, spellState.cooldowns?.[slotId] ?? 0);
+            const charges = spellId ? spellState.charges?.[spellId] : null;
             const duration = definition?.spec.cooldownSeconds ?? 0;
             const cooldownRatio = duration > 0 ? Math.min(1, remaining / duration) : 0;
             ctx.fillStyle = definition ? "rgba(7, 18, 30, 0.94)" : "rgba(12, 16, 24, 0.82)";
@@ -548,6 +549,7 @@ export class CanvasRenderer {
             ctx.fillStyle = "#94a3b8";
             ctx.font = "800 9px ui-monospace, monospace";
             ctx.fillText(SPELL_COMMAND_LABEL[slotId], x + cellSize * 0.5, y + cellSize - 8);
+            if (Number.isSafeInteger(charges)) ctx.fillText(`×${charges}`, x + cellSize - 12, y + 18);
             if (remaining > 0) {
                 ctx.fillStyle = "#f8fafc";
                 ctx.font = "900 15px ui-monospace, monospace";

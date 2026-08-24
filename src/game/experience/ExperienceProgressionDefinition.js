@@ -2,7 +2,7 @@ import { MAX_AUGMENT_SELECTIONS } from "../augments/AugmentCatalog.js";
 
 export const EXPERIENCE_PROGRESSION_SPEC = Object.freeze({
     baseRequirement: 50,
-    perLevelIncrease: 25,
+    growthMultiplier: 1.2,
     roundingStep: 5
 });
 
@@ -22,7 +22,7 @@ export class ExperienceProgressionDefinition {
     requirementForLevel(level) {
         if (!Number.isSafeInteger(level) || level < 1) throw new Error("experience level must be a positive integer");
         return roundToStep(
-            this.spec.baseRequirement + (level - 1) * this.spec.perLevelIncrease,
+            this.spec.baseRequirement * this.spec.growthMultiplier ** (level - 1),
             this.spec.roundingStep
         );
     }
@@ -30,7 +30,9 @@ export class ExperienceProgressionDefinition {
     cumulativeRequirement(level) {
         if (!Number.isSafeInteger(level) || level < 0) throw new Error("experience level must be non-negative");
         if (level === 0) return 0;
-        return (level * (this.requirementForLevel(1) + this.requirementForLevel(level))) / 2;
+        let total = 0;
+        for (let current = 1; current <= level; current += 1) total += this.requirementForLevel(current);
+        return total;
     }
 
     levelForExperience(totalExperience) {
@@ -42,6 +44,12 @@ export class ExperienceProgressionDefinition {
             level += 1;
         }
         return level;
+    }
+
+    deathPenaltyForLevel(level) {
+        if (!Number.isSafeInteger(level) || level < 0) throw new Error("experience level must be non-negative");
+        const requirementLevel = Math.max(1, Math.min(level + 1, this.maximumRewardLevel));
+        return roundToStep(this.requirementForLevel(requirementLevel) * 0.5, this.spec.roundingStep);
     }
 }
 

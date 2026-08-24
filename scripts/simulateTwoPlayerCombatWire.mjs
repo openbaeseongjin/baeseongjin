@@ -575,11 +575,15 @@ async function simulateDeathRespawnWire() {
         const serverVictim = room?.simulation.players.find(({ id }) => id === victimId);
         const localVictim = second.ownerRuntime?.simulation.players.find(({ id }) => id === victimId);
         assert(serverVictim && localVictim, "사망 시나리오의 피해 Player runtime을 찾지 못했습니다");
-        serverVictim.health = 50;
-        localVictim.health = 50;
+        serverVictim.health = 20;
+        localVictim.health = 20;
+        for (const victim of [serverVictim, localVictim]) {
+            victim.experience.add(265);
+            while (victim.experience.pendingRewardCount > 0) victim.experience.resolveNextReward();
+        }
         const teammateBefore = first.ownerState();
         await waitFor(
-            () => first.latestSnapshot?.state.players.find(({ id }) => id === victimId)?.health === 50,
+            () => first.latestSnapshot?.state.players.find(({ id }) => id === victimId)?.health === 20,
             "피해 Player health 설정이 snapshot에 반영되지 않았습니다",
             runtime
         );
@@ -621,6 +625,14 @@ async function simulateDeathRespawnWire() {
             "피해 Player의 부활 상태가 서버·동료에 수렴하지 않았습니다",
             runtime
         );
+        assert(
+            sharedVictim.experience.totalExperience === 210,
+            "사망 Player가 현재 레벨 요구 XP의 절반인 55를 잃지 않았습니다"
+        );
+        assert(
+            sharedVictim.experience.level === 3 && sharedVictim.experience.resolvedRewardLevel === 4,
+            "사망 뒤 현재 레벨은 내려가고 보상 완료 레벨은 유지되어야 합니다"
+        );
         const teammateAfter = first.ownerState();
         assert(teammateAfter.health === teammateBefore.health, "동료 HP가 다른 Player 사망 때문에 바뀌었습니다");
         assert(
@@ -635,6 +647,8 @@ async function simulateDeathRespawnWire() {
             receiptAccepted: receipt.accepted,
             victimHealthAfterRespawn: sharedVictim.health,
             victimLifeState: sharedVictim.lifeState,
+            victimExperienceAfterDeath: sharedVictim.experience.totalExperience,
+            victimRewardLevelPreserved: sharedVictim.experience.resolvedRewardLevel,
             teammatePreserved: true,
             serverAliveAfterRespawn: true
         });

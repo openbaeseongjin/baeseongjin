@@ -459,7 +459,10 @@ export class MultiplayerGameApp {
                         ...current.state.players.flatMap(
                             (player) => player.augmentRuntimeState?.combat?.spellProjectiles ?? []
                         )
-                    ]
+                    ],
+                    augmentAreas: current.state.players.flatMap(
+                        (player) => player.augmentRuntimeState?.combat?.spellAreas ?? []
+                    )
                 },
                 dt,
                 particleBounds
@@ -609,6 +612,10 @@ export class MultiplayerGameApp {
             augmentProjectiles: [
                 ...(base.augmentProjectiles ?? []),
                 ...otherPlayers.flatMap((other) => other.augmentRuntimeState?.combat?.spellProjectiles ?? [])
+            ],
+            augmentAreas: [
+                ...(base.augmentAreas ?? []),
+                ...otherPlayers.flatMap((other) => other.augmentRuntimeState?.combat?.spellAreas ?? [])
             ],
             ...predictableProjectiles,
             ...combatFeedback,

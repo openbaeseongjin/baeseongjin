@@ -12,6 +12,7 @@ import {
     RopeRenderer,
     RopeShotRenderer,
     SwingRenderer,
+    SpellEffectRenderer,
     WorldGeometryRenderer,
     localRopes,
     localShots,
@@ -85,6 +86,7 @@ export class PolygonSceneRenderer {
                             (scene.enemyProjectiles ?? []).filter((projectile) => projectile.canCutRope),
                         category: "cutterProjectiles"
                     }),
+                    new SpellEffectRenderer(),
                     new CombatEffectRenderer(),
                     new EventEffectRenderer(),
                     new AttachmentCandidateRenderer(),

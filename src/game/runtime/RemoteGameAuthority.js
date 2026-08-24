@@ -447,8 +447,12 @@ export class RemoteGameAuthority {
                 ? {
                       knockback: {
                           direction: event.knockback.direction,
-                          distance: event.knockback.distance,
-                          duration: event.knockback.duration ?? event.knockback.durationSeconds
+                          ...(event.knockback.impulse !== undefined
+                              ? { impulse: event.knockback.impulse }
+                              : {
+                                    distance: event.knockback.distance,
+                                    duration: event.knockback.duration ?? event.knockback.durationSeconds
+                                })
                       }
                   }
                 : {})

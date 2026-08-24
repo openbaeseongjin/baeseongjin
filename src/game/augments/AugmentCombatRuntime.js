@@ -10,6 +10,8 @@ import {
 } from "../spells/SpellRuntimeDefinition.js";
 import { directionBetween } from "../spells/SpellRuntimeSupport.js";
 import { SpellProjectileState } from "../spells/SpellProjectileState.js";
+import { SpellAreaState } from "../spells/SpellAreaState.js";
+import { AugmentPassiveState } from "./AugmentPassiveState.js";
 import { ElectrifiedRopeContactState } from "./rope/ElectrifiedRopeContactState.js";
 import { resolveCollisionExplosion } from "./rope/CollisionExplosionState.js";
 
@@ -60,7 +62,9 @@ export class AugmentCombatRuntime {
             pulseSeconds: AUGMENT_IMPACT_CONFIG.electrifiedPulseSeconds
         });
         this.projectileState = new SpellProjectileState();
+        this.areaState = new SpellAreaState();
         this.spellState = new SpellRuntimeState();
+        this.passiveState = new AugmentPassiveState();
         this.eventSequence = 0;
     }
 
@@ -70,9 +74,10 @@ export class AugmentCombatRuntime {
 
     prepareCommand(player, loadout, command) {
         this.syncLoadout(loadout);
+        this.passiveState.prepareCommand(player, loadout, command);
         return Object.freeze({
             ...command,
-            gravityScale: 1,
+            gravityScale: this.spellState.gravityScale(),
             preserveMovementImpulse: this.spellState.consumeMovementImpulsePreservation(),
             movementMultiplier: this.spellState.movementMultiplier()
         });
@@ -116,6 +121,7 @@ export class AugmentCombatRuntime {
             );
 
         this.spellState.advance(dt);
+        this.passiveState.advance(player, loadout, dt);
         const direction = directionBetween(player.physics.position, player.ropeObject.aimWorld, {
             x: Math.sign(player.physics.velocity.x) || 1,
             y: 0
@@ -128,8 +134,16 @@ export class AugmentCombatRuntime {
                     id: SPELL_KEY.projectile(player.id, tick, this.eventSequence++),
                     ownerId: player.id,
                     ...definition
+                }),
+            spawnArea: (definition) =>
+                this.areaState.spawn({
+                    id: SPELL_KEY.projectile(player.id, tick, this.eventSequence++),
+                    ownerId: player.id,
+                    remainingSeconds: definition.durationSeconds,
+                    ...definition
                 })
         });
+        this.spellState.applyContinuousEffects(player, direction, dt);
         if (cast) {
             presentationEvents.push(
                 Object.freeze({
@@ -152,6 +166,7 @@ export class AugmentCombatRuntime {
             emitImpact,
             presentationEvents
         });
+        this.areaState.advance({ targets, dt, emitImpact });
         return Object.freeze({
             impactEvents: Object.freeze(impactEvents),
             presentationEvents: Object.freeze(presentationEvents)
@@ -218,6 +233,11 @@ export class AugmentCombatRuntime {
                             outcome.targetId === primaryTarget.id ? player.physics.position : primaryTarget.position,
                         contactPosition: outcome.position,
                         knockback: outcome.knockback
+                            ? Object.freeze({
+                                  direction: outcome.knockback.direction,
+                                  impulse: outcome.knockback.distance / outcome.knockback.durationSeconds
+                              })
+                            : null
                     })
                 );
             }
@@ -229,7 +249,9 @@ export class AugmentCombatRuntime {
         return Object.freeze({
             electrified: this.electrified.snapshot(),
             spellProjectiles: this.projectileState.snapshot(),
+            spellAreas: this.areaState.snapshot(),
             spellState: this.spellState.snapshot(),
+            passiveState: this.passiveState.snapshot(),
             eventSequence: this.eventSequence
         });
     }
@@ -238,14 +260,18 @@ export class AugmentCombatRuntime {
         if (!snapshot) {
             this.electrified.reset();
             this.projectileState.reset();
+            this.areaState.reset();
             this.spellState.reset();
+            this.passiveState.reset();
             this.eventSequence = 0;
             if (loadout) this.syncLoadout(loadout);
             return this.snapshot();
         }
         this.electrified.restore(snapshot?.electrified ?? null);
         this.projectileState.restore(snapshot?.spellProjectiles ?? []);
+        this.areaState.restore(snapshot?.spellAreas ?? []);
         this.spellState.restore(snapshot?.spellState ?? null);
+        this.passiveState.restore(snapshot?.passiveState ?? null);
         if (!Number.isSafeInteger(snapshot.eventSequence) || snapshot.eventSequence < 0) {
             throw new Error("spell eventSequence must be a non-negative integer");
         }
@@ -257,7 +283,9 @@ export class AugmentCombatRuntime {
     resetForRespawn(loadout) {
         this.electrified.reset();
         this.projectileState.reset();
+        this.areaState.reset();
         this.spellState.reset();
+        this.passiveState.reset();
         this.syncLoadout(loadout);
         return this.snapshot();
     }
