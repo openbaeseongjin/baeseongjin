@@ -8,7 +8,7 @@ import { PredictableProjectileStore } from "./runtime/PredictableProjectileStore
 import { createCurrentGameSimulation } from "./simulation/GameSimulationFactory.js";
 import { CAMERA_CONFIG, resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
-import { createBossStagePresentation } from "../render/boss/BossStagePresentation.js";
+import { createBossPresentationEvents, createBossStagePresentation } from "../render/boss/BossStagePresentation.js";
 import { bossStageSpecById } from "./boss-authoring/BossStageCatalog.js";
 import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
 import { selectClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
@@ -89,6 +89,7 @@ export class GameApp {
         this.combatFeedback = new ClientCombatFeedback({ viewerId: this.authority.playerId });
         this.statusFeedback = new ClientStatusFeedback({ viewerId: this.authority.playerId });
         this.playerPresentationEvents = [];
+        this.bossPresentationEvents = [];
         const presentationDefinition =
             playerDefinition ?? this.renderer.sceneRenderer?.playerDefinition ?? DEFAULT_PLAYER_SPRITE_DEFINITION;
         const deathPresentation = presentationDefinition.presentationFor("death");
@@ -306,6 +307,7 @@ export class GameApp {
         this.advanceDebugTrainingDummy(dt);
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
+        this.bossPresentationEvents.push(...createBossPresentationEvents(authorityEvents));
         this.statusFeedback.update(dt);
         this.statusFeedback.apply(authorityEvents);
         this.queuePlayerPresentationEvents(authorityEvents);
@@ -470,11 +472,13 @@ export class GameApp {
         this.stats.resets = state.resets;
         this.queuePlayerPresentationEvents([state.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
+        const bossPresentationEvents = Object.freeze(this.bossPresentationEvents.splice(0));
         const bossStageSnapshot = renderState.bossStage ?? renderState.bossStageRuntime ?? renderState.bossRuntime;
         const localBossStage = localBossStageSnapshot(bossStageSnapshot, renderState.player);
         const bossStagePresentation = createBossStagePresentation(
             localBossStage,
-            this.bossStageSpecResolver(localBossStage?.stageId ?? localBossStage?.id ?? localBossStage?.encounterId)
+            this.bossStageSpecResolver(localBossStage?.stageId ?? localBossStage?.id ?? localBossStage?.encounterId),
+            bossPresentationEvents
         );
         const renderMetrics = this.renderer.draw({
             ...renderState,

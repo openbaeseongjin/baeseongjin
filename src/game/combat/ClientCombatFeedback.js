@@ -34,12 +34,22 @@ export class ClientCombatFeedback {
             enemyProjectiles = [],
             augmentProjectiles = [],
             windStates = [],
+            bossStage = null,
             world = {}
         },
         dt,
         visibleWorldBounds
     ) {
-        const scene = { enemies, players, projectiles, enemyProjectiles, augmentProjectiles, windStates, world };
+        const scene = {
+            enemies,
+            players,
+            projectiles,
+            enemyProjectiles,
+            augmentProjectiles,
+            windStates,
+            bossStage,
+            world
+        };
         this.continuousEmitter.beginFrame({ dt, visibleWorldBounds, effectBuffer: this.effectBuffer });
         const context = {
             viewerId: this.viewerId,

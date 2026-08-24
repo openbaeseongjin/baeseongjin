@@ -12,6 +12,7 @@ function freezeWorldObject(object) {
         ropeAttachable: object.ropeAttachable === true,
         hazardKind: object.hazardKind ?? null,
         actionState: object.actionState ?? null,
+        defeatStage: object.defeatStage ?? null,
         damaging: object.damaging === true,
         movementProgress: finite(object.movementProgress),
         suspensionHeight: Math.max(0, finite(object.suspensionHeight)),
@@ -58,13 +59,25 @@ function freezeWorldObject(object) {
 const PRESENTATION_KIND = Object.freeze({
     "boss-grapple-anchor": "grapple-anchor"
 });
+const BOSS_PRESENTATION_EVENT_TYPE = Object.freeze({
+    "boss-damaged": true,
+    "boss-guard-blocked": true
+});
 const DIRECTION_LABEL = Object.freeze({ "-1": "left", 1: "right" });
 
 function directionLabel(direction) {
     return DIRECTION_LABEL[String(direction)] ?? null;
 }
 
-export function createBossStagePresentation(snapshot, stageSpec = null) {
+export function createBossPresentationEvents(events) {
+    return Object.freeze(
+        (events ?? [])
+            .filter(({ eventType }) => BOSS_PRESENTATION_EVENT_TYPE[eventType] === true)
+            .map((event) => Object.freeze({ ...event }))
+    );
+}
+
+export function createBossStagePresentation(snapshot, stageSpec = null, events = Object.freeze([])) {
     if (!snapshot || snapshot.status === "inactive") return null;
     const phaseCount = Math.max(1, Math.trunc(finite(snapshot.phaseCount, 1)));
     const phase = Math.max(1, Math.min(phaseCount, Math.trunc(finite(snapshot.phase, 1))));
@@ -123,7 +136,8 @@ export function createBossStagePresentation(snapshot, stageSpec = null) {
         }),
         world: Object.freeze({
             name: presentation.name ?? snapshot.name ?? hud.title ?? hud.name ?? "BOSS",
-            objects: Object.freeze((presentation.objects ?? snapshot.presentationObjects ?? []).map(freezeWorldObject))
+            objects: Object.freeze((presentation.objects ?? snapshot.presentationObjects ?? []).map(freezeWorldObject)),
+            events: Object.freeze([...events])
         })
     });
 }

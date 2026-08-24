@@ -1102,6 +1102,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 state: this.state,
                 defeatStage: victoryStage,
                 actionState: this.actionPhase,
+                remainingSeconds: this.timer,
                 direction: this.facing,
                 physicsBody: true,
                 ropeAttachable: this.body.isRopeableSurface(),

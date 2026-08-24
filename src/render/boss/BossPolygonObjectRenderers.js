@@ -23,6 +23,56 @@ const WARDEN_ATTACK_FAMILY_COLOR = Object.freeze({
     melee: COLOR.WARNING,
     dash: "#38bdf8"
 });
+const WARDEN_TELEGRAPH_COLOR_BY_STATE = Object.freeze({
+    "baton-1": COLOR.WARNING,
+    "baton-2": COLOR.WARNING,
+    "overhead-slam": COLOR.WARNING,
+    "back-swing": COLOR.WARNING,
+    "counter-bash": COLOR.WARNING,
+    "ground-thruster-dash": WARDEN_ATTACK_FAMILY_COLOR.dash,
+    "diagonal-thruster-dash": WARDEN_ATTACK_FAMILY_COLOR.dash,
+    charge: COLOR.WARNING
+});
+
+const WARDEN_MELEE_RANGE_IMAGE_PROFILE = Object.freeze({
+    "baton-1": Object.freeze({ startY: 0.24, controlY: -0.34, endY: -0.08, directionMultiplier: 1 }),
+    "baton-2": Object.freeze({ startY: -0.18, controlY: 0.32, endY: 0.2, directionMultiplier: 1 }),
+    "back-swing": Object.freeze({ startY: 0.18, controlY: -0.28, endY: -0.16, directionMultiplier: -1 }),
+    "counter-bash": Object.freeze({ startY: 0.08, controlY: -0.08, endY: 0, directionMultiplier: 1 })
+});
+
+const WARDEN_MELEE_RANGE_IMAGE = Object.freeze({
+    SEGMENT_COUNT: 9,
+    HORIZONTAL_SPAN_RATIO: 0.84,
+    SEGMENT_WIDTH_RATIO: 0.11,
+    OUTER_HEIGHT_RATIO: 0.2,
+    INNER_HEIGHT_RATIO: 0.11,
+    CORE_HEIGHT_RATIO: 0.04,
+    MIN_OUTER_HEIGHT: 14,
+    MIN_INNER_HEIGHT: 8,
+    MIN_CORE_HEIGHT: 4,
+    IMPACT_ARM_RATIO: 0.18,
+    OUTER_COLOR: "rgba(251, 113, 133, 0.82)",
+    INNER_COLOR: "#fbbf24",
+    CORE_COLOR: "#fff7ed"
+});
+
+const WARDEN_BEAM_RANGE_IMAGE = Object.freeze({
+    OUTER_HEIGHT_RATIO: 0.46,
+    INNER_HEIGHT_RATIO: 0.28,
+    CORE_HEIGHT_RATIO: 0.09,
+    MIN_OUTER_HEIGHT: 28,
+    MIN_INNER_HEIGHT: 16,
+    MIN_CORE_HEIGHT: 6,
+    TILE_WIDTH_RATIO: 0.52,
+    MIN_TILE_WIDTH: 44,
+    TILE_GAP_RATIO: 0.22,
+    EDGE_HEIGHT_RATIO: 0.04,
+    OUTER_COLOR: "rgba(136, 19, 55, 0.8)",
+    INNER_COLOR: "rgba(251, 113, 133, 0.9)",
+    CORE_COLOR: "#fff1f2",
+    EDGE_COLOR: "#a5f3fc"
+});
 
 const KIND = Object.freeze({
     GRAPPLE_ANCHOR: "grapple-anchor",
@@ -63,6 +113,30 @@ function polygon(context, vertices) {
     context.beginPath();
     vertices.forEach(({ x, y }, index) => (index === 0 ? context.moveTo(x, y) : context.lineTo(x, y)));
     context.closePath();
+}
+
+function wardenTelegraphColor(state, family) {
+    return WARDEN_TELEGRAPH_COLOR_BY_STATE[state] ?? WARDEN_ATTACK_FAMILY_COLOR[family] ?? COLOR.WARNING;
+}
+
+function pixelStreak(context, x, y, width, height, color) {
+    context.fillStyle = color;
+    context.fillRect(Math.round(x), Math.round(y), Math.round(width), Math.round(height));
+}
+
+function pixelBlock(context, centerX, centerY, width, height, color) {
+    context.fillStyle = color;
+    context.fillRect(
+        Math.round(centerX - width * 0.5),
+        Math.round(centerY - height * 0.5),
+        Math.max(1, Math.round(width)),
+        Math.max(1, Math.round(height))
+    );
+}
+
+function quadraticCoordinate(start, control, end, progress) {
+    const inverse = 1 - progress;
+    return inverse * inverse * start + 2 * inverse * progress * control + progress * progress * end;
 }
 
 class BossPolygonObjectRenderer {
@@ -122,7 +196,7 @@ class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
         const guarding = object.state === "guard" || object.state === "counter-ready";
         const warning = object.actionState === "telegraph";
         const family = WARDEN_ATTACK_FAMILY[object.state] ?? null;
-        const warningColor = family ? WARDEN_ATTACK_FAMILY_COLOR[family] : COLOR.WARNING;
+        const warningColor = wardenTelegraphColor(object.state, family);
         if (defeated) context.rotate(WARDEN_DEFEAT_STAGE_ROTATION[object.defeatStage] ?? -0.95);
         context.fillStyle = "#4d5b61";
         context.strokeStyle = warning ? warningColor : defeated ? "#64748b" : "#e1eaed";
@@ -193,6 +267,14 @@ class SecurityBeamRenderer extends BossPolygonObjectRenderer {
         context.strokeRect(-width * 0.5, -height * 0.5, width, height);
         context.setLineDash([]);
         context.globalAlpha = 1;
+        if (active) this.drawActiveRangeImage(context, width, height);
+        context.fillStyle = active ? "rgba(255,255,255,0.72)" : "rgba(251,191,36,0.7)";
+        const bandHeight = Math.max(4, Math.round(height * (active ? 0.12 : 0.06)));
+        const segmentWidth = Math.max(24, Math.round(height * 0.55));
+        const segmentGap = Math.max(16, Math.round(segmentWidth * 0.7));
+        for (let x = -width * 0.5; x < width * 0.5; x += segmentWidth + segmentGap) {
+            context.fillRect(Math.round(x), -Math.round(bandHeight * 0.5), segmentWidth, bandHeight);
+        }
         context.strokeStyle = object.state === "telegraph" ? COLOR.WARNING : "#fff1f2";
         context.lineWidth = 4;
         const labels = String(object.variant ?? "")
@@ -209,6 +291,28 @@ class SecurityBeamRenderer extends BossPolygonObjectRenderer {
             context.textBaseline = "middle";
             context.fillText(String(object.order), 0, 0);
         }
+    }
+
+    drawActiveRangeImage(context, width, height) {
+        const style = WARDEN_BEAM_RANGE_IMAGE;
+        const outerHeight = Math.max(style.MIN_OUTER_HEIGHT, height * style.OUTER_HEIGHT_RATIO);
+        const innerHeight = Math.max(style.MIN_INNER_HEIGHT, height * style.INNER_HEIGHT_RATIO);
+        const coreHeight = Math.max(style.MIN_CORE_HEIGHT, height * style.CORE_HEIGHT_RATIO);
+        const edgeHeight = Math.max(2, height * style.EDGE_HEIGHT_RATIO);
+        const tileWidth = Math.max(style.MIN_TILE_WIDTH, height * style.TILE_WIDTH_RATIO);
+        const tileGap = Math.max(8, tileWidth * style.TILE_GAP_RATIO);
+        context.save();
+        context.imageSmoothingEnabled = false;
+        context.globalCompositeOperation = "lighter";
+        pixelBlock(context, 0, 0, width, outerHeight, style.OUTER_COLOR);
+        pixelBlock(context, 0, 0, width, innerHeight, style.INNER_COLOR);
+        pixelBlock(context, 0, 0, width, coreHeight, style.CORE_COLOR);
+        pixelBlock(context, 0, coreHeight * 0.75, width, edgeHeight, style.EDGE_COLOR);
+        for (let x = -width * 0.5; x < width * 0.5; x += tileWidth + tileGap) {
+            pixelBlock(context, x + tileWidth * 0.5, -innerHeight * 0.38, tileWidth, edgeHeight, style.CORE_COLOR);
+            pixelBlock(context, x + tileWidth * 0.5, innerHeight * 0.38, tileWidth, edgeHeight, style.CORE_COLOR);
+        }
+        context.restore();
     }
 }
 
@@ -329,7 +433,7 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
         const { width, height } = size(object, 220, 140);
         const active = object.state === "active" || object.state === "beam-active" || object.state === "burst-active";
         const family = WARDEN_ATTACK_FAMILY[object.variant] ?? null;
-        const telegraphColor = family ? WARDEN_ATTACK_FAMILY_COLOR[family] : COLOR.WARNING;
+        const telegraphColor = wardenTelegraphColor(object.variant, family);
         context.globalAlpha = active ? 0.62 : 0.32;
         context.fillStyle = active
             ? "rgba(251, 113, 133, 0.35)"
@@ -346,6 +450,69 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
             chevron(context, 0, 0, direction(object), Math.min(width, height) * 0.55, telegraphColor);
         }
         context.globalAlpha = 1;
+        if (active && family === "melee") this.drawMeleeRangeImage(context, object, width, height);
+        if (active && family === "dash") this.drawDashTrail(context, object, width, height);
+    }
+
+    drawMeleeRangeImage(context, object, width, height) {
+        if (object.variant === "overhead-slam") {
+            this.drawOverheadRangeImage(context, width, height);
+            return;
+        }
+        const profile = WARDEN_MELEE_RANGE_IMAGE_PROFILE[object.variant] ?? WARDEN_MELEE_RANGE_IMAGE_PROFILE["baton-1"];
+        const style = WARDEN_MELEE_RANGE_IMAGE;
+        const sign = direction(object) * profile.directionMultiplier;
+        const span = width * style.HORIZONTAL_SPAN_RATIO;
+        const startX = -sign * span * 0.5;
+        const segmentWidth = width * style.SEGMENT_WIDTH_RATIO;
+        const outerHeight = Math.max(style.MIN_OUTER_HEIGHT, height * style.OUTER_HEIGHT_RATIO);
+        const innerHeight = Math.max(style.MIN_INNER_HEIGHT, height * style.INNER_HEIGHT_RATIO);
+        const coreHeight = Math.max(style.MIN_CORE_HEIGHT, height * style.CORE_HEIGHT_RATIO);
+        context.globalCompositeOperation = "lighter";
+        for (let index = 0; index < style.SEGMENT_COUNT; index += 1) {
+            const progress = index / (style.SEGMENT_COUNT - 1);
+            const x = startX + sign * span * progress;
+            const y = quadraticCoordinate(profile.startY, profile.controlY, profile.endY, progress) * height;
+            pixelBlock(context, x, y, segmentWidth, outerHeight, style.OUTER_COLOR);
+            pixelBlock(context, x, y, segmentWidth, innerHeight, style.INNER_COLOR);
+            pixelBlock(context, x, y, segmentWidth, coreHeight, style.CORE_COLOR);
+        }
+        const impactX = sign * span * 0.5;
+        const impactY = profile.endY * height;
+        const impactArm = Math.max(18, Math.min(width, height) * style.IMPACT_ARM_RATIO);
+        pixelBlock(context, impactX, impactY, impactArm, coreHeight, style.CORE_COLOR);
+        pixelBlock(context, impactX, impactY, coreHeight, impactArm, style.CORE_COLOR);
+    }
+
+    drawOverheadRangeImage(context, width, height) {
+        const style = WARDEN_MELEE_RANGE_IMAGE;
+        const segmentCount = style.SEGMENT_COUNT;
+        const span = height * style.HORIZONTAL_SPAN_RATIO;
+        const segmentHeight = height * style.SEGMENT_WIDTH_RATIO;
+        const outerWidth = Math.max(style.MIN_OUTER_HEIGHT, width * style.OUTER_HEIGHT_RATIO);
+        const innerWidth = Math.max(style.MIN_INNER_HEIGHT, width * style.INNER_HEIGHT_RATIO);
+        const coreWidth = Math.max(style.MIN_CORE_HEIGHT, width * style.CORE_HEIGHT_RATIO);
+        context.globalCompositeOperation = "lighter";
+        for (let index = 0; index < segmentCount; index += 1) {
+            const progress = index / (segmentCount - 1);
+            const y = -span * 0.5 + span * progress;
+            const x = Math.sin(progress * Math.PI) * width * 0.08;
+            pixelBlock(context, x, y, outerWidth, segmentHeight, style.OUTER_COLOR);
+            pixelBlock(context, x, y, innerWidth, segmentHeight, style.INNER_COLOR);
+            pixelBlock(context, x, y, coreWidth, segmentHeight, style.CORE_COLOR);
+        }
+        const floorY = height * 0.42;
+        pixelBlock(context, 0, floorY, width * 0.82, Math.max(12, height * 0.12), style.OUTER_COLOR);
+        pixelBlock(context, 0, floorY, width * 0.68, Math.max(7, height * 0.07), style.INNER_COLOR);
+        pixelBlock(context, 0, floorY, width * 0.44, Math.max(3, height * 0.03), style.CORE_COLOR);
+    }
+
+    drawDashTrail(context, object, width, height) {
+        const sign = direction(object);
+        context.globalCompositeOperation = "lighter";
+        pixelStreak(context, -sign * width * 0.48, -height * 0.18, sign * width * 0.4, 8, "#67e8f9");
+        pixelStreak(context, -sign * width * 0.42, 0, sign * width * 0.3, 5, "#38bdf8");
+        pixelStreak(context, -sign * width * 0.35, height * 0.18, sign * width * 0.22, 4, "#ecfeff");
     }
 }
 
