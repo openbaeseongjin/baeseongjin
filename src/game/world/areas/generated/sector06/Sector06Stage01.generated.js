@@ -317,7 +317,173 @@ const SPEC = {
         "type": "reach"
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "patrol-drone-t1",
+            "pursuit-drone-t1"
+          ]
+        },
+        "id": "sector-06-01:route-guard-01",
+        "kind": "sentry",
+        "position": {
+          "x": -730,
+          "y": -2080
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 110,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "id": "sector-06-01:route-guard-02",
+        "kind": "sentry",
+        "position": {
+          "x": -840,
+          "y": -1540
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "patrol-drone-t1",
+            "pursuit-drone-t1"
+          ]
+        },
+        "id": "sector-06-01:route-guard-03",
+        "kind": "sentry",
+        "position": {
+          "x": -320,
+          "y": -2410
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "shield-drone-t1",
+            "artillery-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "id": "sector-06-01:route-guard-04",
+        "kind": "sentry",
+        "position": {
+          "x": 140,
+          "y": -2450
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "patrol-drone-t1",
+            "pursuit-drone-t1"
+          ]
+        },
+        "id": "sector-06-01:route-guard-05",
+        "kind": "sentry",
+        "position": {
+          "x": -570,
+          "y": -1800
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      }
+    ],
     "order": 1,
     "recoveryPoints": [
       {

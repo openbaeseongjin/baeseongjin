@@ -1,9 +1,17 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 
-export const AUGMENT_IMPACT_CLAIM_PROTOCOL_VERSION = 4;
+export const AUGMENT_IMPACT_CLAIM_PROTOCOL_VERSION = 5;
 
-const ACCEPTED_RESOLUTIONS = new Set(["applied", "shield-blocked", "target-already-dead", "duplicate"]);
-const REJECTED_REASONS = new Set(["target-missing", "tick-window", "invalid"]);
+const ACCEPTED_RESOLUTION_LOOKUP = Object.freeze({
+    applied: true,
+    "shield-blocked": true,
+    "target-already-dead": true
+});
+const REJECTED_REASON_LOOKUP = Object.freeze({
+    "target-missing": true,
+    "tick-window": true,
+    invalid: true
+});
 
 function requireId(value, label) {
     if (typeof value !== "string" || value.length === 0) throw new Error(`${label} must be non-empty`);
@@ -85,13 +93,13 @@ export function createAugmentImpactReceipt({
 }) {
     if (typeof accepted !== "boolean") throw new Error("accepted must be boolean");
     if (accepted) {
-        if (!ACCEPTED_RESOLUTIONS.has(resolution)) {
+        if (ACCEPTED_RESOLUTION_LOOKUP[resolution] !== true) {
             throw new Error("accepted augment impact receipt requires a supported resolution");
         }
         if (reason !== undefined)
             throw new Error("accepted augment impact receipt must not include a rejection reason");
     } else {
-        if (!REJECTED_REASONS.has(reason)) {
+        if (REJECTED_REASON_LOOKUP[reason] !== true) {
             throw new Error("rejected augment impact receipt requires a supported reason");
         }
         if (resolution !== undefined) throw new Error("rejected augment impact receipt must not include a resolution");

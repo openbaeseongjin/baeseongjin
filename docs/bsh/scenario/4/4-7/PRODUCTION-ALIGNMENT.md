@@ -1,5 +1,7 @@
 # SECTOR 04-7 — PRODUCTION ALIGNMENT
 
+> **CURRENT RUNTIME OVERRIDE — 0.68.0:** Enemy slot은 4개이며 아래 Pursuit/Security 2기 authoring 기록을 대체한다.
+
 ## Current source-of-truth split
 
 Latest checked main: `3c9f661bba58af6f7351e00754c12aef86575a12`.

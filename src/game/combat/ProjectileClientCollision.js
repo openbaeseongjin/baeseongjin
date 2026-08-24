@@ -62,7 +62,6 @@ export const withPlayerImpactPrediction = createSimulationCapabilityMixin({
             canHitPlayer &&
             !ropeHit &&
             player.health > 0 &&
-            (player.hitInvulnerabilityRemaining ?? 0) <= 0 &&
             colliderSnapshotOverlapsCircle(player.collider, player.position, this.position, this.radius)
         );
         const isOverlapping = ropeHit || bodyHit;

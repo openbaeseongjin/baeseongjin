@@ -1,6 +1,6 @@
 # 6-5 PRODUCTION ALIGNMENT REV2.1
 
-Runtime: generated source with one Scanner controlling only C1/C3; browser tuning pending.
+Runtime: generated source with five Enemy slots and one Scanner controlling only C1/C3; browser tuning pending.
 
 Latest checked main:
 `8b344f0f7a2309bfb316655668ed180718db7781`

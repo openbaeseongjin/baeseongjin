@@ -578,6 +578,39 @@ const SPEC = {
           "y": -2070
         },
         "presentationId": "world-object:gate"
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "pursuit-drone-t1",
+            "shield-drone-t1",
+            "artillery-drone-t1"
+          ]
+        },
+        "id": "sector-03-06:route-guard-01",
+        "kind": "sentry",
+        "position": {
+          "x": -840,
+          "y": -528
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
       }
     ],
     "order": 6,

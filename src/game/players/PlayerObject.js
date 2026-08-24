@@ -29,7 +29,6 @@ export class PlayerObject extends withPlayerRenderSnapshot(withLocomotionInput(I
         this.ropeImpactState = ropeImpactState;
         this.health = combatConfig.playerMaxHealth;
         this.maxHealth = combatConfig.playerMaxHealth;
-        this.hitInvulnerabilityRemaining = 0;
         this.ropeDisabledRemaining = 0;
         this.lifeState = "active";
         this.respawnAnchorId = respawnAnchorId;

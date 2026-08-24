@@ -48,6 +48,8 @@ const EXPECTED_SECTOR_END_FLOW = Object.freeze({
     "6-8": Object.freeze({ targetStageId: null, bossStageId: "boss-06" })
 });
 const PROMOTED_STAGE_ENTRY_SECTOR_RANGE = Object.freeze({ first: 4, last: 6 });
+const ENEMY_DENSITY_EXEMPT_STAGE_LOOKUP = Object.freeze({ "1-1": true, "1-2": true });
+const MINIMUM_ENEMY_COUNT_BY_SECTOR = Object.freeze({ 1: 3, 2: 3, 3: 4, 4: 4, 5: 5, 6: 5 });
 const BASE_ROPE_REACH = ropeHookReach(ROPE_CONFIG);
 const FORBIDDEN_AUTHORITY_KEYS = Object.freeze({
     designSourcePath: true,
@@ -490,20 +492,30 @@ function validateSectorRecallContracts(world, issues) {
     const sector06Scanner = world.scannerGroups.filter(
         ({ stageId }) => stageId === EXPECTED_SECTOR_06_RECALL.scannerStageId
     );
-    const sector06EncounterByStage = Object.freeze(
-        Object.fromEntries(
-            world.enemySpawns.filter(({ sectorId }) => sectorId === "sector-06").map((entry) => [entry.stageId, entry])
-        )
-    );
+    const sector06Encounters = world.enemySpawns.filter(({ sectorId }) => sectorId === "sector-06");
     if (sector06Wind.length !== 1 || sector06Scanner.length !== 1) {
         issue(issues, "sector-06-recall-environment-mismatch", {
             windCount: sector06Wind.length,
             scannerCount: sector06Scanner.length
         });
     }
-    const standard = sector06EncounterByStage[EXPECTED_SECTOR_06_RECALL.standardStageId];
-    const patrol = sector06EncounterByStage[EXPECTED_SECTOR_06_RECALL.patrolStageId];
-    const cutter = sector06EncounterByStage[EXPECTED_SECTOR_06_RECALL.cutterStageId];
+    const standard = sector06Encounters.find(
+        ({ stageId, enemySelection }) =>
+            stageId === EXPECTED_SECTOR_06_RECALL.standardStageId &&
+            enemySelection?.fixedEnemyType === ENEMY_TYPE.SENTRY_T1
+    );
+    const patrol = sector06Encounters.find(
+        ({ stageId, enemySelection, patrol }) =>
+            stageId === EXPECTED_SECTOR_06_RECALL.patrolStageId &&
+            enemySelection?.fixedEnemyType === ENEMY_TYPE.PATROL_DRONE_T1 &&
+            patrol
+    );
+    const cutter = sector06Encounters.find(
+        ({ stageId, enemySelection, rules }) =>
+            stageId === EXPECTED_SECTOR_06_RECALL.cutterStageId &&
+            enemySelection?.fixedEnemyType === ENEMY_TYPE.SENTRY_T1 &&
+            rules?.includes("cutter-fire")
+    );
     if (
         standard?.enemySelection?.fixedEnemyType !== ENEMY_TYPE.SENTRY_T1 ||
         patrol?.enemySelection?.fixedEnemyType !== ENEMY_TYPE.PATROL_DRONE_T1 ||
@@ -998,6 +1010,21 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
         const validation = validateAreaSpecV2(spec, { file: entry.sourcePath, registry: EMPTY_AREA_BEHAVIOR_REGISTRY });
         issues.push(...validation.issues);
         validateEditorEntityCoverage(spec, issues);
+        const sectorNumber = Number(entry.stageId.split("-")[0]);
+        const minimumEnemyCount = ENEMY_DENSITY_EXEMPT_STAGE_LOOKUP[entry.stageId]
+            ? 0
+            : MINIMUM_ENEMY_COUNT_BY_SECTOR[sectorNumber];
+        const authoredEnemyCount = (spec.definition.objects ?? []).filter(
+            ({ enemyType, enemySelection, kind }) =>
+                enemyType || enemySelection || kind === "sentry" || kind === "patrol-drone"
+        ).length;
+        if (authoredEnemyCount < minimumEnemyCount) {
+            issue(issues, "authored-enemy-density-below-minimum", {
+                stageId: entry.stageId,
+                expectedMinimum: minimumEnemyCount,
+                actual: authoredEnemyCount
+            });
+        }
         const generatedArea = areaIndex[entry.areaId];
         const compiledArea = createAreaDefinitionFromV2(spec);
         validateGroundedWorldObjectPresentations(compiledArea, entry.stageId, issues);
@@ -1005,7 +1032,6 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
         const entryRouteDistance = firstRoutePoint
             ? Math.hypot(compiledArea.entry.x - firstRoutePoint.x, compiledArea.entry.y - firstRoutePoint.y)
             : Number.POSITIVE_INFINITY;
-        const sectorNumber = Number(entry.stageId.split("-")[0]);
         const validatesPromotedEntry =
             sectorNumber >= PROMOTED_STAGE_ENTRY_SECTOR_RANGE.first &&
             sectorNumber <= PROMOTED_STAGE_ENTRY_SECTOR_RANGE.last;

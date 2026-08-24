@@ -4,14 +4,16 @@ import { MAX_AUGMENT_SELECTIONS } from "../augments/AugmentCatalog.js";
 import { STATUS_EFFECT_ID } from "../status-effects/StatusEffectDefinition.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 14;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 15;
 export const PLAYER_IMPACT_TYPE = Object.freeze({
     ROPE_CUT: "rope-cut",
     PLAYER_HIT: "player-hit",
     FALL_DAMAGE: "fall-damage",
     JAMMER_SHOCK: "jammer-shock"
 });
-const IMPACT_TYPES = new Set(Object.values(PLAYER_IMPACT_TYPE));
+const IMPACT_TYPE_LOOKUP = Object.freeze(
+    Object.fromEntries(Object.values(PLAYER_IMPACT_TYPE).map((impactType) => [impactType, true]))
+);
 export const PLAYER_IMPACT_SOURCE_KIND = Object.freeze({
     BOSS_HAZARD: "boss-hazard",
     HARDPOINT_JAMMER: "hardpoint-jammer"
@@ -139,9 +141,6 @@ function normalizeImpactRecoveryState(state) {
     if (normalized.health > normalized.maxHealth) {
         throw new Error("outcome.state.health must not exceed outcome.state.maxHealth");
     }
-    assertFinite(normalized.hitInvulnerabilityRemaining, "outcome.state.hitInvulnerabilityRemaining", {
-        minimum: 0
-    });
     assertFinite(normalized.ropeDisabledRemaining, "outcome.state.ropeDisabledRemaining", { minimum: 0 });
     if (normalized.respawnAnchorId !== undefined && normalized.respawnAnchorId !== null) {
         assertId(normalized.respawnAnchorId, "outcome.state.respawnAnchorId");
@@ -295,7 +294,6 @@ function impactStateProjection(state, { impactType, respawned }) {
     const projection = {
         health: quantized(state.health, 0.001),
         velocity: quantizedVector(state.velocity, 0.1),
-        hitInvulnerabilityTicks: quantized(state.hitInvulnerabilityRemaining, 1 / 120),
         lifeState: state.lifeState
     };
     if (!respawned) return projection;
@@ -335,7 +333,7 @@ function impactStateProjection(state, { impactType, respawned }) {
 }
 
 export function createPlayerImpactStateDigest(state, { impactType, respawned }) {
-    if (!IMPACT_TYPES.has(impactType)) throw new Error(`unsupported impactType: ${impactType}`);
+    if (IMPACT_TYPE_LOOKUP[impactType] !== true) throw new Error(`unsupported impactType: ${impactType}`);
     if (typeof respawned !== "boolean") throw new Error("respawned must be boolean");
     const serialized = JSON.stringify(impactStateProjection(state, { impactType, respawned }));
     let hash = FNV_64_OFFSET;
@@ -368,7 +366,7 @@ export function createPlayerImpactClaim({
     assertId(impactId, "impactId");
     assertTick(clientTick, "clientTick");
     assertTick(authorityTick, "authorityTick");
-    if (!IMPACT_TYPES.has(impactType)) throw new Error(`unsupported impactType: ${impactType}`);
+    if (IMPACT_TYPE_LOOKUP[impactType] !== true) throw new Error(`unsupported impactType: ${impactType}`);
     if (!Number.isFinite(position?.x) || !Number.isFinite(position?.y)) {
         throw new Error("position must contain finite x and y");
     }
@@ -543,7 +541,7 @@ export function createPlayerImpactReceipt({
         return Object.freeze({ impactId, projectileId: impactId, accepted, reason });
     }
     if (recoveryId !== null) throw new Error("accepted impact receipts must not include recoveryId");
-    if (!IMPACT_TYPES.has(resolution)) throw new Error(`unsupported impact resolution: ${resolution}`);
+    if (IMPACT_TYPE_LOOKUP[resolution] !== true) throw new Error(`unsupported impact resolution: ${resolution}`);
     if (!Number.isFinite(damage) || damage < 0) throw new Error("damage must be non-negative and finite");
     return Object.freeze({ impactId, projectileId: impactId, accepted, resolution, damage });
 }

@@ -133,6 +133,72 @@
           "y": -768
         },
         "presentationId": "world-object:gate"
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "patrol-drone-t1",
+            "pursuit-drone-t1",
+            "shield-drone-t1"
+          ]
+        },
+        "id": "sector-02-01:route-guard-01",
+        "kind": "sentry",
+        "position": {
+          "x": -304,
+          "y": -256
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
+      },
+      {
+        "activationSpec": {
+          "anchor": "center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 480,
+            "width": 640
+          }
+        },
+        "coordinateAnchor": "center",
+        "enemySelection": {
+          "allowedEnemyTypes": [
+            "sentry-t1",
+            "shield-drone-t1",
+            "support-drone-t1"
+          ]
+        },
+        "id": "sector-02-01:route-guard-02",
+        "kind": "sentry",
+        "position": {
+          "x": 400,
+          "y": -464
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "kill-optional",
+          "no-rope-cut",
+          "activation-band-only"
+        ]
       }
     ],
     "order": 1,

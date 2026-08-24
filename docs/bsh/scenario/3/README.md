@@ -15,7 +15,7 @@
 > **Growth:** 3-5에서 generic Augment Offer #3
 > **Stage package authority:** Each 3-N AREA-SPEC-REV8-DESIGN.json and DIRECTION-SPEC.json owns its detailed authored topology. This master owns cross-stage intent only.
 > **Runtime boundary:** No Runtime code or current mock geometry is changed by this authoring merge; PRODUCTION-ALIGNMENT.md owns the implementation gap.
-> **Current Enemy Slot Authority:** `1,2,2,3,2,3,4,5 = TOTAL 22`
+> **Current Enemy Slot Authority — 0.68.0:** `4,4,4,4,4,4,4,5 = TOTAL 33`; 이전 Stage별 exact count는 대체되며 [`../../../enemy-density-composition.md`](../../../enemy-density-composition.md)가 현재 권위다.
 
 ---
 
@@ -41,7 +41,7 @@ REV3에서 새로 고친다:
 
 1. **Sector가 높아질수록 맵 월드 풋프린트가 커지는 규칙을 최상위 설계 원칙으로 추가**
 2. Sector 03의 평균 공간 규모를 Sector 02보다 명확히 확대
-3. 최신 Runtime 적 밀도 권위 `1,2,2,3,2,3,4,5` 반영
+3. 최신 Runtime 적 밀도 권위 `4,4,4,4,4,4,4,5` 반영
 4. 3-2 / 3-5 / 3-7 Access Carrier 반영
 5. 3-5를 Enemy 0 Rest에서 `압력 → 완전 Safe Node → 압력` 구조로 수정
 6. 3-1 기존 `2112×704` Draft 폐기 및 더 큰 Sector Intro 재설계

@@ -1,5 +1,7 @@
 # 3-6 PRODUCTION ALIGNMENT — REV8.0
 
+> **CURRENT RUNTIME OVERRIDE — 0.68.0:** Enemy slot은 4개이며 아래 3-slot cutover 기록을 대체한다.
+
 Baseline: `d39cbb49d3d8247caf2542393994704292dd5002`
 
 Runtime cutover: canonical `AREA-SPEC.v2.json` generates `Sector03Stage06.generated.js`; the generated Stage uses `GRAND CENTRAL ATRIUM`, `4352×2336`, the approved atrium topology, 3 enemy slots, C1/C2 Scanner, physical exit panel/gate, and `sector-03-07` next.
