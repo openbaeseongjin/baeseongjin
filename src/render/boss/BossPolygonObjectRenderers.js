@@ -260,6 +260,17 @@ class ExchangeModuleRenderer extends BossPolygonObjectRenderer {
     }
 }
 
+const WARDEN_DEFEAT_STAGE_ROTATION = Object.freeze({
+    "baton-drop": -0.18,
+    "shield-fall": -0.5,
+    unconscious: -0.95,
+    "security-off": -0.95,
+    "gate-light": -0.95,
+    "gate-open": -0.95,
+    "shuttle-reveal": -0.95,
+    "player-control": -0.95
+});
+
 class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
         const { width, height } = size(object, 96, 150);
@@ -268,7 +279,7 @@ class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
         const warning = object.actionState === "telegraph";
         const family = WARDEN_ATTACK_FAMILY[object.state] ?? null;
         const warningColor = family ? WARDEN_ATTACK_FAMILY_COLOR[family] : COLOR.WARNING;
-        if (defeated) context.rotate(-0.95);
+        if (defeated) context.rotate(WARDEN_DEFEAT_STAGE_ROTATION[object.defeatStage] ?? -0.95);
         context.fillStyle = "#4d5b61";
         context.strokeStyle = warning ? warningColor : defeated ? "#64748b" : "#e1eaed";
         context.lineWidth = warning ? 5 : 3;
@@ -277,19 +288,25 @@ class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
         context.fill();
         context.stroke();
         context.setLineDash([]);
-        context.fillStyle = "#617783";
-        context.strokeStyle = guarding ? "#fef08a" : "#eef7fa";
-        context.lineWidth = guarding ? 6 : 4;
         const sign = direction(object);
-        const shieldX = sign * width * 0.72;
-        context.fillRect(shieldX - width * 0.18, -height * 0.34, width * 0.36, height * 0.62);
-        context.strokeRect(shieldX - width * 0.18, -height * 0.34, width * 0.36, height * 0.62);
-        context.strokeStyle = object.actionState === "active" ? COLOR.HAZARD : "#ffca70";
-        context.lineWidth = 8;
-        context.beginPath();
-        context.moveTo(-sign * width * 0.28, -height * 0.18);
-        context.lineTo(-sign * width * 0.85, height * 0.3);
-        context.stroke();
+        const batonDropped = defeated && object.defeatStage !== "baton-drop" && object.defeatStage !== null;
+        const shieldFallen = batonDropped && object.defeatStage !== "shield-fall";
+        if (!shieldFallen) {
+            context.fillStyle = "#617783";
+            context.strokeStyle = guarding ? "#fef08a" : "#eef7fa";
+            context.lineWidth = guarding ? 6 : 4;
+            const shieldX = sign * width * 0.72;
+            context.fillRect(shieldX - width * 0.18, -height * 0.34, width * 0.36, height * 0.62);
+            context.strokeRect(shieldX - width * 0.18, -height * 0.34, width * 0.36, height * 0.62);
+        }
+        if (!batonDropped) {
+            context.strokeStyle = object.actionState === "active" ? COLOR.HAZARD : "#ffca70";
+            context.lineWidth = 8;
+            context.beginPath();
+            context.moveTo(-sign * width * 0.28, -height * 0.18);
+            context.lineTo(-sign * width * 0.85, height * 0.3);
+            context.stroke();
+        }
         if (String(object.state).includes("thruster") || object.state === "charge") {
             context.fillStyle = "#68e7ff";
             context.beginPath();
@@ -354,7 +371,8 @@ class SecurityBeamRenderer extends BossPolygonObjectRenderer {
 class DepartureGateRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
         const { width, height } = size(object, 480, 760);
-        context.strokeStyle = object.state === "open" ? "#ffe998" : "#a4b5bd";
+        const lit = object.state === "open" || object.state === "light";
+        context.strokeStyle = lit ? "#ffe998" : "#a4b5bd";
         context.fillStyle = object.state === "open" ? "rgba(255,233,152,0.08)" : "#28353d";
         context.lineWidth = 6;
         if (object.state === "open") {

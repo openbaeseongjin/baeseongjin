@@ -4180,6 +4180,19 @@ export class GameSimulation {
                 new Vector2(claim.velocity.x / speed, claim.velocity.y / speed),
                 COMBAT_CONFIG.playerHitKnockback
             );
+        } else if (bossHazard && claim.sourceType === "counter-bash" && this.bossRuntime?.bodyPosition) {
+            const offset = this.#bossWorldOffset();
+            const originX = this.bossRuntime.bodyPosition.x + offset.x;
+            const originY = this.bossRuntime.bodyPosition.y + offset.y;
+            const dx = player.physics.position.x - originX;
+            const dy = player.physics.position.y - originY;
+            const pushDistance = Math.hypot(dx, dy);
+            if (pushDistance > 0) {
+                player.physics.applyImpulse(
+                    new Vector2(dx / pushDistance, dy / pushDistance),
+                    COMBAT_CONFIG.playerHitKnockback
+                );
+            }
         }
         player.hitInvulnerabilityRemaining = COMBAT_CONFIG.playerHitInvulnerability;
         if (bossHazard && player.health <= 0) {

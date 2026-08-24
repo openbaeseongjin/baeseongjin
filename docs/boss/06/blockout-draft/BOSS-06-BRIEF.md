@@ -151,24 +151,20 @@ Main Runway
 
 전투장에 보이는 Rope Anchor는 실제 게임에서도 전부 잡혀야 한다.
 
-Boss06에서 Rope로 잡을 수 있는 대상은 정확히 다음만 허용한다.
+`role: swing-attack` 전용 grapple-target인 상부 Anchor(U1~U8)와 복구 Anchor(RR1/RR3)는 물론, Main Runway·보조 발판·출발 게이트·탑승 발판을 포함한 모든 solid collision surface도 엔진의 공용 지형 부착 규칙(모든 solid surface는 `grappleable:true`)에 따라 Rope로 부착 가능하다. 이는 이미 배포된 다른 보스(Boss03 등)와 동일한 공용 계약이며, Boss06만 예외로 좁히지 않는다.
 
 ```text
-상부 Anchor
+상부 Anchor (swing-attack)
 U1 U2 U3 U4 U5 U6 U7 U8
 
-복구 Anchor
+복구 Anchor (swing-attack)
 RR1 RR3
+
+그 외 solid surface (일반 부착, swing-attack 아님)
+Main Runway / 보조 발판 / 출발 게이트 / 탑승 발판
 ```
 
-그 외에는 Rope 부착 금지:
-
-- Main Runway
-- 보조 발판
-- 보안 빔 발사 장치
-- 출발 게이트
-- 탑승 발판
-- Warden 본체
+Rope 부착 금지 대상은 Warden 본체와 보안 빔 발사 장치(solid collision이 없는 오브젝트)뿐이다.
 
 특히 **프리뷰에는 보이지만 실제 게임에서는 잡히지 않는 가짜 Anchor를 만들지 않는다.**
 
@@ -695,7 +691,7 @@ Warden은 죽지 않는다.
 
 # 16. 마지막 이동과 탈출
 
-전투 중에는 Main Runway 오른쪽 끝과 Gate 사이에 약 180px의 추락 구간이 있다.
+전투 중에는 Main Runway 오른쪽 끝과 Gate 사이에 약 240px의 추락 구간이 있다.
 
 Boss 승리 후 이 구간에 짧은 연결 발판이 열린다.
 
@@ -730,7 +726,7 @@ Gate 통과
 - 방패나 충격봉을 Warden 몸 충돌 크기에 포함
 - Main Runway를 여러 높이 발판으로 잘게 나눔
 - 보이는 Anchor가 실제로는 잡히지 않음
-- 의도하지 않은 발판이나 장치에 Rope가 붙음
+- 프리뷰에는 없던 가짜 Anchor가 실제 게임에만 몰래 붙음
 - 보안 빔 발사 장치가 Player 이동을 막음
 - 빔이 실제 벽처럼 Player를 밀어냄
 - Warden이 Rope를 사용함
@@ -759,9 +755,9 @@ Gate 통과
 
 ## Rope
 
-- U1~U8 전부 실제로 잡히는가
-- RR1/RR3가 실제로 잡히는가
-- 다른 발판이나 Gate가 Rope 대상으로 잡히지 않는가
+- U1~U8 전부 실제로 잡히는가 (`role: swing-attack`)
+- RR1/RR3가 실제로 잡히는가 (`role: swing-attack`)
+- Main/보조 발판/Gate/탑승 발판도 일반 solid surface로서 정상적으로 잡히는가
 - Warden이 Rope 대상으로 잡히지 않는가
 
 ## 화면

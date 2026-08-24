@@ -79,7 +79,7 @@ x=1000
 y=1900
 width=3120
 height=115
-grappleable=false
+grappleable=true
 ```
 
 **하나의 flat rectangle만 사용.**
@@ -96,7 +96,7 @@ grappleable=false
 
 - Ledge L/R width: 280px
 - underside→Main clear height: 234px
-- grappleable=false
+- grappleable=true
 - Warden diagonal dash의 짧은 landing만 담당
 - landing x는 `halfBossWidth + safety` 안쪽으로 clamp
 
@@ -111,13 +111,13 @@ U1~U8:
 - 최소 Anchor→solid clearance = 175px
 - solid surface 내부 Anchor = 0
 
-Boss06 실제 grappleable 집합은 정확히:
+Boss06의 `swing-attack` grapple-target(공중 Rope 이동선)은 정확히:
 
 ```text
 U1 U2 U3 U4 U5 U6 U7 U8 RR1 RR3
 ```
 
-Main/Ledge/Emitter/Gate/Boarding Deck/Warden은 grappleable=false.
+Main/Ledge/Gate/Boarding Deck은 공용 지형 규칙에 따라 일반 solid surface로서 grappleable=true다. Emitter(solid collision 없음)와 Warden은 grappleable 대상이 아니다.
 
 ## 7. Anchor가 보스/이펙트 뒤에 숨지 않게 한다
 
@@ -164,18 +164,18 @@ Beam:
 - static collision surface 금지
 - damage only
 
-특히 오른쪽 Emitter가 시각적으로 180px fall lane 근처에 있으므로 collision=true가 되면 공간이 좁아진다. 반드시 non-collision.
+특히 오른쪽 Emitter가 시각적으로 240px fall lane 근처에 있으므로 collision=true가 되면 공간이 좁아진다. 반드시 non-collision.
 
 ## 10. Gate
 
 - Main edge x=4120
 - Gate x=4300
-- combat 중 180px 실제 fall lane
+- combat 중 240px 실제 fall lane
 - Gate는 Main Charge lane을 침범하지 않음
 
 Victory:
 - Gate collision 제거/open
-- 180px Threshold Bridge 활성화
+- 240px Threshold Bridge 활성화
 - Boarding Deck 연결
 
 ## 11. Entry
@@ -208,7 +208,7 @@ Map Editor Gameplay View에서 반드시:
 ```text
 assert mainCollisionSurfaces.length == 1
 assert mainCollisionSurface is flat rectangle
-assert actualGrappleIds == expectedGrappleIds
+assert swingAttackGrappleIds == { U1, U2, U3, U4, U5, U6, U7, U8, RR1, RR3 }
 assert noSwingAnchorInsideCollisionSurface
 assert allUpperAdjacentDistances <= 400
 assert noUnplannedUpperShortcut <= 400

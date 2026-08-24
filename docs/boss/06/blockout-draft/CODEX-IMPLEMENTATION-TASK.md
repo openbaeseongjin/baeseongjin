@@ -30,7 +30,7 @@
 - Warden `canGroundActors:false`
 - Warden `ropeAttachment:false`
 - U1~U8 + RR1/RR3 = actual swing-attack anchors
-- 그 외 Boss06 surface grappleable false
+- 그 외 Boss06 solid surface(Main/Ledge/Gate/Boarding)는 공용 지형 규칙에 따라 grappleable true; Emitter/Warden만 grappleable 대상 아님
 
 ### 최우선 4 — 피격 / Guard / Counter
 - common Boss impact path에서 impact/source position을 Warden runtime에 전달

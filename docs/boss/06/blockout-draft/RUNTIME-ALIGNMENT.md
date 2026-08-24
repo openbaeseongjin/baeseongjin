@@ -215,7 +215,7 @@ Boss HP 0:
 - hazards OFF
 - Gate lights ON
 - Gate OPEN
-- 180px Threshold Bridge active
+- 240px Threshold Bridge active
 - camera pan
 - Shuttle spawn/reveal presentation
 - control restore

@@ -21,7 +21,7 @@ Boss06 `CONTINUITY WARDEN`은 **구현 작업으로 넘겨도 되는 설계 상�
 | 약점이 Boss 내부에 생겨 공격 불가 | 별도 weakpoint 0개, body ImpactTarget 1개 | PASS |
 | 보이는 몸과 피격 판정 크기가 다름 | Warden visible body를 96×150 physics envelope 안으로 축소 | PASS |
 | Anchor가 보이지만 실제로 안 잡힘 | U1~U8 + RR1/RR3 모두 `role:swing-attack` 요구 | PASS |
-| 엉뚱한 발판/장치가 Rope target | Main/Ledge/Emitter/Gate/Warden grappleable false | PASS |
+| 엉뚱한 발판/장치가 Rope target | Emitter/Warden은 grappleable 대상 아님(solid collision 없음/제외). Main/Ledge/Gate는 공용 지형 규칙에 따라 grappleable true, U1~U8/RR1/RR3는 별도 `swing-attack` 계약 | PASS |
 | 발판 단차에 Dash/Charge 걸림 | Main collision deck 단일 flat rectangle | PASS |
 | 공간이 좁아 Boss/Player가 끼임 | Warden 96×150 상한 + Main 3120px + Ledge 280px | PASS |
 | Boss 이동/공격이 구조물 관통 | 후보 위치/전체 hazard geometry 교차 검사 후 blocked면 취소 | 구현 필수 |
@@ -240,7 +240,7 @@ Terminal Boss transition은 현행 일반 Boss source/target landmark 경로와 
 - Warden visual body와 hit body가 크게 불일치
 - Warden collider >96×150 without re-QA
 - Main collision deck 2개 이상
-- actual grapple set가 U1~U8+RR1+RR3와 다름
+- U1~U8+RR1+RR3의 `swing-attack` grapple-target이 실제로 부착되지 않음 (Main/Ledge/Gate 등 그 외 solid surface는 공용 지형 규칙에 따라 일반 grappleable로 허용)
 - Anchor가 solid geometry 안에 생성
 - Main 위치 중 LOW 회피 Anchor direct coverage가 끊김
 - Dash/Charge/Reposition이 solid를 관통
