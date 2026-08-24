@@ -50,26 +50,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "a3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "A3",
-          "sourceId": "a3"
-        },
-        "x": 950,
-        "y": -770
-      },
-      "target": {
-        "id": "a3-surface",
-        "properties": {
-          "sourceId": "a3"
-        },
-        "x": 950,
-        "y": -770
-      }
-    },
-    {
-      "landmark": {
         "id": "a4",
         "properties": {
           "coordinateAnchor": "center",
@@ -156,76 +136,16 @@ const SPEC = {
           "label": "A8",
           "sourceId": "a8"
         },
-        "x": 40,
-        "y": -1880
+        "x": 245,
+        "y": -1805
       },
       "target": {
         "id": "a8-surface",
         "properties": {
           "sourceId": "a8"
         },
-        "x": 40,
-        "y": -1880
-      }
-    },
-    {
-      "landmark": {
-        "id": "a9",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "A9",
-          "sourceId": "a9"
-        },
-        "x": 380,
-        "y": -1940
-      },
-      "target": {
-        "id": "a9-surface",
-        "properties": {
-          "sourceId": "a9"
-        },
-        "x": 380,
-        "y": -1940
-      }
-    },
-    {
-      "landmark": {
-        "id": "a10",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "A10",
-          "sourceId": "a10"
-        },
-        "x": 730,
-        "y": -2000
-      },
-      "target": {
-        "id": "a10-surface",
-        "properties": {
-          "sourceId": "a10"
-        },
-        "x": 730,
-        "y": -2000
-      }
-    },
-    {
-      "landmark": {
-        "id": "a11",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "A11",
-          "sourceId": "a11"
-        },
-        "x": 1080,
-        "y": -2060
-      },
-      "target": {
-        "id": "a11-surface",
-        "properties": {
-          "sourceId": "a11"
-        },
-        "x": 1080,
-        "y": -2060
+        "x": 245,
+        "y": -1805
       }
     },
     {
@@ -236,16 +156,16 @@ const SPEC = {
           "label": "A12",
           "sourceId": "a12"
         },
-        "x": 1430,
-        "y": -2120
+        "x": 1425,
+        "y": -2185
       },
       "target": {
         "id": "a12-surface",
         "properties": {
           "sourceId": "a12"
         },
-        "x": 1430,
-        "y": -2120
+        "x": 1425,
+        "y": -2185
       }
     },
     {
@@ -256,16 +176,16 @@ const SPEC = {
           "label": "A13",
           "sourceId": "a13"
         },
-        "x": 1770,
-        "y": -2180
+        "x": 1815,
+        "y": -2230
       },
       "target": {
         "id": "a13-surface",
         "properties": {
           "sourceId": "a13"
         },
-        "x": 1770,
-        "y": -2180
+        "x": 1815,
+        "y": -2230
       }
     }
   ],
@@ -385,8 +305,8 @@ const SPEC = {
         "id": "sector-04-06:upper-cutter",
         "kind": "sentry",
         "position": {
-          "x": 1177,
-          "y": -1825
+          "x": 1175,
+          "y": -1795
         },
         "rules": [
           "cutter-fire",
@@ -523,36 +443,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "lower-gallery-entry-deck",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": 2030,
-          "y": -460
-        },
-        "sourceId": "entry-deck",
-        "vertices": [
-          {
-            "x": 1850,
-            "y": -460
-          },
-          {
-            "x": 2210,
-            "y": -460
-          },
-          {
-            "x": 2210,
-            "y": -428
-          },
-          {
-            "x": 1850,
-            "y": -428
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "lower-gallery-recovery",
         "kind": "scenario-surface",
         "oneWay": true,
@@ -613,150 +503,30 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "smoke-lock-upper",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": 40,
-          "y": -1870
-        },
-        "sourceId": "smoke-lock-upper",
-        "vertices": [
-          {
-            "x": -95,
-            "y": -1870
-          },
-          {
-            "x": 175,
-            "y": -1870
-          },
-          {
-            "x": 175,
-            "y": -1840
-          },
-          {
-            "x": -95,
-            "y": -1840
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "upper-gallery-recovery",
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": 1070,
-          "y": -2050
+          "x": 1065,
+          "y": -2045
         },
         "sourceId": "upper-gallery-recovery",
         "vertices": [
           {
-            "x": -105,
-            "y": -2050
+            "x": -110,
+            "y": -2045
           },
           {
-            "x": 2245,
-            "y": -2050
+            "x": 2240,
+            "y": -2045
           },
           {
-            "x": 2245,
-            "y": -2022
+            "x": 2240,
+            "y": -2017
           },
           {
-            "x": -105,
-            "y": -2022
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "baffle-a",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": 599,
-          "y": -1920
-        },
-        "sourceId": "baffle-a",
-        "vertices": [
-          {
-            "x": 560,
-            "y": -1920
-          },
-          {
-            "x": 638,
-            "y": -1920
-          },
-          {
-            "x": 638,
-            "y": -1640
-          },
-          {
-            "x": 560,
-            "y": -1640
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "baffle-b",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": 999,
-          "y": -1990
-        },
-        "sourceId": "baffle-b",
-        "vertices": [
-          {
-            "x": 960,
-            "y": -1990
-          },
-          {
-            "x": 1038,
-            "y": -1990
-          },
-          {
-            "x": 1038,
-            "y": -1710
-          },
-          {
-            "x": 960,
-            "y": -1710
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "baffle-c",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": 1399,
-          "y": -2060
-        },
-        "sourceId": "baffle-c",
-        "vertices": [
-          {
-            "x": 1360,
-            "y": -2060
-          },
-          {
-            "x": 1438,
-            "y": -2060
-          },
-          {
-            "x": 1438,
-            "y": -1780
-          },
-          {
-            "x": 1360,
-            "y": -1780
+            "x": -110,
+            "y": -2017
           }
         ]
       },

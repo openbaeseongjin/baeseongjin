@@ -36,16 +36,16 @@ const SPEC = {
           "label": "h1",
           "sourceId": "h1"
         },
-        "x": 0,
-        "y": -400
+        "x": -5,
+        "y": -355
       },
       "target": {
         "id": "h1-surface",
         "properties": {
           "sourceId": "h1"
         },
-        "x": 0,
-        "y": -400
+        "x": -5,
+        "y": -355
       }
     },
     {
@@ -56,16 +56,16 @@ const SPEC = {
           "label": "p0",
           "sourceId": "p0"
         },
-        "x": 0,
-        "y": -650
+        "x": 10,
+        "y": -885
       },
       "target": {
         "id": "p0-surface",
         "properties": {
           "sourceId": "p0"
         },
-        "x": 0,
-        "y": -650
+        "x": 10,
+        "y": -885
       }
     },
     {
@@ -216,16 +216,16 @@ const SPEC = {
           "label": "t1",
           "sourceId": "t1"
         },
-        "x": 320,
-        "y": -1510
+        "x": 220,
+        "y": -1630
       },
       "target": {
         "id": "t1-surface",
         "properties": {
           "sourceId": "t1"
         },
-        "x": 320,
-        "y": -1510
+        "x": 220,
+        "y": -1630
       }
     },
     {
@@ -236,16 +236,16 @@ const SPEC = {
           "label": "t2",
           "sourceId": "t2"
         },
-        "x": 640,
-        "y": -1600
+        "x": 520,
+        "y": -1655
       },
       "target": {
         "id": "t2-surface",
         "properties": {
           "sourceId": "t2"
         },
-        "x": 640,
-        "y": -1600
+        "x": 520,
+        "y": -1655
       }
     },
     {
@@ -316,76 +316,16 @@ const SPEC = {
           "label": "b-upper-3",
           "sourceId": "b-upper-3"
         },
-        "x": 80,
-        "y": -2200
+        "x": 210,
+        "y": -2205
       },
       "target": {
         "id": "b-upper-3-surface",
         "properties": {
           "sourceId": "b-upper-3"
         },
-        "x": 80,
-        "y": -2200
-      }
-    },
-    {
-      "landmark": {
-        "id": "b-lower-1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "b-lower-1",
-          "sourceId": "b-lower-1"
-        },
-        "x": 580,
-        "y": -1800
-      },
-      "target": {
-        "id": "b-lower-1-surface",
-        "properties": {
-          "sourceId": "b-lower-1"
-        },
-        "x": 580,
-        "y": -1800
-      }
-    },
-    {
-      "landmark": {
-        "id": "b-lower-2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "b-lower-2",
-          "sourceId": "b-lower-2"
-        },
-        "x": 300,
-        "y": -1980
-      },
-      "target": {
-        "id": "b-lower-2-surface",
-        "properties": {
-          "sourceId": "b-lower-2"
-        },
-        "x": 300,
-        "y": -1980
-      }
-    },
-    {
-      "landmark": {
-        "id": "b-lower-3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "b-lower-3",
-          "sourceId": "b-lower-3"
-        },
-        "x": 20,
-        "y": -2180
-      },
-      "target": {
-        "id": "b-lower-3-surface",
-        "properties": {
-          "sourceId": "b-lower-3"
-        },
-        "x": 20,
-        "y": -2180
+        "x": 210,
+        "y": -2205
       }
     },
     {
@@ -406,26 +346,6 @@ const SPEC = {
         },
         "x": -180,
         "y": -2300
-      }
-    },
-    {
-      "landmark": {
-        "id": "f1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "f1",
-          "sourceId": "f1"
-        },
-        "x": -180,
-        "y": -2520
-      },
-      "target": {
-        "id": "f1-surface",
-        "properties": {
-          "sourceId": "f1"
-        },
-        "x": -180,
-        "y": -2520
       }
     },
     {
@@ -795,25 +715,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 0,
-          "y": -650
+          "x": 5,
+          "y": -585
         },
         "vertices": [
           {
-            "x": -210,
-            "y": -650
+            "x": -205,
+            "y": -585
           },
           {
-            "x": 210,
-            "y": -650
+            "x": 215,
+            "y": -585
           },
           {
-            "x": 210,
-            "y": -626
+            "x": 215,
+            "y": -561
           },
           {
-            "x": -210,
-            "y": -626
+            "x": -205,
+            "y": -561
           }
         ]
       },
@@ -824,25 +744,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 0,
-          "y": -1400
+          "x": 5,
+          "y": -1410
         },
         "vertices": [
           {
-            "x": -210,
-            "y": -1400
+            "x": -205,
+            "y": -1410
           },
           {
-            "x": 210,
-            "y": -1400
+            "x": 215,
+            "y": -1410
           },
           {
-            "x": 210,
-            "y": -1376
+            "x": 215,
+            "y": -1386
           },
           {
-            "x": -210,
-            "y": -1376
+            "x": -205,
+            "y": -1386
           }
         ]
       },

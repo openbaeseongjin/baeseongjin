@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 5df9951562bddb154a81d5c9f51db33812991042c4522c75f442386b49d8e853
-authored-area-sha256: ea04201ea6a21985d9a946fc8ca4dabf346b873876be91197febb7a906fbdae4
+scenario-source-sha256: a6de55b09d7165685090f318740daead5f039a6ea257f6898a9105393e37f2c3
+authored-area-sha256: 2ae2f8dceadd0a554fb7fa66e482637f28f864283c4bb5dc0a09cbaaf35f4e43
 authored-sector-sha256: 271b92fbe6401162663a85cf3f04df0309affedba4d402bccf7b9f327c56472d
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 0cfdeaeae0f91beae1b9424c24935da55b8517a2
+reviewed-upstream: 829d3fe3b7d6dc4fd3cd5fb95690ad4f210afaee
 -->
 
 ## 현재 확인 체크포인트
@@ -30,6 +30,7 @@ reviewed-upstream: 0cfdeaeae0f91beae1b9424c24935da55b8517a2
 
 ## 최근 반영된 시나리오 변화
 
+- Map Editor에서 저장한 Sector 04·05의 4-1~4-8, 5-1~5-8 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. 4-8 Quorum 진행 게이트는 목표 완료 전후에만 전환되며, 적 슬롯을 움직이면 legacy activation bounds도 같은 delta로 이동해 드론 위치와 공격·활성 범위 표시가 분리되지 않는다.
 - Map Editor에서 저장한 Sector 03 3-1~3-8의 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. 삭제된 Scanner 대상 Surface의 참조와 대상이 전부 삭제된 Scanner 그룹도 함께 제거해 production Gameplay View가 연속 월드를 조립할 수 있게 했다.
 - Map Editor에서 저장한 Sector 02 2-1~2-8의 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. Runtime은 이 8개 `AREA-SPEC.v2.json`을 단일 권위로 compile하며, 실제 traversal 체감은 아직 별도 검증 범위다.
 - Map Editor에서 저장한 Sector 01 1-1~1-8의 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. Runtime은 이 8개 `AREA-SPEC.v2.json`을 단일 권위로 compile하며, 실제 traversal 체감은 아직 별도 검증 범위다.

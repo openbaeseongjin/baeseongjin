@@ -1,43 +1,316 @@
 {
-  "schemaVersion": "area-spec-v2",
-  "authoringMode": "runtime",
-  "stage": {
-    "id": "5-6",
-    "sector": 5,
-    "stage": 6,
-    "sourceAreaId": "sector-05-06"
-  },
-  "editor": {
-    "editableDomains": [
-      "bounds",
-      "entry",
-      "exit",
-      "surfaces",
-      "anchors",
-      "recoveryRoute",
-      "enemySlots",
-      "worldObjects",
-      "wind",
-      "camera"
-    ],
-    "readOnlyDomains": [
-      "objectives",
-      "progression",
-      "story",
-      "scanner",
-      "behaviorRegistry"
-    ]
-  },
-  "definition": {
-    "id": "sector-05-06",
-    "sectorId": "sector-05",
-    "order": 6,
-    "name": "INCIDENT AUTHORIZATION ANNEX",
-    "subtitle": "ACTUAL RISE → DROP → LOWER TRENCH → RE-ASCENT → SIGN-OFF",
-    "bounds": {
-      "width": 1950,
-      "height": 2464
+  "anchors": [
+    {
+      "landmark": {
+        "id": "entry",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "entry",
+          "sourceId": "entry"
+        },
+        "x": 720,
+        "y": -100
+      },
+      "target": {
+        "id": "entry-surface",
+        "properties": {
+          "sourceId": "entry"
+        },
+        "x": 720,
+        "y": -100
+      }
     },
+    {
+      "landmark": {
+        "id": "p0",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "p0",
+          "sourceId": "p0"
+        },
+        "x": 720,
+        "y": -980
+      },
+      "target": {
+        "id": "p0-surface",
+        "properties": {
+          "sourceId": "p0"
+        },
+        "x": 720,
+        "y": -980
+      }
+    },
+    {
+      "landmark": {
+        "id": "jam-a1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "jam-a1",
+          "sourceId": "jam-a1"
+        },
+        "x": 470,
+        "y": -1160
+      },
+      "target": {
+        "id": "jam-a1-surface",
+        "properties": {
+          "sourceId": "jam-a1"
+        },
+        "x": 470,
+        "y": -1160
+      }
+    },
+    {
+      "landmark": {
+        "id": "merge-a",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "merge-a",
+          "sourceId": "merge-a"
+        },
+        "x": 225,
+        "y": -1080
+      },
+      "target": {
+        "id": "merge-a-surface",
+        "properties": {
+          "sourceId": "merge-a"
+        },
+        "x": 225,
+        "y": -1080
+      }
+    },
+    {
+      "landmark": {
+        "id": "drop-1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "drop-1",
+          "sourceId": "drop-1"
+        },
+        "x": -145,
+        "y": -995
+      },
+      "target": {
+        "id": "drop-1-surface",
+        "properties": {
+          "sourceId": "drop-1"
+        },
+        "x": -145,
+        "y": -995
+      }
+    },
+    {
+      "landmark": {
+        "id": "drop-2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "drop-2",
+          "sourceId": "drop-2"
+        },
+        "x": 75,
+        "y": -755
+      },
+      "target": {
+        "id": "drop-2-surface",
+        "properties": {
+          "sourceId": "drop-2"
+        },
+        "x": 75,
+        "y": -755
+      }
+    },
+    {
+      "landmark": {
+        "id": "trench-entry",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "trench-entry",
+          "sourceId": "trench-entry"
+        },
+        "x": -260,
+        "y": -610
+      },
+      "target": {
+        "id": "trench-entry-surface",
+        "properties": {
+          "sourceId": "trench-entry"
+        },
+        "x": -260,
+        "y": -610
+      }
+    },
+    {
+      "landmark": {
+        "id": "trench-1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "trench-1",
+          "sourceId": "trench-1"
+        },
+        "x": 250,
+        "y": -265
+      },
+      "target": {
+        "id": "trench-1-surface",
+        "properties": {
+          "sourceId": "trench-1"
+        },
+        "x": 250,
+        "y": -265
+      }
+    },
+    {
+      "landmark": {
+        "id": "trench-2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "trench-2",
+          "sourceId": "trench-2"
+        },
+        "x": 515,
+        "y": -160
+      },
+      "target": {
+        "id": "trench-2-surface",
+        "properties": {
+          "sourceId": "trench-2"
+        },
+        "x": 515,
+        "y": -160
+      }
+    },
+    {
+      "landmark": {
+        "id": "riser-2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "riser-2",
+          "sourceId": "riser-2"
+        },
+        "x": 800,
+        "y": -1020
+      },
+      "target": {
+        "id": "riser-2-surface",
+        "properties": {
+          "sourceId": "riser-2"
+        },
+        "x": 800,
+        "y": -1020
+      }
+    },
+    {
+      "landmark": {
+        "id": "aegis-1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "aegis-1",
+          "sourceId": "aegis-1"
+        },
+        "x": 535,
+        "y": -1455
+      },
+      "target": {
+        "id": "aegis-1-surface",
+        "properties": {
+          "sourceId": "aegis-1"
+        },
+        "x": 535,
+        "y": -1455
+      }
+    },
+    {
+      "landmark": {
+        "id": "aegis-2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "aegis-2",
+          "sourceId": "aegis-2"
+        },
+        "x": 255,
+        "y": -1525
+      },
+      "target": {
+        "id": "aegis-2-surface",
+        "properties": {
+          "sourceId": "aegis-2"
+        },
+        "x": 255,
+        "y": -1525
+      }
+    },
+    {
+      "landmark": {
+        "id": "record-1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "record-1",
+          "sourceId": "record-1"
+        },
+        "x": -260,
+        "y": -1875
+      },
+      "target": {
+        "id": "record-1-surface",
+        "properties": {
+          "sourceId": "record-1"
+        },
+        "x": -260,
+        "y": -1875
+      }
+    },
+    {
+      "landmark": {
+        "id": "record-2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "record-2",
+          "sourceId": "record-2"
+        },
+        "x": -40,
+        "y": -2085
+      },
+      "target": {
+        "id": "record-2-surface",
+        "properties": {
+          "sourceId": "record-2"
+        },
+        "x": -40,
+        "y": -2085
+      }
+    },
+    {
+      "landmark": {
+        "id": "exit",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "exit",
+          "sourceId": "exit"
+        },
+        "x": -520,
+        "y": -2200
+      },
+      "target": {
+        "id": "exit-surface",
+        "properties": {
+          "sourceId": "exit"
+        },
+        "x": -520,
+        "y": -2200
+      }
+    }
+  ],
+  "authoringMode": "runtime",
+  "behaviorRefs": [],
+  "definition": {
+    "bounds": {
+      "height": 2464,
+      "width": 1950
+    },
+    "cameraZones": [],
+    "checkpoints": [],
+    "cueIds": [],
     "entry": {
       "id": "sector-05-06:entry",
       "x": 720,
@@ -48,14 +321,315 @@
       "x": -520,
       "y": -2200
     },
+    "gate": {
+      "id": "sector-05-06:gate",
+      "nextAreaId": "sector-05-07",
+      "requiredObjectiveIds": [
+        "exit-panel-engaged"
+      ],
+      "trigger": {
+        "height": 160,
+        "width": 96,
+        "x": -568,
+        "y": -2296
+      }
+    },
+    "id": "sector-05-06",
+    "jammerGroups": [],
+    "name": "INCIDENT AUTHORIZATION ANNEX",
     "nextAreaId": "sector-05-07",
+    "objectives": [
+      {
+        "bounds": {
+          "height": 180,
+          "width": 420,
+          "x": -470,
+          "y": -2260
+        },
+        "id": "routing-authorization",
+        "sourceObjectId": "sector-05-06:routing-proof-03-of-03:terminal",
+        "type": "interact"
+      },
+      {
+        "bounds": {
+          "height": 180,
+          "width": 420,
+          "x": -730,
+          "y": -2348
+        },
+        "id": "final-deck-reached",
+        "requiredObjectiveIds": [
+          "routing-authorization"
+        ],
+        "type": "reach"
+      },
+      {
+        "id": "exit-panel-engaged",
+        "requiredObjectiveIds": [
+          "final-deck-reached"
+        ],
+        "sourceObjectId": "sector-05-06:exit-panel",
+        "type": "interact"
+      }
+    ],
+    "objects": [
+      {
+        "activation": {
+          "height": 420,
+          "width": 780,
+          "x": 175,
+          "y": -1320
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "hardpoint-jammer-v1",
+        "id": "sector-05-06:jammer-a",
+        "kind": "sentry",
+        "position": {
+          "x": 650,
+          "y": -1120
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "no-projectile-attack"
+        ]
+      },
+      {
+        "activation": {
+          "height": 520,
+          "width": 1150,
+          "x": -350,
+          "y": -620
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "sentry-t1",
+        "id": "sector-05-06:cutter-a",
+        "kind": "sentry",
+        "position": {
+          "x": 300,
+          "y": -220
+        },
+        "presentationId": "world-object:sentry",
+        "rules": [
+          "cutter-fire"
+        ]
+      },
+      {
+        "activation": {
+          "height": 440,
+          "width": 1000,
+          "x": -110,
+          "y": -1765
+        },
+        "coordinateAnchor": "center",
+        "enemyType": "shield-drone-t1",
+        "id": "sector-05-06:aegis-a",
+        "kind": "sentry",
+        "position": {
+          "x": 350,
+          "y": -1505
+        },
+        "presentationId": "world-object:sentry",
+        "rules": []
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "id": "sector-05-06:routing-proof-03-of-03:terminal",
+        "interactionRadius": 84,
+        "kind": "story-display",
+        "label": "ROUTING AUTHORIZATION · 03 / 03",
+        "objectiveId": "routing-authorization",
+        "position": {
+          "x": 950,
+          "y": -1320
+        },
+        "presentationId": "world-object:story-display"
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-06:gate",
+        "id": "sector-05-06:exit-panel",
+        "interactionRadius": 72,
+        "kind": "gate-panel",
+        "objectiveId": "exit-panel-engaged",
+        "position": {
+          "x": -632,
+          "y": -2168
+        },
+        "presentationId": "world-object:gate-panel"
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-05-06:gate",
+        "id": "sector-05-06:exit-gate",
+        "kind": "gate",
+        "position": {
+          "x": -520,
+          "y": -2168
+        },
+        "presentationId": "world-object:gate"
+      }
+    ],
+    "order": 6,
+    "recoveryPoints": [
+      {
+        "id": "sector-05-06:recovery-1",
+        "maxRetrySeconds": 5,
+        "x": -120,
+        "y": -500
+      },
+      {
+        "id": "sector-05-06:recovery-2",
+        "maxRetrySeconds": 5,
+        "x": 500,
+        "y": -820
+      },
+      {
+        "id": "sector-05-06:recovery-3",
+        "maxRetrySeconds": 5,
+        "x": 520,
+        "y": -1540
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-05-06:route-entry",
+        "sourceId": "entry",
+        "x": 720,
+        "y": -100
+      },
+      {
+        "id": "sector-05-06:route-r0",
+        "sourceId": "r0",
+        "x": 720,
+        "y": -400
+      },
+      {
+        "id": "sector-05-06:route-r1",
+        "sourceId": "r1",
+        "x": 720,
+        "y": -700
+      },
+      {
+        "id": "sector-05-06:route-p0",
+        "sourceId": "p0",
+        "x": 720,
+        "y": -980
+      },
+      {
+        "id": "sector-05-06:route-jam-a1",
+        "sourceId": "jam-a1",
+        "x": 430,
+        "y": -1120
+      },
+      {
+        "id": "sector-05-06:route-merge-a",
+        "sourceId": "merge-a",
+        "x": 160,
+        "y": -1080
+      },
+      {
+        "id": "sector-05-06:route-jam-b1",
+        "sourceId": "jam-b1",
+        "x": 500,
+        "y": -1230
+      },
+      {
+        "id": "sector-05-06:route-drop-1",
+        "sourceId": "drop-1",
+        "x": -80,
+        "y": -900
+      },
+      {
+        "id": "sector-05-06:route-drop-2",
+        "sourceId": "drop-2",
+        "x": -160,
+        "y": -650
+      },
+      {
+        "id": "sector-05-06:route-trench-entry",
+        "sourceId": "trench-entry",
+        "x": -120,
+        "y": -420
+      },
+      {
+        "id": "sector-05-06:route-trench-1",
+        "sourceId": "trench-1",
+        "x": 180,
+        "y": -360
+      },
+      {
+        "id": "sector-05-06:route-trench-2",
+        "sourceId": "trench-2",
+        "x": 500,
+        "y": -360
+      },
+      {
+        "id": "sector-05-06:route-trench-exit",
+        "sourceId": "trench-exit",
+        "x": 800,
+        "y": -420
+      },
+      {
+        "id": "sector-05-06:route-riser-1",
+        "sourceId": "riser-1",
+        "x": 800,
+        "y": -720
+      },
+      {
+        "id": "sector-05-06:route-riser-2",
+        "sourceId": "riser-2",
+        "x": 800,
+        "y": -1020
+      },
+      {
+        "id": "sector-05-06:route-riser-top",
+        "sourceId": "riser-top",
+        "x": 800,
+        "y": -1320
+      },
+      {
+        "id": "sector-05-06:route-aegis-1",
+        "sourceId": "aegis-1",
+        "x": 520,
+        "y": -1480
+      },
+      {
+        "id": "sector-05-06:route-aegis-2",
+        "sourceId": "aegis-2",
+        "x": 240,
+        "y": -1580
+      },
+      {
+        "id": "sector-05-06:route-aegis-safe",
+        "sourceId": "aegis-safe",
+        "x": 0,
+        "y": -1700
+      },
+      {
+        "id": "sector-05-06:route-record-1",
+        "sourceId": "record-1",
+        "x": -260,
+        "y": -1840
+      },
+      {
+        "id": "sector-05-06:route-exit",
+        "sourceId": "exit",
+        "x": -520,
+        "y": -2200
+      }
+    ],
+    "routes": [],
+    "scannerGroups": [],
+    "sectorId": "sector-05",
+    "storyTriggers": [],
+    "subtitle": "ACTUAL RISE → DROP → LOWER TRENCH → RE-ASCENT → SIGN-OFF",
     "surfaces": [
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-05-06:entry-deck",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 720,
           "y": -68
@@ -80,11 +654,11 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-05-06:runtime-deck-1",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": 720,
           "y": -980
@@ -109,98 +683,98 @@
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-05-06:runtime-deck-2",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
-          "x": -120,
-          "y": -420
+          "x": -115,
+          "y": -365
         },
         "vertices": [
           {
-            "x": -330,
-            "y": -420
+            "x": -325,
+            "y": -365
           },
           {
-            "x": 90,
-            "y": -420
+            "x": 95,
+            "y": -365
           },
           {
-            "x": 90,
-            "y": -396
+            "x": 95,
+            "y": -341
           },
           {
-            "x": -330,
-            "y": -396
+            "x": -325,
+            "y": -341
           }
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-05-06:runtime-deck-3",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
-          "x": 800,
-          "y": -1320
+          "x": 795,
+          "y": -1315
         },
         "vertices": [
           {
-            "x": 640,
-            "y": -1320
+            "x": 635,
+            "y": -1315
           },
           {
-            "x": 960,
-            "y": -1320
+            "x": 955,
+            "y": -1315
           },
           {
-            "x": 960,
-            "y": -1296
+            "x": 955,
+            "y": -1291
           },
           {
-            "x": 640,
-            "y": -1296
+            "x": 635,
+            "y": -1291
           }
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-05-06:runtime-deck-4",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
-          "x": 0,
-          "y": -1700
+          "x": 10,
+          "y": -1670
         },
         "vertices": [
           {
-            "x": -180,
-            "y": -1700
+            "x": -170,
+            "y": -1670
           },
           {
-            "x": 180,
-            "y": -1700
+            "x": 190,
+            "y": -1670
           },
           {
-            "x": 180,
-            "y": -1676
+            "x": 190,
+            "y": -1646
           },
           {
-            "x": -180,
-            "y": -1676
+            "x": -170,
+            "y": -1646
           }
         ]
       },
       {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
         "id": "sector-05-06:runtime-deck-5",
         "kind": "safe-deck",
         "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
         "position": {
           "x": -520,
           "y": -2168
@@ -225,754 +799,34 @@
         ]
       }
     ],
-    "routePoints": [
-      {
-        "id": "sector-05-06:route-entry",
-        "x": 720,
-        "y": -100,
-        "sourceId": "entry"
-      },
-      {
-        "id": "sector-05-06:route-r0",
-        "x": 720,
-        "y": -400,
-        "sourceId": "r0"
-      },
-      {
-        "id": "sector-05-06:route-r1",
-        "x": 720,
-        "y": -700,
-        "sourceId": "r1"
-      },
-      {
-        "id": "sector-05-06:route-p0",
-        "x": 720,
-        "y": -980,
-        "sourceId": "p0"
-      },
-      {
-        "id": "sector-05-06:route-jam-a1",
-        "x": 430,
-        "y": -1120,
-        "sourceId": "jam-a1"
-      },
-      {
-        "id": "sector-05-06:route-merge-a",
-        "x": 160,
-        "y": -1080,
-        "sourceId": "merge-a"
-      },
-      {
-        "id": "sector-05-06:route-jam-b1",
-        "x": 500,
-        "y": -1230,
-        "sourceId": "jam-b1"
-      },
-      {
-        "id": "sector-05-06:route-drop-1",
-        "x": -80,
-        "y": -900,
-        "sourceId": "drop-1"
-      },
-      {
-        "id": "sector-05-06:route-drop-2",
-        "x": -160,
-        "y": -650,
-        "sourceId": "drop-2"
-      },
-      {
-        "id": "sector-05-06:route-trench-entry",
-        "x": -120,
-        "y": -420,
-        "sourceId": "trench-entry"
-      },
-      {
-        "id": "sector-05-06:route-trench-1",
-        "x": 180,
-        "y": -360,
-        "sourceId": "trench-1"
-      },
-      {
-        "id": "sector-05-06:route-trench-2",
-        "x": 500,
-        "y": -360,
-        "sourceId": "trench-2"
-      },
-      {
-        "id": "sector-05-06:route-trench-exit",
-        "x": 800,
-        "y": -420,
-        "sourceId": "trench-exit"
-      },
-      {
-        "id": "sector-05-06:route-riser-1",
-        "x": 800,
-        "y": -720,
-        "sourceId": "riser-1"
-      },
-      {
-        "id": "sector-05-06:route-riser-2",
-        "x": 800,
-        "y": -1020,
-        "sourceId": "riser-2"
-      },
-      {
-        "id": "sector-05-06:route-riser-top",
-        "x": 800,
-        "y": -1320,
-        "sourceId": "riser-top"
-      },
-      {
-        "id": "sector-05-06:route-aegis-1",
-        "x": 520,
-        "y": -1480,
-        "sourceId": "aegis-1"
-      },
-      {
-        "id": "sector-05-06:route-aegis-2",
-        "x": 240,
-        "y": -1580,
-        "sourceId": "aegis-2"
-      },
-      {
-        "id": "sector-05-06:route-aegis-safe",
-        "x": 0,
-        "y": -1700,
-        "sourceId": "aegis-safe"
-      },
-      {
-        "id": "sector-05-06:route-record-1",
-        "x": -260,
-        "y": -1840,
-        "sourceId": "record-1"
-      },
-      {
-        "id": "sector-05-06:route-record-2",
-        "x": -260,
-        "y": -2080,
-        "sourceId": "record-2"
-      },
-      {
-        "id": "sector-05-06:route-exit",
-        "x": -520,
-        "y": -2200,
-        "sourceId": "exit"
-      }
-    ],
-    "recoveryPoints": [
-      {
-        "id": "sector-05-06:recovery-1",
-        "x": -120,
-        "y": -500,
-        "maxRetrySeconds": 5
-      },
-      {
-        "id": "sector-05-06:recovery-2",
-        "x": 500,
-        "y": -820,
-        "maxRetrySeconds": 5
-      },
-      {
-        "id": "sector-05-06:recovery-3",
-        "x": 520,
-        "y": -1540,
-        "maxRetrySeconds": 5
-      }
-    ],
-    "checkpoints": [],
-    "objects": [
-      {
-        "id": "sector-05-06:jammer-a",
-        "kind": "sentry",
-        "presentationId": "world-object:sentry",
-        "enemyType": "hardpoint-jammer-v1",
-        "position": {
-          "x": 650,
-          "y": -1120
-        },
-        "coordinateAnchor": "center",
-        "activation": {
-          "x": 175,
-          "y": -1320,
-          "width": 780,
-          "height": 420
-        },
-        "rules": [
-          "no-projectile-attack"
-        ]
-      },
-      {
-        "id": "sector-05-06:cutter-a",
-        "kind": "sentry",
-        "presentationId": "world-object:sentry",
-        "enemyType": "sentry-t1",
-        "position": {
-          "x": 430,
-          "y": -420
-        },
-        "coordinateAnchor": "center",
-        "activation": {
-          "x": -220,
-          "y": -820,
-          "width": 1150,
-          "height": 520
-        },
-        "rules": [
-          "cutter-fire"
-        ]
-      },
-      {
-        "id": "sector-05-06:aegis-a",
-        "kind": "sentry",
-        "presentationId": "world-object:sentry",
-        "enemyType": "shield-drone-t1",
-        "position": {
-          "x": 360,
-          "y": -1540
-        },
-        "coordinateAnchor": "center",
-        "activation": {
-          "x": -100,
-          "y": -1800,
-          "width": 1000,
-          "height": 440
-        },
-        "rules": []
-      },
-      {
-        "id": "sector-05-06:routing-proof-03-of-03:terminal",
-        "kind": "story-display",
-        "presentationId": "world-object:story-display",
-        "position": {
-          "x": -260,
-          "y": -2080
-        },
-        "coordinateAnchor": "bottom-center",
-        "interactionRadius": 84,
-        "label": "ROUTING AUTHORIZATION · 03 / 03",
-        "objectiveId": "routing-authorization"
-      },
-      {
-        "id": "sector-05-06:exit-panel",
-        "kind": "gate-panel",
-        "presentationId": "world-object:gate-panel",
-        "position": {
-          "x": -632,
-          "y": -2168
-        },
-        "coordinateAnchor": "bottom-center",
-        "interactionRadius": 72,
-        "objectiveId": "exit-panel-engaged",
-        "gateId": "sector-05-06:gate"
-      },
-      {
-        "id": "sector-05-06:exit-gate",
-        "kind": "gate",
-        "presentationId": "world-object:gate",
-        "position": {
-          "x": -520,
-          "y": -2168
-        },
-        "coordinateAnchor": "bottom-center",
-        "gateId": "sector-05-06:gate"
-      }
-    ],
-    "objectives": [
-      {
-        "id": "routing-authorization",
-        "type": "interact",
-        "sourceObjectId": "sector-05-06:routing-proof-03-of-03:terminal",
-        "bounds": {
-          "x": -470,
-          "y": -2260,
-          "width": 420,
-          "height": 180
-        }
-      },
-      {
-        "id": "final-deck-reached",
-        "type": "reach",
-        "bounds": {
-          "x": -730,
-          "y": -2348,
-          "width": 420,
-          "height": 180
-        },
-        "requiredObjectiveIds": [
-          "routing-authorization"
-        ]
-      },
-      {
-        "id": "exit-panel-engaged",
-        "type": "interact",
-        "sourceObjectId": "sector-05-06:exit-panel",
-        "requiredObjectiveIds": [
-          "final-deck-reached"
-        ]
-      }
-    ],
-    "windZones": [],
-    "scannerGroups": [],
-    "storyTriggers": [],
-    "routes": [],
-    "cameraZones": [],
-    "cueIds": [],
-    "jammerGroups": [],
-    "gate": {
-      "id": "sector-05-06:gate",
-      "nextAreaId": "sector-05-07",
-      "requiredObjectiveIds": [
-        "exit-panel-engaged"
-      ],
-      "trigger": {
-        "x": -568,
-        "y": -2296,
-        "width": 96,
-        "height": 160
-      }
-    }
+    "windZones": []
   },
-  "anchors": [
-    {
-      "target": {
-        "id": "entry-surface",
-        "x": 720,
-        "y": -100,
-        "properties": {
-          "sourceId": "entry"
-        }
-      },
-      "landmark": {
-        "id": "entry",
-        "x": 720,
-        "y": -100,
-        "properties": {
-          "label": "entry",
-          "coordinateAnchor": "center",
-          "sourceId": "entry"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "r0-surface",
-        "x": 720,
-        "y": -400,
-        "properties": {
-          "sourceId": "r0"
-        }
-      },
-      "landmark": {
-        "id": "r0",
-        "x": 720,
-        "y": -400,
-        "properties": {
-          "label": "r0",
-          "coordinateAnchor": "center",
-          "sourceId": "r0"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "r1-surface",
-        "x": 720,
-        "y": -700,
-        "properties": {
-          "sourceId": "r1"
-        }
-      },
-      "landmark": {
-        "id": "r1",
-        "x": 720,
-        "y": -700,
-        "properties": {
-          "label": "r1",
-          "coordinateAnchor": "center",
-          "sourceId": "r1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "p0-surface",
-        "x": 720,
-        "y": -980,
-        "properties": {
-          "sourceId": "p0"
-        }
-      },
-      "landmark": {
-        "id": "p0",
-        "x": 720,
-        "y": -980,
-        "properties": {
-          "label": "p0",
-          "coordinateAnchor": "center",
-          "sourceId": "p0"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "jam-a1-surface",
-        "x": 430,
-        "y": -1120,
-        "properties": {
-          "sourceId": "jam-a1"
-        }
-      },
-      "landmark": {
-        "id": "jam-a1",
-        "x": 430,
-        "y": -1120,
-        "properties": {
-          "label": "jam-a1",
-          "coordinateAnchor": "center",
-          "sourceId": "jam-a1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "jam-b1-surface",
-        "x": 500,
-        "y": -1230,
-        "properties": {
-          "sourceId": "jam-b1"
-        }
-      },
-      "landmark": {
-        "id": "jam-b1",
-        "x": 500,
-        "y": -1230,
-        "properties": {
-          "label": "jam-b1",
-          "coordinateAnchor": "center",
-          "sourceId": "jam-b1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "merge-a-surface",
-        "x": 160,
-        "y": -1080,
-        "properties": {
-          "sourceId": "merge-a"
-        }
-      },
-      "landmark": {
-        "id": "merge-a",
-        "x": 160,
-        "y": -1080,
-        "properties": {
-          "label": "merge-a",
-          "coordinateAnchor": "center",
-          "sourceId": "merge-a"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "drop-1-surface",
-        "x": -80,
-        "y": -900,
-        "properties": {
-          "sourceId": "drop-1"
-        }
-      },
-      "landmark": {
-        "id": "drop-1",
-        "x": -80,
-        "y": -900,
-        "properties": {
-          "label": "drop-1",
-          "coordinateAnchor": "center",
-          "sourceId": "drop-1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "drop-2-surface",
-        "x": -160,
-        "y": -650,
-        "properties": {
-          "sourceId": "drop-2"
-        }
-      },
-      "landmark": {
-        "id": "drop-2",
-        "x": -160,
-        "y": -650,
-        "properties": {
-          "label": "drop-2",
-          "coordinateAnchor": "center",
-          "sourceId": "drop-2"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "trench-entry-surface",
-        "x": -120,
-        "y": -420,
-        "properties": {
-          "sourceId": "trench-entry"
-        }
-      },
-      "landmark": {
-        "id": "trench-entry",
-        "x": -120,
-        "y": -420,
-        "properties": {
-          "label": "trench-entry",
-          "coordinateAnchor": "center",
-          "sourceId": "trench-entry"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "trench-1-surface",
-        "x": 180,
-        "y": -360,
-        "properties": {
-          "sourceId": "trench-1"
-        }
-      },
-      "landmark": {
-        "id": "trench-1",
-        "x": 180,
-        "y": -360,
-        "properties": {
-          "label": "trench-1",
-          "coordinateAnchor": "center",
-          "sourceId": "trench-1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "trench-2-surface",
-        "x": 500,
-        "y": -360,
-        "properties": {
-          "sourceId": "trench-2"
-        }
-      },
-      "landmark": {
-        "id": "trench-2",
-        "x": 500,
-        "y": -360,
-        "properties": {
-          "label": "trench-2",
-          "coordinateAnchor": "center",
-          "sourceId": "trench-2"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "trench-exit-surface",
-        "x": 800,
-        "y": -420,
-        "properties": {
-          "sourceId": "trench-exit"
-        }
-      },
-      "landmark": {
-        "id": "trench-exit",
-        "x": 800,
-        "y": -420,
-        "properties": {
-          "label": "trench-exit",
-          "coordinateAnchor": "center",
-          "sourceId": "trench-exit"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "riser-1-surface",
-        "x": 800,
-        "y": -720,
-        "properties": {
-          "sourceId": "riser-1"
-        }
-      },
-      "landmark": {
-        "id": "riser-1",
-        "x": 800,
-        "y": -720,
-        "properties": {
-          "label": "riser-1",
-          "coordinateAnchor": "center",
-          "sourceId": "riser-1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "riser-2-surface",
-        "x": 800,
-        "y": -1020,
-        "properties": {
-          "sourceId": "riser-2"
-        }
-      },
-      "landmark": {
-        "id": "riser-2",
-        "x": 800,
-        "y": -1020,
-        "properties": {
-          "label": "riser-2",
-          "coordinateAnchor": "center",
-          "sourceId": "riser-2"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "riser-top-surface",
-        "x": 800,
-        "y": -1320,
-        "properties": {
-          "sourceId": "riser-top"
-        }
-      },
-      "landmark": {
-        "id": "riser-top",
-        "x": 800,
-        "y": -1320,
-        "properties": {
-          "label": "riser-top",
-          "coordinateAnchor": "center",
-          "sourceId": "riser-top"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "aegis-1-surface",
-        "x": 520,
-        "y": -1480,
-        "properties": {
-          "sourceId": "aegis-1"
-        }
-      },
-      "landmark": {
-        "id": "aegis-1",
-        "x": 520,
-        "y": -1480,
-        "properties": {
-          "label": "aegis-1",
-          "coordinateAnchor": "center",
-          "sourceId": "aegis-1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "aegis-2-surface",
-        "x": 240,
-        "y": -1580,
-        "properties": {
-          "sourceId": "aegis-2"
-        }
-      },
-      "landmark": {
-        "id": "aegis-2",
-        "x": 240,
-        "y": -1580,
-        "properties": {
-          "label": "aegis-2",
-          "coordinateAnchor": "center",
-          "sourceId": "aegis-2"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "aegis-safe-surface",
-        "x": 0,
-        "y": -1700,
-        "properties": {
-          "sourceId": "aegis-safe"
-        }
-      },
-      "landmark": {
-        "id": "aegis-safe",
-        "x": 0,
-        "y": -1700,
-        "properties": {
-          "label": "aegis-safe",
-          "coordinateAnchor": "center",
-          "sourceId": "aegis-safe"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "record-1-surface",
-        "x": -260,
-        "y": -1840,
-        "properties": {
-          "sourceId": "record-1"
-        }
-      },
-      "landmark": {
-        "id": "record-1",
-        "x": -260,
-        "y": -1840,
-        "properties": {
-          "label": "record-1",
-          "coordinateAnchor": "center",
-          "sourceId": "record-1"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "record-2-surface",
-        "x": -260,
-        "y": -2080,
-        "properties": {
-          "sourceId": "record-2"
-        }
-      },
-      "landmark": {
-        "id": "record-2",
-        "x": -260,
-        "y": -2080,
-        "properties": {
-          "label": "record-2",
-          "coordinateAnchor": "center",
-          "sourceId": "record-2"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "exit-surface",
-        "x": -520,
-        "y": -2200,
-        "properties": {
-          "sourceId": "exit"
-        }
-      },
-      "landmark": {
-        "id": "exit",
-        "x": -520,
-        "y": -2200,
-        "properties": {
-          "label": "exit",
-          "coordinateAnchor": "center",
-          "sourceId": "exit"
-        }
-      }
-    }
-  ],
-  "behaviorRefs": []
+  "editor": {
+    "editableDomains": [
+      "bounds",
+      "entry",
+      "exit",
+      "surfaces",
+      "anchors",
+      "recoveryRoute",
+      "enemySlots",
+      "worldObjects",
+      "wind",
+      "camera"
+    ],
+    "readOnlyDomains": [
+      "objectives",
+      "progression",
+      "story",
+      "scanner",
+      "behaviorRegistry"
+    ]
+  },
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "id": "5-6",
+    "sector": 5,
+    "sourceAreaId": "sector-05-06",
+    "stage": 6
+  }
 }

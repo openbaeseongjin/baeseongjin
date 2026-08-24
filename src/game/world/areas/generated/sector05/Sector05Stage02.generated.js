@@ -76,16 +76,16 @@ const SPEC = {
           "label": "H2",
           "sourceId": "h2"
         },
-        "x": -1240,
-        "y": -600
+        "x": -1380,
+        "y": -735
       },
       "target": {
         "id": "h2-surface",
         "properties": {
           "sourceId": "h2"
         },
-        "x": -1240,
-        "y": -600
+        "x": -1380,
+        "y": -735
       }
     },
     {
@@ -116,16 +116,16 @@ const SPEC = {
           "label": "M0",
           "sourceId": "m0"
         },
-        "x": -650,
-        "y": -960
+        "x": -1175,
+        "y": -1185
       },
       "target": {
         "id": "m0-surface",
         "properties": {
           "sourceId": "m0"
         },
-        "x": -650,
-        "y": -960
+        "x": -1175,
+        "y": -1185
       }
     },
     {
@@ -136,36 +136,16 @@ const SPEC = {
           "label": "H4",
           "sourceId": "h4"
         },
-        "x": -330,
-        "y": -1120
+        "x": -795,
+        "y": -1445
       },
       "target": {
         "id": "h4-surface",
         "properties": {
           "sourceId": "h4"
         },
-        "x": -330,
-        "y": -1120
-      }
-    },
-    {
-      "landmark": {
-        "id": "p1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P1",
-          "sourceId": "p1"
-        },
-        "x": -20,
-        "y": -1270
-      },
-      "target": {
-        "id": "p1-surface",
-        "properties": {
-          "sourceId": "p1"
-        },
-        "x": -20,
-        "y": -1270
+        "x": -795,
+        "y": -1445
       }
     },
     {
@@ -176,56 +156,16 @@ const SPEC = {
           "label": "H5",
           "sourceId": "h5"
         },
-        "x": 300,
-        "y": -1440
+        "x": -335,
+        "y": -1810
       },
       "target": {
         "id": "h5-surface",
         "properties": {
           "sourceId": "h5"
         },
-        "x": 300,
-        "y": -1440
-      }
-    },
-    {
-      "landmark": {
-        "id": "h6",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "H6",
-          "sourceId": "h6"
-        },
-        "x": 620,
-        "y": -1620
-      },
-      "target": {
-        "id": "h6-surface",
-        "properties": {
-          "sourceId": "h6"
-        },
-        "x": 620,
-        "y": -1620
-      }
-    },
-    {
-      "landmark": {
-        "id": "m1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "M1",
-          "sourceId": "m1"
-        },
-        "x": 900,
-        "y": -1790
-      },
-      "target": {
-        "id": "m1-surface",
-        "properties": {
-          "sourceId": "m1"
-        },
-        "x": 900,
-        "y": -1790
+        "x": -335,
+        "y": -1810
       }
     },
     {
@@ -236,56 +176,16 @@ const SPEC = {
           "label": "H7",
           "sourceId": "h7"
         },
-        "x": 620,
-        "y": -1970
+        "x": -20,
+        "y": -2040
       },
       "target": {
         "id": "h7-surface",
         "properties": {
           "sourceId": "h7"
         },
-        "x": 620,
-        "y": -1970
-      }
-    },
-    {
-      "landmark": {
-        "id": "h8",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "H8",
-          "sourceId": "h8"
-        },
-        "x": 300,
-        "y": -2150
-      },
-      "target": {
-        "id": "h8-surface",
-        "properties": {
-          "sourceId": "h8"
-        },
-        "x": 300,
-        "y": -2150
-      }
-    },
-    {
-      "landmark": {
-        "id": "f",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "F",
-          "sourceId": "f"
-        },
         "x": -20,
-        "y": -2320
-      },
-      "target": {
-        "id": "f-surface",
-        "properties": {
-          "sourceId": "f"
-        },
-        "x": -20,
-        "y": -2320
+        "y": -2040
       }
     },
     {
@@ -296,16 +196,50 @@ const SPEC = {
           "label": "X",
           "sourceId": "x"
         },
-        "x": -340,
-        "y": -2480
+        "x": 225,
+        "y": -2405
       },
       "target": {
         "id": "x-surface",
         "properties": {
           "sourceId": "x"
         },
-        "x": -340,
-        "y": -2480
+        "x": 225,
+        "y": -2405
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-05-02:editor-anchor-1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "NEW"
+        },
+        "x": 605,
+        "y": -2055
+      },
+      "target": {
+        "id": "sector-05-02:editor-anchor-1-surface",
+        "properties": {},
+        "x": 605,
+        "y": -2055
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-05-02:editor-anchor-2",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "NEW"
+        },
+        "x": -115,
+        "y": -2570
+      },
+      "target": {
+        "id": "sector-05-02:editor-anchor-2-surface",
+        "properties": {},
+        "x": -115,
+        "y": -2570
       }
     }
   ],
@@ -371,7 +305,7 @@ const SPEC = {
         "activation": {
           "height": 600,
           "width": 640,
-          "x": -1400,
+          "x": -1395,
           "y": -1100
         },
         "coordinateAnchor": "center",
@@ -379,7 +313,7 @@ const SPEC = {
         "id": "sector-05-02:aegis-a",
         "kind": "sentry",
         "position": {
-          "x": -900,
+          "x": -895,
           "y": -820
         },
         "presentationId": "world-object:sentry",
@@ -389,16 +323,16 @@ const SPEC = {
         "activation": {
           "height": 610,
           "width": 600,
-          "x": 180,
-          "y": -1920
+          "x": -670,
+          "y": -1905
         },
         "coordinateAnchor": "center",
         "enemyType": "shield-drone-t1",
         "id": "sector-05-02:aegis-b",
         "kind": "sentry",
         "position": {
-          "x": 650,
-          "y": -1660
+          "x": -200,
+          "y": -1645
         },
         "presentationId": "world-object:sentry",
         "rules": []
@@ -439,8 +373,8 @@ const SPEC = {
       {
         "id": "sector-05-02:recovery-2",
         "maxRetrySeconds": 5,
-        "x": 20,
-        "y": -1624
+        "x": -40,
+        "y": -1645
       },
       {
         "id": "sector-05-02:recovery-3",
@@ -503,12 +437,6 @@ const SPEC = {
         "sourceId": "h5",
         "x": 300,
         "y": -1440
-      },
-      {
-        "id": "sector-05-02:route-h6",
-        "sourceId": "h6",
-        "x": 620,
-        "y": -1620
       },
       {
         "id": "sector-05-02:route-m1",
@@ -591,120 +519,30 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "p0-aegis-preview",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": -1710,
-          "y": -440
-        },
-        "sourceId": "p0-aegis-preview",
-        "vertices": [
-          {
-            "x": -1890,
-            "y": -440
-          },
-          {
-            "x": -1530,
-            "y": -440
-          },
-          {
-            "x": -1530,
-            "y": -410
-          },
-          {
-            "x": -1890,
-            "y": -410
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "review-bridge-a",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": -1110,
-          "y": -840
-        },
-        "sourceId": "review-bridge-a",
-        "vertices": [
-          {
-            "x": -1390,
-            "y": -840
-          },
-          {
-            "x": -830,
-            "y": -840
-          },
-          {
-            "x": -830,
-            "y": -816
-          },
-          {
-            "x": -1390,
-            "y": -816
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "m0-post-aegis-safe",
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": -760,
-          "y": -980
+          "x": -1145,
+          "y": -495
         },
         "sourceId": "m0-post-aegis-safe",
         "vertices": [
           {
-            "x": -925,
-            "y": -980
+            "x": -1310,
+            "y": -495
           },
           {
-            "x": -595,
-            "y": -980
+            "x": -980,
+            "y": -495
           },
           {
-            "x": -595,
-            "y": -950
+            "x": -980,
+            "y": -465
           },
           {
-            "x": -925,
-            "y": -950
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "p1-upper-control-read",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": -180,
-          "y": -1290
-        },
-        "sourceId": "p1-upper-control-read",
-        "vertices": [
-          {
-            "x": -360,
-            "y": -1290
-          },
-          {
-            "x": 0,
-            "y": -1290
-          },
-          {
-            "x": 0,
-            "y": -1260
-          },
-          {
-            "x": -360,
-            "y": -1260
+            "x": -1310,
+            "y": -465
           }
         ]
       },
@@ -715,56 +553,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": 350,
-          "y": -1680
+          "x": 585,
+          "y": -1895
         },
         "sourceId": "review-bridge-b",
         "vertices": [
           {
-            "x": 50,
-            "y": -1680
+            "x": 285,
+            "y": -1895
           },
           {
-            "x": 650,
-            "y": -1680
+            "x": 885,
+            "y": -1895
           },
           {
-            "x": 650,
-            "y": -1656
+            "x": 885,
+            "y": -1871
           },
           {
-            "x": 50,
-            "y": -1656
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "m1-post-aegis-safe",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": 790,
-          "y": -1810
-        },
-        "sourceId": "m1-post-aegis-safe",
-        "vertices": [
-          {
-            "x": 620,
-            "y": -1810
-          },
-          {
-            "x": 960,
-            "y": -1810
-          },
-          {
-            "x": 960,
-            "y": -1780
-          },
-          {
-            "x": 620,
-            "y": -1780
+            "x": 285,
+            "y": -1871
           }
         ]
       },
@@ -775,26 +583,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": -220,
-          "y": -2350
+          "x": -155,
+          "y": -2340
         },
         "sourceId": "final-control-deck",
         "vertices": [
           {
-            "x": -420,
-            "y": -2350
+            "x": -355,
+            "y": -2340
           },
           {
-            "x": -20,
-            "y": -2350
+            "x": 45,
+            "y": -2340
           },
           {
-            "x": -20,
-            "y": -2320
+            "x": 45,
+            "y": -2310
           },
           {
-            "x": -420,
-            "y": -2320
+            "x": -355,
+            "y": -2310
           }
         ]
       },
@@ -835,26 +643,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": -1450,
-          "y": -930
+          "x": -1565,
+          "y": -970
         },
         "sourceId": "recovery-r1",
         "vertices": [
           {
-            "x": -1610,
-            "y": -930
+            "x": -1725,
+            "y": -970
           },
           {
-            "x": -1290,
-            "y": -930
+            "x": -1405,
+            "y": -970
           },
           {
-            "x": -1290,
-            "y": -912
+            "x": -1405,
+            "y": -952
           },
           {
-            "x": -1610,
-            "y": -912
+            "x": -1725,
+            "y": -952
           }
         ]
       },
@@ -865,26 +673,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": 20,
-          "y": -1600
+          "x": -25,
+          "y": -1610
         },
         "sourceId": "recovery-r2",
         "vertices": [
           {
-            "x": -140,
-            "y": -1600
+            "x": -185,
+            "y": -1610
           },
           {
-            "x": 180,
-            "y": -1600
+            "x": 135,
+            "y": -1610
           },
           {
-            "x": 180,
-            "y": -1582
+            "x": 135,
+            "y": -1592
           },
           {
-            "x": -140,
-            "y": -1582
+            "x": -185,
+            "y": -1592
           }
         ]
       },
@@ -895,26 +703,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": 390,
-          "y": -2180
+          "x": 290,
+          "y": -2195
         },
         "sourceId": "recovery-r3",
         "vertices": [
           {
-            "x": 230,
-            "y": -2180
+            "x": 130,
+            "y": -2195
           },
           {
-            "x": 550,
-            "y": -2180
+            "x": 450,
+            "y": -2195
           },
           {
-            "x": 550,
-            "y": -2162
+            "x": 450,
+            "y": -2177
           },
           {
-            "x": 230,
-            "y": -2162
+            "x": 130,
+            "y": -2177
           }
         ]
       },
@@ -925,56 +733,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": -1120,
-          "y": -1120
+          "x": -905,
+          "y": -1115
         },
         "sourceId": "lower-security-partition-vertical",
         "vertices": [
           {
-            "x": -1195,
-            "y": -1120
+            "x": -980,
+            "y": -1115
           },
           {
-            "x": -1045,
-            "y": -1120
+            "x": -830,
+            "y": -1115
           },
           {
-            "x": -1045,
-            "y": -470
+            "x": -830,
+            "y": -465
           },
           {
-            "x": -1195,
-            "y": -470
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "lower-security-partition-horizontal",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": -920,
-          "y": -950
-        },
-        "sourceId": "lower-security-partition-horizontal",
-        "vertices": [
-          {
-            "x": -1275,
-            "y": -950
-          },
-          {
-            "x": -565,
-            "y": -950
-          },
-          {
-            "x": -565,
-            "y": -855
-          },
-          {
-            "x": -1275,
-            "y": -855
+            "x": -980,
+            "y": -465
           }
         ]
       },
@@ -985,26 +763,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": 480,
-          "y": -1950
+          "x": 210,
+          "y": -1895
         },
         "sourceId": "upper-security-partition-vertical",
         "vertices": [
           {
-            "x": 405,
-            "y": -1950
+            "x": 135,
+            "y": -1895
           },
           {
-            "x": 555,
-            "y": -1950
+            "x": 285,
+            "y": -1895
           },
           {
-            "x": 555,
-            "y": -1250
+            "x": 285,
+            "y": -1195
           },
           {
-            "x": 405,
-            "y": -1250
+            "x": 135,
+            "y": -1195
           }
         ]
       },
@@ -1015,26 +793,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": true,
         "position": {
-          "x": 30,
-          "y": -1450
+          "x": -165,
+          "y": -1295
         },
         "sourceId": "upper-security-partition-horizontal",
         "vertices": [
           {
-            "x": -270,
-            "y": -1450
+            "x": -465,
+            "y": -1295
           },
           {
-            "x": 330,
-            "y": -1450
+            "x": 135,
+            "y": -1295
           },
           {
-            "x": 330,
-            "y": -1355
+            "x": 135,
+            "y": -1200
           },
           {
-            "x": -270,
-            "y": -1355
+            "x": -465,
+            "y": -1200
           }
         ]
       },

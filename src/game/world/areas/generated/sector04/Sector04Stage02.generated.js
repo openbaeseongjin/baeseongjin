@@ -150,26 +150,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "CUT1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "CUT1",
-          "sourceId": "CUT1"
-        },
-        "x": 832,
-        "y": -704
-      },
-      "target": {
-        "id": "CUT1-surface",
-        "properties": {
-          "sourceId": "CUT1"
-        },
-        "x": 832,
-        "y": -704
-      }
-    },
-    {
-      "landmark": {
         "id": "CUT2",
         "properties": {
           "coordinateAnchor": "center",
@@ -371,14 +351,7 @@ const SPEC = {
       }
     ],
     "order": 2,
-    "recoveryPoints": [
-      {
-        "id": "sector-04-02:arcade-recovery",
-        "maxRetrySeconds": 5,
-        "x": 640,
-        "y": -992
-      }
-    ],
+    "recoveryPoints": [],
     "routePoints": [
       {
         "id": "sector-04-02:route-ENTRY",
@@ -600,36 +573,6 @@ const SPEC = {
           {
             "x": 520,
             "y": -950
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "safe-vestibule",
-        "kind": "safe-vestibule",
-        "oneWay": true,
-        "position": {
-          "x": 1185,
-          "y": -1408
-        },
-        "sourceId": "safe-vestibule",
-        "vertices": [
-          {
-            "x": 1060,
-            "y": -1408
-          },
-          {
-            "x": 1310,
-            "y": -1408
-          },
-          {
-            "x": 1310,
-            "y": -1378
-          },
-          {
-            "x": 1060,
-            "y": -1378
           }
         ]
       },

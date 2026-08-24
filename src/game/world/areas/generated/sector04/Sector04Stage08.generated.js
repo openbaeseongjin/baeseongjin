@@ -10,42 +10,22 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "P1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P1",
-          "sourceId": "P1"
-        },
-        "x": -860,
-        "y": -350
-      },
-      "target": {
-        "id": "P1-surface",
-        "properties": {
-          "sourceId": "P1"
-        },
-        "x": -860,
-        "y": -350
-      }
-    },
-    {
-      "landmark": {
         "id": "P2",
         "properties": {
           "coordinateAnchor": "center",
           "label": "P2",
           "sourceId": "P2"
         },
-        "x": -540,
-        "y": -520
+        "x": -1100,
+        "y": -690
       },
       "target": {
         "id": "P2-surface",
         "properties": {
           "sourceId": "P2"
         },
-        "x": -540,
-        "y": -520
+        "x": -1100,
+        "y": -690
       }
     },
     {
@@ -56,36 +36,16 @@ const SPEC = {
           "label": "P3",
           "sourceId": "P3"
         },
-        "x": -200,
-        "y": -650
+        "x": -265,
+        "y": -1045
       },
       "target": {
         "id": "P3-surface",
         "properties": {
           "sourceId": "P3"
         },
-        "x": -200,
-        "y": -650
-      }
-    },
-    {
-      "landmark": {
-        "id": "P4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P4",
-          "sourceId": "P4"
-        },
-        "x": 160,
-        "y": -790
-      },
-      "target": {
-        "id": "P4-surface",
-        "properties": {
-          "sourceId": "P4"
-        },
-        "x": 160,
-        "y": -790
+        "x": -265,
+        "y": -1045
       }
     },
     {
@@ -150,26 +110,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "P8",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P8",
-          "sourceId": "P8"
-        },
-        "x": -430,
-        "y": -1530
-      },
-      "target": {
-        "id": "P8-surface",
-        "properties": {
-          "sourceId": "P8"
-        },
-        "x": -430,
-        "y": -1530
-      }
-    },
-    {
-      "landmark": {
         "id": "P9",
         "properties": {
           "coordinateAnchor": "center",
@@ -206,26 +146,6 @@ const SPEC = {
         },
         "x": 190,
         "y": -1880
-      }
-    },
-    {
-      "landmark": {
-        "id": "P11",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P11",
-          "sourceId": "P11"
-        },
-        "x": 500,
-        "y": -2040
-      },
-      "target": {
-        "id": "P11-surface",
-        "properties": {
-          "sourceId": "P11"
-        },
-        "x": 500,
-        "y": -2040
       }
     },
     {
@@ -290,22 +210,19 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "P15",
+        "id": "sector-04-08:editor-anchor-1",
         "properties": {
           "coordinateAnchor": "center",
-          "label": "P15",
-          "sourceId": "P15"
+          "label": "NEW"
         },
-        "x": -650,
-        "y": -2650
+        "x": -870,
+        "y": -895
       },
       "target": {
-        "id": "P15-surface",
-        "properties": {
-          "sourceId": "P15"
-        },
-        "x": -650,
-        "y": -2650
+        "id": "sector-04-08:editor-anchor-1-surface",
+        "properties": {},
+        "x": -870,
+        "y": -895
       }
     }
   ],
@@ -421,8 +338,8 @@ const SPEC = {
         "kind": "access-transit-lock",
         "objectiveId": "sector-04-08:quorum-read",
         "position": {
-          "x": -880,
-          "y": -320
+          "x": -680,
+          "y": -400
         },
         "presentationId": "world-object:access-transit-lock",
         "requiredAccessModuleCount": 2,
@@ -641,92 +558,32 @@ const SPEC = {
         ]
       },
       {
-        "coordinateAnchor": "top-center",
+        "blockedByObjectiveId": "sector-04-08:quorum-read",
+        "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "east-lower-01",
-        "kind": "maintenance-gallery",
-        "oneWay": true,
+        "id": "sector-04-08:quorum-interlock-barrier",
+        "kind": "sector-transit-barrier",
+        "oneWay": false,
         "position": {
-          "x": -570,
-          "y": -560
+          "x": -650,
+          "y": -875
         },
-        "sourceId": "east-lower-01",
         "vertices": [
           {
-            "x": -730,
-            "y": -560
+            "x": -650,
+            "y": -875
           },
           {
-            "x": -410,
-            "y": -560
+            "x": -610,
+            "y": -875
           },
           {
-            "x": -410,
-            "y": -538
+            "x": -610,
+            "y": -363
           },
           {
-            "x": -730,
-            "y": -538
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "east-lower-02",
-        "kind": "maintenance-gallery",
-        "oneWay": true,
-        "position": {
-          "x": -230,
-          "y": -690
-        },
-        "sourceId": "east-lower-02",
-        "vertices": [
-          {
-            "x": -390,
-            "y": -690
-          },
-          {
-            "x": -70,
-            "y": -690
-          },
-          {
-            "x": -70,
-            "y": -668
-          },
-          {
-            "x": -390,
-            "y": -668
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "east-lower-03",
-        "kind": "maintenance-gallery",
-        "oneWay": true,
-        "position": {
-          "x": 125,
-          "y": -830
-        },
-        "sourceId": "east-lower-03",
-        "vertices": [
-          {
-            "x": -40,
-            "y": -830
-          },
-          {
-            "x": 290,
-            "y": -830
-          },
-          {
-            "x": 290,
-            "y": -808
-          },
-          {
-            "x": -40,
-            "y": -808
+            "x": -650,
+            "y": -363
           }
         ]
       },
@@ -763,66 +620,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "center-crossover-01",
-        "kind": "maintenance-crossover",
-        "oneWay": true,
-        "position": {
-          "x": 190,
-          "y": -1200
-        },
-        "sourceId": "center-crossover-01",
-        "vertices": [
-          {
-            "x": 40,
-            "y": -1200
-          },
-          {
-            "x": 340,
-            "y": -1200
-          },
-          {
-            "x": 340,
-            "y": -1178
-          },
-          {
-            "x": 40,
-            "y": -1178
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "center-crossover-02",
-        "kind": "maintenance-crossover",
-        "oneWay": true,
-        "position": {
-          "x": -150,
-          "y": -1360
-        },
-        "sourceId": "center-crossover-02",
-        "vertices": [
-          {
-            "x": -300,
-            "y": -1360
-          },
-          {
-            "x": 0,
-            "y": -1360
-          },
-          {
-            "x": 0,
-            "y": -1338
-          },
-          {
-            "x": -300,
-            "y": -1338
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "west-lower-gallery",
         "kind": "maintenance-gallery",
         "oneWay": true,
@@ -847,67 +644,6 @@ const SPEC = {
           {
             "x": -600,
             "y": -1548
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "fullSafe": true,
-        "grappleable": true,
-        "id": "mid-interlock",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -120,
-          "y": -1765
-        },
-        "sourceId": "mid-interlock",
-        "vertices": [
-          {
-            "x": -330,
-            "y": -1765
-          },
-          {
-            "x": 90,
-            "y": -1765
-          },
-          {
-            "x": 90,
-            "y": -1733
-          },
-          {
-            "x": -330,
-            "y": -1733
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "east-upper-01",
-        "kind": "maintenance-gallery",
-        "oneWay": true,
-        "position": {
-          "x": 175,
-          "y": -1920
-        },
-        "sourceId": "east-upper-01",
-        "vertices": [
-          {
-            "x": 20,
-            "y": -1920
-          },
-          {
-            "x": 330,
-            "y": -1920
-          },
-          {
-            "x": 330,
-            "y": -1898
-          },
-          {
-            "x": 20,
-            "y": -1898
           }
         ]
       },
@@ -938,96 +674,6 @@ const SPEC = {
           {
             "x": 330,
             "y": -2058
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "west-return-01",
-        "kind": "maintenance-gallery",
-        "oneWay": true,
-        "position": {
-          "x": 250,
-          "y": -2290
-        },
-        "sourceId": "west-return-01",
-        "vertices": [
-          {
-            "x": 90,
-            "y": -2290
-          },
-          {
-            "x": 410,
-            "y": -2290
-          },
-          {
-            "x": 410,
-            "y": -2268
-          },
-          {
-            "x": 90,
-            "y": -2268
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "west-return-02",
-        "kind": "maintenance-gallery",
-        "oneWay": true,
-        "position": {
-          "x": -70,
-          "y": -2450
-        },
-        "sourceId": "west-return-02",
-        "vertices": [
-          {
-            "x": -230,
-            "y": -2450
-          },
-          {
-            "x": 90,
-            "y": -2450
-          },
-          {
-            "x": 90,
-            "y": -2428
-          },
-          {
-            "x": -230,
-            "y": -2428
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "west-return-03",
-        "kind": "maintenance-gallery",
-        "oneWay": true,
-        "position": {
-          "x": -390,
-          "y": -2580
-        },
-        "sourceId": "west-return-03",
-        "vertices": [
-          {
-            "x": -550,
-            "y": -2580
-          },
-          {
-            "x": -230,
-            "y": -2580
-          },
-          {
-            "x": -230,
-            "y": -2558
-          },
-          {
-            "x": -550,
-            "y": -2558
           }
         ]
       },
@@ -1093,32 +739,31 @@ const SPEC = {
         ]
       },
       {
-        "blockedByObjectiveId": "sector-04-08:quorum-read",
-        "coordinateAnchor": "top-left",
+        "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "sector-04-08:quorum-interlock-barrier",
-        "kind": "sector-transit-barrier",
-        "oneWay": false,
+        "id": "sector-04-08:surface-1",
+        "kind": "platform",
+        "oneWay": true,
         "position": {
-          "x": -720,
-          "y": -800
+          "x": -545,
+          "y": -875
         },
         "vertices": [
           {
-            "x": -720,
-            "y": -800
+            "x": -609,
+            "y": -875
           },
           {
-            "x": -680,
-            "y": -800
+            "x": -481,
+            "y": -875
           },
           {
-            "x": -680,
-            "y": -288
+            "x": -481,
+            "y": -843
           },
           {
-            "x": -720,
-            "y": -288
+            "x": -609,
+            "y": -843
           }
         ]
       }
