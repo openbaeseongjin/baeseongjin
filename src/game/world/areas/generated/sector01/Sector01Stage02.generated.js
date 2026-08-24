@@ -273,7 +273,7 @@ const SPEC = {
         "kind": "platform",
         "oneWay": true,
         "position": {
-          "x": 416,
+          "x": 400,
           "y": 0
         },
         "vertices": [
@@ -282,11 +282,11 @@ const SPEC = {
             "y": 0
           },
           {
-            "x": 640,
+            "x": 608,
             "y": 0
           },
           {
-            "x": 640,
+            "x": 608,
             "y": 32
           },
           {
