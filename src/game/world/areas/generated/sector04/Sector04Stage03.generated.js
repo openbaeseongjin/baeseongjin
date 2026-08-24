@@ -10,162 +10,22 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "A1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "A1",
-          "sourceId": "A1"
-        },
-        "x": -2080,
-        "y": -544
-      },
-      "target": {
-        "id": "A1-surface",
-        "properties": {
-          "sourceId": "A1"
-        },
-        "x": -2080,
-        "y": -544
-      }
-    },
-    {
-      "landmark": {
-        "id": "A2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "A2",
-          "sourceId": "A2"
-        },
-        "x": -1760,
-        "y": -704
-      },
-      "target": {
-        "id": "A2-surface",
-        "properties": {
-          "sourceId": "A2"
-        },
-        "x": -1760,
-        "y": -704
-      }
-    },
-    {
-      "landmark": {
         "id": "A3",
         "properties": {
           "coordinateAnchor": "center",
           "label": "A3",
           "sourceId": "A3"
         },
-        "x": -1440,
-        "y": -896
+        "x": -1445,
+        "y": -975
       },
       "target": {
         "id": "A3-surface",
         "properties": {
           "sourceId": "A3"
         },
-        "x": -1440,
-        "y": -896
-      }
-    },
-    {
-      "landmark": {
-        "id": "G1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G1",
-          "sourceId": "G1"
-        },
-        "x": -1120,
-        "y": -1024
-      },
-      "target": {
-        "id": "G1-surface",
-        "properties": {
-          "sourceId": "G1"
-        },
-        "x": -1120,
-        "y": -1024
-      }
-    },
-    {
-      "landmark": {
-        "id": "G2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G2",
-          "sourceId": "G2"
-        },
-        "x": -768,
-        "y": -960
-      },
-      "target": {
-        "id": "G2-surface",
-        "properties": {
-          "sourceId": "G2"
-        },
-        "x": -768,
-        "y": -960
-      }
-    },
-    {
-      "landmark": {
-        "id": "G3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G3",
-          "sourceId": "G3"
-        },
-        "x": -416,
-        "y": -1024
-      },
-      "target": {
-        "id": "G3-surface",
-        "properties": {
-          "sourceId": "G3"
-        },
-        "x": -416,
-        "y": -1024
-      }
-    },
-    {
-      "landmark": {
-        "id": "G4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G4",
-          "sourceId": "G4"
-        },
-        "x": -64,
-        "y": -960
-      },
-      "target": {
-        "id": "G4-surface",
-        "properties": {
-          "sourceId": "G4"
-        },
-        "x": -64,
-        "y": -960
-      }
-    },
-    {
-      "landmark": {
-        "id": "G5",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G5",
-          "sourceId": "G5"
-        },
-        "x": 288,
-        "y": -1024
-      },
-      "target": {
-        "id": "G5-surface",
-        "properties": {
-          "sourceId": "G5"
-        },
-        "x": 288,
-        "y": -1024
+        "x": -1445,
+        "y": -975
       }
     },
     {
@@ -176,136 +36,16 @@ const SPEC = {
           "label": "G6",
           "sourceId": "G6"
         },
-        "x": 640,
-        "y": -960
+        "x": 1185,
+        "y": -880
       },
       "target": {
         "id": "G6-surface",
         "properties": {
           "sourceId": "G6"
         },
-        "x": 640,
-        "y": -960
-      }
-    },
-    {
-      "landmark": {
-        "id": "G7",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G7",
-          "sourceId": "G7"
-        },
-        "x": 992,
-        "y": -1024
-      },
-      "target": {
-        "id": "G7-surface",
-        "properties": {
-          "sourceId": "G7"
-        },
-        "x": 992,
-        "y": -1024
-      }
-    },
-    {
-      "landmark": {
-        "id": "G8",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "G8",
-          "sourceId": "G8"
-        },
-        "x": 1344,
-        "y": -960
-      },
-      "target": {
-        "id": "G8-surface",
-        "properties": {
-          "sourceId": "G8"
-        },
-        "x": 1344,
-        "y": -960
-      }
-    },
-    {
-      "landmark": {
-        "id": "D1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "D1",
-          "sourceId": "D1"
-        },
-        "x": 1568,
-        "y": -832
-      },
-      "target": {
-        "id": "D1-surface",
-        "properties": {
-          "sourceId": "D1"
-        },
-        "x": 1568,
-        "y": -832
-      }
-    },
-    {
-      "landmark": {
-        "id": "D2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "D2",
-          "sourceId": "D2"
-        },
-        "x": 1280,
-        "y": -576
-      },
-      "target": {
-        "id": "D2-surface",
-        "properties": {
-          "sourceId": "D2"
-        },
-        "x": 1280,
-        "y": -576
-      }
-    },
-    {
-      "landmark": {
-        "id": "S1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "S1",
-          "sourceId": "S1"
-        },
-        "x": 928,
-        "y": -512
-      },
-      "target": {
-        "id": "S1-surface",
-        "properties": {
-          "sourceId": "S1"
-        },
-        "x": 928,
-        "y": -512
-      }
-    },
-    {
-      "landmark": {
-        "id": "S3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "S3",
-          "sourceId": "S3"
-        },
-        "x": 224,
-        "y": -512
-      },
-      "target": {
-        "id": "S3-surface",
-        "properties": {
-          "sourceId": "S3"
-        },
-        "x": 224,
-        "y": -512
+        "x": 1185,
+        "y": -880
       }
     },
     {
@@ -330,122 +70,22 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "S5",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "S5",
-          "sourceId": "S5"
-        },
-        "x": -480,
-        "y": -512
-      },
-      "target": {
-        "id": "S5-surface",
-        "properties": {
-          "sourceId": "S5"
-        },
-        "x": -480,
-        "y": -512
-      }
-    },
-    {
-      "landmark": {
-        "id": "S6",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "S6",
-          "sourceId": "S6"
-        },
-        "x": -832,
-        "y": -576
-      },
-      "target": {
-        "id": "S6-surface",
-        "properties": {
-          "sourceId": "S6"
-        },
-        "x": -832,
-        "y": -576
-      }
-    },
-    {
-      "landmark": {
-        "id": "U1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "U1",
-          "sourceId": "U1"
-        },
-        "x": -896,
-        "y": -768
-      },
-      "target": {
-        "id": "U1-surface",
-        "properties": {
-          "sourceId": "U1"
-        },
-        "x": -896,
-        "y": -768
-      }
-    },
-    {
-      "landmark": {
-        "id": "U2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "U2",
-          "sourceId": "U2"
-        },
-        "x": -624,
-        "y": -1024
-      },
-      "target": {
-        "id": "U2-surface",
-        "properties": {
-          "sourceId": "U2"
-        },
-        "x": -624,
-        "y": -1024
-      }
-    },
-    {
-      "landmark": {
         "id": "U3",
         "properties": {
           "coordinateAnchor": "center",
           "label": "U3",
           "sourceId": "U3"
         },
-        "x": -336,
-        "y": -1280
+        "x": -870,
+        "y": -1320
       },
       "target": {
         "id": "U3-surface",
         "properties": {
           "sourceId": "U3"
         },
-        "x": -336,
-        "y": -1280
-      }
-    },
-    {
-      "landmark": {
-        "id": "U4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "U4",
-          "sourceId": "U4"
-        },
-        "x": -16,
-        "y": -1504
-      },
-      "target": {
-        "id": "U4-surface",
-        "properties": {
-          "sourceId": "U4"
-        },
-        "x": -16,
-        "y": -1504
+        "x": -870,
+        "y": -1320
       }
     },
     {
@@ -456,56 +96,16 @@ const SPEC = {
           "label": "C1",
           "sourceId": "C1"
         },
-        "x": 320,
-        "y": -1568
+        "x": -30,
+        "y": -1485
       },
       "target": {
         "id": "C1-surface",
         "properties": {
           "sourceId": "C1"
         },
-        "x": 320,
-        "y": -1568
-      }
-    },
-    {
-      "landmark": {
-        "id": "C2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C2",
-          "sourceId": "C2"
-        },
-        "x": 672,
-        "y": -1632
-      },
-      "target": {
-        "id": "C2-surface",
-        "properties": {
-          "sourceId": "C2"
-        },
-        "x": 672,
-        "y": -1632
-      }
-    },
-    {
-      "landmark": {
-        "id": "C3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C3",
-          "sourceId": "C3"
-        },
-        "x": 1024,
-        "y": -1696
-      },
-      "target": {
-        "id": "C3-surface",
-        "properties": {
-          "sourceId": "C3"
-        },
-        "x": 1024,
-        "y": -1696
+        "x": -30,
+        "y": -1485
       }
     },
     {
@@ -516,36 +116,16 @@ const SPEC = {
           "label": "C4",
           "sourceId": "C4"
         },
-        "x": 1376,
-        "y": -1760
+        "x": 1560,
+        "y": -1940
       },
       "target": {
         "id": "C4-surface",
         "properties": {
           "sourceId": "C4"
         },
-        "x": 1376,
-        "y": -1760
-      }
-    },
-    {
-      "landmark": {
-        "id": "C5",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C5",
-          "sourceId": "C5"
-        },
-        "x": 1696,
-        "y": -1904
-      },
-      "target": {
-        "id": "C5-surface",
-        "properties": {
-          "sourceId": "C5"
-        },
-        "x": 1696,
-        "y": -1904
+        "x": 1560,
+        "y": -1940
       }
     }
   ],
@@ -632,22 +212,6 @@ const SPEC = {
     ],
     "objects": [
       {
-        "activation": {
-          "height": 1280,
-          "width": 3200,
-          "x": -1920,
-          "y": -1664
-        },
-        "coordinateAnchor": "center",
-        "enemyType": "pursuit-drone-t1",
-        "id": "sector-04-03:residential-skybridge-pursuit",
-        "kind": "patrol-drone",
-        "position": {
-          "x": -1280,
-          "y": -720
-        }
-      },
-      {
         "coordinateAnchor": "center",
         "id": "sector-04-03:service-relay-b03-panel",
         "interactionRadius": 72,
@@ -678,8 +242,8 @@ const SPEC = {
       {
         "id": "sector-04-03:lower-service-recovery",
         "maxRetrySeconds": 5,
-        "x": 577,
-        "y": -554
+        "x": 575,
+        "y": -530
       },
       {
         "id": "sector-04-03:utility-riser-recovery",
@@ -969,36 +533,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "block-a-bridge-3",
-        "kind": "residential-bridge",
-        "oneWay": true,
-        "position": {
-          "x": -1385,
-          "y": -1028
-        },
-        "sourceId": "block-a-bridge-3",
-        "vertices": [
-          {
-            "x": -1510,
-            "y": -1028
-          },
-          {
-            "x": -1260,
-            "y": -1028
-          },
-          {
-            "x": -1260,
-            "y": -1004
-          },
-          {
-            "x": -1510,
-            "y": -1004
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "garden-skybridge",
         "kind": "garden-skybridge",
         "oneWay": true,
@@ -1029,60 +563,30 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "service-drop-deck",
-        "kind": "service-deck",
-        "oneWay": true,
-        "position": {
-          "x": 1535,
-          "y": -930
-        },
-        "sourceId": "service-drop-deck",
-        "vertices": [
-          {
-            "x": 1420,
-            "y": -930
-          },
-          {
-            "x": 1650,
-            "y": -930
-          },
-          {
-            "x": 1650,
-            "y": -900
-          },
-          {
-            "x": 1420,
-            "y": -900
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "service-drop-recovery",
         "kind": "service-recovery",
         "oneWay": true,
         "position": {
-          "x": 1460,
-          "y": -690
+          "x": 1420,
+          "y": -715
         },
         "sourceId": "service-drop-recovery",
         "vertices": [
           {
-            "x": 1380,
-            "y": -690
+            "x": 1340,
+            "y": -715
           },
           {
-            "x": 1540,
-            "y": -690
+            "x": 1500,
+            "y": -715
           },
           {
-            "x": 1540,
-            "y": -668
+            "x": 1500,
+            "y": -693
           },
           {
-            "x": 1380,
-            "y": -668
+            "x": 1340,
+            "y": -693
           }
         ]
       },
@@ -1123,56 +627,26 @@ const SPEC = {
         "kind": "utility-riser",
         "oneWay": true,
         "position": {
-          "x": -815,
-          "y": -820
+          "x": -1070,
+          "y": -750
         },
         "sourceId": "utility-riser-1",
         "vertices": [
           {
-            "x": -920,
-            "y": -820
+            "x": -1175,
+            "y": -750
           },
           {
-            "x": -710,
-            "y": -820
+            "x": -965,
+            "y": -750
           },
           {
-            "x": -710,
-            "y": -798
+            "x": -965,
+            "y": -728
           },
           {
-            "x": -920,
-            "y": -798
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "utility-riser-2",
-        "kind": "utility-riser",
-        "oneWay": true,
-        "position": {
-          "x": -575,
-          "y": -1080
-        },
-        "sourceId": "utility-riser-2",
-        "vertices": [
-          {
-            "x": -680,
-            "y": -1080
-          },
-          {
-            "x": -470,
-            "y": -1080
-          },
-          {
-            "x": -470,
-            "y": -1058
-          },
-          {
-            "x": -680,
-            "y": -1058
+            "x": -1175,
+            "y": -728
           }
         ]
       },
@@ -1203,36 +677,6 @@ const SPEC = {
           {
             "x": -400,
             "y": -1318
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "utility-riser-4",
-        "kind": "utility-riser",
-        "oneWay": true,
-        "position": {
-          "x": 25,
-          "y": -1575
-        },
-        "sourceId": "utility-riser-4",
-        "vertices": [
-          {
-            "x": -80,
-            "y": -1575
-          },
-          {
-            "x": 130,
-            "y": -1575
-          },
-          {
-            "x": 130,
-            "y": -1553
-          },
-          {
-            "x": -80,
-            "y": -1553
           }
         ]
       },
@@ -1273,26 +717,26 @@ const SPEC = {
         "kind": "safe-exit",
         "oneWay": true,
         "position": {
-          "x": 2080,
-          "y": -2060
+          "x": 2115,
+          "y": -2010
         },
         "sourceId": "block-c-exit-terrace",
         "vertices": [
           {
-            "x": 1900,
-            "y": -2060
+            "x": 1935,
+            "y": -2010
           },
           {
-            "x": 2260,
-            "y": -2060
+            "x": 2295,
+            "y": -2010
           },
           {
-            "x": 2260,
-            "y": -2030
+            "x": 2295,
+            "y": -1980
           },
           {
-            "x": 1900,
-            "y": -2030
+            "x": 1935,
+            "y": -1980
           }
         ]
       }

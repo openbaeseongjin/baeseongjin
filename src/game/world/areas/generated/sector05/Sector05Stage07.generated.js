@@ -110,26 +110,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "h05",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h05",
-          "sourceId": "h05"
-        },
-        "x": 500,
-        "y": -560
-      },
-      "target": {
-        "id": "h05-surface",
-        "properties": {
-          "sourceId": "h05"
-        },
-        "x": 500,
-        "y": -560
-      }
-    },
-    {
-      "landmark": {
         "id": "h06",
         "properties": {
           "coordinateAnchor": "center",
@@ -190,82 +170,22 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "h09",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h09",
-          "sourceId": "h09"
-        },
-        "x": -500,
-        "y": -920
-      },
-      "target": {
-        "id": "h09-surface",
-        "properties": {
-          "sourceId": "h09"
-        },
-        "x": -500,
-        "y": -920
-      }
-    },
-    {
-      "landmark": {
-        "id": "h10",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h10",
-          "sourceId": "h10"
-        },
-        "x": -840,
-        "y": -980
-      },
-      "target": {
-        "id": "h10-surface",
-        "properties": {
-          "sourceId": "h10"
-        },
-        "x": -840,
-        "y": -980
-      }
-    },
-    {
-      "landmark": {
-        "id": "h11",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h11",
-          "sourceId": "h11"
-        },
-        "x": -1120,
-        "y": -1080
-      },
-      "target": {
-        "id": "h11-surface",
-        "properties": {
-          "sourceId": "h11"
-        },
-        "x": -1120,
-        "y": -1080
-      }
-    },
-    {
-      "landmark": {
         "id": "h12",
         "properties": {
           "coordinateAnchor": "center",
           "label": "h12",
           "sourceId": "h12"
         },
-        "x": -1120,
-        "y": -1360
+        "x": -1045,
+        "y": -1270
       },
       "target": {
         "id": "h12-surface",
         "properties": {
           "sourceId": "h12"
         },
-        "x": -1120,
-        "y": -1360
+        "x": -1045,
+        "y": -1270
       }
     },
     {
@@ -276,76 +196,16 @@ const SPEC = {
           "label": "h13",
           "sourceId": "h13"
         },
-        "x": -1120,
-        "y": -1600
+        "x": -965,
+        "y": -1530
       },
       "target": {
         "id": "h13-surface",
         "properties": {
           "sourceId": "h13"
         },
-        "x": -1120,
-        "y": -1600
-      }
-    },
-    {
-      "landmark": {
-        "id": "h14",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h14",
-          "sourceId": "h14"
-        },
-        "x": -820,
-        "y": -1660
-      },
-      "target": {
-        "id": "h14-surface",
-        "properties": {
-          "sourceId": "h14"
-        },
-        "x": -820,
-        "y": -1660
-      }
-    },
-    {
-      "landmark": {
-        "id": "h15",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h15",
-          "sourceId": "h15"
-        },
-        "x": -520,
-        "y": -1660
-      },
-      "target": {
-        "id": "h15-surface",
-        "properties": {
-          "sourceId": "h15"
-        },
-        "x": -520,
-        "y": -1660
-      }
-    },
-    {
-      "landmark": {
-        "id": "h16",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h16",
-          "sourceId": "h16"
-        },
-        "x": -220,
-        "y": -1660
-      },
-      "target": {
-        "id": "h16-surface",
-        "properties": {
-          "sourceId": "h16"
-        },
-        "x": -220,
-        "y": -1660
+        "x": -965,
+        "y": -1530
       }
     },
     {
@@ -356,16 +216,16 @@ const SPEC = {
           "label": "h17",
           "sourceId": "h17"
         },
-        "x": 80,
-        "y": -1700
+        "x": 100,
+        "y": -1775
       },
       "target": {
         "id": "h17-surface",
         "properties": {
           "sourceId": "h17"
         },
-        "x": 80,
-        "y": -1700
+        "x": 100,
+        "y": -1775
       }
     },
     {
@@ -376,16 +236,16 @@ const SPEC = {
           "label": "h18",
           "sourceId": "h18"
         },
-        "x": 240,
-        "y": -1940
+        "x": 325,
+        "y": -1970
       },
       "target": {
         "id": "h18-surface",
         "properties": {
           "sourceId": "h18"
         },
-        "x": 240,
-        "y": -1940
+        "x": 325,
+        "y": -1970
       }
     },
     {
@@ -396,36 +256,16 @@ const SPEC = {
           "label": "h19",
           "sourceId": "h19"
         },
-        "x": 80,
-        "y": -2140
+        "x": 50,
+        "y": -2075
       },
       "target": {
         "id": "h19-surface",
         "properties": {
           "sourceId": "h19"
         },
-        "x": 80,
-        "y": -2140
-      }
-    },
-    {
-      "landmark": {
-        "id": "h20",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h20",
-          "sourceId": "h20"
-        },
-        "x": -220,
-        "y": -2280
-      },
-      "target": {
-        "id": "h20-surface",
-        "properties": {
-          "sourceId": "h20"
-        },
-        "x": -220,
-        "y": -2280
+        "x": 50,
+        "y": -2075
       }
     }
   ],
@@ -747,25 +587,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -320,
-          "y": -300
+          "x": 850,
+          "y": -520
         },
         "vertices": [
           {
-            "x": -700,
-            "y": -300
+            "x": 470,
+            "y": -520
           },
           {
-            "x": 60,
-            "y": -300
+            "x": 1230,
+            "y": -520
           },
           {
-            "x": 60,
-            "y": -276
+            "x": 1230,
+            "y": -496
           },
           {
-            "x": -700,
-            "y": -276
+            "x": 470,
+            "y": -496
           }
         ]
       },
@@ -776,25 +616,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -500,
-          "y": -980
+          "x": -775,
+          "y": -1050
         },
         "vertices": [
           {
-            "x": -880,
-            "y": -980
+            "x": -1155,
+            "y": -1050
           },
           {
-            "x": -120,
-            "y": -980
+            "x": -395,
+            "y": -1050
           },
           {
-            "x": -120,
-            "y": -956
+            "x": -395,
+            "y": -1026
           },
           {
-            "x": -880,
-            "y": -956
+            "x": -1155,
+            "y": -1026
           }
         ]
       },
@@ -805,25 +645,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -520,
-          "y": -1660
+          "x": -430,
+          "y": -1635
         },
         "vertices": [
           {
-            "x": -900,
-            "y": -1660
+            "x": -810,
+            "y": -1635
           },
           {
-            "x": -140,
-            "y": -1660
+            "x": -50,
+            "y": -1635
           },
           {
-            "x": -140,
-            "y": -1636
+            "x": -50,
+            "y": -1611
           },
           {
-            "x": -900,
-            "y": -1636
+            "x": -810,
+            "y": -1611
           }
         ]
       },
@@ -834,25 +674,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -220,
-          "y": -2248
+          "x": -180,
+          "y": -2240
         },
         "vertices": [
           {
-            "x": -380,
-            "y": -2248
+            "x": -340,
+            "y": -2240
           },
           {
-            "x": -60,
-            "y": -2248
+            "x": -20,
+            "y": -2240
           },
           {
-            "x": -60,
-            "y": -2224
+            "x": -20,
+            "y": -2216
           },
           {
-            "x": -380,
-            "y": -2224
+            "x": -340,
+            "y": -2216
           }
         ]
       }

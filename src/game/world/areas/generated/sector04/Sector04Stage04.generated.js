@@ -90,26 +90,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "m1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "M1",
-          "sourceId": "m1"
-        },
-        "x": -736,
-        "y": -896
-      },
-      "target": {
-        "id": "m1-surface",
-        "properties": {
-          "sourceId": "m1"
-        },
-        "x": -736,
-        "y": -896
-      }
-    },
-    {
-      "landmark": {
         "id": "t5",
         "properties": {
           "coordinateAnchor": "center",
@@ -166,26 +146,6 @@ const SPEC = {
         },
         "x": 224,
         "y": -1472
-      }
-    },
-    {
-      "landmark": {
-        "id": "m2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "M2",
-          "sourceId": "m2"
-        },
-        "x": 544,
-        "y": -1280
-      },
-      "target": {
-        "id": "m2-surface",
-        "properties": {
-          "sourceId": "m2"
-        },
-        "x": 544,
-        "y": -1280
       }
     },
     {
@@ -250,42 +210,22 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "m3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "M3",
-          "sourceId": "m3"
-        },
-        "x": 1824,
-        "y": -1664
-      },
-      "target": {
-        "id": "m3-surface",
-        "properties": {
-          "sourceId": "m3"
-        },
-        "x": 1824,
-        "y": -1664
-      }
-    },
-    {
-      "landmark": {
         "id": "t11",
         "properties": {
           "coordinateAnchor": "center",
           "label": "T11",
           "sourceId": "t11"
         },
-        "x": 2144,
-        "y": -1888
+        "x": 2115,
+        "y": -1940
       },
       "target": {
         "id": "t11-surface",
         "properties": {
           "sourceId": "t11"
         },
-        "x": 2144,
-        "y": -1888
+        "x": 2115,
+        "y": -1940
       }
     }
   ],
@@ -575,36 +515,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "entry-deck",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": -2360,
-          "y": -320
-        },
-        "sourceId": "entry-deck",
-        "vertices": [
-          {
-            "x": -2520,
-            "y": -320
-          },
-          {
-            "x": -2200,
-            "y": -320
-          },
-          {
-            "x": -2200,
-            "y": -290
-          },
-          {
-            "x": -2520,
-            "y": -290
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "chamber-a-floor",
         "kind": "scenario-surface",
         "oneWay": true,
@@ -639,26 +549,26 @@ const SPEC = {
         "kind": "scenario-surface",
         "oneWay": false,
         "position": {
-          "x": -992,
-          "y": -256
+          "x": -1085,
+          "y": -520
         },
         "sourceId": "door-a",
         "vertices": [
           {
-            "x": -1040,
-            "y": -256
+            "x": -1133,
+            "y": -520
           },
           {
-            "x": -944,
-            "y": -256
+            "x": -1037,
+            "y": -520
           },
           {
-            "x": -944,
-            "y": 0
+            "x": -1037,
+            "y": -264
           },
           {
-            "x": -1040,
-            "y": 0
+            "x": -1133,
+            "y": -264
           }
         ]
       },
@@ -749,36 +659,6 @@ const SPEC = {
           {
             "x": 872,
             "y": -1218
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "m1-service-ledge",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": -712,
-          "y": -930
-        },
-        "sourceId": "m1-service-ledge",
-        "vertices": [
-          {
-            "x": -852,
-            "y": -930
-          },
-          {
-            "x": -572,
-            "y": -930
-          },
-          {
-            "x": -572,
-            "y": -904
-          },
-          {
-            "x": -852,
-            "y": -904
           }
         ]
       },

@@ -30,26 +30,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "L2",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "L2",
-          "sourceId": "L2"
-        },
-        "x": -1720,
-        "y": -560
-      },
-      "target": {
-        "id": "L2-surface",
-        "properties": {
-          "sourceId": "L2"
-        },
-        "x": -1720,
-        "y": -560
-      }
-    },
-    {
-      "landmark": {
         "id": "L3",
         "properties": {
           "coordinateAnchor": "center",
@@ -790,36 +770,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "high-amenity-entry",
-        "kind": "safe-entry",
-        "oneWay": true,
-        "position": {
-          "x": -2305,
-          "y": -352
-        },
-        "sourceId": "high-amenity-entry",
-        "vertices": [
-          {
-            "x": -2520,
-            "y": -352
-          },
-          {
-            "x": -2090,
-            "y": -352
-          },
-          {
-            "x": -2090,
-            "y": -320
-          },
-          {
-            "x": -2520,
-            "y": -320
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "west-lower-service-edge",
         "kind": "amenity-service-deck",
         "oneWay": true,
@@ -910,36 +860,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "east-mid-safe-read",
-        "kind": "safe-read",
-        "oneWay": true,
-        "position": {
-          "x": 1390,
-          "y": -1260
-        },
-        "sourceId": "east-mid-safe-read",
-        "vertices": [
-          {
-            "x": 1180,
-            "y": -1260
-          },
-          {
-            "x": 1600,
-            "y": -1260
-          },
-          {
-            "x": 1600,
-            "y": -1232
-          },
-          {
-            "x": 1180,
-            "y": -1232
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "west-upper-garden-balcony",
         "kind": "garden-balcony",
         "oneWay": true,
@@ -964,36 +884,6 @@ const SPEC = {
           {
             "x": -2380,
             "y": -1760
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "upper-garden-recovery",
-        "kind": "amenity-recovery",
-        "oneWay": true,
-        "position": {
-          "x": -1525,
-          "y": -1600
-        },
-        "sourceId": "upper-garden-recovery",
-        "vertices": [
-          {
-            "x": -1740,
-            "y": -1600
-          },
-          {
-            "x": -1310,
-            "y": -1600
-          },
-          {
-            "x": -1310,
-            "y": -1578
-          },
-          {
-            "x": -1740,
-            "y": -1578
           }
         ]
       },

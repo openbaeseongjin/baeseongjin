@@ -30,46 +30,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "r0",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "r0",
-          "sourceId": "r0"
-        },
-        "x": 720,
-        "y": -400
-      },
-      "target": {
-        "id": "r0-surface",
-        "properties": {
-          "sourceId": "r0"
-        },
-        "x": 720,
-        "y": -400
-      }
-    },
-    {
-      "landmark": {
-        "id": "r1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "r1",
-          "sourceId": "r1"
-        },
-        "x": 720,
-        "y": -700
-      },
-      "target": {
-        "id": "r1-surface",
-        "properties": {
-          "sourceId": "r1"
-        },
-        "x": 720,
-        "y": -700
-      }
-    },
-    {
-      "landmark": {
         "id": "p0",
         "properties": {
           "coordinateAnchor": "center",
@@ -96,36 +56,16 @@ const SPEC = {
           "label": "jam-a1",
           "sourceId": "jam-a1"
         },
-        "x": 430,
-        "y": -1120
+        "x": 470,
+        "y": -1160
       },
       "target": {
         "id": "jam-a1-surface",
         "properties": {
           "sourceId": "jam-a1"
         },
-        "x": 430,
-        "y": -1120
-      }
-    },
-    {
-      "landmark": {
-        "id": "jam-b1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "jam-b1",
-          "sourceId": "jam-b1"
-        },
-        "x": 500,
-        "y": -1230
-      },
-      "target": {
-        "id": "jam-b1-surface",
-        "properties": {
-          "sourceId": "jam-b1"
-        },
-        "x": 500,
-        "y": -1230
+        "x": 470,
+        "y": -1160
       }
     },
     {
@@ -136,7 +76,7 @@ const SPEC = {
           "label": "merge-a",
           "sourceId": "merge-a"
         },
-        "x": 160,
+        "x": 225,
         "y": -1080
       },
       "target": {
@@ -144,7 +84,7 @@ const SPEC = {
         "properties": {
           "sourceId": "merge-a"
         },
-        "x": 160,
+        "x": 225,
         "y": -1080
       }
     },
@@ -156,16 +96,16 @@ const SPEC = {
           "label": "drop-1",
           "sourceId": "drop-1"
         },
-        "x": -80,
-        "y": -900
+        "x": -145,
+        "y": -995
       },
       "target": {
         "id": "drop-1-surface",
         "properties": {
           "sourceId": "drop-1"
         },
-        "x": -80,
-        "y": -900
+        "x": -145,
+        "y": -995
       }
     },
     {
@@ -176,16 +116,16 @@ const SPEC = {
           "label": "drop-2",
           "sourceId": "drop-2"
         },
-        "x": -160,
-        "y": -650
+        "x": 75,
+        "y": -755
       },
       "target": {
         "id": "drop-2-surface",
         "properties": {
           "sourceId": "drop-2"
         },
-        "x": -160,
-        "y": -650
+        "x": 75,
+        "y": -755
       }
     },
     {
@@ -196,16 +136,16 @@ const SPEC = {
           "label": "trench-entry",
           "sourceId": "trench-entry"
         },
-        "x": -120,
-        "y": -420
+        "x": -260,
+        "y": -610
       },
       "target": {
         "id": "trench-entry-surface",
         "properties": {
           "sourceId": "trench-entry"
         },
-        "x": -120,
-        "y": -420
+        "x": -260,
+        "y": -610
       }
     },
     {
@@ -216,16 +156,16 @@ const SPEC = {
           "label": "trench-1",
           "sourceId": "trench-1"
         },
-        "x": 180,
-        "y": -360
+        "x": 250,
+        "y": -265
       },
       "target": {
         "id": "trench-1-surface",
         "properties": {
           "sourceId": "trench-1"
         },
-        "x": 180,
-        "y": -360
+        "x": 250,
+        "y": -265
       }
     },
     {
@@ -236,56 +176,16 @@ const SPEC = {
           "label": "trench-2",
           "sourceId": "trench-2"
         },
-        "x": 500,
-        "y": -360
+        "x": 515,
+        "y": -160
       },
       "target": {
         "id": "trench-2-surface",
         "properties": {
           "sourceId": "trench-2"
         },
-        "x": 500,
-        "y": -360
-      }
-    },
-    {
-      "landmark": {
-        "id": "trench-exit",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "trench-exit",
-          "sourceId": "trench-exit"
-        },
-        "x": 800,
-        "y": -420
-      },
-      "target": {
-        "id": "trench-exit-surface",
-        "properties": {
-          "sourceId": "trench-exit"
-        },
-        "x": 800,
-        "y": -420
-      }
-    },
-    {
-      "landmark": {
-        "id": "riser-1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "riser-1",
-          "sourceId": "riser-1"
-        },
-        "x": 800,
-        "y": -720
-      },
-      "target": {
-        "id": "riser-1-surface",
-        "properties": {
-          "sourceId": "riser-1"
-        },
-        "x": 800,
-        "y": -720
+        "x": 515,
+        "y": -160
       }
     },
     {
@@ -310,42 +210,22 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "riser-top",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "riser-top",
-          "sourceId": "riser-top"
-        },
-        "x": 800,
-        "y": -1320
-      },
-      "target": {
-        "id": "riser-top-surface",
-        "properties": {
-          "sourceId": "riser-top"
-        },
-        "x": 800,
-        "y": -1320
-      }
-    },
-    {
-      "landmark": {
         "id": "aegis-1",
         "properties": {
           "coordinateAnchor": "center",
           "label": "aegis-1",
           "sourceId": "aegis-1"
         },
-        "x": 520,
-        "y": -1480
+        "x": 535,
+        "y": -1455
       },
       "target": {
         "id": "aegis-1-surface",
         "properties": {
           "sourceId": "aegis-1"
         },
-        "x": 520,
-        "y": -1480
+        "x": 535,
+        "y": -1455
       }
     },
     {
@@ -356,36 +236,16 @@ const SPEC = {
           "label": "aegis-2",
           "sourceId": "aegis-2"
         },
-        "x": 240,
-        "y": -1580
+        "x": 255,
+        "y": -1525
       },
       "target": {
         "id": "aegis-2-surface",
         "properties": {
           "sourceId": "aegis-2"
         },
-        "x": 240,
-        "y": -1580
-      }
-    },
-    {
-      "landmark": {
-        "id": "aegis-safe",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "aegis-safe",
-          "sourceId": "aegis-safe"
-        },
-        "x": 0,
-        "y": -1700
-      },
-      "target": {
-        "id": "aegis-safe-surface",
-        "properties": {
-          "sourceId": "aegis-safe"
-        },
-        "x": 0,
-        "y": -1700
+        "x": 255,
+        "y": -1525
       }
     },
     {
@@ -397,7 +257,7 @@ const SPEC = {
           "sourceId": "record-1"
         },
         "x": -260,
-        "y": -1840
+        "y": -1875
       },
       "target": {
         "id": "record-1-surface",
@@ -405,7 +265,7 @@ const SPEC = {
           "sourceId": "record-1"
         },
         "x": -260,
-        "y": -1840
+        "y": -1875
       }
     },
     {
@@ -416,16 +276,16 @@ const SPEC = {
           "label": "record-2",
           "sourceId": "record-2"
         },
-        "x": -260,
-        "y": -2080
+        "x": -40,
+        "y": -2085
       },
       "target": {
         "id": "record-2-surface",
         "properties": {
           "sourceId": "record-2"
         },
-        "x": -260,
-        "y": -2080
+        "x": -40,
+        "y": -2085
       }
     },
     {
@@ -545,16 +405,16 @@ const SPEC = {
         "activation": {
           "height": 520,
           "width": 1150,
-          "x": -220,
-          "y": -820
+          "x": -350,
+          "y": -620
         },
         "coordinateAnchor": "center",
         "enemyType": "sentry-t1",
         "id": "sector-05-06:cutter-a",
         "kind": "sentry",
         "position": {
-          "x": 430,
-          "y": -420
+          "x": 300,
+          "y": -220
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -565,16 +425,16 @@ const SPEC = {
         "activation": {
           "height": 440,
           "width": 1000,
-          "x": -100,
-          "y": -1800
+          "x": -110,
+          "y": -1765
         },
         "coordinateAnchor": "center",
         "enemyType": "shield-drone-t1",
         "id": "sector-05-06:aegis-a",
         "kind": "sentry",
         "position": {
-          "x": 360,
-          "y": -1540
+          "x": 350,
+          "y": -1505
         },
         "presentationId": "world-object:sentry",
         "rules": []
@@ -587,8 +447,8 @@ const SPEC = {
         "label": "ROUTING AUTHORIZATION · 03 / 03",
         "objectiveId": "routing-authorization",
         "position": {
-          "x": -260,
-          "y": -2080
+          "x": 950,
+          "y": -1320
         },
         "presentationId": "world-object:story-display"
       },
@@ -760,12 +620,6 @@ const SPEC = {
         "y": -1840
       },
       {
-        "id": "sector-05-06:route-record-2",
-        "sourceId": "record-2",
-        "x": -260,
-        "y": -2080
-      },
-      {
         "id": "sector-05-06:route-exit",
         "sourceId": "exit",
         "x": -520,
@@ -843,25 +697,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -120,
-          "y": -420
+          "x": -115,
+          "y": -365
         },
         "vertices": [
           {
-            "x": -330,
-            "y": -420
+            "x": -325,
+            "y": -365
           },
           {
-            "x": 90,
-            "y": -420
+            "x": 95,
+            "y": -365
           },
           {
-            "x": 90,
-            "y": -396
+            "x": 95,
+            "y": -341
           },
           {
-            "x": -330,
-            "y": -396
+            "x": -325,
+            "y": -341
           }
         ]
       },
@@ -872,25 +726,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 800,
-          "y": -1320
+          "x": 795,
+          "y": -1315
         },
         "vertices": [
           {
-            "x": 640,
-            "y": -1320
+            "x": 635,
+            "y": -1315
           },
           {
-            "x": 960,
-            "y": -1320
+            "x": 955,
+            "y": -1315
           },
           {
-            "x": 960,
-            "y": -1296
+            "x": 955,
+            "y": -1291
           },
           {
-            "x": 640,
-            "y": -1296
+            "x": 635,
+            "y": -1291
           }
         ]
       },
@@ -901,25 +755,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 0,
-          "y": -1700
+          "x": 10,
+          "y": -1670
         },
         "vertices": [
           {
-            "x": -180,
-            "y": -1700
+            "x": -170,
+            "y": -1670
           },
           {
-            "x": 180,
-            "y": -1700
+            "x": 190,
+            "y": -1670
           },
           {
-            "x": 180,
-            "y": -1676
+            "x": 190,
+            "y": -1646
           },
           {
-            "x": -180,
-            "y": -1676
+            "x": -170,
+            "y": -1646
           }
         ]
       },

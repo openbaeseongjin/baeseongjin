@@ -340,7 +340,13 @@ export function translateEditorEntity(spec, selected, delta) {
         item.y += delta.y;
         return next;
     }
-    if (selected.domain === "enemySlots" || selected.kind === "wind-source") {
+    if (selected.domain === "enemySlots") {
+        const object = definition.objects.find(({ id }) => id === selected.id);
+        if (!object) throw new TypeError("editor-entity-not-found");
+        translateObjectLayout(object, delta);
+        return next;
+    }
+    if (selected.kind === "wind-source") {
         const object = definition.objects.find(({ id }) => id === selected.id);
         if (!object) throw new TypeError("editor-entity-not-found");
         object.position.x += delta.x;
