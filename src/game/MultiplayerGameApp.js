@@ -23,6 +23,7 @@ import {
 import { createLocalDirectionRuntime } from "./direction/DirectionProductionAdapters.js";
 import { PlayerRespawnPresentation } from "./presentation/PlayerRespawnPresentation.js";
 import { WorldUnlockPresentation } from "./presentation/WorldUnlockPresentation.js";
+import { FinalEscapeCinematic } from "./presentation/FinalEscapeCinematic.js";
 import {
     BOSS_CAMERA_ZOOM_RATIO,
     bossCameraFocusPlayer,
@@ -120,6 +121,7 @@ export class MultiplayerGameApp {
             spriteSize: deathPresentation.size
         });
         this.worldUnlockPresentation = new WorldUnlockPresentation();
+        this.finalEscapeCinematic = new FinalEscapeCinematic(canvas);
         const direction = createLocalDirectionRuntime({
             viewerId: this.authority.playerId,
             definitions: directionDefinitions,
@@ -158,6 +160,7 @@ export class MultiplayerGameApp {
         this.input.detach();
         this.authority.close();
         this.frameId = null;
+        this.finalEscapeCinematic.dispose();
     }
 
     setMetricsVisible(visible) {
@@ -274,6 +277,7 @@ export class MultiplayerGameApp {
         this.latestInput = input;
         this.stepCount += 1;
         const current = this.authority.snapshot(1);
+        this.finalEscapeCinematic.sync(this.localRunCompleted ? "completed" : current.state.runState);
         if (!current.predicted) return;
         const particleBounds = createRenderViewport({
             camera: this.camera,
