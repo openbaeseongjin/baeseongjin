@@ -1,11 +1,598 @@
 {
-  "schemaVersion": "area-spec-v2",
+  "anchors": [
+    {
+      "landmark": {
+        "id": "h00",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h00",
+          "sourceId": "h00"
+        },
+        "x": 550,
+        "y": -2225
+      },
+      "target": {
+        "id": "h00-surface",
+        "properties": {
+          "sourceId": "h00"
+        },
+        "x": 550,
+        "y": -2225
+      }
+    },
+    {
+      "landmark": {
+        "id": "h01",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h01",
+          "sourceId": "h01"
+        },
+        "x": 420,
+        "y": -1910
+      },
+      "target": {
+        "id": "h01-surface",
+        "properties": {
+          "sourceId": "h01"
+        },
+        "x": 420,
+        "y": -1910
+      }
+    },
+    {
+      "landmark": {
+        "id": "h02",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h02",
+          "sourceId": "h02"
+        },
+        "x": 170,
+        "y": -1730
+      },
+      "target": {
+        "id": "h02-surface",
+        "properties": {
+          "sourceId": "h02"
+        },
+        "x": 170,
+        "y": -1730
+      }
+    },
+    {
+      "landmark": {
+        "id": "h03",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h03",
+          "sourceId": "h03"
+        },
+        "x": -90,
+        "y": -1540
+      },
+      "target": {
+        "id": "h03-surface",
+        "properties": {
+          "sourceId": "h03"
+        },
+        "x": -90,
+        "y": -1540
+      }
+    },
+    {
+      "landmark": {
+        "id": "h04",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h04",
+          "sourceId": "h04"
+        },
+        "x": -350,
+        "y": -1360
+      },
+      "target": {
+        "id": "h04-surface",
+        "properties": {
+          "sourceId": "h04"
+        },
+        "x": -350,
+        "y": -1360
+      }
+    },
+    {
+      "landmark": {
+        "id": "h05",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h05",
+          "sourceId": "h05"
+        },
+        "x": -515,
+        "y": -1165
+      },
+      "target": {
+        "id": "h05-surface",
+        "properties": {
+          "sourceId": "h05"
+        },
+        "x": -515,
+        "y": -1165
+      }
+    },
+    {
+      "landmark": {
+        "id": "h07",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h07",
+          "sourceId": "h07"
+        },
+        "x": -815,
+        "y": -1145
+      },
+      "target": {
+        "id": "h07-surface",
+        "properties": {
+          "sourceId": "h07"
+        },
+        "x": -815,
+        "y": -1145
+      }
+    },
+    {
+      "landmark": {
+        "id": "h08",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h08",
+          "sourceId": "h08"
+        },
+        "x": -760,
+        "y": -1460
+      },
+      "target": {
+        "id": "h08-surface",
+        "properties": {
+          "sourceId": "h08"
+        },
+        "x": -760,
+        "y": -1460
+      }
+    },
+    {
+      "landmark": {
+        "id": "h09",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h09",
+          "sourceId": "h09"
+        },
+        "x": -735,
+        "y": -1800
+      },
+      "target": {
+        "id": "h09-surface",
+        "properties": {
+          "sourceId": "h09"
+        },
+        "x": -735,
+        "y": -1800
+      }
+    },
+    {
+      "landmark": {
+        "id": "h11",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h11",
+          "sourceId": "h11"
+        },
+        "x": -520,
+        "y": -2240
+      },
+      "target": {
+        "id": "h11-surface",
+        "properties": {
+          "sourceId": "h11"
+        },
+        "x": -520,
+        "y": -2240
+      }
+    },
+    {
+      "landmark": {
+        "id": "h12",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h12",
+          "sourceId": "h12"
+        },
+        "x": -240,
+        "y": -2330
+      },
+      "target": {
+        "id": "h12-surface",
+        "properties": {
+          "sourceId": "h12"
+        },
+        "x": -240,
+        "y": -2330
+      }
+    },
+    {
+      "landmark": {
+        "id": "h13",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h13",
+          "sourceId": "h13"
+        },
+        "x": 60,
+        "y": -2370
+      },
+      "target": {
+        "id": "h13-surface",
+        "properties": {
+          "sourceId": "h13"
+        },
+        "x": 60,
+        "y": -2370
+      }
+    },
+    {
+      "landmark": {
+        "id": "h14",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "h14",
+          "sourceId": "h14"
+        },
+        "x": 330,
+        "y": -2310
+      },
+      "target": {
+        "id": "h14-surface",
+        "properties": {
+          "sourceId": "h14"
+        },
+        "x": 330,
+        "y": -2310
+      }
+    }
+  ],
   "authoringMode": "runtime",
-  "stage": {
-    "id": "6-1",
-    "sector": 6,
-    "stage": 1,
-    "sourceAreaId": "sector-06-01"
+  "behaviorRefs": [],
+  "definition": {
+    "bounds": {
+      "height": 2720,
+      "width": 2100
+    },
+    "cameraZones": [],
+    "checkpoints": [],
+    "cueIds": [],
+    "entry": {
+      "id": "sector-06-01:entry",
+      "x": -820,
+      "y": -1000
+    },
+    "exit": {
+      "id": "sector-06-01:exit",
+      "x": 570,
+      "y": -2440
+    },
+    "gate": {
+      "id": "sector-06-01:gate",
+      "nextAreaId": "sector-06-02",
+      "requiredObjectiveIds": [
+        "exit-reached"
+      ],
+      "trigger": {
+        "height": 160,
+        "width": 96,
+        "x": 522,
+        "y": -2520
+      }
+    },
+    "id": "sector-06-01",
+    "name": "SKYBREAK ACCESS",
+    "nextAreaId": "sector-06-02",
+    "objectives": [
+      {
+        "bounds": {
+          "height": 160,
+          "width": 96,
+          "x": 522,
+          "y": -2520
+        },
+        "id": "exit-reached",
+        "type": "reach"
+      }
+    ],
+    "objects": [],
+    "order": 1,
+    "recoveryPoints": [
+      {
+        "id": "sector-06-01:recovery-R2",
+        "maxRetrySeconds": 5,
+        "sourceId": "R2",
+        "x": -860,
+        "y": -1320
+      },
+      {
+        "id": "sector-06-01:recovery-R3",
+        "maxRetrySeconds": 5,
+        "sourceId": "R3",
+        "x": -890,
+        "y": -1600
+      },
+      {
+        "id": "sector-06-01:recovery-R4",
+        "maxRetrySeconds": 5,
+        "sourceId": "R4",
+        "x": -870,
+        "y": -1900
+      },
+      {
+        "id": "sector-06-01:recovery-R5",
+        "maxRetrySeconds": 5,
+        "sourceId": "R5",
+        "x": -30,
+        "y": -2190
+      }
+    ],
+    "routePoints": [
+      {
+        "id": "sector-06-01:route-h06",
+        "sourceId": "h06",
+        "x": -830,
+        "y": -980
+      },
+      {
+        "id": "sector-06-01:route-h07",
+        "sourceId": "h07",
+        "x": -760,
+        "y": -1180
+      },
+      {
+        "id": "sector-06-01:route-h08",
+        "sourceId": "h08",
+        "x": -760,
+        "y": -1460
+      },
+      {
+        "id": "sector-06-01:route-h09",
+        "sourceId": "h09",
+        "x": -650,
+        "y": -1720
+      },
+      {
+        "id": "sector-06-01:route-h10",
+        "sourceId": "h10",
+        "x": -650,
+        "y": -2000
+      },
+      {
+        "id": "sector-06-01:route-h11",
+        "sourceId": "h11",
+        "x": -520,
+        "y": -2240
+      },
+      {
+        "id": "sector-06-01:route-h12",
+        "sourceId": "h12",
+        "x": -240,
+        "y": -2330
+      },
+      {
+        "id": "sector-06-01:route-h13",
+        "sourceId": "h13",
+        "x": 60,
+        "y": -2370
+      },
+      {
+        "id": "sector-06-01:route-h14",
+        "sourceId": "h14",
+        "x": 330,
+        "y": -2310
+      },
+      {
+        "id": "sector-06-01:route-h15",
+        "sourceId": "h15",
+        "x": 570,
+        "y": -2440
+      },
+      {
+        "id": "sector-06-01:route-exit",
+        "sourceId": "exit",
+        "x": 506,
+        "y": -2440
+      }
+    ],
+    "routes": [],
+    "scannerGroups": [],
+    "sectorId": "sector-06",
+    "storyTriggers": [],
+    "subtitle": "HIGH ROOF HATCH → SKYBREAK DROP → LOWER SKY ISLAND → FREESTANDING MAST → CROWN",
+    "surfaces": [
+      {
+        "coordinateAnchor": "top-center",
+        "grappleable": true,
+        "id": "sector-06-01:entry-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": -820,
+          "y": -968
+        },
+        "vertices": [
+          {
+            "x": -916,
+            "y": -968
+          },
+          {
+            "x": -724,
+            "y": -968
+          },
+          {
+            "x": -724,
+            "y": -936
+          },
+          {
+            "x": -916,
+            "y": -936
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-left",
+        "grappleable": true,
+        "id": "lower-sky-island",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": 550,
+          "y": -2085
+        },
+        "vertices": [
+          {
+            "x": 550,
+            "y": -2085
+          },
+          {
+            "x": 980,
+            "y": -2085
+          },
+          {
+            "x": 980,
+            "y": -2047
+          },
+          {
+            "x": 550,
+            "y": -2047
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-left",
+        "grappleable": true,
+        "id": "crown-island-1",
+        "kind": "structural-island",
+        "oneWay": true,
+        "position": {
+          "x": -800,
+          "y": -2080
+        },
+        "vertices": [
+          {
+            "x": -800,
+            "y": -2080
+          },
+          {
+            "x": -570,
+            "y": -2080
+          },
+          {
+            "x": -570,
+            "y": -2025
+          },
+          {
+            "x": -800,
+            "y": -2025
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-left",
+        "grappleable": true,
+        "id": "crown-exit-deck",
+        "kind": "safe-deck",
+        "oneWay": true,
+        "position": {
+          "x": 390,
+          "y": -2490
+        },
+        "vertices": [
+          {
+            "x": 390,
+            "y": -2490
+          },
+          {
+            "x": 820,
+            "y": -2490
+          },
+          {
+            "x": 820,
+            "y": -2458
+          },
+          {
+            "x": 390,
+            "y": -2458
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-left",
+        "grappleable": true,
+        "id": "R2",
+        "kind": "recovery",
+        "maxRetrySeconds": 5,
+        "oneWay": true,
+        "position": {
+          "x": -970,
+          "y": -1300
+        },
+        "vertices": [
+          {
+            "x": -970,
+            "y": -1300
+          },
+          {
+            "x": -650,
+            "y": -1300
+          },
+          {
+            "x": -650,
+            "y": -1280
+          },
+          {
+            "x": -970,
+            "y": -1280
+          }
+        ]
+      },
+      {
+        "coordinateAnchor": "top-left",
+        "grappleable": true,
+        "id": "R5",
+        "kind": "recovery",
+        "maxRetrySeconds": 5,
+        "oneWay": true,
+        "position": {
+          "x": -230,
+          "y": -1955
+        },
+        "vertices": [
+          {
+            "x": -230,
+            "y": -1955
+          },
+          {
+            "x": 130,
+            "y": -1955
+          },
+          {
+            "x": 130,
+            "y": -1937
+          },
+          {
+            "x": -230,
+            "y": -1937
+          }
+        ]
+      }
+    ],
+    "windZones": []
   },
   "editor": {
     "editableDomains": [
@@ -28,515 +615,11 @@
       "behaviorRegistry"
     ]
   },
-  "definition": {
-    "id": "sector-06-01",
-    "sectorId": "sector-06",
-    "order": 1,
-    "name": "SKYBREAK ACCESS",
-    "subtitle": "HIGH ROOF HATCH → SKYBREAK DROP → LOWER SKY ISLAND → FREESTANDING MAST → CROWN",
-    "bounds": {
-      "width": 2100,
-      "height": 2720
-    },
-    "entry": {
-      "id": "sector-06-01:entry",
-      "x": 620,
-      "y": -2100
-    },
-    "exit": {
-      "id": "sector-06-01:exit",
-      "x": 570,
-      "y": -2440
-    },
-    "nextAreaId": "sector-06-02",
-    "surfaces": [
-      {
-        "id": "sector-06-01:entry-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "grappleable": true,
-        "coordinateAnchor": "top-center",
-        "position": {
-          "x": 620,
-          "y": -2068
-        },
-        "vertices": [
-          {
-            "x": 524,
-            "y": -2068
-          },
-          {
-            "x": 716,
-            "y": -2068
-          },
-          {
-            "x": 716,
-            "y": -2036
-          },
-          {
-            "x": 524,
-            "y": -2036
-          }
-        ]
-      },
-      { "id": "drop-island-1", "kind": "structural-island", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 300, "y": -1980 }, "vertices": [{ "x": 300, "y": -1980 }, { "x": 490, "y": -1980 }, { "x": 490, "y": -1910 }, { "x": 300, "y": -1910 }] },
-      { "id": "drop-island-2", "kind": "structural-island", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 40, "y": -1810 }, "vertices": [{ "x": 40, "y": -1810 }, { "x": 220, "y": -1810 }, { "x": 220, "y": -1745 }, { "x": 40, "y": -1745 }] },
-      { "id": "drop-island-3", "kind": "structural-island", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -250, "y": -1620 }, "vertices": [{ "x": -250, "y": -1620 }, { "x": -70, "y": -1620 }, { "x": -70, "y": -1555 }, { "x": -250, "y": -1555 }] },
-      { "id": "drop-island-4", "kind": "structural-island", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -520, "y": -1440 }, "vertices": [{ "x": -520, "y": -1440 }, { "x": -340, "y": -1440 }, { "x": -340, "y": -1375 }, { "x": -520, "y": -1375 }] },
-      { "id": "lower-sky-island", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -1010, "y": -1020 }, "vertices": [{ "x": -1010, "y": -1020 }, { "x": -580, "y": -1020 }, { "x": -580, "y": -982 }, { "x": -1010, "y": -982 }] },
-      { "id": "mast-ring-lower", "kind": "mast-platform", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -940, "y": -1510 }, "vertices": [{ "x": -940, "y": -1510 }, { "x": -700, "y": -1510 }, { "x": -700, "y": -1472 }, { "x": -940, "y": -1472 }] },
-      { "id": "mast-ring-mid", "kind": "mast-platform", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -900, "y": -1780 }, "vertices": [{ "x": -900, "y": -1780 }, { "x": -680, "y": -1780 }, { "x": -680, "y": -1744 }, { "x": -900, "y": -1744 }] },
-      { "id": "mast-ring-high", "kind": "mast-platform", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -850, "y": -2040 }, "vertices": [{ "x": -850, "y": -2040 }, { "x": -630, "y": -2040 }, { "x": -630, "y": -2004 }, { "x": -850, "y": -2004 }] },
-      { "id": "crown-island-1", "kind": "structural-island", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -560, "y": -2310 }, "vertices": [{ "x": -560, "y": -2310 }, { "x": -330, "y": -2310 }, { "x": -330, "y": -2255 }, { "x": -560, "y": -2255 }] },
-      { "id": "crown-island-2", "kind": "structural-island", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -250, "y": -2410 }, "vertices": [{ "x": -250, "y": -2410 }, { "x": -20, "y": -2410 }, { "x": -20, "y": -2355 }, { "x": -250, "y": -2355 }] },
-      { "id": "crown-island-3", "kind": "structural-island", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 60, "y": -2450 }, "vertices": [{ "x": 60, "y": -2450 }, { "x": 290, "y": -2450 }, { "x": 290, "y": -2395 }, { "x": 60, "y": -2395 }] },
-      { "id": "crown-exit-deck", "kind": "safe-deck", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": 390, "y": -2490 }, "vertices": [{ "x": 390, "y": -2490 }, { "x": 820, "y": -2490 }, { "x": 820, "y": -2458 }, { "x": 390, "y": -2458 }] },
-      { "id": "R1", "kind": "recovery", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -150, "y": -1270 }, "vertices": [{ "x": -150, "y": -1270 }, { "x": 270, "y": -1270 }, { "x": 270, "y": -1250 }, { "x": -150, "y": -1250 }], "maxRetrySeconds": 5 },
-      { "id": "R2", "kind": "recovery", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -1020, "y": -1320 }, "vertices": [{ "x": -1020, "y": -1320 }, { "x": -700, "y": -1320 }, { "x": -700, "y": -1300 }, { "x": -1020, "y": -1300 }], "maxRetrySeconds": 5 },
-      { "id": "R3", "kind": "recovery", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -1040, "y": -1600 }, "vertices": [{ "x": -1040, "y": -1600 }, { "x": -740, "y": -1600 }, { "x": -740, "y": -1582 }, { "x": -1040, "y": -1582 }], "maxRetrySeconds": 5 },
-      { "id": "R4", "kind": "recovery", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -1020, "y": -1900 }, "vertices": [{ "x": -1020, "y": -1900 }, { "x": -720, "y": -1900 }, { "x": -720, "y": -1882 }, { "x": -1020, "y": -1882 }], "maxRetrySeconds": 5 },
-      { "id": "R5", "kind": "recovery", "oneWay": true, "grappleable": true, "coordinateAnchor": "top-left", "position": { "x": -210, "y": -2190 }, "vertices": [{ "x": -210, "y": -2190 }, { "x": 150, "y": -2190 }, { "x": 150, "y": -2172 }, { "x": -210, "y": -2172 }], "maxRetrySeconds": 5 }
-    ],
-    "routePoints": [
-      {
-        "id": "sector-06-01:route-h00",
-        "x": 620,
-        "y": -2100,
-        "sourceId": "h00"
-      },
-      {
-        "id": "sector-06-01:route-h01",
-        "x": 420,
-        "y": -1910,
-        "sourceId": "h01"
-      },
-      {
-        "id": "sector-06-01:route-h02",
-        "x": 170,
-        "y": -1730,
-        "sourceId": "h02"
-      },
-      {
-        "id": "sector-06-01:route-h03",
-        "x": -90,
-        "y": -1540,
-        "sourceId": "h03"
-      },
-      {
-        "id": "sector-06-01:route-h04",
-        "x": -350,
-        "y": -1360,
-        "sourceId": "h04"
-      },
-      {
-        "id": "sector-06-01:route-h05",
-        "x": -620,
-        "y": -1180,
-        "sourceId": "h05"
-      },
-      {
-        "id": "sector-06-01:route-h06",
-        "x": -830,
-        "y": -980,
-        "sourceId": "h06"
-      },
-      {
-        "id": "sector-06-01:route-h07",
-        "x": -760,
-        "y": -1180,
-        "sourceId": "h07"
-      },
-      {
-        "id": "sector-06-01:route-h08",
-        "x": -760,
-        "y": -1460,
-        "sourceId": "h08"
-      },
-      {
-        "id": "sector-06-01:route-h09",
-        "x": -650,
-        "y": -1720,
-        "sourceId": "h09"
-      },
-      {
-        "id": "sector-06-01:route-h10",
-        "x": -650,
-        "y": -2000,
-        "sourceId": "h10"
-      },
-      {
-        "id": "sector-06-01:route-h11",
-        "x": -520,
-        "y": -2240,
-        "sourceId": "h11"
-      },
-      {
-        "id": "sector-06-01:route-h12",
-        "x": -240,
-        "y": -2330,
-        "sourceId": "h12"
-      },
-      {
-        "id": "sector-06-01:route-h13",
-        "x": 60,
-        "y": -2370,
-        "sourceId": "h13"
-      },
-      {
-        "id": "sector-06-01:route-h14",
-        "x": 330,
-        "y": -2310,
-        "sourceId": "h14"
-      },
-      {
-        "id": "sector-06-01:route-h15",
-        "x": 570,
-        "y": -2440,
-        "sourceId": "h15"
-      },
-      { "id": "sector-06-01:route-exit", "x": 506, "y": -2440, "sourceId": "exit" }
-    ],
-    "recoveryPoints": [
-      { "id": "sector-06-01:recovery-R1", "x": 60, "y": -1270, "sourceId": "R1", "maxRetrySeconds": 5 },
-      { "id": "sector-06-01:recovery-R2", "x": -860, "y": -1320, "sourceId": "R2", "maxRetrySeconds": 5 },
-      { "id": "sector-06-01:recovery-R3", "x": -890, "y": -1600, "sourceId": "R3", "maxRetrySeconds": 5 },
-      { "id": "sector-06-01:recovery-R4", "x": -870, "y": -1900, "sourceId": "R4", "maxRetrySeconds": 5 },
-      { "id": "sector-06-01:recovery-R5", "x": -30, "y": -2190, "sourceId": "R5", "maxRetrySeconds": 5 }
-    ],
-    "checkpoints": [],
-    "objects": [],
-    "objectives": [
-      { "id": "exit-reached", "type": "reach", "bounds": { "x": 522, "y": -2520, "width": 96, "height": 160 } }
-    ],
-    "windZones": [],
-    "scannerGroups": [],
-    "storyTriggers": [],
-    "routes": [],
-    "cameraZones": [],
-    "cueIds": [],
-    "gate": { "id": "sector-06-01:gate", "nextAreaId": "sector-06-02", "requiredObjectiveIds": ["exit-reached"], "trigger": { "x": 522, "y": -2520, "width": 96, "height": 160 } }
-  },
-  "anchors": [
-    {
-      "target": {
-        "id": "h00-surface",
-        "x": 620,
-        "y": -2100,
-        "properties": {
-          "sourceId": "h00"
-        }
-      },
-      "landmark": {
-        "id": "h00",
-        "x": 620,
-        "y": -2100,
-        "properties": {
-          "label": "h00",
-          "coordinateAnchor": "center",
-          "sourceId": "h00"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h01-surface",
-        "x": 420,
-        "y": -1910,
-        "properties": {
-          "sourceId": "h01"
-        }
-      },
-      "landmark": {
-        "id": "h01",
-        "x": 420,
-        "y": -1910,
-        "properties": {
-          "label": "h01",
-          "coordinateAnchor": "center",
-          "sourceId": "h01"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h02-surface",
-        "x": 170,
-        "y": -1730,
-        "properties": {
-          "sourceId": "h02"
-        }
-      },
-      "landmark": {
-        "id": "h02",
-        "x": 170,
-        "y": -1730,
-        "properties": {
-          "label": "h02",
-          "coordinateAnchor": "center",
-          "sourceId": "h02"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h03-surface",
-        "x": -90,
-        "y": -1540,
-        "properties": {
-          "sourceId": "h03"
-        }
-      },
-      "landmark": {
-        "id": "h03",
-        "x": -90,
-        "y": -1540,
-        "properties": {
-          "label": "h03",
-          "coordinateAnchor": "center",
-          "sourceId": "h03"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h04-surface",
-        "x": -350,
-        "y": -1360,
-        "properties": {
-          "sourceId": "h04"
-        }
-      },
-      "landmark": {
-        "id": "h04",
-        "x": -350,
-        "y": -1360,
-        "properties": {
-          "label": "h04",
-          "coordinateAnchor": "center",
-          "sourceId": "h04"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h05-surface",
-        "x": -620,
-        "y": -1180,
-        "properties": {
-          "sourceId": "h05"
-        }
-      },
-      "landmark": {
-        "id": "h05",
-        "x": -620,
-        "y": -1180,
-        "properties": {
-          "label": "h05",
-          "coordinateAnchor": "center",
-          "sourceId": "h05"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h06-surface",
-        "x": -830,
-        "y": -980,
-        "properties": {
-          "sourceId": "h06"
-        }
-      },
-      "landmark": {
-        "id": "h06",
-        "x": -830,
-        "y": -980,
-        "properties": {
-          "label": "h06",
-          "coordinateAnchor": "center",
-          "sourceId": "h06"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h07-surface",
-        "x": -760,
-        "y": -1180,
-        "properties": {
-          "sourceId": "h07"
-        }
-      },
-      "landmark": {
-        "id": "h07",
-        "x": -760,
-        "y": -1180,
-        "properties": {
-          "label": "h07",
-          "coordinateAnchor": "center",
-          "sourceId": "h07"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h08-surface",
-        "x": -760,
-        "y": -1460,
-        "properties": {
-          "sourceId": "h08"
-        }
-      },
-      "landmark": {
-        "id": "h08",
-        "x": -760,
-        "y": -1460,
-        "properties": {
-          "label": "h08",
-          "coordinateAnchor": "center",
-          "sourceId": "h08"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h09-surface",
-        "x": -650,
-        "y": -1720,
-        "properties": {
-          "sourceId": "h09"
-        }
-      },
-      "landmark": {
-        "id": "h09",
-        "x": -650,
-        "y": -1720,
-        "properties": {
-          "label": "h09",
-          "coordinateAnchor": "center",
-          "sourceId": "h09"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h10-surface",
-        "x": -650,
-        "y": -2000,
-        "properties": {
-          "sourceId": "h10"
-        }
-      },
-      "landmark": {
-        "id": "h10",
-        "x": -650,
-        "y": -2000,
-        "properties": {
-          "label": "h10",
-          "coordinateAnchor": "center",
-          "sourceId": "h10"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h11-surface",
-        "x": -520,
-        "y": -2240,
-        "properties": {
-          "sourceId": "h11"
-        }
-      },
-      "landmark": {
-        "id": "h11",
-        "x": -520,
-        "y": -2240,
-        "properties": {
-          "label": "h11",
-          "coordinateAnchor": "center",
-          "sourceId": "h11"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h12-surface",
-        "x": -240,
-        "y": -2330,
-        "properties": {
-          "sourceId": "h12"
-        }
-      },
-      "landmark": {
-        "id": "h12",
-        "x": -240,
-        "y": -2330,
-        "properties": {
-          "label": "h12",
-          "coordinateAnchor": "center",
-          "sourceId": "h12"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h13-surface",
-        "x": 60,
-        "y": -2370,
-        "properties": {
-          "sourceId": "h13"
-        }
-      },
-      "landmark": {
-        "id": "h13",
-        "x": 60,
-        "y": -2370,
-        "properties": {
-          "label": "h13",
-          "coordinateAnchor": "center",
-          "sourceId": "h13"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h14-surface",
-        "x": 330,
-        "y": -2310,
-        "properties": {
-          "sourceId": "h14"
-        }
-      },
-      "landmark": {
-        "id": "h14",
-        "x": 330,
-        "y": -2310,
-        "properties": {
-          "label": "h14",
-          "coordinateAnchor": "center",
-          "sourceId": "h14"
-        }
-      }
-    },
-    {
-      "target": {
-        "id": "h15-surface",
-        "x": 570,
-        "y": -2440,
-        "properties": {
-          "sourceId": "h15"
-        }
-      },
-      "landmark": {
-        "id": "h15",
-        "x": 570,
-        "y": -2440,
-        "properties": {
-          "label": "h15",
-          "coordinateAnchor": "center",
-          "sourceId": "h15"
-        }
-      }
-    }
-  ],
-  "behaviorRefs": []
+  "schemaVersion": "area-spec-v2",
+  "stage": {
+    "id": "6-1",
+    "sector": 6,
+    "sourceAreaId": "sector-06-01",
+    "stage": 1
+  }
 }

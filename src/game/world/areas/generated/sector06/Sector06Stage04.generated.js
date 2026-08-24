@@ -76,56 +76,16 @@ const SPEC = {
           "label": "h03",
           "sourceId": "h03"
         },
-        "x": 20,
-        "y": -470
+        "x": -10,
+        "y": -530
       },
       "target": {
         "id": "h03-surface",
         "properties": {
           "sourceId": "h03"
         },
-        "x": 20,
-        "y": -470
-      }
-    },
-    {
-      "landmark": {
-        "id": "h04",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h04",
-          "sourceId": "h04"
-        },
-        "x": -40,
-        "y": -670
-      },
-      "target": {
-        "id": "h04-surface",
-        "properties": {
-          "sourceId": "h04"
-        },
-        "x": -40,
-        "y": -670
-      }
-    },
-    {
-      "landmark": {
-        "id": "h05",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h05",
-          "sourceId": "h05"
-        },
-        "x": -320,
-        "y": -760
-      },
-      "target": {
-        "id": "h05-surface",
-        "properties": {
-          "sourceId": "h05"
-        },
-        "x": -320,
-        "y": -760
+        "x": -10,
+        "y": -530
       }
     },
     {
@@ -136,16 +96,33 @@ const SPEC = {
           "label": "h06",
           "sourceId": "h06"
         },
-        "x": -80,
-        "y": -920
+        "x": -255,
+        "y": -790
       },
       "target": {
         "id": "h06-surface",
         "properties": {
           "sourceId": "h06"
         },
-        "x": -80,
-        "y": -920
+        "x": -255,
+        "y": -790
+      }
+    },
+    {
+      "landmark": {
+        "id": "sector-06-04:editor-anchor-1",
+        "properties": {
+          "coordinateAnchor": "center",
+          "label": "NEW"
+        },
+        "x": -345,
+        "y": -1020
+      },
+      "target": {
+        "id": "sector-06-04:editor-anchor-1-surface",
+        "properties": {},
+        "x": -345,
+        "y": -1020
       }
     }
   ],
@@ -325,93 +302,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "shelter-eave",
-        "kind": "shelter-eave",
-        "oneWay": true,
-        "position": {
-          "x": -470,
-          "y": -215
-        },
-        "vertices": [
-          {
-            "x": -470,
-            "y": -215
-          },
-          {
-            "x": -260,
-            "y": -215
-          },
-          {
-            "x": -260,
-            "y": -190
-          },
-          {
-            "x": -470,
-            "y": -190
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "quiet-service-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -250,
-          "y": -290
-        },
-        "vertices": [
-          {
-            "x": -250,
-            "y": -290
-          },
-          {
-            "x": 10,
-            "y": -290
-          },
-          {
-            "x": 10,
-            "y": -260
-          },
-          {
-            "x": -250,
-            "y": -260
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "roof-access",
-        "kind": "shelter-roof",
-        "oneWay": true,
-        "position": {
-          "x": -25,
-          "y": -495
-        },
-        "vertices": [
-          {
-            "x": -25,
-            "y": -495
-          },
-          {
-            "x": 75,
-            "y": -495
-          },
-          {
-            "x": 75,
-            "y": -469
-          },
-          {
-            "x": -25,
-            "y": -469
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
         "id": "shelter-upper-deck",
         "kind": "safe-deck",
         "oneWay": true,
@@ -445,25 +335,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -470,
-          "y": -790
+          "x": -675,
+          "y": -875
         },
         "vertices": [
           {
-            "x": -470,
-            "y": -790
+            "x": -675,
+            "y": -875
           },
           {
-            "x": -170,
-            "y": -790
+            "x": -375,
+            "y": -875
           },
           {
-            "x": -170,
-            "y": -758
+            "x": -375,
+            "y": -843
           },
           {
-            "x": -470,
-            "y": -758
+            "x": -675,
+            "y": -843
           }
         ]
       },

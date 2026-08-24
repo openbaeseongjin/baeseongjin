@@ -36,16 +36,16 @@ const SPEC = {
           "label": "H1",
           "sourceId": "sector-06-08:h1"
         },
-        "x": -540,
-        "y": -250
+        "x": -415,
+        "y": -275
       },
       "target": {
         "id": "sector-06-08:h1-surface",
         "properties": {
           "sourceId": "sector-06-08:h1"
         },
-        "x": -540,
-        "y": -250
+        "x": -415,
+        "y": -275
       }
     },
     {
@@ -56,16 +56,16 @@ const SPEC = {
           "label": "H2",
           "sourceId": "sector-06-08:h2"
         },
-        "x": -430,
-        "y": -520
+        "x": -275,
+        "y": -545
       },
       "target": {
         "id": "sector-06-08:h2-surface",
         "properties": {
           "sourceId": "sector-06-08:h2"
         },
-        "x": -430,
-        "y": -520
+        "x": -275,
+        "y": -545
       }
     },
     {
@@ -76,36 +76,16 @@ const SPEC = {
           "label": "H3",
           "sourceId": "sector-06-08:h3"
         },
-        "x": -120,
-        "y": -560
+        "x": -15,
+        "y": -640
       },
       "target": {
         "id": "sector-06-08:h3-surface",
         "properties": {
           "sourceId": "sector-06-08:h3"
         },
-        "x": -120,
-        "y": -560
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-06-08:h4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "H4",
-          "sourceId": "sector-06-08:h4"
-        },
-        "x": 100,
-        "y": -760
-      },
-      "target": {
-        "id": "sector-06-08:h4-surface",
-        "properties": {
-          "sourceId": "sector-06-08:h4"
-        },
-        "x": 100,
-        "y": -760
+        "x": -15,
+        "y": -640
       }
     },
     {
@@ -116,16 +96,16 @@ const SPEC = {
           "label": "H5",
           "sourceId": "sector-06-08:h5"
         },
-        "x": 390,
-        "y": -780
+        "x": 755,
+        "y": -705
       },
       "target": {
         "id": "sector-06-08:h5-surface",
         "properties": {
           "sourceId": "sector-06-08:h5"
         },
-        "x": 390,
-        "y": -780
+        "x": 755,
+        "y": -705
       }
     },
     {
@@ -156,16 +136,16 @@ const SPEC = {
           "label": "P1",
           "sourceId": "sector-06-08:p1"
         },
-        "x": 900,
-        "y": -940
+        "x": 975,
+        "y": -920
       },
       "target": {
         "id": "sector-06-08:p1-surface",
         "properties": {
           "sourceId": "sector-06-08:p1"
         },
-        "x": 900,
-        "y": -940
+        "x": 975,
+        "y": -920
       }
     },
     {
@@ -450,26 +430,26 @@ const SPEC = {
         "landingOnly": true,
         "oneWay": true,
         "position": {
-          "x": -40,
+          "x": 5,
           "y": -350
         },
         "retrySecondsTargetMax": 5,
         "sourceId": "R1",
         "vertices": [
           {
-            "x": -104,
+            "x": -59,
             "y": -350
           },
           {
-            "x": 24,
+            "x": 69,
             "y": -350
           },
           {
-            "x": 24,
+            "x": 69,
             "y": -318
           },
           {
-            "x": -104,
+            "x": -59,
             "y": -318
           }
         ]
@@ -483,60 +463,27 @@ const SPEC = {
         "landingOnly": true,
         "oneWay": true,
         "position": {
-          "x": 500,
-          "y": -600
+          "x": 605,
+          "y": -485
         },
         "retrySecondsTargetMax": 5,
         "sourceId": "R2",
         "vertices": [
           {
-            "x": 436,
-            "y": -600
+            "x": 541,
+            "y": -485
           },
           {
-            "x": 564,
-            "y": -600
+            "x": 669,
+            "y": -485
           },
           {
-            "x": 564,
-            "y": -568
+            "x": 669,
+            "y": -453
           },
           {
-            "x": 436,
-            "y": -568
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "disconnected": true,
-        "grappleable": true,
-        "id": "R3",
-        "kind": "recovery",
-        "landingOnly": true,
-        "oneWay": true,
-        "position": {
-          "x": 1350,
-          "y": -950
-        },
-        "retrySecondsTargetMax": 5,
-        "sourceId": "R3",
-        "vertices": [
-          {
-            "x": 1286,
-            "y": -950
-          },
-          {
-            "x": 1414,
-            "y": -950
-          },
-          {
-            "x": 1414,
-            "y": -918
-          },
-          {
-            "x": 1286,
-            "y": -918
+            "x": 541,
+            "y": -453
           }
         ]
       },
@@ -630,58 +577,29 @@ const SPEC = {
       {
         "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "service-gantry",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": 790,
-          "y": -970
-        },
-        "vertices": [
-          {
-            "x": 790,
-            "y": -970
-          },
-          {
-            "x": 1050,
-            "y": -970
-          },
-          {
-            "x": 1050,
-            "y": -938
-          },
-          {
-            "x": 790,
-            "y": -938
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
         "id": "pad-perimeter",
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 1360,
-          "y": -1405
+          "x": 1385,
+          "y": -1035
         },
         "vertices": [
           {
-            "x": 1360,
-            "y": -1405
+            "x": 1385,
+            "y": -1035
           },
           {
-            "x": 1620,
-            "y": -1405
+            "x": 1645,
+            "y": -1035
           },
           {
-            "x": 1620,
-            "y": -1373
+            "x": 1645,
+            "y": -1003
           },
           {
-            "x": 1360,
-            "y": -1373
+            "x": 1385,
+            "y": -1003
           }
         ]
       },

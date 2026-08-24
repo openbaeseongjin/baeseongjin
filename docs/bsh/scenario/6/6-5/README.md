@@ -5,22 +5,20 @@
 
 Signature:
 
-**SAFE PREVIEW → C1 → C2 → C3 → FULL SAFE → BEACON SPAN**
+**SAFE PREVIEW → C1 → C3 → FULL SAFE → BEACON SPAN**
 
 Metrics:
 - Difficulty: **★★★★**
-- Mandatory links: **8**
+- Mandatory links: **7**
 - Route length: **2308.9px**
 - Vertical gain: **1480px**
 - Max Rope relation: **372.02px < 400px**
 
 Scanner:
 - one shared group
-- C1/C2/C3 exactly
+- C1/C3 exactly
 - 1.5 / 0.6 / 1.1 / 0.3 sec
 - current Rope persists through LOCKED
 
 QA:
-- C2→P2 = **441.81px > 400**
-- C1→C3 = **440.11px > 400**
-- R1 edge→C3 = **442.04px > 400**
+Map Editor의 현재 canonical surface 기준으로 C1/C3만 Scanner가 제어한다.

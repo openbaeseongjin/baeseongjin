@@ -70,26 +70,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "h03",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h03",
-          "sourceId": "h03"
-        },
-        "x": -420,
-        "y": -540
-      },
-      "target": {
-        "id": "h03-surface",
-        "properties": {
-          "sourceId": "h03"
-        },
-        "x": -420,
-        "y": -540
-      }
-    },
-    {
-      "landmark": {
         "id": "h04",
         "properties": {
           "coordinateAnchor": "center",
@@ -116,16 +96,16 @@ const SPEC = {
           "label": "h05",
           "sourceId": "h05"
         },
-        "x": 180,
-        "y": -860
+        "x": -40,
+        "y": -845
       },
       "target": {
         "id": "h05-surface",
         "properties": {
           "sourceId": "h05"
         },
-        "x": 180,
-        "y": -860
+        "x": -40,
+        "y": -845
       }
     },
     {
@@ -136,16 +116,16 @@ const SPEC = {
           "label": "h06",
           "sourceId": "h06"
         },
-        "x": -20,
-        "y": -1060
+        "x": 20,
+        "y": -1055
       },
       "target": {
         "id": "h06-surface",
         "properties": {
           "sourceId": "h06"
         },
-        "x": -20,
-        "y": -1060
+        "x": 20,
+        "y": -1055
       }
     },
     {
@@ -156,16 +136,16 @@ const SPEC = {
           "label": "h07",
           "sourceId": "h07"
         },
-        "x": 260,
-        "y": -1240
+        "x": 155,
+        "y": -1160
       },
       "target": {
         "id": "h07-surface",
         "properties": {
           "sourceId": "h07"
         },
-        "x": 260,
-        "y": -1240
+        "x": 155,
+        "y": -1160
       }
     },
     {
@@ -206,26 +186,6 @@ const SPEC = {
         },
         "x": 120,
         "y": -1640
-      }
-    },
-    {
-      "landmark": {
-        "id": "h10",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h10",
-          "sourceId": "h10"
-        },
-        "x": -120,
-        "y": -1810
-      },
-      "target": {
-        "id": "h10-surface",
-        "properties": {
-          "sourceId": "h10"
-        },
-        "x": -120,
-        "y": -1810
       }
     }
   ],
@@ -315,13 +275,6 @@ const SPEC = {
         "sourceId": "R2",
         "x": 80,
         "y": -820
-      },
-      {
-        "id": "sector-06-03:recovery-R3",
-        "maxRetrySeconds": 5,
-        "sourceId": "R3",
-        "x": 170,
-        "y": -1190
       }
     ],
     "routePoints": [
@@ -465,35 +418,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "safe-sentry-preview",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -720,
-          "y": -355
-        },
-        "vertices": [
-          {
-            "x": -720,
-            "y": -355
-          },
-          {
-            "x": -420,
-            "y": -355
-          },
-          {
-            "x": -420,
-            "y": -325
-          },
-          {
-            "x": -720,
-            "y": -325
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
         "id": "signal-frame-1",
         "kind": "signal-frame",
         "oneWay": true,
@@ -517,35 +441,6 @@ const SPEC = {
           {
             "x": -500,
             "y": -540
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "signal-frame-2",
-        "kind": "signal-frame",
-        "oneWay": true,
-        "position": {
-          "x": -210,
-          "y": -725
-        },
-        "vertices": [
-          {
-            "x": -210,
-            "y": -725
-          },
-          {
-            "x": 0,
-            "y": -725
-          },
-          {
-            "x": 0,
-            "y": -700
-          },
-          {
-            "x": -210,
-            "y": -700
           }
         ]
       },
@@ -581,35 +476,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "upper-signal-frame-1",
-        "kind": "signal-frame",
-        "oneWay": true,
-        "position": {
-          "x": -110,
-          "y": -1085
-        },
-        "vertices": [
-          {
-            "x": -110,
-            "y": -1085
-          },
-          {
-            "x": 80,
-            "y": -1085
-          },
-          {
-            "x": 80,
-            "y": -1060
-          },
-          {
-            "x": -110,
-            "y": -1060
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
         "id": "upper-signal-frame-2",
         "kind": "signal-frame",
         "oneWay": true,
@@ -639,35 +505,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "upper-safe-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -10,
-          "y": -1475
-        },
-        "vertices": [
-          {
-            "x": -10,
-            "y": -1475
-          },
-          {
-            "x": 290,
-            "y": -1475
-          },
-          {
-            "x": 290,
-            "y": -1445
-          },
-          {
-            "x": -10,
-            "y": -1445
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
         "id": "signal-exit-deck",
         "kind": "safe-deck",
         "oneWay": true,
@@ -691,96 +528,6 @@ const SPEC = {
           {
             "x": -250,
             "y": -1808
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "R1",
-        "kind": "recovery",
-        "maxRetrySeconds": 5,
-        "oneWay": true,
-        "position": {
-          "x": -430,
-          "y": -420
-        },
-        "vertices": [
-          {
-            "x": -430,
-            "y": -420
-          },
-          {
-            "x": -210,
-            "y": -420
-          },
-          {
-            "x": -210,
-            "y": -402
-          },
-          {
-            "x": -430,
-            "y": -402
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "R2",
-        "kind": "recovery",
-        "maxRetrySeconds": 5,
-        "oneWay": true,
-        "position": {
-          "x": -30,
-          "y": -820
-        },
-        "vertices": [
-          {
-            "x": -30,
-            "y": -820
-          },
-          {
-            "x": 190,
-            "y": -820
-          },
-          {
-            "x": 190,
-            "y": -802
-          },
-          {
-            "x": -30,
-            "y": -802
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "R3",
-        "kind": "recovery",
-        "maxRetrySeconds": 5,
-        "oneWay": true,
-        "position": {
-          "x": 60,
-          "y": -1190
-        },
-        "vertices": [
-          {
-            "x": 60,
-            "y": -1190
-          },
-          {
-            "x": 280,
-            "y": -1190
-          },
-          {
-            "x": 280,
-            "y": -1172
-          },
-          {
-            "x": 60,
-            "y": -1172
           }
         ]
       }

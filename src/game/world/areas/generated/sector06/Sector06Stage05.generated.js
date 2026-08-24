@@ -70,26 +70,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "sector-06-05:c1",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C1",
-          "sourceId": "sector-06-05:c1"
-        },
-        "x": 130,
-        "y": -500
-      },
-      "target": {
-        "id": "sector-06-05:c1-surface",
-        "properties": {
-          "sourceId": "sector-06-05:c1"
-        },
-        "x": 130,
-        "y": -500
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-06-05:c2",
         "properties": {
           "coordinateAnchor": "center",
@@ -97,7 +77,7 @@ const SPEC = {
           "sourceId": "sector-06-05:c2"
         },
         "x": -120,
-        "y": -720
+        "y": -765
       },
       "target": {
         "id": "sector-06-05:c2-surface",
@@ -105,27 +85,7 @@ const SPEC = {
           "sourceId": "sector-06-05:c2"
         },
         "x": -120,
-        "y": -720
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-06-05:c3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "C3",
-          "sourceId": "sector-06-05:c3"
-        },
-        "x": 140,
-        "y": -940
-      },
-      "target": {
-        "id": "sector-06-05:c3-surface",
-        "properties": {
-          "sourceId": "sector-06-05:c3"
-        },
-        "x": 140,
-        "y": -940
+        "y": -765
       }
     },
     {
@@ -166,26 +126,6 @@ const SPEC = {
         },
         "x": 60,
         "y": -1380
-      }
-    },
-    {
-      "landmark": {
-        "id": "sector-06-05:p4",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P4",
-          "sourceId": "sector-06-05:p4"
-        },
-        "x": -100,
-        "y": -1560
-      },
-      "target": {
-        "id": "sector-06-05:p4-surface",
-        "properties": {
-          "sourceId": "sector-06-05:p4"
-        },
-        "x": -100,
-        "y": -1560
       }
     }
   ],
@@ -328,9 +268,8 @@ const SPEC = {
           "ropeCut": false
         },
         "controlledSurfaceIds": [
-          "sector-06-05:c1-surface",
-          "sector-06-05:c2-surface",
-          "sector-06-05:c3-surface"
+          "terrace-c1",
+          "terrace-c3"
         ],
         "cycle": {
           "available": 1.5,
@@ -346,42 +285,6 @@ const SPEC = {
     "storyTriggers": [],
     "subtitle": "STACKED ACCESS TERRACES / THREE CONTROLLED MOUNTS",
     "surfaces": [
-      {
-        "cannotBypass": [
-          "C2",
-          "C3"
-        ],
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "recovery-r1",
-        "kind": "recovery",
-        "oneWay": true,
-        "position": {
-          "x": -240,
-          "y": -590
-        },
-        "retrySecondsTargetMax": 5,
-        "role": "landing-only",
-        "sourceId": "recovery-r1",
-        "vertices": [
-          {
-            "x": -350,
-            "y": -590
-          },
-          {
-            "x": -130,
-            "y": -590
-          },
-          {
-            "x": -130,
-            "y": -572
-          },
-          {
-            "x": -350,
-            "y": -572
-          }
-        ]
-      },
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
@@ -443,64 +346,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "preview-terrace",
-        "kind": "access-terrace",
-        "oneWay": true,
-        "position": {
-          "x": 270,
-          "y": -250
-        },
-        "vertices": [
-          {
-            "x": 270,
-            "y": -250
-          },
-          {
-            "x": 530,
-            "y": -250
-          },
-          {
-            "x": 530,
-            "y": -222
-          },
-          {
-            "x": 270,
-            "y": -222
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "safe-preview",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": 300,
-          "y": -390
-        },
-        "vertices": [
-          {
-            "x": 300,
-            "y": -390
-          },
-          {
-            "x": 560,
-            "y": -390
-          },
-          {
-            "x": 560,
-            "y": -360
-          },
-          {
-            "x": 300,
-            "y": -360
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
         "id": "terrace-c1",
         "kind": "access-terrace",
         "oneWay": true,
@@ -530,35 +375,6 @@ const SPEC = {
       {
         "coordinateAnchor": "top-left",
         "grappleable": true,
-        "id": "terrace-c2",
-        "kind": "access-terrace",
-        "oneWay": true,
-        "position": {
-          "x": -320,
-          "y": -760
-        },
-        "vertices": [
-          {
-            "x": -320,
-            "y": -760
-          },
-          {
-            "x": 10,
-            "y": -760
-          },
-          {
-            "x": 10,
-            "y": -730
-          },
-          {
-            "x": -320,
-            "y": -730
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
         "id": "terrace-c3",
         "kind": "access-terrace",
         "oneWay": true,
@@ -582,64 +398,6 @@ const SPEC = {
           {
             "x": 0,
             "y": -950
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "array-full-safe",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -300,
-          "y": -1190
-        },
-        "vertices": [
-          {
-            "x": -300,
-            "y": -1190
-          },
-          {
-            "x": 0,
-            "y": -1190
-          },
-          {
-            "x": 0,
-            "y": -1160
-          },
-          {
-            "x": -300,
-            "y": -1160
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "upper-terrace",
-        "kind": "access-terrace",
-        "oneWay": true,
-        "position": {
-          "x": -40,
-          "y": -1410
-        },
-        "vertices": [
-          {
-            "x": -40,
-            "y": -1410
-          },
-          {
-            "x": 210,
-            "y": -1410
-          },
-          {
-            "x": 210,
-            "y": -1382
-          },
-          {
-            "x": -40,
-            "y": -1382
           }
         ]
       },

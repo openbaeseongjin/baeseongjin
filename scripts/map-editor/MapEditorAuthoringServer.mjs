@@ -216,7 +216,12 @@ function scenarioMapPreviewPath(entry) {
     }
     const match = /^(\d+)-(\d+)$/.exec(entry?.stageId ?? "");
     if (!match) throw error("stage-identity-invalid", "Map editor stage identity is invalid.");
-    return `docs/bsh/scenario/${match[1]}/${stageId}/MAP-PREVIEW.html`;
+    return `docs/bsh/scenario/${match[1]}/${entry.stageId}/MAP-PREVIEW.html`;
+}
+
+function hasScenarioMapPreview(entry) {
+    if (typeof entry?.mapReferencePath === "string" && entry.mapReferencePath) return true;
+    return entry?.specType !== "boss-stage" && /^(\d+)-(\d+)$/.test(entry?.stageId ?? "");
 }
 
 function mapPreviewReferenceDocument(source) {
@@ -416,8 +421,7 @@ export async function createMapEditorAuthoringServer({
             memoryStored: Boolean(stage.memorySpec),
             memoryRevision: stage.memoryRevision,
             previewAvailable: previewAvailable(stage),
-            mapReferenceAvailable:
-                stage.entry.specType !== "boss-stage" || typeof stage.entry.mapReferencePath === "string",
+            mapReferenceAvailable: hasScenarioMapPreview(stage.entry),
             ...(stage.entry.specType === "boss-stage" ? { derivedPreview: bossStageDerivedPreview(activeSpec) } : {}),
             ...(stage.outputPath
                 ? {
