@@ -33,7 +33,7 @@
 - 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 generic Augment 선택 지표 수집
 - 원격 배포에서 설정 버튼 길게 누르기로 여는 옵트인 런 지표 패널
 - 첫 화면의 싱글·멀티 선택, 고정 게임 서버 연결과 모바일 4자리 채널 생성·참가
-- 시작 화면·설정의 통합 Help는 PC 좌·우 클릭 마법 커맨드, 하단 네 슬롯 쿨다운, 몹 처치 경험치와 자동 장착 증강을 현재 Runtime과 동일하게 설명한다. 모바일 1차는 이동·점프·Rope만 안내하고 마법 직접 탭은 후속 범위로 명시한다.
+- 시작 화면·설정의 통합 Help는 PC 좌·우 클릭 마법 커맨드, 모바일 Rope 기본 선택과 `슬롯 선택 → 월드 터치 1회 시전`, 네 슬롯 쿨다운, 몹 처치 경험치와 자동 장착 증강을 현재 Runtime과 동일하게 설명한다.
 - 2인 권위 서버의 명령 receipt, 20Hz 스냅샷, 자기 예측과 동료 보간
 - 1인·2인 멀티 공통 Enemy stable-ID in-place prediction restore, indexed history sampling과 fixed-step 단일 remote sample
 - 1-1/1-2 local Player Bark data catalog·queue·causal dedupe·speaker 머리 위 타이핑 말풍선과 future party-chat audience 확장 seam
