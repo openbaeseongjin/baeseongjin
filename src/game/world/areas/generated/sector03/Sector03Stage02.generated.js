@@ -1032,7 +1032,7 @@ const SPEC = {
         "collision": false,
         "coordinateAnchor": "center",
         "damage": false,
-        "grappleable": true,
+        "grappleable": false,
         "id": "media-wall-body",
         "kind": "design-reference",
         "oneWay": false,
