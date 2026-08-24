@@ -12,6 +12,7 @@ import {
     worldObjectPresentation,
     worldObjectWorldBounds
 } from "../assets/WorldObjectPresentationCatalog.js";
+import { WorldObjectSpriteAssetCatalog } from "../assets/WorldObjectSpriteAssetCatalog.js";
 import { worldObjectRenderer } from "../world-object/WorldObjectRendererDefinition.js";
 import { drawCheckpointBeacon, drawExitBeacon } from "../world/WorldMarkerPrimitives.js";
 import { drawElectricArc } from "../effects/ElectricArc.js";
@@ -360,8 +361,9 @@ export class AccessModuleSignalRenderer {
 }
 
 export class AuthoredWorldObjectRenderer {
-    constructor({ presentationCatalog = DEFAULT_WORLD_OBJECT_MOCK_CATALOG } = {}) {
+    constructor({ presentationCatalog = DEFAULT_WORLD_OBJECT_MOCK_CATALOG, spriteAssets = null } = {}) {
         this.presentationCatalog = presentationCatalog;
+        this.spriteAssets = spriteAssets ?? new WorldObjectSpriteAssetCatalog({ presentations: presentationCatalog });
     }
 
     draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
@@ -1008,15 +1010,24 @@ export class AuthoredWorldObjectRenderer {
         }
     }
 
-    drawStoryDisplay(context, style) {
-        const width = style.radius * 1.8;
-        const height = style.radius * 1.15;
+    drawStoryDisplay(context, style, bounds) {
+        const image = this.spriteAssets.imageFor(style.id);
+        if (image) {
+            context.imageSmoothingEnabled = false;
+            context.drawImage(image, bounds.x, bounds.y, bounds.width, bounds.height);
+            return;
+        }
+        const width = bounds.width * 0.5;
+        const height = bounds.height * 0.5;
+        context.save();
+        context.translate(bounds.x + width, bounds.y + height);
         context.fillStyle = "#111827";
         context.fillRect(-width, -height, width * 2, height * 2);
         context.strokeRect(-width, -height, width * 2, height * 2);
         context.fillStyle = style.color;
         context.fillRect(-width + 7, -height + 7, width * 1.15, 4);
         context.fillRect(-width + 7, -height + 16, width * 0.75, 3);
+        context.restore();
     }
 
     drawMaintenanceFrame(context, style) {

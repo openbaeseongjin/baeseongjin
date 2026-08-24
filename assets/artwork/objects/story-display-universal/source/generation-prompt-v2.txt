@@ -1,0 +1,18 @@
+Use case: game asset simplification
+Asset type: low-resolution game world-object pixel sprite source
+Input image: story-display-universal-imagegen-v1.png is the exact edit target
+
+Primary request:
+Simplify the universal information display into a strong low-resolution silhouette suitable for later normalization to a 64x48 pixel sprite.
+
+Constraints:
+- Preserve the straight-on graphite and iron information-display identity.
+- Keep only a thick outer frame, one dark screen, two large abstract information blocks, one cyan service light, one amber service light, side clamps, and one centered underside bracket.
+- Remove vents, bolts, labels, glyphs, micro-lines, decorative seams, surface noise, and all other interior detail.
+- Use hard pixel-stepped edges, broad color regions, low contrast, and no anti-aliased ornament.
+- Keep the object sector-neutral for Sector 01 through Sector 06.
+- No text, number, logo, emblem, watermark, scenery, floor, wall, cast shadow, glow, or extra object.
+- Transparent background only.
+
+Follow-up background extraction:
+Remove only the generated white and light-gray checkerboard background and replace it with genuine transparent alpha. Preserve the simplified object geometry and colors without redrawing, cropping, resizing, smoothing, or adding detail.

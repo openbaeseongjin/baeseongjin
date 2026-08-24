@@ -109,8 +109,7 @@ class TestTargetRenderer extends WorldObjectRendererDefinition {
 }
 class StoryDisplayRenderer extends WorldObjectRendererDefinition {
     draw(a) {
-        center(a.context, a.bounds);
-        a.painter.drawStoryDisplay(a.context, a.style);
+        a.painter.drawStoryDisplay(a.context, a.style, a.bounds);
     }
 }
 class MaintenanceFrameRenderer extends WorldObjectRendererDefinition {

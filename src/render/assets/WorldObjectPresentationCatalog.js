@@ -1,4 +1,11 @@
 import { anchoredRectangleBounds } from "../../game/world/AuthoredCoordinateAnchor.js";
+import { runtimeAssetUrl } from "./RuntimeAssetCatalog.js";
+
+const STORY_DISPLAY_SIZE = Object.freeze({ width: 64, height: 48 });
+const STORY_DISPLAY_SPRITE = Object.freeze({
+    source: runtimeAssetUrl("objects", "story-display-universal", "story-display.png"),
+    size: STORY_DISPLAY_SIZE
+});
 
 const DEFAULT_DEFINITIONS = {
     "world-object:grapple-landmark": { renderMode: "mock-shape", color: "#22d3ee", radius: 15 },
@@ -33,7 +40,13 @@ const DEFAULT_DEFINITIONS = {
     "world-object:checkpoint": { renderMode: "checkpoint" },
     "world-object:sentry": { renderMode: "combat-entity" },
     "world-object:patrol-drone": { renderMode: "combat-entity" },
-    "world-object:story-display": { renderMode: "mock-shape", color: "#f59e0b", radius: 20 },
+    "world-object:story-display": {
+        renderMode: "mock-shape",
+        color: "#f59e0b",
+        radius: 20,
+        size: STORY_DISPLAY_SIZE,
+        sprite: STORY_DISPLAY_SPRITE
+    },
     "world-object:maintenance-frame": { renderMode: "mock-shape", color: "#94a3b8", radius: 26 },
     "world-object:calibration-frame": { renderMode: "mock-shape", color: "#38bdf8", radius: 32 },
     "world-object:access-transit-lock": { renderMode: "mock-shape", color: "#fbbf24", radius: 30 },
