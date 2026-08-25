@@ -18,6 +18,7 @@ function freezeWorldObject(object) {
         missileArmed: object.missileArmed === true,
         verticalVelocity: finite(object.verticalVelocity),
         motionProgress: Math.max(0, Math.min(1, finite(object.motionProgress))),
+        stateProgress: Math.max(0, Math.min(1, finite(object.stateProgress))),
         movementProgress: finite(object.movementProgress),
         defeatProgress: Math.max(0, Math.min(1, finite(object.defeatProgress))),
         suspensionHeight: Math.max(0, finite(object.suspensionHeight)),
