@@ -11,7 +11,7 @@
 - presentation motion: `opening-00..07` over the existing `0.3s` light interval
 - 상태: `RUNTIME CONSUMED · NO DEDICATED OBJECT VALIDATOR`
 
-Gate의 bottom-center는 기존 `gateBounds` 하단과 Departure Deck top이 공유하는 좌표다. Sprite 크기는 visual footprint이며 기존 `220×705` collision bounds를 변경하지 않는다.
+Gate의 bottom-center는 Departure Deck 왼쪽에서 visual 반폭만큼 떨어진 Deck top 좌표다. 따라서 `480×760` sprite 전체가 `600px` Deck 위에 포함되며, 기존 `220×705` collision bounds는 변경하지 않는다.
 
 ## 파일
 

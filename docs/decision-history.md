@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L2] 2026-08-26 — Boss06 탈출 오브젝트의 시각 정렬을 실제 접점으로 대체한다
+
+- 맥락: Gate visual을 `220px` collision center에 놓으면 `480px` sprite의 왼쪽이 Departure Deck 밖으로 나갔고, Shuttle PNG의 마지막 불투명 행은 canvas 중앙이 아니라 `x=140..216`에 있어 bottom-center 배치가 Gate 중첩과 떠 보이는 착지를 만들었다.
+- 결정: Gate visual은 Departure Deck 왼쪽에서 시작해 전체 폭을 Deck 안에 둔다. Shuttle은 `500×390` atlas를 논리 원본 `250×195`로 표시하고 실제 하단 접점 anchor `(0.356, 1)`를 `(4630, -1055)`에 둔다.
+- 영향: sprite와 Canvas fallback, 승리 카메라가 같은 anchor를 사용한다. Gate collision·Boarding zone·승리 타임라인·물리·네트워크 권한은 유지한다.
+- 대체: Gate visual을 collision bottom-center에 두고 Shuttle을 `500×390` bottom-center로 배치한 2026-08-25 계약.
+- 검증 상태: 현재 계약은 `docs/boss/06/README.md`와 두 Boss06 object package README가 소유한다.
+
 ## [L2] 2026-08-25 — Surface 기반 자동 배경 장식을 authored 표현으로 대체한다
 
 - 맥락: `7bad2308`의 구조 검증용 `PixelDecorationRenderer`가 surface마다 seed/hash로 작은 mock sprite를 자동 배치했다. `e73dac74`는 authored Area에서 이를 차단했지만 `d6f1a366`이 Area별 환경 package를 연결하면서 차단을 제거해 mock 안테나가 다시 나타났다.
@@ -41,7 +49,7 @@
 
 ## [L1] 2026-08-25 — 맞닿은 Stage seam을 화면 밖 Gate 전환으로 대체한다
 
-- 맥락: Bounds를 맞닿게 쌓으면 Stage별 Exit·Entry 내부 좌표 때문에 47개 전환 거리가 64~1268px, 수평 이동이 0~4512px로 달라지고 다음 Stage가 출구 화면에 노출됐다.
+- 맥락: Bounds를 맞닿게 쌓으면 Stage별 Exit·Entry 내부 좌표 때문에 47개 전환 거리가 64~~1268px, 수평 이동이 0~~4512px로 달라지고 다음 Stage가 출구 화면에 노출됐다.
 - 결정: 다음 Entry를 이전 Exit와 같은 X·2160px 위에 배치하고 개별 Player Gate portal만 전진 경로로 사용한다. 낙사는 현재 Stage 세이브 지점 아래 공백에서 복구한다.
 - 영향: canonical Stage 내부 geometry는 유지하고 Runtime 조립·parity·카메라 밖 판정·Boss 격리 기준을 새 배치에 맞춘다. Sector backdrop은 Gate 전후 각 Stage의 기존 자산 로딩 경계를 유지한다.
 - 대체: 0.60.0의 gap-0 Bounds seam, 물리적 상향 통과, 이전 Stage까지 계속 낙하·착지·Rope 복구하는 연속 수직 배치.
@@ -239,6 +247,7 @@
 - 영향: Anchor A–C, Fan A/B, Recovery Platform과 Cooling Shaft 배경을 중심으로 1-3 문서와 레퍼런스 이미지를 구성했다.
 - 대체: `Sector 01-3 SECURITY CHECK` — 새로운 이동·환경 규칙 대신 첫 Sentry Turret의 Red Telegraph와 Rope 회피를 가르친다. Cooling Shaft와 Wind 학습은 Build Expression 뒤의 `Sector 01-6 COOLING SHAFT` REV 3.0으로 이동했다.
 - 검증 상태: 대체 방향은 유지되며 현재 상세 기준은 `docs/bsh/scenario/1/1-3/README.md` REV 3.0이다. Blockout과 플레이테스트는 아직 진행하지 않았다.
+
 ## [L2] 2026-08-12 — 플레이어와 환경별 최상위 runtime 폴더를 사용한다
 
 - 맥락: 첫 player·environment manifest를 각각 도입하면서 `assets/sprites/`와 `assets/environment/`가 독립된 작업·runtime 경로를 함께 맡았다.

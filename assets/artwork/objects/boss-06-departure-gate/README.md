@@ -50,7 +50,7 @@ The silhouette follows the current `ContinuityWardenRuntime` Gate bounds rather 
 - Loader boundary: `RuntimeAssetCatalog` + `WorldObjectSpriteAssetCatalog`
 - Renderer: `ContinuityWardenSpriteObjectRendererCatalog`
 - `locked`는 전투 중 닫힌 문, `light`는 기존 0.3초 동안 `opening-00..07`, `open`은 열린 통로를 표시한다.
-- bottom-center anchor는 기존 Gate collision bounds 하단과 Departure Deck 보행면이 공유하는 좌표를 사용한다.
+- bottom-center anchor는 Departure Deck 왼쪽에서 visual 반폭만큼 떨어진 보행면 좌표를 사용해 `480px` visual 전체를 Deck 안에 둔다. 기존 Gate collision bounds는 이 시각 보정과 독립적으로 유지한다.
 - 준비 전 또는 상태별 이미지 로드 실패 시 기존 `DepartureGateRenderer` Canvas 표현으로 독립 복구한다.
 - 이 Runtime 연결은 Gate collision, `gateOpen`, victory timing, bridge deployment, Shuttle reveal, gameplay, physics or network authority를 변경하지 않는다.
 - The `opening-00..07` files are presentation frames, not a new gameplay state. Runtime remains `locked / light / open`.

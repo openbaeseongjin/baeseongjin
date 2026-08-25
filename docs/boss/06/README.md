@@ -84,8 +84,8 @@ Boss06는 이를 우선 재사용하고, 별도의 Rope AI나 새 범용 hazard 
 - `boss-06.json`의 3200px Main·단방향 Ledge 3개·U1~U10·Gate·220px Bridge·Boarding Deck을 authored geometry로 실행한다. 모든 solid surface는 일반 부착 가능하며, World surface가 전용 Boss terrain atlas를 그리는 단일 권위다. Boss presentation object로 같은 발판을 다시 그리지 않는다.
 - Security Beam 양 끝은 세로 기둥 없이 떠 있는 `64×64` Security Star 두 개만 표시한다. `idle`·amber `telegraph`·red `active`·amber `ending`은 기존 Security state와 beam gap에서 파생하며 collision·Rope·damage·network state를 추가하지 않는다.
 - 승리 뒤 Warden은 기절하고 Gate light/open → Threshold Bridge → Shuttle reveal → Player별 Boarding → 모든 active Player ready → `beginCompletion()` 순서로 진행한다. 첫 Player가 동료를 순간이동시키지 않는다.
-- Shuttle reveal은 `assets/runtime/objects/boss-06-maintenance-shuttle/maintenance-shuttle-boarding.png`의 `500×390` bottom-center 픽셀 sprite를 사용한다. 승리 카메라는 좁은 모바일 화면에서도 셔틀이 화면 밖에 남지 않도록 접촉점에서 sprite 중심을 파생해 목표로 삼는다. asset 준비 전·실패 시 기존 Canvas 셔틀로 복구하며 Boarding 판정·승리 타임라인은 바꾸지 않는다.
-- Departure Gate는 `480×760` locked/light/open sprite와 기존 0.3초 `light → open` 8-frame motion을 사용한다. Gate와 Shuttle의 bottom-center는 Departure Deck top에 맞추고 asset 준비 전·상태별 실패 시 각 Canvas 표현으로 독립 복구한다. 충돌 bounds·Bridge·Boarding zone·상태 권한은 유지한다.
+- Shuttle reveal은 `assets/runtime/objects/boss-06-maintenance-shuttle/maintenance-shuttle-boarding.png`의 `500×390` atlas를 논리 원본 크기인 `250×195`로 표시한다. authored `shuttlePosition (4630, -1055)`은 실제 하단 착지 픽셀의 접점 anchor `(0.356, 1)`이며, 승리 카메라는 이 접점에서 sprite 중심을 파생한다. asset 준비 전·실패 시 같은 크기·anchor의 Canvas 셔틀로 복구하며 Boarding 판정·승리 타임라인은 바꾸지 않는다.
+- Departure Gate는 `480×760` locked/light/open sprite와 기존 0.3초 `light → open` 8-frame motion을 사용한다. 시각 Gate의 왼쪽은 Departure Deck 왼쪽에서 시작하고 전체 폭은 Deck 안에 포함되며, 기존 `220×705` collision bounds는 유지한다. Gate의 bottom-center와 Shuttle의 실제 착지점은 Departure Deck top에 맞추고 asset 준비 전·상태별 실패 시 각 Canvas 표현으로 독립 복구한다. Bridge·Boarding zone·상태 권한은 유지한다.
 - Browser Gameplay View와 실제 1~4인·멀티 수렴은 구현 상태와 분리해 검증한다.
 
 ## V2 기록

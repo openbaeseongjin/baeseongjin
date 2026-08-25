@@ -113,7 +113,8 @@ export const CONTINUITY_WARDEN_SHUTTLE_STATE = Object.freeze({
     BOARDING: "boarding"
 });
 
-export const CONTINUITY_WARDEN_SHUTTLE_SIZE = Object.freeze({ width: 500, height: 390 });
+export const CONTINUITY_WARDEN_SHUTTLE_SIZE = Object.freeze({ width: 250, height: 195 });
+export const CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR = Object.freeze({ x: 0.356, y: 1 });
 export const CONTINUITY_WARDEN_SECURITY_STAR_SIZE = Object.freeze({ width: 64, height: 64 });
 export const CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR = Object.freeze({ x: 0.5, y: 1 });
 

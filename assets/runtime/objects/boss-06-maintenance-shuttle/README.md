@@ -6,11 +6,12 @@
 - Asset ID: `boss-06-maintenance-shuttle`
 - Boss object kind: `boss-maintenance-shuttle`
 - 파일: `maintenance-shuttle-boarding.png`
-- 크기: `500×390 RGBA`
-- Anchor: `bottom-center`
+- atlas 크기: `500×390 RGBA`
+- world 표시 크기: `250×195`
+- Anchor: actual bottom contact `(0.356, 1)`
 - 상태: `RUNTIME CONSUMED · NO DEDICATED OBJECT VALIDATOR`
 
-Boss06 승리 연출의 `shuttle-reveal`과 Player별 Boarding 구간에서 같은 정적 sprite를 사용한다. `hidden` 상태는 렌더하지 않으며, authored `shuttlePosition`은 Departure Deck top과 같은 bottom-center 접촉점을 소유한다.
+Boss06 승리 연출의 `shuttle-reveal`과 Player별 Boarding 구간에서 같은 정적 sprite를 사용한다. `hidden` 상태는 렌더하지 않으며, authored `shuttlePosition (4630, -1055)`은 Departure Deck top에 닿는 실제 하단 착지 픽셀의 중심을 소유한다.
 
 ## 출처와 정규화
 
@@ -25,7 +26,7 @@ Boss06 승리 연출의 `shuttle-reveal`과 Player별 Boarding 구간에서 같�
 - `WorldObjectSpriteAssetCatalog`가 실제 `500×390` 크기를 검증한다.
 - Boss Stage resource preparation이 Warden sprite와 셔틀 sprite를 첫 프레임 전에 함께 준비한다.
 - 준비 전 또는 로드 실패 시 `MaintenanceShuttleRenderer`의 기존 Canvas 표현을 사용한다.
-- sprite와 fallback은 같은 bottom-center anchor·world size를 사용한다.
+- sprite와 fallback은 같은 실제 하단 접점 anchor `(0.356, 1)`·`250×195` world size를 사용한다.
 
 ## 비소유 범위
 

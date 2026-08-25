@@ -11,6 +11,7 @@ import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 const GATE_PACKAGE_ID = "boss-06-departure-gate";
 const SECURITY_STAR_PACKAGE_ID = "boss-06-security-star";
 const SECURITY_STAR_ATLAS_SIZE = Object.freeze({ width: 832, height: 64 });
+const SHUTTLE_ATLAS_SIZE = Object.freeze({ width: 500, height: 390 });
 const GATE_OPENING_FRAME_COUNT = 8;
 const GATE_OPENING_SPRITE_STATE = Object.freeze(
     Array.from({ length: GATE_OPENING_FRAME_COUNT }, (_, index) => `opening-${String(index).padStart(2, "0")}`)
@@ -61,11 +62,7 @@ const CONTINUITY_WARDEN_OBJECT_PRESENTATION = Object.freeze({
     [CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE]: Object.freeze({
         id: CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE,
         size: CONTINUITY_WARDEN_SHUTTLE_SIZE,
-        sprite: sprite(
-            "boss-06-maintenance-shuttle",
-            "maintenance-shuttle-boarding.png",
-            CONTINUITY_WARDEN_SHUTTLE_SIZE
-        )
+        sprite: sprite("boss-06-maintenance-shuttle", "maintenance-shuttle-boarding.png", SHUTTLE_ATLAS_SIZE)
     })
 });
 

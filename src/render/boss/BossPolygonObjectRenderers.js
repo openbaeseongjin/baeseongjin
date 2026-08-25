@@ -5,6 +5,7 @@ import {
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
     CONTINUITY_WARDEN_OBJECT_KIND,
     CONTINUITY_WARDEN_SECURITY_STAR_STATE,
+    CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE
@@ -557,6 +558,7 @@ class MaintenanceShuttleRenderer extends BossPolygonObjectRenderer {
             CONTINUITY_WARDEN_SHUTTLE_SIZE.width,
             CONTINUITY_WARDEN_SHUTTLE_SIZE.height
         );
+        context.translate(width * (0.5 - CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR.x), 0);
         context.fillStyle = "#31434c";
         context.strokeStyle = "#dce8ec";
         context.lineWidth = 6;
