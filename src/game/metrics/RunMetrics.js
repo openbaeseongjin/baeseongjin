@@ -46,10 +46,6 @@ export class RunMetrics {
         if (this.firstAugmentSeconds === null) this.firstAugmentSeconds = this.activeSeconds;
     }
 
-    recordEnemyOutcomes(playerEvents) {
-        this.enemyDefeats += playerEvents.hits.filter((event) => event.type === "enemy-defeated").length;
-    }
-
     recordPlayerImpact(impactType, damage = 0) {
         if ([PLAYER_IMPACT_TYPE.PLAYER_HIT, PLAYER_IMPACT_TYPE.FALL_DAMAGE].includes(impactType))
             this.damageTaken += damage;

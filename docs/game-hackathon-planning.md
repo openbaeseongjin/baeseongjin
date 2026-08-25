@@ -137,7 +137,7 @@
 - 정기 회의: 매일 22:00~23:00, Discord
 - `SECTOR 01`~`06`의 상세 Stage 문서는 48/48 작성됐다. 문서 작성과 Runtime 연결은 별도 상태이며, 현재 연결 수·차단 요소·마지막 확인 근거는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 - 메인 개발은 문서 수를 완료 수치로 사용하지 않고 섹터 순서대로 mock Runtime을 연결한다. 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름·오브젝트 요구·전환 계약과 실제 검증이 모두 필요하다.
-- 0.67.0은 authored 장비 Node를 제거하고 몹 막타 경험치·자동 계산 레벨업·Player별 Augment 선택으로 전환한다. Catalog는 Rope 패시브 6장과 메테오·기동 증폭을 소유하며 시작 마법은 에너지 공과 물리 대시다. 기준은 [`augment-v1.md`](./augment-v1.md)다.
+- 0.67.0은 authored 장비 Node를 제거하고 마지막 양수 Player 피해 귀속 경험치·자동 계산 레벨업·Player별 Augment 선택으로 전환한다. 완전 회복·Encounter reset 전에는 이후 환경 원인 사망도 해당 Player에게 귀속한다. Catalog와 현재 보상 범위의 기준은 [`augment-v1.md`](./augment-v1.md)다.
 - 0.67.0의 마법 입력은 PC 우클릭 시작 뒤 좌·우 클릭 두 번이며 모바일 마법 입력은 1차 범위에서 제외한다.
 - NPC는 온라인 예선 핵심 범위에서 제외한다. 코어 완료 뒤 여유가 있을 때만 2-6의 선택지 없는 3줄 stationary NPC를 검토한다.
 - Ending은 Final Security 처치 뒤 개별 Boarding, 전원 준비, Door Close, City Pullback, Run Complete 순서로 확정됐으며 상세 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)가 소유한다.

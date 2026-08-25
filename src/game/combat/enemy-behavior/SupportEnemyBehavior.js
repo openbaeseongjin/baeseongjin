@@ -45,7 +45,7 @@ export class SupportEnemyBehavior extends StateEnemyBehavior {
     }
     advance(enemy, { enemies = [], targets = [], dt = ENEMY_BEHAVIOR_CONFIG.ZERO } = {}) {
         validateBehaviorDt(dt);
-        enemy.health = Math.min(enemy.maxHealth, enemy.health + this.regenerationPerSecond * dt);
+        enemy.heal(this.regenerationPerSecond * dt);
         return SUPPORT_BEHAVIOR_STATE_DEFINITION[this.state].advance(this, enemy, { enemies, targets, dt });
     }
     snapshot() {

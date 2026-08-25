@@ -20,6 +20,7 @@ import { withEnemyPhysicsSimulation, withEnemyWeaponSimulation } from "./enemy-w
 import { directionFromEnemyToTarget, visibleEnemyTargets } from "./enemy-weapon/EnemyWeaponTargeting.js";
 import { EnemyActivationState } from "./EnemyActivationState.js";
 import { CombatStatusEffectPool } from "../status-effects/CombatStatusEffectPool.js";
+import { EnemyDamageAttribution } from "./EnemyDamageAttribution.js";
 
 function assertFinite(value, label, { minimum = -Infinity, exclusiveMinimum = false } = {}) {
     if (!Number.isFinite(value)) throw new Error(`${label} must be finite`);
@@ -165,7 +166,11 @@ class EnemyBodyObject extends withSurfacePhysics(
         this.health = health;
         this.maxHealth = maxHealth;
         this.experienceReward = assertFinite(experienceReward, "experienceReward", { minimum: 0 });
-        this.defeatedByPlayerId = null;
+        Object.defineProperty(this, "damageAttribution", {
+            value: new EnemyDamageAttribution(),
+            enumerable: false,
+            writable: false
+        });
         this.statusEffects = statusEffects;
         this.presentationAimDirection = presentationAimDirection
             ? Object.freeze({ x: presentationAimDirection.x, y: presentationAimDirection.y })
@@ -227,6 +232,26 @@ class EnemyBodyObject extends withSurfacePhysics(
 
     get lifeState() {
         return this.health > 0 ? "active" : "inactive";
+    }
+
+    get experienceCreditPlayerId() {
+        return this.damageAttribution.lastDamagedByPlayerId;
+    }
+
+    recordPlayerDamage(sourcePlayerId, damage) {
+        return this.damageAttribution.recordPlayerDamage(sourcePlayerId, damage);
+    }
+
+    heal(amount) {
+        const healing = assertFinite(amount, "enemy healing", { minimum: 0 });
+        const previousHealth = this.health;
+        this.health = Math.min(this.maxHealth, this.health + healing);
+        this.damageAttribution.clearIfFullyHealed(this.health, this.maxHealth);
+        return this.health - previousHealth;
+    }
+
+    resetDamageAttribution() {
+        return this.damageAttribution.reset();
     }
 
     observeActivation(targets) {
@@ -300,7 +325,7 @@ class EnemyBodyObject extends withSurfacePhysics(
                 minimum: 0
             }
         );
-        this.defeatedByPlayerId = null;
+        this.resetDamageAttribution();
         const aimDirection = state.aimDirection
             ? {
                   x: assertFinite(state.aimDirection.x, "enemy.aimDirection.x"),

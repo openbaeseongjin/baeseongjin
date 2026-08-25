@@ -35,16 +35,15 @@ function treatmentTarget(behavior, enemy, enemies) {
 }
 
 function heal(behavior, healer, target, dt) {
-    const previousHealth = target.health;
     const requestedHealing = Math.min(target.maxHealth - target.health, behavior.healingPerSecond * dt);
     const healing = Math.min(requestedHealing, healer.health / behavior.healthSpentPerHealing);
     const healthSpent = healing * behavior.healthSpentPerHealing;
-    target.health += healing;
+    const appliedHealing = target.heal(healing);
     healer.health = Math.max(ENEMY_BEHAVIOR_CONFIG.ZERO, healer.health - healthSpent);
     return Object.freeze({
         type: ENEMY_BEHAVIOR_EVENT_TYPE.SUPPORT_LINK,
         targetId: target.id,
-        healing: target.health - previousHealth,
+        healing: appliedHealing,
         healthSpent
     });
 }

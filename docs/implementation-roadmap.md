@@ -51,6 +51,7 @@
 
 ### 아직 없음
 
+- 지상 보행형 Enemy와 Enemy 낙하·착지 피해 발생 규칙. 현재 `EnemyDamageAttribution`은 후속 환경 피해가 추가될 때 Player XP 귀속을 이어받는 기반까지만 소유한다.
 - 실제 플레이에서 새로 발견된 실패 사례와 초반 2분 지표 표본
 - 실제 조작 기반 전체 등반 검증
 - 실제 두 사람이 서로 다른 기기에서 장시간 등반하며 수행하는 개별 사망·부활·고지연 플레이테스트
@@ -65,7 +66,7 @@
 1. **Phase 1~2 · #622:** `SectorDefinition`, canonical encounter container, Sector validator, `1-1`~~`6-8` deterministic alias와 build/startup-only preview adapter를 먼저 병합한다. Sector 01~~03 preview는 현재 Area 좌표·activation·고정 적 선택을 보존하지만 기본 Runtime에 주입하지 않는다. Sector 04~06은 migration alias input만 제공한다.
 2. **Enemy Phase 6:** #622 merge SHA 위로 topology-independent enemy branch를 rebase하고 `enemySelection.fixedEnemyType | enemySelection.allowedEnemyTypes`를 canonical `encounterSlot`에 연결한다. Runtime encounter 권위에 `areaId`를 다시 넣지 않는다.
 3. **Phase 3 · #625 / #637 / #816 / #922, 0.60.0에서 공간 계약 완결:** Player별 checkpoint와 독립 Boss Stage는 유지하되 4,800px city wing·connector collision과 Stage 격리 gap을 제거했다. 일반 Stage authored Bounds는 위아래 edge가 맞닿고 Gate portal로 전진한다.
-4. [0.67.0 전환] authored `augment-node` 획득과 출구 선행조건을 제거하고, 서버가 확정한 몹 막타 XP로 개인 레벨업 선택을 연다.
+4. [0.67.0 전환] authored `augment-node` 획득과 출구 선행조건을 제거하고, 서버가 확정한 마지막 양수 Player 피해 귀속 XP로 개인 레벨업 선택을 연다.
 5. **Sector Access 3-of-3 · 0.43.2 / portal 정렬 0.60.0:** Sector 01·02·03의 기존 Carrier와 공용 Module 진행은 유지한다. outgoing route가 잠긴 동안 authored Gate portal만 사용할 수 없으며 자동 transit barrier collision·visual은 생성하지 않는다. 수집 진행과 Player별 checkpoint는 보존한다.
 6. **Sector 01~06 combat density · 0.68.0:** `1-1·1-2`를 제외한 Stage를 Sector별 최소 `3 → 3 → 4 → 4 → 5 → 5` slot로 늘려 총 189개를 사용한다. 기존 selector와 Stage-local activation을 유지하고 runtime director·동적 생성 좌표는 추가하지 않는다.
 7. **Stage 공간 권위 · 0.60.0:** 일반 Stage surface·벽·격벽·world object 위치와 경계 개구부는 Editor source만 소유한다. Player는 아래 Stage들로 계속 낙하·착지·Rope 복구하고 전체 월드 하단 아래에서만 사망한다. Gate는 위치 기반 Player 한 명만 전진시키며 현재 Stage ID는 저장하지 않는다.
