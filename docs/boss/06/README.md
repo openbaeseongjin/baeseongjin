@@ -23,6 +23,8 @@ Warden은 Rope를 사용하지 않는다. Shield, Baton, Thruster Dash와 Pad Se
 
 V4에서는 Warden이 좌표로 판정한 주 바닥·Raised Ledge를 평상 걷기·점프·내려가기 상태로 계속 추적한다. 공격은 실행 가능한 상태 풀에서 결정적 가중 랜덤으로 고르며, 정점의 5발 유도미사일과 제한 각속도는 유지한다.
 
+여러 Player가 있으면 Neutral에서 전투 구역 안의 active 참가자 중 거리·ID 순으로 최근접 대상을 선택한다. 공격을 시작한 뒤에는 target과 facing을 종료까지 고정해 Guard/Counter가 자동 회전하거나 미사일 예고 대상이 발사 직전에 바뀌지 않는다.
+
 별도 소환 패턴은 이동형 공격 Enemy pool에서 2마리를 생성한다. 성공한 패턴 뒤 15초 동안 재사용하지 않고, 살아 있는 Boss 소환몹이 6마리 이상이면 패턴 순서에서 건너뛴다.
 
 ## 전투 계약
@@ -72,7 +74,7 @@ Boss06는 이를 우선 재사용하고, 별도의 Rope AI나 새 범용 hazard 
 ## Runtime 연결
 
 - `6-8` content boundary 뒤 regular `6-9` 없이 terminal `boss-06`을 삽입한다.
-- Warden body ImpactTarget 하나, 96×150 Polygon body, Guard/Counter, Baton·Dash·Charge·LOW/HIGH Security와 점프 상태를 `ContinuityWardenRuntime`이 소유한다.
+- Warden body ImpactTarget 하나와 sprite 불투명 body 폭에 맞춘 120×150 Polygon 하나를 물리·기본탄·Spell·멀티 client prediction이 공유한다. Guard/Counter, Baton·Dash·Charge·LOW/HIGH Security와 점프 상태는 `ContinuityWardenRuntime`이 소유한다.
 - 점프 물리는 공용 Physics mixin 기반 Has-A 컴포넌트, 5발 유도탄은 `enemy + homing` projectile 조합과 서버 spawn/resolve 사건을 사용한다.
 - 소환 요청은 Boss Runtime이 만들고 서버 `GameSimulation`만 동적 Enemy를 등록한다. Patrol·Pursuit·Shield·Artillery를 결정적 순서로 고르며 wipe·승리 때 소환몹과 잔탄을 제거한다.
 - 승인된 Phase1 Warden pixel sprite를 유지하고, 전용 locomotion atlas가 없는 V4 `walk/jump/descend/fall/landing`은 `combat-idle` body의 renderer-local pose fallback으로 표현한다. 소환 명령은 `security-command` clip을 재사용한다.
@@ -106,7 +108,7 @@ Draft01 QA에서 발견된 다음 문제를 이전 초안에서 수정했다.
 
 - dummy weakpoint 금지
 - body ImpactTarget exactly 1
-- Warden solid collider <=96×150
+- Warden solid collider =120×150
 - Main collision deck exactly 1
 - RR1/RR3 actual swing-attack anchors
 - Emitter/Beam solid collision 금지

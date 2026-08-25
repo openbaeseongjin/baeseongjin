@@ -739,6 +739,7 @@ export class GameSimulation {
         return Object.freeze({
             ...runtime,
             environmentAreaId: stage.sourceAreaId,
+            impactTargets: this.#activeBossImpactSnapshots(),
             ropeAttachmentActors,
             arena: Object.freeze({
                 id: stage.id,
@@ -1051,7 +1052,7 @@ export class GameSimulation {
         }
     }
 
-    #advanceBossRuntime(dt) {
+    #advanceBossRuntime(dt, { canSelectTarget = true } = {}) {
         if (!this.bossRuntime) return Object.freeze({ accepted: false, changed: false });
         const stage = this.#bossStageWorld();
         const activeParticipants = this.#activeBossParticipants();
@@ -1064,6 +1065,7 @@ export class GameSimulation {
             surfaces: stage?.surfaces ?? Object.freeze([]),
             anchors: stage?.route ?? Object.freeze([]),
             bossSummonedEnemyCount: this.#bossSummonedEnemies().filter(({ health }) => health > 0).length,
+            canSelectTarget,
             worldOffset: this.#bossWorldOffset()
         });
         this.#setActiveDynamicCollisionSurfaces();
@@ -2038,7 +2040,7 @@ export class GameSimulation {
         this.tick = tick;
         this.elapsedSeconds += dt;
         if (this.bossRuntime) {
-            this.#advanceBossRuntime(dt);
+            this.#advanceBossRuntime(dt, { canSelectTarget: false });
             this.bossRuntime.drainEvents();
         }
         this.#prepareCollisionFrame();
@@ -3062,11 +3064,11 @@ export class GameSimulation {
                 sourcePlayerId: authenticatedPlayerId,
                 sourceKind: claim.sourceKind ?? claim.effectId,
                 normalDamage: claim.damage,
-                position: claim.contactPosition,
+                position: claim.sourcePosition,
                 causalId: claim.eventId ?? claim.predictionId
             });
             const statusEffectId = SPELL_STATUS_EFFECT[claim.effectId] ?? null;
-            if (result.accepted && statusEffectId) {
+            if (result.accepted && result.damage > 0 && statusEffectId) {
                 this.bossRuntime?.statusEffects?.apply(statusEffectId, { sourceId: authenticatedPlayerId });
             }
             if (replicate && result.accepted) {
@@ -3826,7 +3828,7 @@ export class GameSimulation {
                 sourcePlayerId: authenticatedPlayerId,
                 sourceKind: "projectile",
                 normalDamage: damage,
-                position: targetState.position,
+                position: claim.position,
                 causalId: claim.predictionId
             });
             if (!result.accepted) return result;

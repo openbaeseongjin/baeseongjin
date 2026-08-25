@@ -54,20 +54,23 @@ const WARDEN_MELEE_RANGE_IMAGE_PROFILE = Object.freeze({
 });
 
 const WARDEN_MELEE_RANGE_IMAGE = Object.freeze({
-    SEGMENT_COUNT: 9,
     HORIZONTAL_SPAN_RATIO: 0.84,
-    SEGMENT_WIDTH_RATIO: 0.11,
-    OUTER_HEIGHT_RATIO: 0.2,
-    INNER_HEIGHT_RATIO: 0.11,
-    CORE_HEIGHT_RATIO: 0.04,
-    MIN_OUTER_HEIGHT: 14,
-    MIN_INNER_HEIGHT: 8,
-    MIN_CORE_HEIGHT: 4,
-    IMPACT_ARM_RATIO: 0.18,
-    OUTER_COLOR: "rgba(251, 113, 133, 0.82)",
-    INNER_COLOR: "#fbbf24",
-    CORE_COLOR: "#fff7ed"
+    OUTER_WIDTH_RATIO: 0.2,
+    INNER_WIDTH_RATIO: 0.11,
+    CORE_WIDTH_RATIO: 0.035,
+    MIN_OUTER_WIDTH: 16,
+    MIN_INNER_WIDTH: 9,
+    MIN_CORE_WIDTH: 3,
+    IMPACT_RADIUS_RATIO: 0.1,
+    OUTER_COLOR: "rgba(251, 113, 133, 0.58)",
+    INNER_COLOR: "rgba(251, 191, 36, 0.92)",
+    CORE_COLOR: "rgba(255, 247, 237, 0.95)"
 });
+const WARDEN_MELEE_STROKE_LAYER = Object.freeze([
+    Object.freeze({ color: "OUTER_COLOR", minimum: "MIN_OUTER_WIDTH", ratio: "OUTER_WIDTH_RATIO" }),
+    Object.freeze({ color: "INNER_COLOR", minimum: "MIN_INNER_WIDTH", ratio: "INNER_WIDTH_RATIO" }),
+    Object.freeze({ color: "CORE_COLOR", minimum: "MIN_CORE_WIDTH", ratio: "CORE_WIDTH_RATIO" })
+]);
 
 const WARDEN_BEAM_RANGE_IMAGE = Object.freeze({
     OUTER_HEIGHT_RATIO: 0.46,
@@ -161,11 +164,6 @@ function pixelBlock(context, centerX, centerY, width, height, color) {
         Math.max(1, Math.round(width)),
         Math.max(1, Math.round(height))
     );
-}
-
-function quadraticCoordinate(start, control, end, progress) {
-    const inverse = 1 - progress;
-    return inverse * inverse * start + 2 * inverse * progress * control + progress * progress * end;
 }
 
 class BossPolygonObjectRenderer {
@@ -502,22 +500,25 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
         const { width, height } = size(object, 220, 140);
         const active = object.state === "active" || object.state === "beam-active" || object.state === "burst-active";
         const family = WARDEN_ATTACK_FAMILY[object.variant] ?? null;
+        const meleeActive = active && family === "melee";
         const telegraphColor = wardenTelegraphColor(object.variant, family);
-        context.globalAlpha = active ? 0.62 : 0.32;
-        context.fillStyle = active
-            ? "rgba(251, 113, 133, 0.35)"
-            : (WARDEN_TELEGRAPH_FILL[family] ?? "rgba(251, 191, 36, 0.2)");
-        context.strokeStyle = active ? COLOR.HAZARD : telegraphColor;
-        context.lineWidth = active ? 5 : 3;
-        context.setLineDash(active ? [] : family === "dash" ? [10, 8] : [20, 14]);
-        context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
-        context.setLineDash([]);
+        if (!meleeActive) {
+            context.globalAlpha = active ? 0.62 : 0.32;
+            context.fillStyle = active
+                ? "rgba(251, 113, 133, 0.35)"
+                : (WARDEN_TELEGRAPH_FILL[family] ?? "rgba(251, 191, 36, 0.2)");
+            context.strokeStyle = active ? COLOR.HAZARD : telegraphColor;
+            context.lineWidth = active ? 5 : 3;
+            context.setLineDash(active ? [] : family === "dash" ? [10, 8] : [20, 14]);
+            context.fillRect(-width * 0.5, -height * 0.5, width, height);
+            context.strokeRect(-width * 0.5, -height * 0.5, width, height);
+            context.setLineDash([]);
+        }
         if (!active && family === "dash") {
             chevron(context, 0, 0, direction(object), Math.min(width, height) * 0.55, telegraphColor);
         }
         context.globalAlpha = 1;
-        if (active && family === "melee") this.drawMeleeRangeImage(context, object, width, height);
+        if (meleeActive) this.drawMeleeRangeImage(context, object, width, height);
         if (active && family === "dash") this.drawDashTrail(context, object, width, height);
     }
 
@@ -530,48 +531,46 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
         const style = WARDEN_MELEE_RANGE_IMAGE;
         const sign = direction(object) * profile.directionMultiplier;
         const span = width * style.HORIZONTAL_SPAN_RATIO;
-        const startX = -sign * span * 0.5;
-        const segmentWidth = width * style.SEGMENT_WIDTH_RATIO;
-        const outerHeight = Math.max(style.MIN_OUTER_HEIGHT, height * style.OUTER_HEIGHT_RATIO);
-        const innerHeight = Math.max(style.MIN_INNER_HEIGHT, height * style.INNER_HEIGHT_RATIO);
-        const coreHeight = Math.max(style.MIN_CORE_HEIGHT, height * style.CORE_HEIGHT_RATIO);
-        context.globalCompositeOperation = "lighter";
-        for (let index = 0; index < style.SEGMENT_COUNT; index += 1) {
-            const progress = index / (style.SEGMENT_COUNT - 1);
-            const x = startX + sign * span * progress;
-            const y = quadraticCoordinate(profile.startY, profile.controlY, profile.endY, progress) * height;
-            pixelBlock(context, x, y, segmentWidth, outerHeight, style.OUTER_COLOR);
-            pixelBlock(context, x, y, segmentWidth, innerHeight, style.INNER_COLOR);
-            pixelBlock(context, x, y, segmentWidth, coreHeight, style.CORE_COLOR);
-        }
-        const impactX = sign * span * 0.5;
-        const impactY = profile.endY * height;
-        const impactArm = Math.max(18, Math.min(width, height) * style.IMPACT_ARM_RATIO);
-        pixelBlock(context, impactX, impactY, impactArm, coreHeight, style.CORE_COLOR);
-        pixelBlock(context, impactX, impactY, coreHeight, impactArm, style.CORE_COLOR);
+        this.drawLayeredMeleeCurve(
+            context,
+            { x: -sign * span * 0.5, y: profile.startY * height },
+            { x: 0, y: profile.controlY * height },
+            { x: sign * span * 0.5, y: profile.endY * height },
+            width,
+            height
+        );
     }
 
     drawOverheadRangeImage(context, width, height) {
+        this.drawLayeredMeleeCurve(
+            context,
+            { x: -width * 0.16, y: -height * 0.46 },
+            { x: width * 0.18, y: -height * 0.08 },
+            { x: 0, y: height * 0.42 },
+            width,
+            height
+        );
+    }
+
+    drawLayeredMeleeCurve(context, start, control, end, width, height) {
         const style = WARDEN_MELEE_RANGE_IMAGE;
-        const segmentCount = style.SEGMENT_COUNT;
-        const span = height * style.HORIZONTAL_SPAN_RATIO;
-        const segmentHeight = height * style.SEGMENT_WIDTH_RATIO;
-        const outerWidth = Math.max(style.MIN_OUTER_HEIGHT, width * style.OUTER_HEIGHT_RATIO);
-        const innerWidth = Math.max(style.MIN_INNER_HEIGHT, width * style.INNER_HEIGHT_RATIO);
-        const coreWidth = Math.max(style.MIN_CORE_HEIGHT, width * style.CORE_HEIGHT_RATIO);
+        context.save();
         context.globalCompositeOperation = "lighter";
-        for (let index = 0; index < segmentCount; index += 1) {
-            const progress = index / (segmentCount - 1);
-            const y = -span * 0.5 + span * progress;
-            const x = Math.sin(progress * Math.PI) * width * 0.08;
-            pixelBlock(context, x, y, outerWidth, segmentHeight, style.OUTER_COLOR);
-            pixelBlock(context, x, y, innerWidth, segmentHeight, style.INNER_COLOR);
-            pixelBlock(context, x, y, coreWidth, segmentHeight, style.CORE_COLOR);
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        for (const layer of WARDEN_MELEE_STROKE_LAYER) {
+            context.strokeStyle = style[layer.color];
+            context.lineWidth = Math.max(style[layer.minimum], height * style[layer.ratio]);
+            context.beginPath();
+            context.moveTo(start.x, start.y);
+            context.quadraticCurveTo(control.x, control.y, end.x, end.y);
+            context.stroke();
         }
-        const floorY = height * 0.42;
-        pixelBlock(context, 0, floorY, width * 0.82, Math.max(12, height * 0.12), style.OUTER_COLOR);
-        pixelBlock(context, 0, floorY, width * 0.68, Math.max(7, height * 0.07), style.INNER_COLOR);
-        pixelBlock(context, 0, floorY, width * 0.44, Math.max(3, height * 0.03), style.CORE_COLOR);
+        context.fillStyle = style.CORE_COLOR;
+        context.beginPath();
+        context.arc(end.x, end.y, Math.max(6, Math.min(width, height) * style.IMPACT_RADIUS_RATIO), 0, Math.PI * 2);
+        context.fill();
+        context.restore();
     }
 
     drawDashTrail(context, object, width, height) {

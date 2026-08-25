@@ -5,7 +5,7 @@
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: d019865567c39fb44e073562cf1df11157fccb6cb4aba140bd3ee989883dc2ee
 authored-area-sha256: 006b82b383ea3d7bdebd21f322c1dbb54de85af8b3fc02cfa60a9dbd42477904
-authored-sector-sha256: 3c7250fe0a52e5b6c5f1120a411027b66953c3658453c9cfe5c244e95cbff51e
+authored-sector-sha256: 99c751acb18faedf06752634d14325e0d8782139da0148952039997a311189f6
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
 reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
@@ -30,6 +30,8 @@ reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
 | Sector 06 / 6-1~6-8 | canonical v2/generated 8개, `6-8→Boss06→Boarding→Escape`   | Boss06 full combat·1~4인 boarding        |
 
 ## 최근 반영된 시나리오 변화
+
+- Boss06 후속 combat geometry는 스프라이트 불투명 body 폭에 맞춘 120×150 Polygon 하나를 본체 물리·기본탄·Spell·멀티 client prediction에 공유한다. 기본탄의 plain position 예외와 Polygon 반경 0 해석을 제거하고, 유도미사일은 지연 catch-up을 포함한 공용 swept projectile contact로 피해·소비한다. Neutral에서 거리·ID 순 최근접 Player를 선택하고 공격 시작 뒤 target/facing을 고정한다. Arena·Anchor·플랫폼·공격 roster와 Boarding은 변경하지 않았다.
 
 - 48개 Stage 출구를 Entry·Exit·Exit Panel 각 1개와 W interact objective 각 1개로 정규화했다. 출구를 이중으로 막던 도달 objective와 4-8의 별도 자동 quorum 장벽을 제거하고, Sector Key/Access가 부족한 경우에만 `수집 n / 필요 m` 상단 경고를 표시한다. 2-5의 서사용 Upper Transit 잠금 구조물은 일반 Gate 정체성에서 분리했다.
 

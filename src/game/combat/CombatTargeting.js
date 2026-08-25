@@ -9,6 +9,24 @@ export function selectNearestEnemy(position, enemies, range) {
     );
 }
 
+export function selectNearestPositionTarget(position, targets, range = Number.POSITIVE_INFINITY) {
+    let nearest = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    for (const target of targets) {
+        const distance = Math.hypot(position.x - target.position.x, position.y - target.position.y);
+        if (distance > range) continue;
+        if (
+            nearest === null ||
+            distance < nearestDistance ||
+            (distance === nearestDistance && target.id.localeCompare(nearest.id) < 0)
+        ) {
+            nearest = target;
+            nearestDistance = distance;
+        }
+    }
+    return nearest;
+}
+
 export function selectNearestPlayer(position, targets, range) {
     return (
         targets

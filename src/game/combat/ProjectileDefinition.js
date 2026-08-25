@@ -16,6 +16,7 @@ export const PROJECTILE_HOMING = Object.freeze({
 
 export const PROJECTILE_TARGET_COLLECTION = Object.freeze({
     ENEMIES: "enemies",
+    COMBAT_TARGETS: "combatTargets",
     PLAYERS: "players"
 });
 
@@ -60,7 +61,7 @@ export const PROJECTILE_DEFINITION = Object.freeze({
     [PROJECTILE_TYPE.PLAYER]: Object.freeze({
         objectType: PROJECTILE_TYPE.PLAYER,
         defaultMotionKind: PROJECTILE_MOTION_KIND.HOMING,
-        targetStateCollection: PROJECTILE_TARGET_COLLECTION.ENEMIES,
+        targetStateCollection: PROJECTILE_TARGET_COLLECTION.COMBAT_TARGETS,
         renderCollection: PROJECTILE_RENDER_COLLECTION.PLAYER,
         collisionRejectionPolicy: PROJECTILE_COLLISION_REJECTION.CONSUME,
         usesOwnerPredictionId: true

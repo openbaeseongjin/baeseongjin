@@ -1,6 +1,7 @@
 import { ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { AUGMENT_IMPACT_CONFIG, ROPE_IMPACT_CONFIG } from "../config.js";
 import { SPELL_EFFECT_ID, SPELL_ID, SPELL_SPEC } from "../spells/SpellDefinition.js";
+import { combatTargetBoundingRadius } from "../combat/CombatTargetGeometry.js";
 
 const formula = ({ cardId, damage, range, knockbackImpulse = 0 }) =>
     Object.freeze({
@@ -107,8 +108,8 @@ export function validateAugmentImpactFormula(player, claim, target = null, { pos
         claim.sourcePosition.x - claim.contactPosition.x,
         claim.sourcePosition.y - claim.contactPosition.y
     );
-    if (sourceDistance > definition.range + (target?.radius ?? target?.collider?.radius ?? 0) + positionTolerance)
-        return Object.freeze({ valid: false });
+    const targetRadius = target ? combatTargetBoundingRadius(target) : 0;
+    if (sourceDistance > definition.range + targetRadius + positionTolerance) return Object.freeze({ valid: false });
     if (definition.knockback === null) {
         if (claim.knockback !== undefined) return Object.freeze({ valid: false });
     } else if (

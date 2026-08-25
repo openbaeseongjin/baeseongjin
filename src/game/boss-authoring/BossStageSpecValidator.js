@@ -54,6 +54,7 @@ const CONTINUITY_WARDEN_ARENA = Object.freeze({
     MAIN_WIDTH: 3200,
     PLATFORM_COUNT: 3,
     ANCHOR_COUNT: 10,
+    BODY_WIDTH: 120,
     BODY_HEIGHT: 150
 });
 
@@ -373,6 +374,16 @@ function validateContinuityWardenArena(spec, issues, file) {
     }
     if ((spec.arena.anchors ?? []).length !== CONTINUITY_WARDEN_ARENA.ANCHOR_COUNT) {
         issue(issues, file, "continuity-warden-anchor-count-invalid");
+    }
+    const collider = spec.boss?.collider;
+    const position = spec.boss?.position;
+    if (
+        collider?.width !== CONTINUITY_WARDEN_ARENA.BODY_WIDTH ||
+        collider?.height !== CONTINUITY_WARDEN_ARENA.BODY_HEIGHT ||
+        collider.x + collider.width * 0.5 !== position?.x ||
+        collider.y + collider.height * 0.5 !== position?.y
+    ) {
+        issue(issues, file, "continuity-warden-body-collider-invalid");
     }
     if (
         main &&

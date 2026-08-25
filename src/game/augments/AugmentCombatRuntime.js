@@ -1,4 +1,5 @@
-import { distancePointToSegment } from "../combat/CombatSystems.js";
+import { IMPACT_TARGET_KIND } from "../combat/ImpactTarget.js";
+import { combatTargetBlocksImpactFrom } from "../combat/CombatTargetGeometry.js";
 import { AUGMENT_IMPACT_CONFIG } from "../config.js";
 import { ropeAttachmentPoint } from "../rope/RopeAttachment.js";
 import { SpellRuntimeState } from "../spells/SpellRuntimeState.js";
@@ -47,11 +48,15 @@ function impactEvent({
         ...(statusEffectId ? { statusEffectId } : {}),
         ...(impactSpeed === undefined ? {} : { impactSpeed }),
         ...(knockback ? { knockback: Object.freeze(knockback) } : {}),
-        predictedResolution: target.blocksImpactFrom?.(sourcePosition)
+        predictedResolution: combatTargetBlocksImpactFrom(target, sourcePosition)
             ? SPELL_IMPACT_RESOLUTION.SHIELD_BLOCKED
-            : target.health <= damage
-              ? SPELL_IMPACT_RESOLUTION.ENEMY_DEFEATED
-              : SPELL_IMPACT_RESOLUTION.ENEMY_HIT
+            : target.impactTargetKind === IMPACT_TARGET_KIND.BOSS
+              ? target.health <= damage
+                  ? SPELL_IMPACT_RESOLUTION.BOSS_DEFEATED
+                  : SPELL_IMPACT_RESOLUTION.BOSS_HIT
+              : target.health <= damage
+                ? SPELL_IMPACT_RESOLUTION.ENEMY_DEFEATED
+                : SPELL_IMPACT_RESOLUTION.ENEMY_HIT
     });
 }
 
@@ -162,7 +167,6 @@ export class AugmentCombatRuntime {
             surfaces,
             collisionBroadPhase,
             dt,
-            distancePointToSegment,
             emitImpact,
             presentationEvents
         });

@@ -326,8 +326,8 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
         actorId: "boss-06:continuity-warden:body",
         collider: {
             height: 150,
-            width: 96,
-            x: 3312,
+            width: 120,
+            x: 3300,
             y: -1190
         },
         impactTargetIds: ["boss-06:continuity-warden:body"],

@@ -2,6 +2,7 @@ import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 import { PROJECTILE_MOTION_CAPABILITY } from "./ProjectileObject.js";
 import { ENEMY_SIMULATION_CAPABILITY } from "./enemy-weapon/EnemyWeaponDefinition.js";
 import { segmentIntersectsSurface } from "../world/PolygonGeometry.js";
+import { combatTargetOverlapsCircle } from "./CombatTargetGeometry.js";
 
 const simulationDispatcher = new SimulationDispatcher();
 const EMPTY_COLLISION_ACTORS = Object.freeze([]);
@@ -81,15 +82,13 @@ export function updatePlayerProjectiles({
             );
             continue;
         }
-        const targetHit = target.collider
-            ? target.collider.overlapsCircle(target.position, projectile.position, projectile.radius)
-            : projectile.position.distanceTo(target.position) <= projectile.radius + target.radius;
+        const targetHit = combatTargetOverlapsCircle(target, projectile.position, projectile.radius);
         if (resolveHits && targetHit) {
             target.health -= projectile.damage;
             hits.push(
                 Object.freeze({
                     type: target.health <= 0 ? "enemy-defeated" : "enemy-hit",
-                    position: target.position.clone(),
+                    position: projectile.position.clone(),
                     damage: projectile.damage,
                     sourcePlayerId: projectile.ownerId,
                     targetId: target.id,
@@ -101,7 +100,7 @@ export function updatePlayerProjectiles({
                 Object.freeze({
                     projectileId: projectile.id,
                     resolution: target.health <= 0 ? "enemy-defeated" : "enemy-hit",
-                    position: target.position.clone()
+                    position: projectile.position.clone()
                 })
             );
             continue;
