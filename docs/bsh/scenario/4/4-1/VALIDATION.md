@@ -54,5 +54,5 @@
 - [ ] no world pause / control lock
 
 ## Boundary
-- [ ] do not direct-wire 3-8→4-1 until Post-Sector03 contract is resolved
+- [x] Boss03 catalog intercepts 3-8→4-1 and defeat returns each Player to the authored 4-1 Entry
 - [ ] new 4-1→4-2 handoff does not inherit legacy Transit narrative

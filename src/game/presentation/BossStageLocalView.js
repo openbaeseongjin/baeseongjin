@@ -5,6 +5,7 @@ export const BOSS_CAMERA_ZOOM_RATIO = 0.55;
 
 const BOSS_CAMERA_FOCUS_STATUS = Object.freeze({ active: true, completed: true });
 const BOSS_CAMERA_FOCUS_KIND = Object.freeze({
+    [LOWER_SECTOR_COMMANDER_OBJECT_KIND.BODY]: true,
     "boss-continuity-warden": true,
     "boss-victory-camera": true
 });
@@ -80,3 +81,4 @@ export function bossCameraFocusPlayer(player, bossStage) {
         }
     };
 }
+import { LOWER_SECTOR_COMMANDER_OBJECT_KIND } from "../boss/LowerSectorCommanderDefinition.js";

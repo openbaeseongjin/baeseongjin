@@ -31,4 +31,4 @@ Direction Runtime v1 exists on main.
 
 ## Critical
 Do not infer causality.
-Do not add a separate Boss or transition geometry: the existing authored Gate portal is the sole Sector03→04 connection.
+Do not add transition geometry to 3-8. The existing authored Gate route is intercepted by the Boss03 catalog entry and resumes at the 4-1 authored Entry after Commander defeat; removing that catalog entry restores the direct portal.

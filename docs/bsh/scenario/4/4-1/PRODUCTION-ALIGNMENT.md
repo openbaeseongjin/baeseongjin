@@ -40,4 +40,4 @@ The new Upper Residential 4-1 is generated from canonical `AREA-SPEC.v2.json`.
 Do not interpret this documentation package as an already migrated Runtime.
 
 `AREA-SPEC.v2.json` is the production geometry authority and is registered through the Sector04 manifest.
-The existing 3-8 Gate, after its source objective and Sector03 Access 3-of-3 condition, directly transfers each Player to this Stage's authored Entry. Do not add separate transition geometry or a Boss-stage detour.
+The existing 3-8 Gate route is intercepted by the active Boss03 catalog entry after its source objective and Sector03 Access 3-of-3 condition. Commander defeat transfers each Player to this Stage's authored Entry; removing Boss03 from the product catalog restores the direct portal without changing either Stage geometry.

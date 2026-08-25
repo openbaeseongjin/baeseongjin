@@ -5,6 +5,7 @@ const DEFAULT_WEAK_NORMAL_DAMAGE_MULTIPLIER = 1;
 const DEFAULT_CLOSED_BODY_DAMAGE_MULTIPLIER = 0.25;
 const MIN_PARTICIPANTS = 1;
 const MAX_PARTICIPANTS = 4;
+const DEFAULT_PARTICIPANT_DEFEAT_POLICY = "shared-wipe";
 
 function freezeValue(value) {
     if (Array.isArray(value)) return Object.freeze(value.map((entry) => freezeValue(entry)));
@@ -95,6 +96,10 @@ export class BossStageDefinition {
             spec.combat?.closedBodyDamageMultiplier ?? DEFAULT_CLOSED_BODY_DAMAGE_MULTIPLIER,
             "Boss closedBodyDamageMultiplier",
             { minimum: 0, maximum: 1 }
+        );
+        this.participantDefeatPolicy = requireId(
+            spec.combat?.participantDefeatPolicy ?? DEFAULT_PARTICIPANT_DEFEAT_POLICY,
+            "Boss participant defeat policy"
         );
         this.phases = Object.freeze(spec.phases.map((phase, index) => normalizePhase(phase, index)));
         this.arena = freezeValue({ ...(spec.arena ?? {}), boss: spec.boss ?? null, mechanics: spec.mechanics ?? [] });

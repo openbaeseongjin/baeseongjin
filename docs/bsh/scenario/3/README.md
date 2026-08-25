@@ -9,7 +9,7 @@
 > **Core Story Shift:** `왜 C만 멈췄지? → 같은 사고였는데… 이동 조건은 같지 않았어.`
 > **General Stages:** `3-1 → 3-8`
 > **3-8 Boss:** NONE IN THIS STAGE
-> **Post-Sector Transition:** Direct authored portal `3-8 → 4-1`
+> **Post-Sector Transition:** `3-8 → Boss03 → 4-1 authored Entry`
 > **New Enemy Type:** NONE
 > **New Rope Input / Mode:** NONE
 > **Growth:** 3-5에서 generic Augment Offer #3
@@ -1580,7 +1580,7 @@ Transition:
 ```text
 UPPER EXCHANGE GATE
 ↓
-DIRECT AUTHORED PORTAL
+Boss03 catalog-intercepted authored route
 ↓
 SECTOR 04 UPPER RESIDENTIAL / AMENITY
 ```
@@ -1867,7 +1867,7 @@ ARCHIVE CONNECTION
 ↓
 
 POST-SECTOR 03
-DIRECT AUTHORED PORTAL
+Boss03 catalog-intercepted authored route
 4-1
 ```
 

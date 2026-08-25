@@ -5,7 +5,7 @@ import { windBladePhase } from "../../game/world/WorldForceField.js";
 import { isSurfaceEnabledForProgress } from "../../game/world/WorldGateGeometry.js";
 import { authoredRegionForPosition } from "../../game/world/AuthoredLandmarkResolver.js";
 import { resolveAccessModuleTargets } from "../ScreenEdgeGuide.js";
-import { boundsForVertices, isVisible } from "../RenderViewport.js";
+import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
     WORLD_OBJECT_SPRITE_STATE,

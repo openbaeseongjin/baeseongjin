@@ -25,6 +25,7 @@ import { WORLD_CONFIG } from "../config.js";
 import { createGameSimulationForWorldRevision } from "../simulation/GameSimulationFactory.js";
 import { routeServerMessage } from "./RemoteServerMessageRouter.js";
 import { ClientServerTickProjection } from "./ClientServerTickProjection.js";
+import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
 import {
     createPartyChatMessage,
     createPartyChatSubmission,
@@ -358,7 +359,15 @@ export class RemoteGameAuthority {
 
     submitPredictedBossImpact(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
-        if (!this.submitOwnerMotion()) return false;
+        if (!this.submitOwnerMotion()) {
+            if (event.parameters?.sourceType === LOWER_SECTOR_COMMANDER_HAZARD.GRAB) {
+                this.ownerRuntime.recordImpactReceipt(
+                    { impactId: event.impactId, accepted: false },
+                    this.latestSnapshot
+                );
+            }
+            return false;
+        }
         const state = this.ownerRuntime.impactClaimState();
         const respawned = event.respawned === true;
         const outcome = {
@@ -366,7 +375,12 @@ export class RemoteGameAuthority {
             digest: createPlayerImpactStateDigest(state, { impactType: "player-hit", respawned })
         };
         this.pendingImpactClaims.set(event.impactId, { event, outcome });
-        return this.submitImpactClaim(event, outcome);
+        const submitted = this.submitImpactClaim(event, outcome);
+        if (!submitted && event.parameters?.sourceType === LOWER_SECTOR_COMMANDER_HAZARD.GRAB) {
+            this.pendingImpactClaims.delete(event.impactId);
+            this.ownerRuntime.recordImpactReceipt({ impactId: event.impactId, accepted: false }, this.latestSnapshot);
+        }
+        return submitted;
     }
 
     submitHitClaim(event) {

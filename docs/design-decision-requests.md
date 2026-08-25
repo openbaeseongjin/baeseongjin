@@ -18,9 +18,9 @@ Rope 6·Action 6·Signature 6·범용 modifier 4의 22장, explicit Node 1-4·2-
 
 ## P2. Boss
 
-제품 Boss는 Sector 06 마지막의 Boss06 하나다.
+제품 Boss는 Sector03 경계의 Boss03과 Sector06 마지막의 Boss06이다.
 
-- 1-8→2-1, 2-8→3-1, 3-8→4-1, 4-8→5-1, 5-8→6-1은 직접 Gate portal이다.
+- 1-8→2-1, 2-8→3-1, 4-8→5-1, 5-8→6-1은 직접 Gate portal이며 3-8→Boss03→4-1을 사용한다.
 - 6-8→Boss06→Boarding→Escape는 terminal Boss 흐름이다.
 
 ## P3. 일반 Timer / Purge

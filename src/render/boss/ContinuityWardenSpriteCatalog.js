@@ -1,6 +1,9 @@
 import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 import { SpriteAnimation } from "../sprites/SpriteAnimation.js";
-import { CONTINUITY_WARDEN_STATE } from "../../game/boss/ContinuityWardenDefinition.js";
+import {
+    CONTINUITY_WARDEN_LOCOMOTION_STATE,
+    CONTINUITY_WARDEN_STATE
+} from "../../game/boss/ContinuityWardenDefinition.js";
 
 const ASSET_ID = "continuity-warden-phase-1";
 const CELL = Object.freeze({ width: 128, height: 192 });
@@ -13,7 +16,8 @@ const ACTION_PHASE = Object.freeze({ TELEGRAPH: "telegraph", ACTIVE: "active" })
 const CHARGE_CLIP_ID = Object.freeze({
     TELEGRAPH: "charge-telegraph",
     SUSTAIN: "charge-sustain",
-    EXIT: "charge-exit"
+    EXIT: "charge-exit",
+    JUMP_PREPARE: "jump-prepare"
 });
 
 const ATLAS = Object.freeze({
@@ -84,6 +88,12 @@ const CHARGE_CLIP_DEFINITION = Object.freeze({
         frameOffset: 6,
         durations: Object.freeze(FRAME_DURATION_BY_CLIP.charge.slice(6, 8)),
         loop: false
+    }),
+    [CHARGE_CLIP_ID.JUMP_PREPARE]: Object.freeze({
+        atlasId: "charge",
+        frameOffset: 0,
+        durations: Object.freeze([0.2, 0.2]),
+        loop: false
     })
 });
 
@@ -95,6 +105,10 @@ const DEFEAT_CLIP_BY_STAGE = Object.freeze({
     "baton-drop": "defeated-baton-drop",
     "shield-fall": "defeated-shield-fall",
     unconscious: "defeated-unconscious"
+});
+const LOCOMOTION_CLIP_BY_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_LOCOMOTION_STATE.WALK]: "combat-idle",
+    [CONTINUITY_WARDEN_LOCOMOTION_STATE.TAKEOFF]: CHARGE_CLIP_ID.JUMP_PREPARE
 });
 
 const STATE_CLIP_ID = Object.freeze({
@@ -187,6 +201,7 @@ export class ContinuityWardenSpriteDefinition {
             [CHARGE_CLIP_ID.TELEGRAPH]: segmentedClip(CHARGE_CLIP_ID.TELEGRAPH),
             [CHARGE_CLIP_ID.SUSTAIN]: segmentedClip(CHARGE_CLIP_ID.SUSTAIN),
             [CHARGE_CLIP_ID.EXIT]: segmentedClip(CHARGE_CLIP_ID.EXIT),
+            [CHARGE_CLIP_ID.JUMP_PREPARE]: segmentedClip(CHARGE_CLIP_ID.JUMP_PREPARE),
             "counter-ready": clip("counter-ready"),
             "counter-bash": clip("counter-bash"),
             "security-command": clip("security-command"),
@@ -226,6 +241,15 @@ export class ContinuityWardenSpriteDefinition {
             return animation.stateElapsedSeconds < enter.totalDurationSeconds
                 ? enter.frameAt(animation.stateElapsedSeconds)
                 : this.clips["guard-loop"].frameAt(animation.stateElapsedSeconds - enter.totalDurationSeconds);
+        }
+        const locomotionClipId = LOCOMOTION_CLIP_BY_STATE[object.locomotionState];
+        if (locomotionClipId) {
+            const locomotionClip = this.clips[locomotionClipId];
+            const phase =
+                object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.WALK
+                    ? animation.distancePx / 36
+                    : animation.stateElapsedSeconds;
+            return locomotionClip.frameAt(phase);
         }
         if (object.state === "security-active") return lastFrame(this.clips["security-command"]);
         if (object.state === "defeated") {

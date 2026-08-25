@@ -71,5 +71,6 @@
 - 남은 renderer 전체 순회와 정적 backdrop 재합성은 viewport candidate·cache 경계의 후속 최적화 대상이다.
 - `SpriteSceneResourceBundle`은 manifest definition에서 lazy Image asset set을 한 번 조립한다. startup은 Player와 기본 시작 Area package만 우선 load·decode하고, 다른 Sector package는 current Area gate와 분리된 background promise로 준비한다. 싱글·멀티·디버그 재시작은 같은 bundle을 재사용하므로 gameplay frame과 모드 전환이 atlas 요청을 다시 만들지 않는다. Environment component는 definition별 frozen atlas ID 배열을 Object lookup으로 선택해 frame마다 전체 package 목록을 재조립하지 않는다.
 - Boss06 지지면 판정은 Runtime 생성 때 Main·Ledge 4개만 immutable support catalog로 정규화하고, 활성 Boss의 neutral locomotion tick에서 이 고정 후보만 좌표 질의한다. 전체 world surface를 순회하거나 플랫폼 진입 이벤트·snapshot 상태를 만들지 않는다.
+- Boss03은 고정 Arena surface 4개와 active participant 최대 4명만 조회한다. `CombatInteractionController`의 동적 Map도 참가자당 최대 하나의 capture만 보관하며 비활성 interaction은 완료 tick에 제거한다. 월드 surface·전체 Player 이력·Boss catalog를 fixed step마다 순회하지 않는다.
 
 새 기능은 남은 위반을 핑계로 같은 패턴을 추가하지 않는다. 해당 권위 컴포넌트 경계를 복구하는 별도 수정 단위로 제거한다.

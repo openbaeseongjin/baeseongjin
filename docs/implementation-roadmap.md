@@ -77,7 +77,7 @@ AS IS → Sector 01~~06의 48개 Stage는 canonical v2/generated catalog로 prod
 
 TO BE → Sector 01~05는 마지막 일반 Stage에서 다음 Sector로 직접 전환하고, Sector 06 뒤에만 독립 Boss Stage를 유지한다. Boss06 terminal Boarding을 포함한 실제 desktop/mobile 및 멀티플레이 전체 등반을 검증한다. 상세 상태는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 
-진행은 `1-8→2-1`, `2-8→3-1`, `3-8→4-1`, `4-8→5-1`, `5-8→6-1`, `6-8→Boss06→Gate/Bridge/Shuttle→전원 Boarding→Escape`다. 일반 Timer/Purge와 Boss Timer/Arena collapse는 계속 HOLD다.
+진행은 `1-8→2-1`, `2-8→3-1`, `3-8→Boss03→4-1`, `4-8→5-1`, `5-8→6-1`, `6-8→Boss06→Gate/Bridge/Shuttle→전원 Boarding→Escape`다. Boss03 catalog 항목을 제거하면 3-8→4-1 직결로 복구되며 Timer/Purge와 Boss Timer/Arena collapse는 계속 HOLD다.
 
 `2-3`의 과거 Specialization과 Node offer는 제거됐다. 공간은 유지하지만 증강 획득·출구 진행과 연결하지 않는다.
 

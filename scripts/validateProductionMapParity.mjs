@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { extname, join, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { PLAYER_CONFIG, ROPE_CONFIG, ropeHookReach } from "../src/game/config.js";
+import { BOSS_STAGE_CATALOG } from "../src/game/boss-authoring/BossStageCatalog.js";
 import { ENEMY_TYPE } from "../src/game/EnemyType.js";
 import { EMPTY_AREA_BEHAVIOR_REGISTRY } from "../src/game/world/area-authoring-v2/AreaBehaviorRegistry.js";
 import { AUTHORED_RUNTIME_CONTENT_BOUNDARY_STAGE_IDS } from "../src/game/world/area-authoring-v2/AreaRuntimePromotion.js";
@@ -35,14 +36,25 @@ const runtimeCatalogs = Object.freeze([
 const RUNTIME_STAGE_COUNT = 48;
 const SCENARIO_STAGE_COUNT = 0;
 const TOTAL_STAGE_COUNT = RUNTIME_STAGE_COUNT + SCENARIO_STAGE_COUNT;
-const EXPECTED_BOSS_STAGE_IDS = Object.freeze(["boss-06"]);
+const EXPECTED_EDITOR_BOSS_STAGE_IDS = Object.freeze(["boss-03", "boss-06"]);
+const EXPECTED_BOSS_STAGE_IDS = Object.freeze(
+    Object.keys(BOSS_STAGE_CATALOG).sort((left, right) => left.localeCompare(right))
+);
+const ACTIVE_BOSS_ID_BY_SOURCE_STAGE = Object.freeze(
+    Object.fromEntries(
+        Object.values(BOSS_STAGE_CATALOG).map(({ id, sourceAreaId }) => [
+            sourceAreaId.replace(/^sector-0?/, "").replace("-0", "-"),
+            id
+        ])
+    )
+);
 const EXPECTED_SECTOR_END_FLOW = Object.freeze({
     "1-8": Object.freeze({ targetStageId: "2-1", bossStageId: null }),
     "2-8": Object.freeze({ targetStageId: "3-1", bossStageId: null }),
-    "3-8": Object.freeze({ targetStageId: "4-1", bossStageId: null }),
+    "3-8": Object.freeze({ targetStageId: "4-1", bossStageId: ACTIVE_BOSS_ID_BY_SOURCE_STAGE["3-8"] ?? null }),
     "4-8": Object.freeze({ targetStageId: "5-1", bossStageId: null }),
     "5-8": Object.freeze({ targetStageId: "6-1", bossStageId: null }),
-    "6-8": Object.freeze({ targetStageId: null, bossStageId: "boss-06" })
+    "6-8": Object.freeze({ targetStageId: null, bossStageId: ACTIVE_BOSS_ID_BY_SOURCE_STAGE["6-8"] ?? null })
 });
 const PROMOTED_STAGE_ENTRY_SECTOR_RANGE = Object.freeze({ first: 4, last: 6 });
 const ENEMY_DENSITY_EXEMPT_STAGE_LOOKUP = Object.freeze({ "1-1": true, "1-2": true });
@@ -310,9 +322,9 @@ function validateEditorCatalog(editorCatalog, issues) {
     const bossStageIds = bossStageEntries
         .map(({ stageId }) => stageId)
         .sort((left, right) => left.localeCompare(right));
-    if (JSON.stringify(bossStageIds) !== JSON.stringify(EXPECTED_BOSS_STAGE_IDS)) {
+    if (JSON.stringify(bossStageIds) !== JSON.stringify(EXPECTED_EDITOR_BOSS_STAGE_IDS)) {
         issue(issues, "editor-boss-stage-catalog-mismatch", {
-            expected: EXPECTED_BOSS_STAGE_IDS,
+            expected: EXPECTED_EDITOR_BOSS_STAGE_IDS,
             actual: bossStageIds
         });
     }

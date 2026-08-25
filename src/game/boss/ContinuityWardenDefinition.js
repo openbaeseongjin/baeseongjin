@@ -30,6 +30,10 @@ export const CONTINUITY_WARDEN_ACTION_PHASE = Object.freeze({
     RECOVERY: "recovery"
 });
 
+export const CONTINUITY_WARDEN_HUD_LABEL = Object.freeze({
+    SECURITY_WARNING: "WARNING"
+});
+
 export const CONTINUITY_WARDEN_REACTION_STATE = Object.freeze({
     DAMAGED: "damaged"
 });

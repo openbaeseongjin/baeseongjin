@@ -19,9 +19,14 @@ function freezeWorldObject(object) {
         verticalVelocity: finite(object.verticalVelocity),
         motionProgress: Math.max(0, Math.min(1, finite(object.motionProgress))),
         movementProgress: finite(object.movementProgress),
+        defeatProgress: Math.max(0, Math.min(1, finite(object.defeatProgress))),
         suspensionHeight: Math.max(0, finite(object.suspensionHeight)),
         rotation: finite(object.rotation),
         remainingSeconds: Math.max(0, finite(object.remainingSeconds)),
+        targetPlayerId: object.targetPlayerId ?? null,
+        targetPosition: object.targetPosition
+            ? Object.freeze({ x: finite(object.targetPosition.x), y: finite(object.targetPosition.y) })
+            : null,
         surfaceId: object.surfaceId ?? null,
         velocity: Object.freeze({ x: finite(object.velocity?.x), y: finite(object.velocity?.y) }),
         path: object.path
@@ -119,6 +124,7 @@ export function createBossStagePresentation(snapshot, stageSpec = null, events =
                   hud.objective ??
                   presentation.objective ??
                   "ENGAGE TARGET"),
+            warningLabel: snapshot.warningLabel ?? "",
             vulnerabilityLabel:
                 snapshot.vulnerabilityLabel ??
                 hud.vulnerabilityLabel ??

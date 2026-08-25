@@ -3,6 +3,7 @@ import {
     BOSS_DAMAGE_MODE,
     BOSS_HEALTH_BAR_STYLE,
     BOSS_MECHANIC_TYPE,
+    BOSS_PARTICIPANT_DEFEAT_POLICY,
     BOSS_STAGE_SPEC_TYPE,
     BOSS_STAGE_SPEC_VERSION,
     BOSS_TERMINAL_COMPLETION,
@@ -20,6 +21,7 @@ const VISUAL_PRESET_IDS = Object.freeze(Object.values(BOSS_VISUAL_PRESET_ID));
 const VULNERABILITY_TARGET_IDS = Object.freeze(Object.values(BOSS_VULNERABILITY_TARGET_ID));
 const VULNERABILITY_TRIGGERS = Object.freeze(Object.values(BOSS_VULNERABILITY_TRIGGER));
 const HEALTH_BAR_STYLES = Object.freeze(Object.values(BOSS_HEALTH_BAR_STYLE));
+const PARTICIPANT_DEFEAT_POLICIES = Object.freeze(Object.values(BOSS_PARTICIPANT_DEFEAT_POLICY));
 const ANCHOR_ROLES = Object.freeze(Object.values(BOSS_ANCHOR_ROLE));
 const EDITABLE_ROOTS = Object.freeze([
     "arena",
@@ -56,6 +58,42 @@ const CONTINUITY_WARDEN_ARENA = Object.freeze({
     ANCHOR_COUNT: 10,
     BODY_WIDTH: 120,
     BODY_HEIGHT: 150
+});
+const LOWER_SECTOR_COMMANDER_POSITIVE_PARAMETERS = Object.freeze([
+    "acceleration",
+    "deceleration",
+    "grabRange",
+    "grabTelegraphSeconds",
+    "grabLeadSeconds",
+    "grabTimeoutSeconds",
+    "grabDamage",
+    "grabHoldSeconds",
+    "grabPullSeconds",
+    "grabHammerDamage",
+    "grabCooldownSeconds",
+    "captureCliffMargin",
+    "captureFrontGap",
+    "hammerRange",
+    "hammerHeight",
+    "hammerTelegraphSeconds",
+    "hammerActiveSeconds",
+    "hammerDamage",
+    "chargeDistance",
+    "chargeSpeed",
+    "chargeTelegraphSeconds",
+    "chargeActiveSeconds",
+    "chargeDamage",
+    "chargeKnockback"
+]);
+const LOWER_SECTOR_COMMANDER_ARENA = Object.freeze({
+    MAIN_KIND: "commander-main-runway",
+    CROSSBEAM_KIND: "commander-crossbeam",
+    WIDTH: 3200,
+    HEIGHT: 1200,
+    MAIN_WIDTH: 2800,
+    CROSSBEAM_COUNT: 3,
+    BODY_WIDTH: 128,
+    BODY_HEIGHT: 192
 });
 
 function issue(issues, file, code, details = {}) {
@@ -285,6 +323,9 @@ function validateCombat(spec, issues, file) {
     if (combat.participantCountSnapshot !== "boss-stage-start") {
         issue(issues, file, "combat-participant-snapshot-invalid");
     }
+    if (!PARTICIPANT_DEFEAT_POLICIES.includes(combat.participantDefeatPolicy)) {
+        issue(issues, file, "combat-participant-defeat-policy-invalid");
+    }
     if (
         combat.weakNormalDamageMultiplier !== undefined &&
         (!Number.isFinite(combat.weakNormalDamageMultiplier) ||
@@ -350,8 +391,62 @@ function validateMechanics(spec, issues, file) {
                 issue(issues, file, "continuity-warden-summon-parameters-invalid", { id: mechanic.id });
             }
         }
+        if (mechanic.type === BOSS_MECHANIC_TYPE.LOWER_SECTOR_COMMANDER && isObject(mechanic.parameters)) {
+            for (const key of LOWER_SECTOR_COMMANDER_POSITIVE_PARAMETERS) {
+                if (!positive(mechanic.parameters[key])) {
+                    issue(issues, file, "lower-sector-commander-parameter-invalid", { id: mechanic.id, key });
+                }
+            }
+            const speeds = mechanic.parameters.walkSpeeds;
+            const ratios = mechanic.parameters.intensityHealthRatios;
+            const recoveries = mechanic.parameters.recoverySeconds;
+            if (!Array.isArray(speeds) || speeds.length !== 3 || !speeds.every(positive)) {
+                issue(issues, file, "lower-sector-commander-walk-speeds-invalid", { id: mechanic.id });
+            }
+            if (
+                !Array.isArray(ratios) ||
+                ratios.length !== 2 ||
+                !ratios.every((value) => Number.isFinite(value) && value > 0 && value < 1) ||
+                ratios[0] <= ratios[1]
+            ) {
+                issue(issues, file, "lower-sector-commander-intensity-ratios-invalid", { id: mechanic.id });
+            }
+            if (!Array.isArray(recoveries) || recoveries.length !== 3 || !recoveries.every(positive)) {
+                issue(issues, file, "lower-sector-commander-recovery-invalid", { id: mechanic.id });
+            }
+        }
     }
     return ids;
+}
+
+function validateLowerSectorCommanderArena(spec, issues, file) {
+    if (!spec.mechanics?.some(({ type }) => type === BOSS_MECHANIC_TYPE.LOWER_SECTOR_COMMANDER)) return;
+    const bounds = spec.arena?.bounds;
+    const surfaces = spec.arena?.surfaces ?? [];
+    const mains = surfaces.filter(({ kind }) => kind === LOWER_SECTOR_COMMANDER_ARENA.MAIN_KIND);
+    const crossbeams = surfaces.filter(({ kind }) => kind === LOWER_SECTOR_COMMANDER_ARENA.CROSSBEAM_KIND);
+    if (
+        bounds?.width !== LOWER_SECTOR_COMMANDER_ARENA.WIDTH ||
+        bounds?.height !== LOWER_SECTOR_COMMANDER_ARENA.HEIGHT
+    ) {
+        issue(issues, file, "lower-sector-commander-arena-size-invalid");
+    }
+    if (mains.length !== 1 || mains[0]?.bounds.width !== LOWER_SECTOR_COMMANDER_ARENA.MAIN_WIDTH) {
+        issue(issues, file, "lower-sector-commander-main-floor-invalid");
+    }
+    if (crossbeams.length !== LOWER_SECTOR_COMMANDER_ARENA.CROSSBEAM_COUNT) {
+        issue(issues, file, "lower-sector-commander-crossbeam-count-invalid");
+    }
+    const collider = spec.boss?.collider;
+    const position = spec.boss?.position;
+    if (
+        collider?.width !== LOWER_SECTOR_COMMANDER_ARENA.BODY_WIDTH ||
+        collider?.height !== LOWER_SECTOR_COMMANDER_ARENA.BODY_HEIGHT ||
+        collider.x + collider.width * 0.5 !== position?.x ||
+        collider.y + collider.height * 0.5 !== position?.y
+    ) {
+        issue(issues, file, "lower-sector-commander-body-collider-invalid");
+    }
 }
 
 function validateContinuityWardenArena(spec, issues, file) {
@@ -470,12 +565,15 @@ export function validateBossStageSpec(spec, { file = "boss-stage.json" } = {}) {
     }
     validateArena(spec, issues, file);
     validateContinuityWardenArena(spec, issues, file);
+    validateLowerSectorCommanderArena(spec, issues, file);
     validateCombat(spec, issues, file);
     if (
         !isObject(spec.boss) ||
         typeof spec.boss.actorId !== "string" ||
         !validBounds(spec.boss.collider) ||
-        !VISUAL_PRESET_IDS.includes(spec.boss.visualPresetId)
+        !VISUAL_PRESET_IDS.includes(spec.boss.visualPresetId) ||
+        !MECHANIC_TYPES.includes(spec.boss.mechanicId) ||
+        !spec.mechanics?.some(({ type }) => type === spec.boss.mechanicId)
     ) {
         issue(issues, file, "boss-actor-invalid");
     }

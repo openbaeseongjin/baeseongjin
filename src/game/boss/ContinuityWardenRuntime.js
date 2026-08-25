@@ -23,6 +23,7 @@ import {
     CONTINUITY_WARDEN_ACTION_PHASE as ACTION_PHASE,
     CONTINUITY_WARDEN_EVENT,
     CONTINUITY_WARDEN_HAZARD,
+    CONTINUITY_WARDEN_HUD_LABEL,
     CONTINUITY_WARDEN_ID,
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
     CONTINUITY_WARDEN_OBJECT_KIND as OBJECT_KIND,
@@ -80,6 +81,9 @@ const MOTION_HAZARD_STATE = Object.freeze({
     [CONTINUITY_WARDEN_STATE.CHARGE]: true
 });
 const CAMERA_PRIORITY = Object.freeze({ BODY: 1, HAZARD: 5 });
+const HUD_WARNING_BY_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_STATE.SECURITY_COMMAND]: CONTINUITY_WARDEN_HUD_LABEL.SECURITY_WARNING
+});
 const PRESENTED_PAD_SURFACE_KIND = Object.freeze({
     [CONTINUITY_WARDEN_SURFACE_KIND.MAIN]: true,
     [CONTINUITY_WARDEN_SURFACE_KIND.LEDGE]: true,
@@ -262,6 +266,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.locomotionTarget = null;
         this.locomotionLandingPending = false;
         this.locomotionTimer = 0;
+        this.walkDistance = 0;
         this.reactionState = null;
         this.reactionTimer = 0;
         this.previousBodyPosition = { ...this.bodyPosition };
@@ -436,6 +441,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.locomotionTarget = null;
         this.locomotionLandingPending = false;
         this.locomotionTimer = 0;
+        this.walkDistance = 0;
         this.reactionState = null;
         this.reactionTimer = 0;
         this.previousBodyPosition = { ...this.bodyPosition };
@@ -523,6 +529,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         const delta = destination.x - this.bodyPosition.x;
         const step = Math.sign(delta) * Math.min(Math.abs(delta), this.config.walkSpeed * dt);
         this.bodyPosition = { x: this.bodyPosition.x + step, y: destination.y };
+        this.walkDistance += Math.abs(step);
         this.body.setKinematicPosition(this.bodyPosition, dt);
         this.facing = delta === 0 ? this.facing : Math.sign(delta);
         return Math.abs(destination.x - this.bodyPosition.x) <= Number.EPSILON;
@@ -1657,6 +1664,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 actionState: this.actionPhase,
                 remainingSeconds: this.timer,
                 locomotionState: this.locomotionState,
+                movementProgress: this.walkDistance,
                 reactionState: this.reactionState,
                 verticalVelocity: jumpMotion.velocity.y,
                 motionProgress:
@@ -1857,6 +1865,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                         ? "EVACUATION COMPLETE"
                         : "MAINTENANCE SHUTTLE / BOARDING"
                     : this.definition.phases[0]?.hud?.objective,
+            warningLabel: HUD_WARNING_BY_STATE[this.state] ?? "",
             health: this.health,
             currentHealth: this.health,
             vulnerability: freezeComposite({ active: false, targetId: TARGET_ID, remainingSeconds: 0 }),
@@ -1898,6 +1907,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             locomotionTarget: this.locomotionTarget,
             locomotionLandingPending: this.locomotionLandingPending,
             locomotionTimer: this.locomotionTimer,
+            walkDistance: this.walkDistance,
             jumpTarget: this.jumpTarget,
             jumpMotion: this.jumpMotion.snapshot(),
             body: this.body.snapshot(),
@@ -1951,6 +1961,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.locomotionTarget = snapshot.locomotionTarget ? { ...snapshot.locomotionTarget } : null;
         this.locomotionLandingPending = snapshot.locomotionLandingPending === true;
         this.locomotionTimer = snapshot.locomotionTimer ?? 0;
+        this.walkDistance = snapshot.walkDistance ?? 0;
         this.jumpTarget = {
             ...(snapshot.jumpTarget ?? snapshot.body?.position ?? this.definition.arena.boss.position)
         };
