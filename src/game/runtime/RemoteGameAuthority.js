@@ -29,6 +29,10 @@ import { ClientServerTickProjection } from "./ClientServerTickProjection.js";
 import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
 import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "../combat/PlatformCollisionDamage.js";
 import {
+    AUGMENT_IMPACT_EVENT_SOURCE_KIND,
+    AUGMENT_IMPACT_REPLICATION_EVENT_TYPE
+} from "../augments/AugmentImpactEventDefinition.js";
+import {
     createPartyChatMessage,
     createPartyChatSubmission,
     serializePartyChatSubmission
@@ -741,7 +745,12 @@ export class RemoteGameAuthority {
                 const predictionId =
                     event.parameters?.sourceKind === "rope-impact" ? event.parameters.predictionId : null;
                 const augmentEventId =
-                    event.parameters?.sourceKind === "augment-impact" ? event.parameters.eventId : null;
+                    event.eventType === AUGMENT_IMPACT_REPLICATION_EVENT_TYPE.RESOLVED &&
+                    event.sourceKind === AUGMENT_IMPACT_EVENT_SOURCE_KIND
+                        ? event.impactId
+                        : event.parameters?.sourceKind === AUGMENT_IMPACT_EVENT_SOURCE_KIND
+                          ? event.parameters.eventId
+                          : null;
                 if (augmentEventId && this.locallyPredictedAugmentImpactIds.delete(augmentEventId)) return false;
                 if (!predictionId || !this.locallyPredictedRopeImpactIds.delete(predictionId)) return true;
                 const predictedResolution = this.predictedRopeImpactResolutions.get(predictionId);

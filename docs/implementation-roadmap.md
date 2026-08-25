@@ -39,6 +39,7 @@
 - 1-1/1-2 local Player Bark와 인증 Party Chat이 공용 queue·causal dedupe·speaker 머리 위/화면 경계 타이핑 말풍선을 사용
 - 0.45.0 Stage Direction v1 schema·compiler·coverage/review release gate·timeline runtime·authority adapter와 1-1/1-2 Camera/Story/Bark/Audio/Lighting/비언어 migration
 - 0.72.2 플랫폼 충돌 피해: 공중→접지 전이 대신 authored surface와 새 충돌이 시작된 tick의 보정 전 2D 속력으로 기존 `800~1400px/s → 최대 체력 0~50%` 곡선을 한 번 적용한다.
+- 0.73.1 멀티 Player 피격 표현: Enemy Behavior·Boss·Player Spell·적 투사체가 공통 `player-hit + target ID + impact ID` 사건을 사용하고 피해자의 즉시 예측과 동료의 서버 확정을 actor별 FSM에서 한 번씩 재생한다.
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.
 - [0.62.0 / #934] 움직이는 Boss Polygon Rope는 손→조준 ray의 앞면 교점, body-local anchor, 선속도+회전 접선속도 joint와 owner/server/remote 동일 transform 복원을 사용한다. Boss06의 정적 Main/Ledge/Gate는 collision platform으로서 Ropeable이며, Warden body는 플랫폼이 아닌 actor라 부착 대상이 아니다.
 - [0.65.0 / #936] Boss06은 표현 경고와 실제 hazard geometry, ID 순서의 wipe·승리 복귀, local Player 우선 camera, 검증된 participant restore와 단일 authority Boss DTO 계약을 사용한다.

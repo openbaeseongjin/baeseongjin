@@ -5,6 +5,9 @@ import { PLAYER_IMPACT_TYPE } from "../network/PlayerImpactClaim.js";
 import { ENEMY_LIFECYCLE_EVENT_TYPE } from "./EnemyImpactTombstones.js";
 import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "./PlatformCollisionDamage.js";
 import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
+import { AUGMENT_IMPACT_EVENT_SOURCE_KIND } from "../augments/AugmentImpactEventDefinition.js";
+import { PLAYER_DAMAGE_REPLICATION_EVENT_TYPE } from "./PlayerDamageEvent.js";
+import { ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE } from "./enemy-behavior/EnemyBehaviorDefinition.js";
 
 export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PLAYER_RESPAWNED: "player-respawned",
@@ -19,9 +22,9 @@ export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PREDICTED_SPELL_PROJECTILE_ENDED: "predicted-spell-projectile-ended",
     PLAYER_PLATFORM_COLLISION_DAMAGED: PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.APPLIED,
     PREDICTED_PLAYER_PLATFORM_COLLISION_DAMAGED: PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.PREDICTED,
-    BOSS_PLAYER_HIT: "boss-player-hit",
+    BOSS_PLAYER_HIT: PLAYER_DAMAGE_REPLICATION_EVENT_TYPE.BOSS_HIT,
     BOSS_ATTACK_STARTED: "boss-attack-started",
-    ENEMY_BEHAVIOR_PLAYER_HIT: "enemy-behavior-player-hit"
+    ENEMY_BEHAVIOR_PLAYER_HIT: ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE.PLAYER_HIT
 });
 
 export const CLIENT_FEEDBACK_RESOLUTION = Object.freeze({
@@ -40,7 +43,7 @@ export const CLIENT_FEEDBACK_RESOLUTION = Object.freeze({
 
 export const CLIENT_FEEDBACK_SOURCE_KIND = Object.freeze({
     ROPE_IMPACT: "rope-impact",
-    AUGMENT_IMPACT: "augment-impact"
+    AUGMENT_IMPACT: AUGMENT_IMPACT_EVENT_SOURCE_KIND
 });
 
 export const CLIENT_FEEDBACK_EFFECT_ID = Object.freeze({
@@ -237,7 +240,7 @@ export function eventEffectId(event) {
 }
 
 export function eventSourceKind(event) {
-    return event.parameters?.sourceKind;
+    return event.sourceKind ?? event.parameters?.sourceKind;
 }
 
 export function bossWardenImpactPreset(event) {

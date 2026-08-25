@@ -1,6 +1,10 @@
 import { Vector2 } from "../../game-kit/index.js";
 import { AUGMENT_CATALOG, MAX_AUGMENT_SELECTIONS, augmentById } from "../augments/AugmentCatalog.js";
 import { augmentImpactFormula, validateAugmentImpactFormula } from "../augments/AugmentImpactFormula.js";
+import {
+    AUGMENT_IMPACT_EVENT_SOURCE_KIND,
+    AUGMENT_IMPACT_REPLICATION_EVENT_TYPE
+} from "../augments/AugmentImpactEventDefinition.js";
 import { BOSS_STAGE_CATALOG } from "../boss-authoring/BossStageCatalog.js";
 import { createBossEncounterRuntime } from "../boss/BossEncounterRuntimeFactory.js";
 import { CONTINUITY_WARDEN_EVENT, CONTINUITY_WARDEN_ID } from "../boss/ContinuityWardenDefinition.js";
@@ -34,6 +38,7 @@ import {
 import { createEnemyObject } from "../combat/EnemyObject.js";
 import { ENEMY_LIFECYCLE_EVENT_TYPE, recordEnemyImpactTombstone } from "../combat/EnemyImpactTombstones.js";
 import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js";
+import { createPlayerDamageEvent, PLAYER_DAMAGE_REPLICATION_EVENT_TYPE } from "../combat/PlayerDamageEvent.js";
 import {
     PLATFORM_COLLISION_DAMAGE_EVENT_TYPE,
     PLATFORM_COLLISION_DAMAGE_ID,
@@ -1432,31 +1437,32 @@ export class GameSimulation {
                 }
                 const defeated = player.health <= 0;
                 if (defeated) this.#resolveBossParticipantDefeat(player, `boss-${hazard.kind}`);
-                const event = Object.freeze({
-                    contactId,
-                    bossStageId: stage.id,
-                    hazardKind: hazard.kind,
-                    hazardSequence: hazard.sequence,
-                    playerId: player.id,
-                    damage: contact.damage,
-                    appliedDamage,
-                    health: player.health,
-                    position: vectorState(player.physics.position),
-                    velocity: vectorState(player.physics.velocity),
+                const event = createPlayerDamageEvent({
                     impactId: contactId,
-                    projectileId: contactId,
-                    clientTick: this.tick,
-                    resolution: "player-hit",
+                    targetId: player.id,
+                    damage: contact.damage,
                     respawned: defeated && player.lifeState === "active",
-                    parameters: Object.freeze({
-                        sourceKind: PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD,
-                        sourceId: stage.id,
-                        sourceType: hazard.kind,
-                        sourceSequence: hazard.sequence,
-                        damage: contact.damage
-                    })
+                    details: {
+                        contactId,
+                        bossStageId: stage.id,
+                        hazardKind: hazard.kind,
+                        hazardSequence: hazard.sequence,
+                        appliedDamage,
+                        health: player.health,
+                        position: vectorState(player.physics.position),
+                        velocity: vectorState(player.physics.velocity),
+                        projectileId: contactId,
+                        clientTick: this.tick,
+                        parameters: Object.freeze({
+                            sourceKind: PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD,
+                            sourceId: stage.id,
+                            sourceType: hazard.kind,
+                            sourceSequence: hazard.sequence,
+                            damage: contact.damage
+                        })
+                    }
                 });
-                if (replicate) this.recordReplicationEvent("boss-player-hit", event);
+                if (replicate) this.recordReplicationEvent(PLAYER_DAMAGE_REPLICATION_EVENT_TYPE.BOSS_HIT, event);
                 this.eventFlash = { type: "player-hit", age: 0, ...event };
                 outcomes.push(event);
             }
@@ -2990,25 +2996,27 @@ export class GameSimulation {
         }
         this.#commitAugmentImpactEvents(player.augmentCombat.drainQueuedImpactEvents());
         this.metrics.recordPlayerImpact("player-hit", damage);
-        const event = Object.freeze({
+        const event = createPlayerDamageEvent({
             impactId: `${enemyId}:${result.type}:${this.tick}:${player.id}`,
-            sourceId: enemyId,
-            sourceKind: result.type,
-            playerId: player.id,
+            targetId: player.id,
             damage,
-            health: player.health,
-            position: vectorState(player.physics.position),
-            impactPosition: vectorState(result.position ?? player.physics.position),
-            ...(Number.isFinite(result.radius)
-                ? {
-                      bounds: Object.freeze({
-                          minX: result.position.x - result.radius,
-                          minY: result.position.y - result.radius,
-                          maxX: result.position.x + result.radius,
-                          maxY: result.position.y + result.radius
-                      })
-                  }
-                : {})
+            details: {
+                sourceId: enemyId,
+                sourceKind: result.type,
+                health: player.health,
+                position: vectorState(player.physics.position),
+                impactPosition: vectorState(result.position ?? player.physics.position),
+                ...(Number.isFinite(result.radius)
+                    ? {
+                          bounds: Object.freeze({
+                              minX: result.position.x - result.radius,
+                              minY: result.position.y - result.radius,
+                              maxX: result.position.x + result.radius,
+                              maxY: result.position.y + result.radius
+                          })
+                      }
+                    : {})
+            }
         });
         this.recordReplicationEvent(ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE.PLAYER_HIT, event);
         this.eventFlash = { type: "player-hit", age: 0, ...event };
@@ -3104,6 +3112,7 @@ export class GameSimulation {
                 playerTarget.statusEffects.apply(statusEffectId, { sourceId: claim.sourcePlayerId });
             }
             const knockbackApplied = applyPlayerSpellKnockback(playerTarget, claim.knockback);
+            const respawned = playerTarget.health <= 0;
             const resolution = Object.freeze({
                 accepted: true,
                 resolution: "applied",
@@ -3111,21 +3120,28 @@ export class GameSimulation {
                 knockbackApplied
             });
             if (replicate) {
-                this.recordReplicationEvent("augment-impact-resolved", {
-                    predictionId: claim.predictionId,
-                    effectId: claim.effectId,
-                    effectSourceKind: claim.sourceKind,
-                    sourcePlayerId: claim.sourcePlayerId,
+                const event = createPlayerDamageEvent({
+                    impactId: claim.eventId,
                     targetId: playerTarget.id,
-                    targetKind: IMPACT_TARGET_KIND.PLAYER,
-                    sourcePosition: claim.sourcePosition,
-                    contactPosition: claim.contactPosition,
                     damage: protection.appliedDamage,
-                    statusEffectId
+                    respawned,
+                    details: {
+                        predictionId: claim.predictionId,
+                        sourceKind: AUGMENT_IMPACT_EVENT_SOURCE_KIND,
+                        effectId: claim.effectId,
+                        effectSourceKind: claim.sourceKind,
+                        sourcePlayerId: claim.sourcePlayerId,
+                        targetKind: IMPACT_TARGET_KIND.PLAYER,
+                        position: claim.contactPosition,
+                        sourcePosition: claim.sourcePosition,
+                        contactPosition: claim.contactPosition,
+                        statusEffectId
+                    }
                 });
+                this.recordReplicationEvent(AUGMENT_IMPACT_REPLICATION_EVENT_TYPE.RESOLVED, event);
             }
-            if (playerTarget.health <= 0) {
-                this.respawnPlayerAtCheckpoint(playerTarget, claim.effectId, claim.sourcePlayerId);
+            if (respawned) {
+                this.respawnPlayerAtCheckpoint(playerTarget, claim.effectId, claim.eventId);
             }
             return resolution;
         }
@@ -3151,13 +3167,17 @@ export class GameSimulation {
                 this.bossRuntime?.statusEffects?.apply(statusEffectId, { sourceId: authenticatedPlayerId });
             }
             if (replicate && result.accepted) {
-                this.recordReplicationEvent("augment-impact-resolved", {
+                this.recordReplicationEvent(AUGMENT_IMPACT_REPLICATION_EVENT_TYPE.RESOLVED, {
+                    impactId: claim.eventId,
                     predictionId: claim.predictionId,
+                    sourceKind: AUGMENT_IMPACT_EVENT_SOURCE_KIND,
+                    resolution: result.resolution,
                     effectId: claim.effectId,
                     effectSourceKind: claim.sourceKind,
                     sourcePlayerId: authenticatedPlayerId,
                     targetId: claim.targetId,
                     targetKind: IMPACT_TARGET_KIND.BOSS,
+                    position: claim.contactPosition,
                     sourcePosition: claim.sourcePosition,
                     contactPosition: claim.contactPosition,
                     damage: result.damage,
@@ -4403,19 +4423,21 @@ export class GameSimulation {
             };
         }
         if (claim.sourceKind === PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD) {
-            this.recordReplicationEvent("boss-player-hit", {
+            const event = createPlayerDamageEvent({
                 impactId,
-                contactId: impactId,
-                bossStageId: claim.sourceId,
-                hazardKind: claim.sourceType,
-                hazardSequence: claim.sourceSequence,
-                playerId: player.id,
                 targetId: player.id,
                 damage,
-                position: new Vector2(claim.position.x, claim.position.y),
-                velocity: new Vector2(claim.velocity.x, claim.velocity.y),
-                respawned: claim.outcome.respawned
+                respawned: claim.outcome.respawned,
+                details: {
+                    contactId: impactId,
+                    bossStageId: claim.sourceId,
+                    hazardKind: claim.sourceType,
+                    hazardSequence: claim.sourceSequence,
+                    position: new Vector2(claim.position.x, claim.position.y),
+                    velocity: new Vector2(claim.velocity.x, claim.velocity.y)
+                }
             });
+            this.recordReplicationEvent(PLAYER_DAMAGE_REPLICATION_EVENT_TYPE.BOSS_HIT, event);
         }
         if (projectile) this.objects.enemyProjectiles.remove(projectile.id);
         this.recordProjectileResolution(
