@@ -13,4 +13,4 @@ Boss06의 현행 기획과 terminal Boarding은 유지한다. Boss Timer와 시�
 
 ## Boss03 시각 자료
 
-- [Boss03 Commander 이미지 생성 기획](./03/COMMANDER-IMAGE-GENERATION-PLAN.md)은 Polygon Runtime의 사슬 훅·휴대형 해머 외형 검수 기준이다. 원본 PNG 자체는 여전히 Runtime 자산이 아니다.
+- [Boss03 Commander 이미지 생성 기획](./03/COMMANDER-IMAGE-GENERATION-PLAN.md)은 사슬 훅·휴대형 해머 외형 검수 기준이다. 생성 원본 자체가 아니라 정규화된 local sprite package가 기본 `sprite` profile에 연결되며 로드 실패와 미지원 상태는 Polygon으로 복구한다.

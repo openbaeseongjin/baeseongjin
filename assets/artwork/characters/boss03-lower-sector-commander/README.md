@@ -1,8 +1,8 @@
 # Boss03 Lower Sector Commander 그래픽 원본
 
-> 상태: **REFERENCE-ONLY / 본체·보행 자세·사슬 훅·휴대형 해머·그랩 예고·당김·구속 시각 승인 / 보행·그랩 예고·당김·구속 분리 export 규격 통과**
+> 상태: **APPROVED AUTHORING SOURCE / LOCAL RUNTIME INTEGRATED**
 
-사용자가 선택한 Boss03 본체 기본 스프라이트와 검토용 투명 export를 보존한다. 둥근 중량형 2족 본체, 사슬 훅, 손에 든 대형 사각 해머의 외형 기준만 소유하며 Boss03 제품 활성화, Runtime 연결, 충돌, 피해, 물리와 네트워크 권위를 만들지 않는다.
+사용자가 승인한 Boss03 본체·장비·상태별 reference와 Player 스타일 모션 원본을 보존한다. 정규화한 8개 본체 모션과 그랩 VFX는 `assets/runtime/characters/lower-sector-commander-v1/`에 연결하지만, 이 authoring 폴더는 충돌·피해·물리·네트워크 권위를 만들지 않는다.
 
 ## 파일
 
@@ -27,6 +27,11 @@
 | 구속 본체 승인 export | [`export/commander-grab-held-body-approved-128x192.png`](./export/commander-grab-held-body-approved-128x192.png) | `128×192px` RGBA · alpha `0/255` · 발 중앙 anchor `(64, 152)` · Player·체인·훅 제외 · SHA-256 `4D7CC3D6BF1F4560244F9216C6F57DCC25185969D8773D732C7C984CF7FE6B29` |
 | 구속 훅 머리 승인 export | [`export/commander-grab-held-hook-head-approved-48x48.png`](./export/commander-grab-held-hook-head-approved-48x48.png) | `48×48px` RGBA · 당김 승인 훅 머리 재사용 · SHA-256 `734748C5C725E871554830B59C72C13E8B3DCA546D26E98266E7CDBD409EA7FC` |
 | 구속 체인 링크 승인 export | [`export/commander-grab-held-chain-link-approved-16x16.png`](./export/commander-grab-held-chain-link-approved-16x16.png) | `16×16px` RGBA · 당김 승인 체인 링크 재사용 · SHA-256 `EF45788AC0E2B0AE4836C9C81CF55714A07267D31BDD1F1E5787DDD403EE9383` |
+| 그랩 예고 픽셀 저작 후보 | [`source/boss03-grab-telegraph-pixel-authoring-v2.png`](./source/boss03-grab-telegraph-pixel-authoring-v2.png) | `1024×1536px` RGB · 체크무늬 포함 ImageGen source |
+| 기본 대기 픽셀 저작 후보 | [`source/boss03-idle-pixel-authoring-v1.png`](./source/boss03-idle-pixel-authoring-v1.png) | `1024×1536px` RGB · 체크무늬 포함 ImageGen source |
+| Player 스타일 대기 후보 | [`source/boss03-idle-player-style-authoring-v2.png`](./source/boss03-idle-player-style-authoring-v2.png) | `1024×1536px` RGBA · 모션 스타일 탐색 source |
+| Player 스타일 대기 선택본 | [`source/boss03-idle-player-style-selected-v1.png`](./source/boss03-idle-player-style-selected-v1.png) | `1024×1536px` · 사용자 선택 모션 외형 기준 |
+| 모션 저작 v1 | [`source/motion-authoring-v1/README.md`](./source/motion-authoring-v1/README.md) | 8개 클립·47개 생성 프레임·결정적 Runtime 정규화 |
 
 ## 승인 외형
 
@@ -58,12 +63,20 @@
 - 휴대형 해머 검토 export도 승인 확대 원본을 같은 정수 격자와 hard alpha로 정규화했다. 불투명 영역은 `(9, 25)~(116, 166)`이며 이 범위는 결합 좌표나 공격 판정을 정하지 않는다.
 - 구속 분리 P0 검수 결과는 [`GRAB_HELD_P0_VALIDATION.md`](./GRAB_HELD_P0_VALIDATION.md)에 기록한다.
 
+## Runtime v1 정규화
+
+- ImageGen 모션 보드는 [`source/motion-authoring-v1/`](./source/motion-authoring-v1/)에 보존하고, `normalize_runtime_assets.py`가 frame 분리·16색 palette·alpha `0/255`·nearest-neighbor 2배 확대를 결정적으로 수행한다.
+- 본체 8개 clip은 `256×256` cell과 anchor `(0.5, 0.59375)`를 공유한다. 각 clip 첫 기준 자세의 불투명 높이는 `184px`이며 긴 해머·훅은 본체를 줄이지 않고 투명 canvas를 사용한다.
+- `walk` 8프레임은 이동 거리 `144px`마다 한 주기를 재생한다. collider·이동 속도·AI와 분리된 표현 주기다.
+- 공격 clip은 gameplay `direction`과 원본 방향을 비교해 그랩·해머·돌진이 판정 방향을 바라보게 한다.
+- 사출 훅·반복 사슬·당김 장력은 [`assets/artwork/effects/boss03-chain-hook-pull/`](../../effects/boss03-chain-hook-pull/)에서 분리 저작한다.
+
 ## 사용 경계
 
-- 검토 export는 한 장의 중립 자세만 포함하므로 animation atlas나 Runtime-ready package가 아니다.
-- 현재 제품 Boss03은 authoring spec과 Polygon Runtime을 사용한다. 이 PNG에는 전용 manifest·validator·renderer binding이 없으므로 `assets/runtime/`으로 복사하거나 현재 표현을 직접 교체하지 않는다.
-- `128×192`·RGBA·hard alpha·anchor 통과는 authoring export 통과다. 전용 Boss03 renderer 연결과 실제 Stage 1x·모바일 검수 전에는 Runtime-ready로 표시하지 않는다.
+- 넓은 장면형 승인본과 단일 검토 export는 Runtime atlas가 아니며 시각 관계 참고로만 사용한다.
+- 기본 `sprite` profile은 정규화된 local Runtime package를 사용하고, 리소스 실패·미지원 상태와 `polygon` profile은 기존 Boss Polygon으로 복구한다.
+- Boss 전용 공개 manifest·validator는 아직 없다. 코드 소유 불변 clip과 package README가 현재 local Runtime 계약이다.
 - 당김 넓은 승인본은 상태 관계 참고이고, 당김 본체·훅 머리·체인 링크 승인본은 분리 렌더링을 위한 authoring export다. Player나 고정 길이 체인을 본체 PNG에 합치지 않는다.
 - 그랩 예고 승인본은 시각 관계를 검수하는 넓은 참고 프레임이며 실제 Arena 배치·사거리·피격 범위를 정하지 않는다.
 - 끌어오기 승인본도 시각 관계를 검수하는 넓은 참고 프레임이며 실제 이동 속도·피해·사거리·충돌 판정을 정하지 않는다.
-- 그랩 구속 본체·훅 머리·체인 링크를 authoring export로 승인했다. 다음 신규 제작 단위는 **그랩 확정 해머 상태**다.
+- 그래픽 크기·프레임 시간·VFX는 collider·hitbox·피해량·사거리·물리·네트워크 결과를 바꾸지 않는다.

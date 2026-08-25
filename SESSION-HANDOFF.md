@@ -4,16 +4,6 @@
 
 ## 현재 미흡수 항목
 
-### [L2] Boss03 상태 이미지 순차 승인 진행
-
-- 승인 순서와 완료 상태는 `docs/boss/03/COMMANDER-IMAGE-GENERATION-PLAN.md`가 소유한다.
-- 중립·보행·그랩 예고 관계 이미지·당김·구속까지 시각 승인됐다. 보행·그랩 예고·당김은 투명 authoring export까지 규격을 통과했다.
-- 넓은 장면형 이미지는 계속 REFERENCE-ONLY로 두고, 상태별 본체·장비·동적 표현을 분리한 투명 셀로 다시 제작한다.
-- 그랩 예고 본체 투명 `128×192` 자세까지 승인됐다.
-- 당김 분리 export 세 개를 승인했다: `commander-grab-pull-body-approved-128x192.png`, `commander-grab-hook-head-approved-48x48.png`, `commander-grab-chain-link-approved-16x16.png`.
-- 넓은 구속 승인본을 분리한 `commander-grab-held-body-approved-128x192.png`, `commander-grab-held-hook-head-approved-48x48.png`, `commander-grab-held-chain-link-approved-16x16.png`을 authoring export로 승인했다.
-- 구속 훅 머리와 체인 링크는 당김 승인 부품을 그대로 재사용하며, 다음 제작 단위는 그랩 확정 해머 상태다.
-
 ### [L1] 개발 규칙 미반영 코드를 대상 묶음별 검토 후 순차 리팩터링한다
 
 - 현재 `docs/development-rules.md`를 기준으로 저장소 전체의 미반영 코드를 단계별로 바로잡는다.

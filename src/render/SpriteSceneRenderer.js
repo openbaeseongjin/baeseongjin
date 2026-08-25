@@ -42,6 +42,9 @@ import { EnemySpritePackageCatalog } from "./sprites/EnemySpritePackageCatalog.j
 import { DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION } from "./boss/ContinuityWardenSpriteCatalog.js";
 import { ContinuityWardenSpriteObjectRendererCatalog } from "./boss/ContinuityWardenSpriteObjectRenderer.js";
 import { ContinuityWardenObjectSpriteAssetCatalog } from "./boss/ContinuityWardenObjectSpriteCatalog.js";
+import { DEFAULT_LOWER_SECTOR_COMMANDER_SPRITE_DEFINITION } from "./boss/LowerSectorCommanderSpriteCatalog.js";
+import { LowerSectorCommanderSpriteObjectRendererCatalog } from "./boss/LowerSectorCommanderSpriteObjectRenderer.js";
+import { BossStageSpriteObjectRendererCatalog } from "./boss/BossStageSpriteObjectRendererCatalog.js";
 import { CONTINUITY_WARDEN_PROJECTILE_PRESET_ID } from "../game/boss/ContinuityWardenDefinition.js";
 import { HomingMissileRenderer } from "./projectiles/HomingMissileRenderer.js";
 
@@ -63,6 +66,8 @@ export class SpriteSceneResourceBundle {
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
         environmentAssets = null,
         authoredAreaEnvironmentDefinitions = Object.freeze({}),
+        lowerSectorCommanderDefinition = DEFAULT_LOWER_SECTOR_COMMANDER_SPRITE_DEFINITION,
+        lowerSectorCommanderAssets = null,
         continuityWardenDefinition = DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION,
         continuityWardenAssets = null,
         continuityWardenObjectSpriteAssets = null,
@@ -100,6 +105,15 @@ export class SpriteSceneResourceBundle {
                 },
                 autoStart: false,
                 ImageClass
+            });
+        this.lowerSectorCommanderDefinition = lowerSectorCommanderDefinition;
+        this.lowerSectorCommanderAssets =
+            lowerSectorCommanderAssets ??
+            new SpriteImageAssetSet({
+                atlases: lowerSectorCommanderDefinition.atlases,
+                autoStart: false,
+                ImageClass,
+                fallbackLabel: "Lower Sector Commander polygon fallback"
             });
         this.continuityWardenDefinition = continuityWardenDefinition;
         this.continuityWardenAssets =
@@ -151,6 +165,7 @@ export class SpriteSceneResourceBundle {
             this.preparePlayer(),
             this.enemySpritePackages.prepareSector(sectorId),
             this.environmentAssets.prepare(environmentAtlasIds),
+            this.lowerSectorCommanderAssets.prepare(),
             this.continuityWardenAssets.prepare(),
             this.continuityWardenObjectSpriteAssets.prepare()
         ]);
@@ -172,6 +187,7 @@ export class SpriteSceneResourceBundle {
         return Promise.all([
             this.enemySpritePackages.prepareRemaining([sectorId]),
             this.environmentAssets.prepare(remainingEnvironmentAtlasIds),
+            this.lowerSectorCommanderAssets.prepare(),
             this.continuityWardenAssets.prepare(),
             this.continuityWardenObjectSpriteAssets.prepare()
         ]).then(() => this.snapshot());
@@ -182,6 +198,7 @@ export class SpriteSceneResourceBundle {
             this.playerAssets.prepare(),
             this.enemySpritePackages.prepare(),
             this.environmentAssets.prepare(),
+            this.lowerSectorCommanderAssets.prepare(),
             this.continuityWardenAssets.prepare(),
             this.continuityWardenObjectSpriteAssets.prepare()
         ]);
@@ -200,6 +217,7 @@ export class SpriteSceneResourceBundle {
                 )
             ),
             environment: this.environmentAssets.status,
+            lowerSectorCommander: this.lowerSectorCommanderAssets.status,
             continuityWarden: this.continuityWardenAssets.status,
             continuityWardenObjects: this.continuityWardenObjectSpriteAssets.status
         });
@@ -210,6 +228,7 @@ export class SpriteSceneResourceBundle {
             player: this.playerAssets.status,
             enemies: this.enemySpritePackages.statusForSector(sectorId),
             environment: this.environmentAssets.statusFor(this.environmentAtlasIdsForArea(areaId)),
+            lowerSectorCommander: this.lowerSectorCommanderAssets.status,
             continuityWarden: this.continuityWardenAssets.status,
             continuityWardenObjects: this.continuityWardenObjectSpriteAssets.status
         });
@@ -241,6 +260,8 @@ export class SpriteSceneRenderer {
         environmentDefinition = DEFAULT_ENVIRONMENT_DEFINITION,
         environmentAssets = null,
         authoredAreaEnvironmentDefinitions = Object.freeze({}),
+        lowerSectorCommanderDefinition = DEFAULT_LOWER_SECTOR_COMMANDER_SPRITE_DEFINITION,
+        lowerSectorCommanderAssets = null,
         continuityWardenDefinition = DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION,
         continuityWardenAssets = null,
         continuityWardenObjectSpriteAssets = null,
@@ -263,6 +284,8 @@ export class SpriteSceneRenderer {
                 environmentDefinition,
                 environmentAssets,
                 authoredAreaEnvironmentDefinitions,
+                lowerSectorCommanderDefinition,
+                lowerSectorCommanderAssets,
                 continuityWardenDefinition,
                 continuityWardenAssets,
                 continuityWardenObjectSpriteAssets
@@ -275,6 +298,8 @@ export class SpriteSceneRenderer {
         this.environmentDefinition = this.resources.environmentDefinition;
         this.authoredAreaEnvironmentDefinitions = this.resources.authoredAreaEnvironmentDefinitions;
         this.environmentAssets = this.resources.environmentAssets;
+        this.lowerSectorCommanderDefinition = this.resources.lowerSectorCommanderDefinition;
+        this.lowerSectorCommanderAssets = this.resources.lowerSectorCommanderAssets;
         this.continuityWardenDefinition = this.resources.continuityWardenDefinition;
         this.continuityWardenAssets = this.resources.continuityWardenAssets;
         this.continuityWardenObjectSpriteAssets = this.resources.continuityWardenObjectSpriteAssets;
@@ -291,10 +316,17 @@ export class SpriteSceneRenderer {
             polygonTerrain
         });
 
-        const bossObjectRenderers = new ContinuityWardenSpriteObjectRendererCatalog({
+        const lowerSectorCommanderObjectRenderers = new LowerSectorCommanderSpriteObjectRendererCatalog({
+            assets: this.lowerSectorCommanderAssets,
+            definition: this.lowerSectorCommanderDefinition
+        });
+        const continuityWardenObjectRenderers = new ContinuityWardenSpriteObjectRendererCatalog({
             assets: this.continuityWardenAssets,
             definition: this.continuityWardenDefinition,
             objectSpriteAssets: this.continuityWardenObjectSpriteAssets
+        });
+        const bossObjectRenderers = new BossStageSpriteObjectRendererCatalog({
+            catalogs: [lowerSectorCommanderObjectRenderers, continuityWardenObjectRenderers]
         });
 
         const actorRenderers = new CameraWorldRenderer([
