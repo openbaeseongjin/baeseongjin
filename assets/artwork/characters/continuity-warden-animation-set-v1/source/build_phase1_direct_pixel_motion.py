@@ -54,6 +54,19 @@ def shift_region(image: Image.Image, box: tuple[int, int, int, int], dx: int, dy
     return result
 
 
+def shift_regions(
+    image: Image.Image,
+    moves: tuple[tuple[tuple[int, int, int, int], int, int], ...],
+) -> Image.Image:
+    result = image.copy()
+    pieces = tuple((image.crop(box), box, dx, dy) for box, dx, dy in moves)
+    for piece, box, _, _ in pieces:
+        result.paste(Image.new("RGBA", piece.size, (0, 0, 0, 0)), box)
+    for piece, box, dx, dy in pieces:
+        result.alpha_composite(piece, (box[0] + dx, box[1] + dy))
+    return result
+
+
 def upper_recoil(image: Image.Image, dx: int, dy: int = 0) -> Image.Image:
     result = image.copy()
     upper_box = (0, 22, 64, 68)
@@ -168,6 +181,22 @@ def main_clips() -> tuple[Clip, ...]:
     counter_pose = Image.open(PHASE_ROOT / "phase-late-control-pressure-logical-64x96.png").convert("RGBA")
     shield_piece = idle[0].crop((44, 42, 64, 82))
     shield_floor_piece = shield_piece.transpose(Image.Transpose.ROTATE_90)
+    rear_leg = (15, 68, 32, 96)
+    lead_leg = (32, 68, 52, 96)
+
+    walk = Clip(
+        "walk",
+        (
+            shift_regions(idle[0], ((rear_leg, -2, 0), (lead_leg, 2, 0))),
+            shift_regions(idle[1], ((rear_leg, -1, 0), (lead_leg, 1, 0))),
+            shift_regions(idle[2], ((rear_leg, 1, -1), (lead_leg, -1, 0))),
+            shift_regions(idle[3], ((rear_leg, 2, 0), (lead_leg, -2, 0))),
+            shift_regions(idle[4], ((rear_leg, 1, 0), (lead_leg, -1, 0))),
+            shift_regions(idle[5], ((rear_leg, -1, 0), (lead_leg, 1, -1))),
+        ),
+        (110, 110, 110, 110, 110, 110),
+        True,
+    )
 
     security_low_hand = shift_region(security, (41, 25, 64, 61), 0, 2)
     security_high_hand = shift_region(security, (41, 25, 64, 61), 0, -1)
@@ -272,6 +301,7 @@ def main_clips() -> tuple[Clip, ...]:
     )
 
     return (
+        walk,
         charge,
         security_command,
         hit_front,

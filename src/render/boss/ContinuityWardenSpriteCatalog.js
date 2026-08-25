@@ -12,6 +12,7 @@ const ANCHOR = Object.freeze({ x: 0.5, y: 113 / 192 });
 const VISUAL_PRESET_ID = "continuity-warden";
 const LEFT_DIRECTION = "left";
 const LEFT_DIRECTION_VALUE = -1;
+const WALK_STRIDE_PIXELS = 48;
 const ACTION_PHASE = Object.freeze({ TELEGRAPH: "telegraph", ACTIVE: "active" });
 const CHARGE_CLIP_ID = Object.freeze({
     TELEGRAPH: "charge-telegraph",
@@ -22,6 +23,7 @@ const CHARGE_CLIP_ID = Object.freeze({
 
 const ATLAS = Object.freeze({
     "combat-idle": Object.freeze({ file: "combat-idle.png", frames: 6 }),
+    walk: Object.freeze({ file: "walk.png", frames: 6 }),
     "baton-1": Object.freeze({ file: "baton-1.png", frames: 3 }),
     "baton-2": Object.freeze({ file: "baton-2.png", frames: 3 }),
     "overhead-slam": Object.freeze({ file: "overhead-slam.png", frames: 3 }),
@@ -47,6 +49,7 @@ const ATLAS = Object.freeze({
 
 const FRAME_DURATION_BY_CLIP = Object.freeze({
     "combat-idle": Object.freeze([0.22, 0.22, 0.22, 0.22, 0.22, 0.22]),
+    walk: Object.freeze([0.11, 0.11, 0.11, 0.11, 0.11, 0.11]),
     "baton-1": Object.freeze([0.3, 0.3, 0.35]),
     "baton-2": Object.freeze([0.2, 0.19, 0.35]),
     "overhead-slam": Object.freeze([0.2, 0.19, 0.35]),
@@ -107,8 +110,13 @@ const DEFEAT_CLIP_BY_STAGE = Object.freeze({
     unconscious: "defeated-unconscious"
 });
 const LOCOMOTION_CLIP_BY_STATE = Object.freeze({
-    [CONTINUITY_WARDEN_LOCOMOTION_STATE.WALK]: "combat-idle",
+    [CONTINUITY_WARDEN_LOCOMOTION_STATE.WALK]: "walk",
     [CONTINUITY_WARDEN_LOCOMOTION_STATE.TAKEOFF]: CHARGE_CLIP_ID.JUMP_PREPARE
+});
+const LOCOMOTION_PHASE_RESOLVER_BY_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_LOCOMOTION_STATE.WALK]: (animation, clipDefinition) =>
+        ((animation.distancePx % WALK_STRIDE_PIXELS) / WALK_STRIDE_PIXELS) * clipDefinition.totalDurationSeconds,
+    [CONTINUITY_WARDEN_LOCOMOTION_STATE.TAKEOFF]: (animation) => animation.stateElapsedSeconds
 });
 
 const STATE_CLIP_ID = Object.freeze({
@@ -189,6 +197,7 @@ export class ContinuityWardenSpriteDefinition {
         );
         this.clips = Object.freeze({
             "combat-idle": clip("combat-idle", { loop: true }),
+            walk: clip("walk", { loop: true }),
             "baton-1": clip("baton-1"),
             "baton-2": clip("baton-2"),
             "overhead-slam": clip("overhead-slam"),
@@ -245,10 +254,7 @@ export class ContinuityWardenSpriteDefinition {
         const locomotionClipId = LOCOMOTION_CLIP_BY_STATE[object.locomotionState];
         if (locomotionClipId) {
             const locomotionClip = this.clips[locomotionClipId];
-            const phase =
-                object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.WALK
-                    ? animation.distancePx / 36
-                    : animation.stateElapsedSeconds;
+            const phase = LOCOMOTION_PHASE_RESOLVER_BY_STATE[object.locomotionState](animation, locomotionClip);
             return locomotionClip.frameAt(phase);
         }
         if (object.state === "security-active") return lastFrame(this.clips["security-command"]);
