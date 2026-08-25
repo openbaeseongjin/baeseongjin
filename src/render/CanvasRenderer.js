@@ -29,6 +29,11 @@ const BOSS_HUD_BLOCKING_STATUS = Object.freeze({
     [CLIENT_STATUS_TYPE.PORTAL_ACCESS_BLOCKED]: true
 });
 
+const AUGMENT_ICON_RENDERING = Object.freeze({
+    smoothingEnabled: true,
+    smoothingQuality: "high"
+});
+
 const ROPE_IMPACT_REJECTION_STATUS = Object.freeze({
     [ROPE_IMPACT_REJECTION_REASON.SWING_REQUIRED]: Object.freeze({
         title: "스윙 필요",
@@ -81,6 +86,7 @@ export class CanvasRenderer {
         this.performancePolicy = Object.freeze({ ...DEFAULT_CANVAS_PERFORMANCE_POLICY, ...performancePolicy });
         this.cullMargin = cullMargin;
         this.augmentIconAssets = augmentIconAssets;
+        void this.augmentIconAssets.prepare();
         this.performanceMetrics = new RenderPerformanceMetrics({ sampleSize: this.performancePolicy.sampleSize });
         this.cssWidth = 1;
         this.cssHeight = 1;
@@ -563,7 +569,8 @@ export class CanvasRenderer {
         const image = this.augmentIconAssets.imageFor(id);
         if (image) {
             ctx.save();
-            ctx.imageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = AUGMENT_ICON_RENDERING.smoothingEnabled;
+            ctx.imageSmoothingQuality = AUGMENT_ICON_RENDERING.smoothingQuality;
             ctx.drawImage(image, Math.round(x - size * 0.5), Math.round(y - size * 0.5), size, size);
             ctx.restore();
             return true;

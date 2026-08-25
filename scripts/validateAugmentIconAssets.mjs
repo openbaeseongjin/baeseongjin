@@ -18,7 +18,7 @@ if (!input) throw new Error("Usage: npm run validate:augment-icons -- <export-or
 const directory = resolve(input);
 const entries = await readdir(directory, { withFileTypes: true });
 const fileLookup = Object.freeze(
-    Object.fromEntries(entries.filter(({ isFile }) => isFile()).map(({ name }) => [name, true]))
+    Object.fromEntries(entries.filter((entry) => entry.isFile()).map(({ name }) => [name, true]))
 );
 const expectedFileLookup = Object.freeze(Object.fromEntries(AUGMENT_ICON_IDS.map((id) => [`${id}.png`, true])));
 const missing = Object.keys(expectedFileLookup).filter((fileName) => !fileLookup[fileName]);
