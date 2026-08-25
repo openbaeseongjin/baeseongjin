@@ -1,5 +1,6 @@
 import {
     CompositeBossEncounterRuntime,
+    compositeLocalPoint,
     compositeWorldPoint,
     freezeComposite
 } from "./CompositeBossEncounterRuntime.js";
@@ -379,10 +380,15 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             this.locomotion.stop();
             return freezeComposite({ accepted: true, changed: true });
         }
+        const worldOffset = context.worldOffset ?? { x: 0, y: 0 };
+        const players = (context.players ?? []).map((player) => ({
+            ...player,
+            position: compositeLocalPoint(player.position, worldOffset)
+        }));
         const target = this.targetPlayerId
-            ? (context.players?.find(({ id }) => id === this.targetPlayerId) ?? null)
+            ? (players.find(({ id }) => id === this.targetPlayerId) ?? null)
             : context.canSelectTarget !== false
-              ? nearestTarget(context.players, this.body.position)
+              ? nearestTarget(players, this.body.position)
               : null;
         if (this.stateCatalog[this.state]) this.statePool.advance(this.state, { runtime: this, dt, target });
         else this.#advanceNeutral(dt, target, { canSelectAttack: context.canSelectTarget !== false });
