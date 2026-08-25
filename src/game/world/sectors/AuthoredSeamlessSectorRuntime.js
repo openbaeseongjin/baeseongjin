@@ -11,8 +11,9 @@ import { STAGE_SAVE_POINT_CULL_RADIUS, stageSavePointBounds } from "../StageSave
 import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
 import { isAuthoredRuntimeContentBoundary } from "../area-authoring-v2/AreaRuntimePromotion.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "./SectorDefinition.js";
+import { STAGE_TRANSITION_LAYOUT, stageOriginFromGate } from "../StageTransitionLayout.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-continuous-stage-runtime-v21-boss03-commander";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-gate-separated-stage-runtime-v22-boss03-commander";
 
 const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_01_AREA_CATALOG,
@@ -239,7 +240,7 @@ function bossStageSurface(surface, dx, dy, stageId, grappleAccessGroup = null) {
 }
 
 function createBossStageRuntimeDefinition(spec, sourceLandmark, targetLandmark, entryRouteId) {
-    const dx = BOSS_ARENA_ISOLATION_X - spec.arena.entry.x;
+    const dx = sourceLandmark.exit.x + BOSS_ARENA_ISOLATION_X - spec.arena.entry.x;
     const dy = sourceLandmark.exit.y - spec.arena.entry.y;
     const bounds = shiftBounds(spec.arena.bounds, dx, dy);
     const entry = shiftPoint(spec.arena.entry, dx, dy);
@@ -323,13 +324,18 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
     const bossStages = [];
     let previousLandmark = null;
     let previousOutboundObjectiveIds = Object.freeze([]);
-    let sectorWorldOriginY = floorY;
-
     for (const [sectorIndex, sourceCatalog] of authoredAreaCatalogs.entries()) {
         const sectorDefinition = authoredSectorCatalog.sectors[sectorIndex];
         const sectorLandmarks = [];
+        const firstAreaEntry = sourceCatalog.areas[0].entry;
+        const sectorWorldOriginX = previousLandmark?.exit.x ?? firstAreaEntry.x;
+        const sectorWorldOriginY = previousLandmark
+            ? previousLandmark.exit.y - STAGE_TRANSITION_LAYOUT.verticalDistance
+            : floorY;
         let sectorLeftX = Number.POSITIVE_INFINITY;
         let sectorRightX = Number.NEGATIVE_INFINITY;
+        let sectorLocalLeftX = Number.POSITIVE_INFINITY;
+        let sectorLocalRightX = Number.NEGATIVE_INFINITY;
         let sectorLocalTopY = Number.POSITIVE_INFINITY;
         let sectorLocalBottomY = Number.NEGATIVE_INFINITY;
 
@@ -338,14 +344,16 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             const landmarkDefinition = sectorDefinition.landmarks[landmarkIndex];
             const localWorld = isolatedAreaWorld(area, seed);
             const localArea = localWorld.areas[0];
-            const dx = 0;
             const previousSectorLandmark = sectorLandmarks.at(-1);
-            const localDy = previousSectorLandmark ? previousSectorLandmark.localBounds.y : -localArea.entry.y;
-            const localEntry = shiftPoint(localArea.entry, dx, localDy);
-            const localExit = shiftPoint(localArea.exit, dx, localDy);
-            const localCoreBounds = shiftBounds(localArea.bounds, dx, localDy);
+            const localOrigin = previousSectorLandmark
+                ? stageOriginFromGate(previousSectorLandmark.localExit, localArea.entry)
+                : Object.freeze({ x: -localArea.entry.x, y: -localArea.entry.y });
+            const localEntry = shiftPoint(localArea.entry, localOrigin.x, localOrigin.y);
+            const localExit = shiftPoint(localArea.exit, localOrigin.x, localOrigin.y);
+            const localCoreBounds = shiftBounds(localArea.bounds, localOrigin.x, localOrigin.y);
             const localBounds = localCoreBounds;
-            const dy = sectorWorldOriginY + localDy;
+            const dx = sectorWorldOriginX + localOrigin.x;
+            const dy = sectorWorldOriginY + localOrigin.y;
             const entry = shiftPoint(localArea.entry, dx, dy);
             const exit = shiftPoint(localArea.exit, dx, dy);
             const coreBounds = shiftBounds(localArea.bounds, dx, dy);
@@ -478,7 +486,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 name: landmarkDefinition.name,
                 subtitle: landmarkDefinition.subtitle,
                 origin: { x: dx, y: dy },
-                localOrigin: { x: dx, y: localDy },
+                localOrigin,
                 localBounds,
                 localEntry,
                 localExit,
@@ -552,6 +560,8 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
             );
             sectorLeftX = Math.min(sectorLeftX, bounds.x);
             sectorRightX = Math.max(sectorRightX, bounds.x + bounds.width);
+            sectorLocalLeftX = Math.min(sectorLocalLeftX, localBounds.x);
+            sectorLocalRightX = Math.max(sectorLocalRightX, localBounds.x + localBounds.width);
             sectorLocalTopY = Math.min(sectorLocalTopY, localBounds.y);
             sectorLocalBottomY = Math.max(sectorLocalBottomY, localBounds.y + localBounds.height);
         }
@@ -573,11 +583,11 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 id: sectorDefinition.id,
                 order: sectorDefinition.order,
                 width: sectorContentWidth,
-                origin: { x: 0, y: sectorWorldOriginY },
+                origin: { x: sectorWorldOriginX, y: sectorWorldOriginY },
                 localBounds: {
-                    x: sectorLeftX,
+                    x: sectorLocalLeftX,
                     y: sectorLocalTopY,
-                    width: sectorContentWidth,
+                    width: sectorLocalRightX - sectorLocalLeftX,
                     height: sectorHeight
                 },
                 bounds: sectorBounds,
@@ -593,11 +603,6 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 contentBoundaryStageId: sectorDefinition.contentBoundaryStageId
             })
         );
-        const nextSectorDefinition = authoredSectorCatalog.sectors[sectorIndex + 1];
-        if (nextSectorDefinition) {
-            const nextSectorFirstArea = authoredAreaCatalogs[sectorIndex + 1].areas[0];
-            sectorWorldOriginY = sectorBounds.y + nextSectorFirstArea.entry.y;
-        }
     }
 
     for (const spec of configuredBossStageSpecs) {

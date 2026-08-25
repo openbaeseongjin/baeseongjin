@@ -101,6 +101,7 @@ import { resolveEnemyEncounter } from "../world/EnemyEncounterSelection.js";
 import { advanceSectorProgress } from "../world/SectorProgressController.js";
 import { SectorProgressState } from "../world/SectorProgressState.js";
 import { playerOverlapsStageSavePoint } from "../world/StageSavePointGeometry.js";
+import { STAGE_TRANSITION_LAYOUT } from "../world/StageTransitionLayout.js";
 import { collisionSurfacesForProgress, collisionSurfacesForSectorProgress } from "../world/WorldGateGeometry.js";
 import {
     pointInsideBounds,
@@ -266,7 +267,6 @@ function normalizedBossDefinitions({ bossDefinition, bossDefinitions }) {
     }
     return Object.freeze(definitions.map((definition) => defineBossStage(definition)));
 }
-const AUTHORED_STAGE_FALL_RECOVERY_MARGIN = 780;
 const ACTOR_ROPE_ANCHOR_SURFACE_TOLERANCE = 0.75;
 const ACTOR_ROPE_ANCHOR_MATCH_TOLERANCE = 0.01;
 const BOSS_PARTICIPANT_STATUS = Object.freeze({
@@ -2575,9 +2575,9 @@ export class GameSimulation {
 
     recoverFallenPlayers() {
         const fallenPlayerIds = [];
-        const recoveryY = this.fallRecoveryY();
         for (const player of this.players) {
             if (player.lifeState !== "active") continue;
+            const recoveryY = this.fallRecoveryY(player.id);
             if (player.physics.position.isFinite() && player.physics.position.y <= recoveryY) {
                 continue;
             }
@@ -2587,9 +2587,23 @@ export class GameSimulation {
         return fallenPlayerIds;
     }
 
-    fallRecoveryY() {
+    fallRecoveryY(playerId = null) {
+        if (
+            playerId !== null &&
+            this.bossRuntime?.status === "active" &&
+            this.#bossParticipantStatus(playerId) === BOSS_PARTICIPANT_STATUS.ACTIVE
+        ) {
+            return Number.POSITIVE_INFINITY;
+        }
+        if (playerId !== null && this.isSeamlessSectorWorld) {
+            const anchor = this.respawnAnchorForPlayer(playerId);
+            const landmark = this.landmarkById[anchor?.landmarkId];
+            if (landmark?.bounds) {
+                return landmark.bounds.y + landmark.bounds.height + STAGE_TRANSITION_LAYOUT.fallRecoveryMargin;
+            }
+        }
         const worldBottomY = Number.isFinite(this.world.bottomY) ? this.world.bottomY : WORLD_CONFIG.floorY;
-        return worldBottomY + AUTHORED_STAGE_FALL_RECOVERY_MARGIN;
+        return worldBottomY + STAGE_TRANSITION_LAYOUT.fallRecoveryMargin;
     }
 
     resolvePlayerFall(playerId) {

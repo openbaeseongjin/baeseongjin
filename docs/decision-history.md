@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-25 — 맞닿은 Stage seam을 화면 밖 Gate 전환으로 대체한다
+
+- 맥락: Bounds를 맞닿게 쌓으면 Stage별 Exit·Entry 내부 좌표 때문에 47개 전환 거리가 64~1268px, 수평 이동이 0~4512px로 달라지고 다음 Stage가 출구 화면에 노출됐다.
+- 결정: 다음 Entry를 이전 Exit와 같은 X·2160px 위에 배치하고 개별 Player Gate portal만 전진 경로로 사용한다. 낙사는 현재 Stage 세이브 지점 아래 공백에서 복구한다.
+- 영향: canonical Stage 내부 geometry는 유지하고 Runtime 조립·parity·카메라 밖 판정·Boss 격리 기준을 새 배치에 맞춘다. Sector backdrop은 Gate 전후 각 Stage의 기존 자산 로딩 경계를 유지한다.
+- 대체: 0.60.0의 gap-0 Bounds seam, 물리적 상향 통과, 이전 Stage까지 계속 낙하·착지·Rope 복구하는 연속 수직 배치.
+- 검증 상태: 현재 계약은 `docs/development-rules.md`, `docs/architecture.md`, `docs/map-editor.md`와 production map parity가 소유한다.
+
 ## [L1] 2026-08-25 — 낙하 피해를 플랫폼 충돌 피해로 대체한다
 
 - 맥락: 여러 Stage 높이를 가로지른 고속 충돌에서 공중→접지 전이와 하강 Y 속도에 묶인 피해가 누락됐다.
