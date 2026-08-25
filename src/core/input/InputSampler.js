@@ -1,8 +1,9 @@
 import { findMobileControl, isMobileMovementControl, MOBILE_CONTROL_ID } from "./MobileControlLayout.js";
 import { MobileGameplayInputAdapter, MOBILE_GAMEPLAY_ACTION_ID } from "./MobileGameplayInputAdapter.js";
-import { PointerSpellCommandBuffer, POINTER_SPELL_TOKEN } from "./PointerSpellCommandBuffer.js";
+import { SPELL_SLOT_COMMAND_BY_KEY_CODE, SpellSlotCommandInput } from "./SpellSlotCommandInput.js";
 
 const movementKeys = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS"]);
+const gameplayKeys = new Set([...movementKeys, ...Object.keys(SPELL_SLOT_COMMAND_BY_KEY_CODE)]);
 export class InputSampler {
     constructor(target = globalThis.window, surface = target, { onRopeRelease = () => {} } = {}) {
         this.target = target;
@@ -11,7 +12,7 @@ export class InputSampler {
         this.onRopeRelease = onRopeRelease;
         this.keys = new Set();
         this.pointer = { x: 0, y: 0, down: false };
-        this.pointerSpellCommands = new PointerSpellCommandBuffer();
+        this.spellSlotCommands = new SpellSlotCommandInput();
         this.mobileGameplayInput = new MobileGameplayInputAdapter();
         this.ropePointerId = null;
         this.controlPointers = new Map();
@@ -22,9 +23,14 @@ export class InputSampler {
         this.onKeyDown = (event) => {
             if (this.suspended) return;
             const alreadyHeld = this.keys.has(event.code);
-            if (movementKeys.has(event.code)) this.keys.add(event.code);
+            if (gameplayKeys.has(event.code)) this.keys.add(event.code);
             if (!alreadyHeld && (event.code === "KeyW" || event.code === "ArrowUp")) {
                 this.interactSequence += 1;
+            }
+            const spellCommandKey = SPELL_SLOT_COMMAND_BY_KEY_CODE[event.code];
+            if (!alreadyHeld && spellCommandKey) {
+                event.preventDefault?.();
+                this.spellSlotCommands.issue(spellCommandKey);
             }
         };
         this.onKeyUp = (event) => {
@@ -42,24 +48,14 @@ export class InputSampler {
         this.onPointerDown = (event) => {
             if (this.suspended) return;
             if (event.pointerType !== "touch") {
-                const nowSeconds = (event.timeStamp ?? globalThis.performance?.now?.() ?? 0) / 1000;
                 if (event.button === 2) {
                     event.preventDefault?.();
                     this.pointer.x = event.clientX ?? this.pointer.x;
                     this.pointer.y = event.clientY ?? this.pointer.y;
                     if (this.pointer.down) {
                         this.pointer.down = false;
-                        this.notifyRopeRelease("spell-command-start");
+                        this.notifyRopeRelease("secondary-pointer-release");
                     }
-                    this.pointerSpellCommands.input(POINTER_SPELL_TOKEN.RIGHT, nowSeconds);
-                    return;
-                }
-                const spellInput = this.pointerSpellCommands.input(POINTER_SPELL_TOKEN.LEFT, nowSeconds);
-                if (spellInput.consumed) {
-                    event.preventDefault?.();
-                    this.pointer.x = event.clientX ?? this.pointer.x;
-                    this.pointer.y = event.clientY ?? this.pointer.y;
-                    this.pointer.down = false;
                     return;
                 }
                 this.pointer = { x: event.clientX ?? this.pointer.x, y: event.clientY ?? this.pointer.y, down: true };
@@ -79,7 +75,7 @@ export class InputSampler {
             const spellCommandKey = this.mobileGameplayInput.consumeSpellTarget();
             if (spellCommandKey) {
                 this.pointer = { x: event.clientX, y: event.clientY, down: false };
-                this.pointerSpellCommands.issue(spellCommandKey);
+                this.spellSlotCommands.issue(spellCommandKey);
                 return;
             }
             if (this.ropePointerId === null) {
@@ -141,7 +137,7 @@ export class InputSampler {
         this.ropePointerId = null;
         this.pointer.down = false;
         this.mobileGameplayInput.select(actionId);
-        if (releasedRope) this.notifyRopeRelease("spell-command-start");
+        if (releasedRope) this.notifyRopeRelease("mobile-spell-selection");
     }
 
     releasePointer(pointerId, pointerType, reason) {
@@ -165,7 +161,6 @@ export class InputSampler {
         this.ropePointerId = null;
         this.controlPointers.clear();
         this.pointer.down = false;
-        this.pointerSpellCommands.cancel();
         this.mobileGameplayInput.reset();
         if (releasedRope && reason) this.notifyRopeRelease(reason);
     }
@@ -215,8 +210,7 @@ export class InputSampler {
     }
 
     snapshot() {
-        const nowSeconds = (globalThis.performance?.now?.() ?? 0) / 1000;
-        const spellCommand = this.pointerSpellCommands.snapshot(nowSeconds);
+        const spellCommand = this.spellSlotCommands.snapshot();
         const keyboardHorizontal =
             Number(this.keys.has("ArrowRight") || this.keys.has("KeyD")) -
             Number(this.keys.has("ArrowLeft") || this.keys.has("KeyA"));

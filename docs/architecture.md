@@ -212,7 +212,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - 모바일 이동·점프는 PC 키보드와 동일한 `horizontal`, `vertical` 명령을 만들며 별도 게임 규칙을 두지 않는다.
 - 이동·Rope·Spell 슬롯의 버튼 판정과 Canvas 표시는 `MobileControlLayout`의 같은 사각형 정보를 사용한다. 모바일 선택 수명주기는 `MobileGameplayInputAdapter`만 소유한다.
 - 로프 손가락은 `pointerId`로 추적하며 다른 터치가 기존 로프 조작을 빼앗지 않는다.
-- 모바일은 Spell 슬롯을 누르면 선택만 하고 다음 월드 터치 위치를 조준점으로 해당 슬롯을 한 번 시전한 뒤 Rope 선택으로 돌아간다. 모바일 어댑터는 기존 단조 `spellCommand` sequence와 slot command key를 직접 발행하며 PC 좌·우 클릭 토큰, 공용 `PlayerCommand`, Spell Runtime과 네트워크 계약을 바꾸지 않는다.
+- PC의 `Q/E/R/Shift`와 모바일의 Spell 슬롯은 같은 단조 `spellCommand` sequence와 slot command key를 직접 발행한다. PC 슬롯 키는 현재 커서를 조준점으로 Rope를 유지한 채 한 번 시전하고, 모바일은 슬롯 선택 뒤 다음 월드 터치로 한 번 시전한 뒤 Rope 선택으로 돌아간다. 공용 `PlayerCommand`, Spell Runtime과 네트워크 계약은 입력 장치와 분리한다.
 - 스윙 드래그 임계값은 고정 픽셀이 아니라 현재 Canvas의 짧은 변에 대한 비율로 계산한다. 화면 크기는 `PlayerCommand.viewport`에 포함되어 권한 주체에서도 같은 판정을 재현한다.
 - 활성 로프 드래그가 브라우저 상단 UI로 빠지는 `pointerleave`, `pointercancel`, 창 포커스 상실 또는 문서 숨김으로 끝나면 로프 유지가 아니라 사용자의 해제 의도로 처리한다. 입력 상태를 먼저 정리하고, 렌더 프레임이 멈추기 전에 싱글의 공용 시뮬레이션과 멀티의 로컬 예측·즉시 전송을 한 번 실행한다. 화면 안의 정상 `pointerup`은 기존 고정 스텝에서 처리한다.
 

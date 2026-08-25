@@ -12,8 +12,8 @@ import { createRenderViewport, DEFAULT_RENDER_CULL_MARGIN } from "./RenderViewpo
 import { assertSceneRenderer } from "./SceneRenderer.js";
 import { ACTOR_STATUS_COLORS, resolveHealthStatus } from "./ActorStatusPresentation.js";
 import { spellDefinition } from "../game/spells/SpellCatalog.js";
-import { SPELL_COMMAND_LABEL, SPELL_SLOT_LABEL, SPELL_SLOT_ORDER } from "../game/spells/SpellDefinition.js";
-import { POINTER_SPELL_TOKEN } from "../core/input/PointerSpellCommandBuffer.js";
+import { SPELL_SLOT_LABEL, SPELL_SLOT_ORDER } from "../game/spells/SpellDefinition.js";
+import { SPELL_SLOT_KEY_LABEL } from "../core/input/SpellSlotCommandInput.js";
 import { graphemes } from "../core/text/GraphemeText.js";
 import { layoutScreenEdgePresentations, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
@@ -734,7 +734,7 @@ export class CanvasRenderer {
             ctx.fillStyle = "#94a3b8";
             ctx.font = "800 9px ui-monospace, monospace";
             ctx.fillText(
-                mobileControlLayout ? SPELL_SLOT_LABEL[slotId] : SPELL_COMMAND_LABEL[slotId],
+                mobileControlLayout ? SPELL_SLOT_LABEL[slotId] : SPELL_SLOT_KEY_LABEL[slotId],
                 x + cellSize * 0.5,
                 y + cellSize - 8
             );
@@ -760,17 +760,6 @@ export class CanvasRenderer {
         ctx.fillStyle = "#e2e8f0";
         ctx.font = "800 9px ui-monospace, monospace";
         ctx.fillText(`LV ${experience?.level ?? 0}`, startX, experienceY - 3);
-        const inputTokens = mobileControlLayout ? [] : (scene.spellInput?.tokens ?? []);
-        if (inputTokens.length > 0) {
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#fde68a";
-            ctx.font = "900 13px ui-monospace, monospace";
-            ctx.fillText(
-                inputTokens.map((token) => (token === POINTER_SPELL_TOKEN.RIGHT ? "R" : "L")).join(" → "),
-                this.cssWidth * 0.5,
-                y - 10
-            );
-        }
         ctx.restore();
     }
 

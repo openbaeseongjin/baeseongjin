@@ -1,12 +1,12 @@
-import { POINTER_SPELL_COMMAND } from "../../core/input/PointerSpellCommandBuffer.js";
+import { SPELL_SLOT_COMMAND } from "../../core/input/SpellSlotCommandInput.js";
 import { STATUS_EFFECT_ID } from "../status-effects/StatusEffectDefinition.js";
 import { SPELL_TARGET_POLICY_ID } from "./SpellTargetPolicy.js";
 
 export const SPELL_SLOT_ID = Object.freeze({
-    BASIC_ATTACK: POINTER_SPELL_COMMAND.RIGHT_LEFT_LEFT,
-    UTILITY: POINTER_SPELL_COMMAND.RIGHT_LEFT_RIGHT,
-    POWER_ATTACK: POINTER_SPELL_COMMAND.RIGHT_RIGHT_LEFT,
-    MOVEMENT: POINTER_SPELL_COMMAND.RIGHT_RIGHT_RIGHT
+    BASIC_ATTACK: SPELL_SLOT_COMMAND.BASIC_ATTACK,
+    UTILITY: SPELL_SLOT_COMMAND.UTILITY,
+    POWER_ATTACK: SPELL_SLOT_COMMAND.POWER_ATTACK,
+    MOVEMENT: SPELL_SLOT_COMMAND.MOVEMENT
 });
 
 export const SPELL_ID = Object.freeze({
@@ -269,12 +269,6 @@ export const SPELL_SPEC = Object.freeze({
 });
 
 export const SPELL_SLOT_ORDER = Object.freeze(Object.values(SPELL_SLOT_ID));
-export const SPELL_COMMAND_LABEL = Object.freeze({
-    [SPELL_SLOT_ID.BASIC_ATTACK]: "RLL",
-    [SPELL_SLOT_ID.UTILITY]: "RLR",
-    [SPELL_SLOT_ID.POWER_ATTACK]: "RRL",
-    [SPELL_SLOT_ID.MOVEMENT]: "RRR"
-});
 export const SPELL_SLOT_LABEL = Object.freeze({
     [SPELL_SLOT_ID.BASIC_ATTACK]: "기본",
     [SPELL_SLOT_ID.UTILITY]: "유틸",

@@ -1,5 +1,5 @@
 import { createPlayerCommand } from "../commands/PlayerCommand.js";
-import { POINTER_SPELL_COMMAND_BY_TOKENS } from "../../core/input/PointerSpellCommandBuffer.js";
+import { SPELL_SLOT_COMMAND_BY_ID } from "../../core/input/SpellSlotCommandInput.js";
 
 export const PLAYER_COMMAND_PROTOCOL_VERSION = 7;
 
@@ -29,9 +29,9 @@ function normalizeCommand(command) {
     if (
         command.spellCommand?.commandKey !== null &&
         command.spellCommand?.commandKey !== undefined &&
-        !Object.hasOwn(POINTER_SPELL_COMMAND_BY_TOKENS, command.spellCommand.commandKey)
+        !Object.hasOwn(SPELL_SLOT_COMMAND_BY_ID, command.spellCommand.commandKey)
     ) {
-        throw new Error("spellCommand.commandKey must be null or a known spell command");
+        throw new Error("spellCommand.commandKey must be null or a known spell slot command");
     }
     if (!Number.isSafeInteger(command.interactSequence ?? 0) || (command.interactSequence ?? 0) < 0) {
         throw new Error("interactSequence must be a non-negative safe integer");

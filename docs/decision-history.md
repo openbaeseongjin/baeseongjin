@@ -23,6 +23,14 @@
 - 대체: 0.74.0 결정 중 현재 `respawnAnchorId` Stage 하단 공백을 낙사 경계로 사용한 부분만 대체한다. 동일 X·2160px Gate 분리 배치는 유지한다.
 - 검증 상태: 현재 계약은 `docs/development-rules.md`, `docs/architecture.md`, `docs/map-editor.md`, `docs/multiplayer-synchronization.md`와 production map parity가 소유한다.
 
+## [L2] 2026-08-25 — PC 우클릭 Spell 조합을 직접 슬롯 키로 대체한다
+
+- 맥락: 고정된 네 역할 슬롯을 고르기 위해 마우스 세 번을 입력하면 Rope 조준·접선 드래그와 같은 손을 경쟁하고, 첫 우클릭이 부착 Rope까지 해제해 핵심 Rope 숙련보다 입력 암기와 실수가 난이도를 소유했다.
+- 결정: PC는 `Q` 기본 공격, `E` 유틸, `R` 고위력 공격, `Shift` 이동 Spell을 현재 커서 방향으로 즉시 시전한다. 슬롯 키는 Rope를 해제하지 않고 우클릭은 Rope 해제·발사 취소만 담당한다.
+- 영향: 데스크톱 HUD와 Help는 직접 키를 표시하고 모바일의 `슬롯 선택 → 월드 터치 1회 시전`, 네 역할·쿨다운·내부 command ID와 네트워크 계약은 유지한다.
+- 대체: `우좌좌` 기본, `우좌우` 유틸, `우우좌` 고위력, `우우우` 이동을 입력마다 0.75초 안에 완성하는 PC 커맨드 방식.
+- 검증 상태: 현재 계약은 `docs/augment-v1.md`, `docs/game-hackathon-planning.md`, `docs/architecture.md`와 통합 `help.html`이 소유한다.
+
 ## [L1] 2026-08-25 — 맞닿은 Stage seam을 화면 밖 Gate 전환으로 대체한다
 
 - 맥락: Bounds를 맞닿게 쌓으면 Stage별 Exit·Entry 내부 좌표 때문에 47개 전환 거리가 64~1268px, 수평 이동이 0~4512px로 달라지고 다음 Stage가 출구 화면에 노출됐다.

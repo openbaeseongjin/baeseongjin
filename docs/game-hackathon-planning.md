@@ -31,7 +31,7 @@
 - 기본 공격도 자동 사격이 아니라 로프 이동의 속도·충돌 진입을 사용해, 이동 숙련이 전투 성과로 직접 이어지게 한다.
 - 정상 짧은 낙하는 허용하되 큰 추락 착지에는 체력 위험을 두어 고도 관리와 안전한 Recovery 선택에 의미를 준다.
 
-초기 안내는 시작 화면과 설정에서 여는 통합 `help.html`이 소유한다. Help는 PC 좌·우 클릭 Spell 커맨드, 모바일 Rope 기본 선택과 `슬롯 선택 → 월드 터치 1회 시전`, 하단 네 슬롯 쿨다운, 몹 처치 경험치와 자동 장착 Augment를 현재 Runtime과 동일하게 설명한다. 시작 화면은 `처음 플레이하시나요?` 안내와 Help 링크를 항상 제공하고 게임 중에는 같은 `help.html?embedded=1`을 연다.
+초기 안내는 시작 화면과 설정에서 여는 통합 `help.html`이 소유한다. Help는 PC `Q/E/R/Shift` 직접 Spell 슬롯과 Rope 동시 사용, 모바일 Rope 기본 선택과 `슬롯 선택 → 월드 터치 1회 시전`, 하단 네 슬롯 쿨다운, 몹 처치 경험치와 자동 장착 Augment를 현재 Runtime과 동일하게 설명한다. 시작 화면은 `처음 플레이하시나요?` 안내와 Help 링크를 항상 제공하고 게임 중에는 같은 `help.html?embedded=1`을 연다.
 
 ## 4. 확정된 장르 구조
 
@@ -138,7 +138,7 @@
 - `SECTOR 01`~`06`의 상세 Stage 문서는 48/48 작성됐다. 문서 작성과 Runtime 연결은 별도 상태이며, 현재 연결 수·차단 요소·마지막 확인 근거는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
 - 메인 개발은 문서 수를 완료 수치로 사용하지 않고 섹터 순서대로 mock Runtime을 연결한다. 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름·오브젝트 요구·전환 계약과 실제 검증이 모두 필요하다.
 - 0.67.0은 authored 장비 Node를 제거하고 마지막 양수 Player 피해 귀속 경험치·자동 계산 레벨업·Player별 Augment 선택으로 전환한다. 완전 회복·Encounter reset 전에는 이후 환경 원인 사망도 해당 Player에게 귀속한다. Catalog와 현재 보상 범위의 기준은 [`augment-v1.md`](./augment-v1.md)다.
-- 0.67.0의 마법 입력은 PC 우클릭 시작 뒤 좌·우 클릭 두 번이며 모바일 마법 입력은 1차 범위에서 제외한다.
+- 0.75.0의 PC Spell 입력은 `Q` 기본·`E` 유틸·`R` 고위력·`Shift` 이동 직접 슬롯이며 Rope 부착·스윙을 해제하지 않는다. 모바일은 같은 네 역할을 `슬롯 선택 → 월드 터치 1회 시전`으로 사용한다.
 - NPC는 온라인 예선 핵심 범위에서 제외한다. 코어 완료 뒤 여유가 있을 때만 2-6의 선택지 없는 3줄 stationary NPC를 검토한다.
 - Ending은 Final Security 처치 뒤 개별 Boarding, 전원 준비, Door Close, City Pullback, Run Complete 순서로 확정됐으며 상세 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md)가 소유한다.
 - 그래픽·오디오 담당자는 메인 개발자가 맵별로 정리한 오브젝트·cue 목록을 받아 8월 19일에 정식 리소스 1차 생산분을 인계한다. 1차 생산분은 전체 자산 완료가 아니라 앞서 정리된 우선 오브젝트의 교체 가능한 첫 묶음이다.

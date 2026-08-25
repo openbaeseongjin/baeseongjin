@@ -1,5 +1,5 @@
 import { MOBILE_GAMEPLAY_ACTION_ID } from "./MobileGameplayInputAdapter.js";
-import { POINTER_SPELL_COMMAND_ORDER } from "./PointerSpellCommandBuffer.js";
+import { SPELL_SLOT_COMMAND_ORDER } from "./SpellSlotCommandInput.js";
 
 export const MOBILE_CONTROL_ID = Object.freeze({
     LEFT: "left",
@@ -13,7 +13,7 @@ const MOBILE_MOVEMENT_CONTROL = Object.freeze({
     [MOBILE_CONTROL_ID.RIGHT]: true
 });
 
-const MOBILE_ACTION_CONTROL_ORDER = Object.freeze([MOBILE_GAMEPLAY_ACTION_ID.ROPE, ...POINTER_SPELL_COMMAND_ORDER]);
+const MOBILE_ACTION_CONTROL_ORDER = Object.freeze([MOBILE_GAMEPLAY_ACTION_ID.ROPE, ...SPELL_SLOT_COMMAND_ORDER]);
 
 const CONTROL_ORDER = Object.freeze([
     MOBILE_CONTROL_ID.LEFT,
@@ -84,9 +84,7 @@ export function getMobileControlLayout(width, height) {
         right: movementControls[MOBILE_CONTROL_ID.RIGHT],
         rope: actionControls[MOBILE_GAMEPLAY_ACTION_ID.ROPE],
         spellSlots: Object.freeze(
-            Object.fromEntries(
-                POINTER_SPELL_COMMAND_ORDER.map((commandKey) => [commandKey, actionControls[commandKey]])
-            )
+            Object.fromEntries(SPELL_SLOT_COMMAND_ORDER.map((commandKey) => [commandKey, actionControls[commandKey]]))
         ),
         controls: Object.freeze({ ...movementControls, ...actionControls })
     });
