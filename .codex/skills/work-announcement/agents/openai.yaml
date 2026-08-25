@@ -1,0 +1,4 @@
+interface:
+  display_name: "작업 공지"
+  short_description: "Git 작업을 기간·분야·담당자로 필터링해 승인 후 공지"
+  default_prompt: "Use $work-announcement to draft a repository-based work announcement for a selected period, domain, and contributor, then publish it only after I approve the exact text."
