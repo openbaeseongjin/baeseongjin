@@ -210,6 +210,10 @@ export class ContinuityWardenSpriteObjectRendererCatalog {
         });
     }
 
+    supports(kind) {
+        return Object.hasOwn(this.renderers, kind);
+    }
+
     rendererFor(kind) {
         return this.renderers[kind] ?? bossPolygonObjectRenderer(kind);
     }

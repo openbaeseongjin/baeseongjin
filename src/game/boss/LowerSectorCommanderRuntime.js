@@ -843,6 +843,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
                 ropeAttachable: false,
                 active: true,
                 targetPlayerId: this.targetPlayerId,
+                targetPosition: this.targetPosition ? compositeWorldPoint(this.targetPosition, worldOffset) : null,
                 defeatProgress: this.state === STATE.DEFEATED ? 1 - this.victoryRemaining / VICTORY_SECONDS : 0
             }
         ];
