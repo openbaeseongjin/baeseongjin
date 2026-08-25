@@ -1,3 +1,6 @@
+import { graphemeLength } from "../../core/text/GraphemeText.js";
+import { PARTY_CHAT_LINGER_SECONDS, PARTY_CHAT_REVEAL_CHARACTERS_PER_SECOND } from "../network/PartyChatMessage.js";
+
 export const PLAYER_MESSAGE_CHANNELS = Object.freeze(["player-bark", "party-chat"]);
 export const PLAYER_MESSAGE_AUDIENCES = Object.freeze(["local-player", "party"]);
 
@@ -35,6 +38,20 @@ export function definePlayerMessage({
         revealCharactersPerSecond: finitePositive(revealCharactersPerSecond, "revealCharactersPerSecond"),
         priority,
         causalId: nonEmpty(causalId, "causalId")
+    });
+}
+
+export function definePartyChatPlayerMessage({ messageId, speakerId, text }) {
+    const durationSeconds = graphemeLength(text) / PARTY_CHAT_REVEAL_CHARACTERS_PER_SECOND + PARTY_CHAT_LINGER_SECONDS;
+    return definePlayerMessage({
+        messageId,
+        channel: "party-chat",
+        audience: "party",
+        speakerId,
+        text,
+        durationSeconds,
+        revealCharactersPerSecond: PARTY_CHAT_REVEAL_CHARACTERS_PER_SECOND,
+        causalId: messageId
     });
 }
 

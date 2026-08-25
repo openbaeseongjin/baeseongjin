@@ -1,12 +1,7 @@
+import { graphemes } from "../../core/text/GraphemeText.js";
 import { definePlayerMessage } from "./PlayerMessageCatalog.js";
 
-const graphemeSegmenter =
-    typeof Intl.Segmenter === "function" ? new Intl.Segmenter(undefined, { granularity: "grapheme" }) : null;
-
-function messageCharacters(text) {
-    if (!graphemeSegmenter) return Array.from(text);
-    return Array.from(graphemeSegmenter.segment(text), ({ segment }) => segment);
-}
+const MAX_SEEN_CAUSAL_IDS = 2048;
 
 export class PlayerMessagePresentation {
     constructor({ viewerId } = {}) {
@@ -16,6 +11,7 @@ export class PlayerMessagePresentation {
         this.current = null;
         this.currentAge = 0;
         this.seenCausalIds = new Set();
+        this.seenCausalIdOrder = [];
         this.blocked = false;
     }
 
@@ -23,6 +19,10 @@ export class PlayerMessagePresentation {
         const normalized = definePlayerMessage(message);
         if (this.seenCausalIds.has(normalized.causalId)) return false;
         this.seenCausalIds.add(normalized.causalId);
+        this.seenCausalIdOrder.push(normalized.causalId);
+        while (this.seenCausalIdOrder.length > MAX_SEEN_CAUSAL_IDS) {
+            this.seenCausalIds.delete(this.seenCausalIdOrder.shift());
+        }
         this.queue.push(normalized);
         return true;
     }
@@ -52,7 +52,7 @@ export class PlayerMessagePresentation {
 
     snapshot() {
         if (this.blocked || !this.current) return null;
-        const characters = messageCharacters(this.current.text);
+        const characters = graphemes(this.current.text);
         const visibleCharacterCount = Math.min(
             characters.length,
             Math.floor(this.currentAge * this.current.revealCharactersPerSecond)

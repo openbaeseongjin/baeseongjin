@@ -25,6 +25,11 @@ import { WORLD_CONFIG } from "../config.js";
 import { createGameSimulationForWorldRevision } from "../simulation/GameSimulationFactory.js";
 import { routeServerMessage } from "./RemoteServerMessageRouter.js";
 import { ClientServerTickProjection } from "./ClientServerTickProjection.js";
+import {
+    createPartyChatMessage,
+    createPartyChatSubmission,
+    serializePartyChatSubmission
+} from "../network/PartyChatMessage.js";
 
 const MAX_TRACKED_COMMANDS = 2048;
 
@@ -82,6 +87,8 @@ export class RemoteGameAuthority {
         this.pendingCheckpointClaim = null;
         this.summitClaimReceipts = [];
         this.pendingSummitClaim = false;
+        this.partyChatSequence = 0;
+        this.partyChatMessages = [];
         this.latestOwnerMotionReceiptTick = -1;
         this.recoveringOwnerMotionTick = false;
         this.networkMetrics = {
@@ -205,6 +212,24 @@ export class RemoteGameAuthority {
         );
         this.submitOwnerMotion();
         return true;
+    }
+
+    submitPartyChat(text) {
+        if (!this.playerId || this.socket?.readyState !== this.WebSocketImpl.OPEN) return null;
+        const submission = createPartyChatSubmission({ clientSequence: this.partyChatSequence, text });
+        this.partyChatSequence += 1;
+        const message = createPartyChatMessage({ speakerId: this.playerId, ...submission });
+        this.socket.send(
+            JSON.stringify({
+                type: MULTIPLAYER_MESSAGE_TYPE.PARTY_CHAT_SUBMIT,
+                payload: serializePartyChatSubmission(submission)
+            })
+        );
+        return message;
+    }
+
+    drainPartyChatMessages() {
+        return Object.freeze(this.partyChatMessages.splice(0));
     }
 
     submitOwnerMotion() {

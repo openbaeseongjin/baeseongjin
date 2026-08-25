@@ -31,6 +31,8 @@ import {
 } from "./presentation/BossStageLocalView.js";
 import { ropeAnchorState } from "./rope/RopeAttachment.js";
 import { PLAYER_IMPACT_SOURCE_KIND } from "./network/PlayerImpactClaim.js";
+import { MultiplayerChatPanel } from "./ui/MultiplayerChatPanel.js";
+import { definePartyChatPlayerMessage } from "./presentation/PlayerMessageCatalog.js";
 
 function ropeAtBossTransform(rope, bossStage) {
     if (!rope?.isAttached || !rope.anchorOwnerId || !rope.anchorLocalOffset) return rope;
@@ -76,7 +78,8 @@ export class MultiplayerGameApp {
         metricsVisible = false,
         hudVisible = true,
         playerDefinition = null,
-        directionDefinitions = []
+        directionDefinitions = [],
+        chatPanelRoot = null
     }) {
         this.renderer = renderer
             ? assertGameRenderer(renderer)
@@ -134,6 +137,12 @@ export class MultiplayerGameApp {
         this.directionLightingPresentation = direction.lightingPresentation;
         this.directionCharacterPresentation = direction.characterPresentation;
         this.directionCoverage = direction.coverage;
+        this.chatPanel = new MultiplayerChatPanel({
+            root: chatPanelRoot,
+            returnFocus: canvas,
+            onActiveChange: (active) => this.input.setSuspended(active, "party-chat"),
+            onSubmit: (text) => this.submitPartyChat(text)
+        });
         this.localRunCompleted = false;
         this.localAugmentReward = null;
         this.pendingAugmentSelection = null;
@@ -152,12 +161,14 @@ export class MultiplayerGameApp {
     }
 
     start() {
+        this.chatPanel.attach();
         this.input.attach();
         this.frameId = requestAnimationFrame(this.tick);
     }
 
     stop() {
         if (this.frameId !== null) cancelAnimationFrame(this.frameId);
+        this.chatPanel.detach();
         this.input.detach();
         this.authority.close();
         this.frameId = null;
@@ -171,6 +182,19 @@ export class MultiplayerGameApp {
     setHudVisible(visible) {
         this.hudVisible = Boolean(visible);
         return this.hudVisible;
+    }
+
+    submitPartyChat(text) {
+        const message = this.authority.submitPartyChat(text);
+        if (!message) return false;
+        this.playerMessagePresentation.enqueue(definePartyChatPlayerMessage(message));
+        return true;
+    }
+
+    receivePartyChatMessages() {
+        for (const message of this.authority.drainPartyChatMessages()) {
+            this.playerMessagePresentation.enqueue(definePartyChatPlayerMessage(message));
+        }
     }
 
     applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
@@ -280,6 +304,7 @@ export class MultiplayerGameApp {
         const current = this.authority.snapshot(1);
         this.finalEscapeCinematic.sync(this.localRunCompleted ? "completed" : current.state.runState);
         if (!current.predicted) return;
+        this.receivePartyChatMessages();
         const particleBounds = createRenderViewport({
             camera: this.camera,
             cssWidth: this.renderer.cssWidth,
@@ -312,6 +337,7 @@ export class MultiplayerGameApp {
         this.combatFeedback.apply(authorityFeedback, { visibleWorldBounds: particleBounds });
         if (current.state.runState === "completed") this.localRunCompleted = false;
         if (this.localRunCompleted || current.state.runState === "completed") {
+            this.playerMessagePresentation.update(dt, { storyPresentation: this.storyPresentation.snapshot() });
             this.combatFeedback.update(dt);
             this.updateCheckpointFeedback(dt);
             this.audioBindings?.presentFrame({ scene: { ...initialAudioContext, runState: "completed" } });

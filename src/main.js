@@ -337,7 +337,8 @@ async function launch() {
                     onDiagnostics: updateDiagnostics,
                     metricsVisible: debug.metrics,
                     hudVisible,
-                    directionDefinitions
+                    directionDefinitions,
+                    chatPanelRoot: document.getElementById("party-chat-panel")
                 });
                 channelBadge.textContent = `채널 ${authority.channelId}`;
                 channelBadge.hidden = false;
