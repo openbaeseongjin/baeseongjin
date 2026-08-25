@@ -21,7 +21,7 @@ Boss06 `CONTINUITY WARDEN`의 사용자 승인 64×96 logical pixel motion을 �
 
 지원 상태는 `neutral`, `baton-1`, `baton-2`, `overhead-slam`, `back-swing`, `guard`, `counter-ready`, `counter-bash`, `ground-thruster-dash`, `diagonal-thruster-dash`, `charge`, `security-command`, `security-active`, `defeated`다. Guard 종료는 renderer-local `guard-exit`, Charge 종료는 `charge-exit`, 나머지 공격 종료는 `neutral-recovery`로 재생한다.
 
-Boss06의 `walk`는 승인된 `combat-idle` clip과 이동 거리 기반 공용 Pose를 조합하고, `jump-prepare`는 `charge` atlas의 무릎 굽힘 0~1 frame을 명시적으로 재사용한다. `jump/fall/landing`은 같은 공용 Pose resolver의 압축·기울기를 사용한다. `enemy-summon`은 기존 `security-command` clip을 재사용하며 gameplay·network animation state를 추가하지 않는다.
+Boss06의 `walk`는 승인된 logical body에서 양발 보폭을 직접 편집한 전용 6프레임 atlas를 사용한다. Runtime은 48px 이동 거리마다 한 주기를 재생하며 정지 중에는 frame을 진행하지 않는다. 과거 `combat-idle` 재사용과 전신 강제 bob·rotation은 제거했다. `jump-prepare`는 `charge` atlas의 무릎 굽힘 0~1 frame을 명시적으로 재사용하고, `jump/fall/landing`은 공용 Pose resolver의 압축·기울기를 사용한다. `enemy-summon`은 기존 `security-command` clip을 재사용하며 gameplay·network animation state를 추가하지 않는다.
 
 `boss-damaged`와 `boss-guard-blocked`를 presentation event로 전달해 `hit-front`/`hit-back`과 `guard-block`을 재생하고, 방향 label 변화는 `turn`을 재생한다. `defeated`는 표시 전용 `defeatStage`로 `defeated-baton-drop` → `defeated-shield-fall` → `defeated-unconscious`를 선택하고 후속 Gate/Shuttle 단계에서는 마지막 unconscious frame을 유지한다. animation state와 frame index는 gameplay/network snapshot에 추가하지 않는다.
 
@@ -40,8 +40,8 @@ Boss06의 `walk`는 승인된 `combat-idle` clip과 이동 거리 기반 공용 
 
 - 모든 atlas는 투명 PNG이며 셀 높이 `192px`, 셀 너비 `128px × frame count`다.
 - 로딩 실패와 미지원 상태는 Boss Polygon renderer로 독립 복구한다.
-- `ContinuityWardenSpriteDefinition`의 22 atlas 실제 PNG header와 선언 크기, charge phase 분할·jump-prepare 재사용을 포함한 25 clip frame coverage를 대조한다.
-- 신규 7 clip 31개 logical frame은 64×96 RGBA·binary alpha·승인 palette subset이며, 128×192 개별 frame과 atlas는 exact nearest-neighbor 2×, authoring/runtime atlas는 byte-identical임을 확인했다.
+- `ContinuityWardenSpriteDefinition`의 23 atlas 실제 PNG header와 선언 크기, walk 거리 주기·charge phase 분할·jump-prepare 재사용을 포함한 26 clip frame coverage를 대조한다.
+- 신규 8 clip 37개 logical frame은 64×96 RGBA·binary alpha·승인 palette subset이며, 128×192 개별 frame과 atlas는 exact nearest-neighbor 2×, authoring/runtime atlas는 byte-identical임을 확인했다.
 - 사건 반응과 패배 단계의 presentation FSM 선택을 독립 실행해 `hit-front`·`hit-back`·`guard-block`과 3단계 defeated atlas 선택을 확인했다.
 - `npm run check`, `npm run format:check`, `git diff --check`, 종료 시 `npm run check:scenario-integration`을 통과했다.
 - Map Editor `boss-06` production Gameplay View는 Sector06 환경과 Warden atlas를 첫 프레임 전에 준비한 뒤 active encounter를 시작한다. 2026-08-24 실제 브라우저에서 Player·Boss HUD·Arena 지형·Warden pixel sprite가 함께 표시되고 console error/warning이 없음을 확인했다.

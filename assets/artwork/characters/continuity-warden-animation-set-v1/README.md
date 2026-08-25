@@ -36,6 +36,7 @@ Boss06 `CONTINUITY WARDEN`의 단일 전투 구간에 필요한 공통 대기, �
 | Animation              | Frames | Preview                            | 프레임 의미                                                         |
 | ---------------------- | -----: | ---------------------------------- | ------------------------------------------------------------------- |
 | `combat-idle`          |      6 | `preview/combat-idle.gif`          | 호흡·어깨·무게중심만 움직이며 Shield와 Baton은 낮게 유지            |
+| `walk`                 |      6 | `preview/walk.gif`                 | 양발 접지·교차·체중 이동을 한 주기로 연결하고 상체 장비는 안정화    |
 | `baton-combo`          |      9 | `preview/baton-combo.gif`          | 1타 예고/접촉/회수 → 2타 역방향 → 3타 Overhead Slam                 |
 | `guard`                |      6 | `preview/guard.gif`                | 중립 → Shield 상승 → Guard 유지 → 정면 충돌 반응 → 안정 → 해제      |
 | `ground-dash`          |      6 | `preview/ground-dash.gif`          | 중립 → 낮은 예고 → 발진 → 수평 이동 → 제동 → 복귀                   |
@@ -61,7 +62,7 @@ Boss06 `CONTINUITY WARDEN`의 단일 전투 구간에 필요한 공통 대기, �
 
 현재 Runtime의 early/mid/late 내부 강도 순서 전체에 필요한 캐릭터 모션을 포함한다. 각 모션은 gameplay state와 1:1로 연결하며 하나의 합본 애니메이션으로 이어 붙이지 않는다.
 
-- 공통: `combat-idle`, `turn`, `neutral-recovery`, `hit-front`, `hit-back`
+- 공통: `combat-idle`, `walk`, `turn`, `neutral-recovery`, `hit-front`, `hit-back`
 - 충격봉: `baton-1`, `baton-2`, `overhead-slam`
 - 방어: `guard-enter`, `guard-loop`, `guard-block`, `guard-exit`
 - 이동: `ground-dash`, `charge`
@@ -95,7 +96,8 @@ Boss06 `CONTINUITY WARDEN`의 단일 전투 구간에 필요한 공통 대기, �
 
 ## Runtime 통합 상태와 남은 결정
 
-- 단일 전투 구간의 `neutral`·Baton 3타·Back Swing·Guard/Counter·Ground/Diagonal Dash·Charge·Security Command·Defeated를 Sprite renderer에 연결했다.
+- 단일 전투 구간의 `neutral`·`walk`·Baton 3타·Back Swing·Guard/Counter·Ground/Diagonal Dash·Charge·Security Command·Defeated를 Sprite renderer에 연결했다.
+- `walk`는 승인된 logical body를 직접 편집한 6프레임 전용 clip이다. Runtime은 48px 이동 거리마다 한 보폭을 재생하고 정지 중에는 frame을 진행하지 않으며, 과거 `combat-idle` 재사용과 전신 강제 bob·rotation은 제거했다.
 - V3 `jump`·`landing`은 새 저작 frame 승인 전까지 `combat-idle` pixel body의 renderer-local pose fallback, `enemy-summon`은 의미가 같은 `security-command` clip으로 연결한다. 이 fallback을 신규 승인 모션으로 기록하지 않는다.
 - `boss-damaged`와 `boss-guard-blocked` 사건은 presentation FSM에서 `hit-front`/`hit-back`과 `guard-block`을 선택하고, 방향 변화는 `turn`을 선택한다. gameplay snapshot에는 animation/frame 상태를 추가하지 않는다.
 - 패배는 Runtime `defeatStage`를 표시 전용으로 전달해 `baton-drop` → `shield-fall` → `unconscious` 독립 clip으로 재생하며 이후 Gate/Shuttle 단계에서는 unconscious 마지막 frame을 유지한다.
