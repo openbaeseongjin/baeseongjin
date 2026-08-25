@@ -3,101 +3,113 @@ import {
     CLIENT_FEEDBACK_RESOLUTION
 } from "../../game/combat/ClientFeedbackEventDefinition.js";
 
-function fallbackEventId(event, index) {
+const PLAYER_PRESENTATION_SOURCE_TYPE = Object.freeze({
+    CHECKPOINT_RESPAWN: "checkpoint-respawn"
+});
+
+const PLAYER_DAMAGE_RESOLUTION = Object.freeze({
+    [CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT]: true,
+    [CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE]: true
+});
+
+function playerTargetId(event) {
+    return event.targetId ?? event.playerId ?? event.parameters?.targetId ?? null;
+}
+
+function eventCauseId(event) {
     return (
-        event.eventId ??
         event.impactId ??
         event.predictionId ??
+        event.parameters?.predictionId ??
+        event.parameters?.eventId ??
+        event.objectId ??
         event.projectileId ??
-        `${event.eventType}:${event.tick ?? index}`
+        event.eventId ??
+        null
     );
 }
 
-function impactEventId(event, index) {
-    return `hit:${event.objectId ?? event.projectileId ?? event.predictionId ?? fallbackEventId(event, index)}`;
+function impactCauseId(event, index) {
+    return eventCauseId(event) ?? `${event.eventType}:${event.tick ?? index}`;
 }
 
-function respawnEventId(event) {
-    const causeId = event.causeId ?? event.impactId ?? event.projectileId ?? event.predictionId;
-    if (causeId) return `respawn:${event.playerId ?? event.targetId}:${causeId}`;
+function respawnCauseId(event, playerId) {
+    const causeId = event.causeId ?? eventCauseId(event);
+    if (causeId) return `respawn:${playerId}:${causeId}`;
     const position = event.position ?? {};
     const x = Number.isFinite(position.x) ? position.x.toFixed(3) : "unknown";
     const y = Number.isFinite(position.y) ? position.y.toFixed(3) : "unknown";
-    return `respawn:${event.playerId}:${event.reason ?? "unknown"}:${x}:${y}`;
+    return `respawn:${playerId}:${event.reason ?? "unknown"}:${x}:${y}`;
 }
 
+class PlayerPresentationEventDefinition {
+    matches(_event) {
+        return false;
+    }
+
+    project(_event, _index) {
+        return null;
+    }
+
+    hit(event, index) {
+        const playerId = playerTargetId(event);
+        return Object.freeze({ id: `hit:${playerId}:${impactCauseId(event, index)}`, playerId, type: "hit" });
+    }
+
+    respawn(event, playerId = playerTargetId(event)) {
+        return Object.freeze({
+            id: respawnCauseId(event, playerId),
+            playerId,
+            type: "respawn",
+            deathPosition: event.deathPosition ?? event.position,
+            respawnPosition: event.respawnPosition ?? event.position ?? null
+        });
+    }
+}
+
+class PlayerDamagePresentationEventDefinition extends PlayerPresentationEventDefinition {
+    matches(event) {
+        return PLAYER_DAMAGE_RESOLUTION[event.resolution] === true && playerTargetId(event) !== null;
+    }
+
+    project(event, index) {
+        return event.respawned ? this.respawn(event) : this.hit(event, index);
+    }
+}
+
+class PlayerRespawnPresentationEventDefinition extends PlayerPresentationEventDefinition {
+    matches(event) {
+        return event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_RESPAWNED && typeof event.playerId === "string";
+    }
+
+    project(event) {
+        return this.respawn(event, event.playerId);
+    }
+}
+
+class CheckpointRespawnPresentationEventDefinition extends PlayerPresentationEventDefinition {
+    matches(event) {
+        return event.type === PLAYER_PRESENTATION_SOURCE_TYPE.CHECKPOINT_RESPAWN && typeof event.playerId === "string";
+    }
+
+    project(event) {
+        return this.respawn(event, event.playerId);
+    }
+}
+
+const PLAYER_PRESENTATION_EVENT_DEFINITIONS = Object.freeze([
+    new PlayerDamagePresentationEventDefinition(),
+    new PlayerRespawnPresentationEventDefinition(),
+    new CheckpointRespawnPresentationEventDefinition()
+]);
+
 export function createPlayerPresentationEvents(events = []) {
-    const presentationEvents = [];
-    events.forEach((event, index) => {
-        if (!event) return;
-        if (
-            [CLIENT_FEEDBACK_EVENT_TYPE.RESOLVE, CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_RESOLVE].includes(
-                event.eventType
-            ) &&
-            [CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT, CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE].includes(
-                event.resolution
-            )
-        ) {
-            const playerId = event.targetId ?? event.parameters?.targetId;
-            if (playerId) {
-                presentationEvents.push(
-                    event.respawned
-                        ? Object.freeze({
-                              id: respawnEventId({ ...event, playerId }),
-                              playerId,
-                              type: "respawn",
-                              deathPosition: event.deathPosition ?? event.position,
-                              respawnPosition: event.respawnPosition ?? null
-                          })
-                        : Object.freeze({ id: impactEventId(event, index), playerId, type: "hit" })
-                );
-            }
-            return;
-        }
-        if (
-            [
-                CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_PLATFORM_COLLISION_DAMAGED,
-                CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_PLAYER_PLATFORM_COLLISION_DAMAGED
-            ].includes(event.eventType) &&
-            (event.targetId || event.playerId)
-        ) {
-            const playerId = event.targetId ?? event.playerId;
-            presentationEvents.push(
-                event.respawned
-                    ? Object.freeze({
-                          id: respawnEventId({ ...event, playerId }),
-                          playerId,
-                          type: "respawn",
-                          deathPosition: event.deathPosition ?? event.position,
-                          respawnPosition: event.respawnPosition ?? null
-                      })
-                    : Object.freeze({ id: impactEventId(event, index), playerId, type: "hit" })
-            );
-            return;
-        }
-        if (event.eventType === "player-respawned" && event.playerId) {
-            presentationEvents.push(
-                Object.freeze({
-                    id: respawnEventId(event),
-                    playerId: event.playerId,
-                    type: "respawn",
-                    deathPosition: event.deathPosition ?? event.position,
-                    respawnPosition: event.position
-                })
-            );
-            return;
-        }
-        if (event.type === "checkpoint-respawn" && event.playerId) {
-            presentationEvents.push(
-                Object.freeze({
-                    id: respawnEventId(event),
-                    playerId: event.playerId,
-                    type: "respawn",
-                    deathPosition: event.deathPosition ?? event.position,
-                    respawnPosition: event.position
-                })
-            );
-        }
-    });
-    return Object.freeze(presentationEvents);
+    return Object.freeze(
+        events.flatMap((event, index) => {
+            if (!event) return [];
+            const definition = PLAYER_PRESENTATION_EVENT_DEFINITIONS.find((candidate) => candidate.matches(event));
+            const projected = definition?.project(event, index) ?? null;
+            return projected ? [projected] : [];
+        })
+    );
 }

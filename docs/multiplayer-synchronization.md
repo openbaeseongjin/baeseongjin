@@ -61,6 +61,8 @@
 
 사용자 체감의 핵심은 **본체 피격·로프 절단·플랫폼 충돌 피해의 최종 판정 주체가 피해 또는 소유 클라이언트**라는 점이다. 피해 클라이언트는 서버 응답 전에 HP·넉백·로프 절단·플랫폼 충돌 피해·치명 시 부활을 적용한다. 정상 impact claim은 사건 자료와 적용 결과의 작은 상태 지문만 보내며 전체 소유자 상태를 반복 전송하지 않는다. 서버 receipt나 이후 snapshot은 이 결과를 복구하거나 소비한 탄환을 되살리지 않는다.
 
+순간 Player impact의 표현 동기화는 공격 종류와 분리한다. 피해 클라이언트의 predicted 사건과 서버 확정 사건은 모두 `resolution: player-hit`, target Player ID와 stable impact ID를 제공한다. 피해자는 predicted 사건으로 즉시 `hit` FSM을 시작하고 같은 ID의 확정 echo를 제거하며, 다른 참가자는 확정 사건을 같은 target actor의 FSM에 정확히 한 번 전달한다. Enemy Behavior·Boss hazard·Player Spell·적 투사체가 별도 animation event type을 만들지 않으며 시간 기반 상태 피해 pulse는 이 사건을 반복하지 않는다.
+
 서버의 impact 검증은 피해 결과를 다시 판정하기 위한 권위 판정이 아니다. 인증된 연결, 메시지 형식과 impact ID 중복 여부를 확인한 뒤 공용 `GameSimulation`으로 같은 피해 전이를 적용하고 상태 지문을 비교한다. 적 탄환 impact는 서버 projectile, 플랫폼 충돌 impact는 보고된 충돌 보정 전 2D 속력과 공용 `PlatformCollisionDamage` 규칙을 사용한다. 지문이 같으면 전체 상태 없이 사건을 확정한다. 지문이 다르면 서버의 임시 전이를 되돌리고 같은 `impact-claim-receipt`에 `accepted: true`, `resolution: recovery-required`, 해당 impact·피해자 연결에 묶인 일회용 `recoveryId`를 보낸다. 피해 클라이언트는 응답 시점의 최신 소유자 상태, 그 상태를 만든 `stateTick`, 새 지문과 `recoveryId`를 한 번 전송한다. 서버는 실제로 발급해 보관 중인 challenge와 일치할 때만 전체 상태를 흡수하고, 상태와 플레이어별 `ownerMotionTick`·로프 tick을 같은 처리에서 갱신한다. challenge 없는 첫 claim이나 다른 impact ID로 전체 상태를 보내면 `recovery-not-requested`로 거부한다. 복구 요청은 피해 클라이언트를 서버 상태로 되감지 않는다.
 
 상태가 크게 벌어졌을 때 수렴 기준은 상태 소유권에 따라 다르다.
