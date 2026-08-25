@@ -99,12 +99,21 @@ export const CONTINUITY_WARDEN_OBJECT_KIND = Object.freeze({
     PAD_SURFACE: "boss-pad-surface"
 });
 
+export const CONTINUITY_WARDEN_GATE_STATE = Object.freeze({
+    LOCKED: "locked",
+    LIGHT: "light",
+    OPEN: "open"
+});
+
+export const CONTINUITY_WARDEN_GATE_SIZE = Object.freeze({ width: 480, height: 760 });
+
 export const CONTINUITY_WARDEN_SHUTTLE_STATE = Object.freeze({
     HIDDEN: "hidden",
     BOARDING: "boarding"
 });
 
 export const CONTINUITY_WARDEN_SHUTTLE_SIZE = Object.freeze({ width: 500, height: 390 });
+export const CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR = Object.freeze({ x: 0.5, y: 1 });
 
 export const CONTINUITY_WARDEN_ID = Object.freeze({
     BODY: "boss-06:continuity-warden:body",

@@ -31,6 +31,8 @@ reviewed-upstream: 590f3d852d5d71149d4f9efdebd26dbefa117c87
 
 ## 최근 반영된 시나리오 변화
 
+- Boss06 승리 표현은 Departure Gate의 locked/light/open와 0.3초 opening motion을 Runtime sprite로 연결하고, Gate·Shuttle의 bottom-center를 Departure Deck top에 맞췄다. Gate collision·Bridge·Boarding zone·승리 타임라인·멀티 권한은 변경하지 않았다.
+
 - Map Editor에서 마지막으로 저장·적용한 37개 일반 Stage의 canonical 지형·Anchor·회수·경로·월드 오브젝트 배치를 generated Stage 모듈과 함께 갱신했다. 삭제한 surface·Anchor·route point는 canonical 원본과 Runtime에서 함께 제거했고, 48개 canonical Stage와 54개 생성물의 일치 검증을 통과했다. 실제 전체 traversal 체감은 별도 검증 범위다.
 
 - 0.74.0은 gap-0 Stage seam을 Gate 분리 배치로 대체했다. 47개 target Entry는 source Exit와 동일 X·2160px 위에 있으며 production parity가 portal endpoint·desktop/mobile 화면 밖·Bounds 비중첩·현재 Stage 하단+780px 낙사 복구 여유를 함께 검사한다. Stage-local canonical geometry와 Boss03·06 전투 계약은 유지하고 Boss Arena는 source Gate 기준 오른쪽 격리를 사용한다.

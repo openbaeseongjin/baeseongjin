@@ -2,6 +2,8 @@ import { paintSpriteFrame } from "../sprites/SpriteCanvasPainter.js";
 import { bossPolygonObjectRenderer } from "./BossPolygonObjectRenderers.js";
 import { ContinuityWardenAnimationController } from "./ContinuityWardenAnimationController.js";
 import {
+    CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR,
+    CONTINUITY_WARDEN_GATE_SIZE,
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
     CONTINUITY_WARDEN_OBJECT_KIND,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
@@ -159,8 +161,35 @@ class MaintenanceShuttleSpriteRenderer {
         context.imageSmoothingEnabled = false;
         context.drawImage(
             image,
-            Math.round(object.position.x - width * 0.5),
-            Math.round(object.position.y - height * 0.5),
+            Math.round(object.position.x - width * CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR.x),
+            Math.round(object.position.y - height * CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR.y),
+            width,
+            height
+        );
+        context.restore();
+    }
+}
+
+class DepartureGateSpriteRenderer {
+    constructor({ assets }) {
+        this.assets = assets;
+        this.fallback = bossPolygonObjectRenderer(CONTINUITY_WARDEN_OBJECT_KIND.GATE);
+    }
+
+    draw(context, object) {
+        const image = this.assets?.gateImageFor(object.state, object.stateProgress);
+        if (!image) {
+            this.fallback.draw(context, object);
+            return;
+        }
+        const width = Math.max(1, object.size?.width ?? CONTINUITY_WARDEN_GATE_SIZE.width);
+        const height = Math.max(1, object.size?.height ?? CONTINUITY_WARDEN_GATE_SIZE.height);
+        context.save();
+        context.imageSmoothingEnabled = false;
+        context.drawImage(
+            image,
+            Math.round(object.position.x - width * CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR.x),
+            Math.round(object.position.y - height * CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR.y),
             width,
             height
         );
@@ -172,6 +201,9 @@ export class ContinuityWardenSpriteObjectRendererCatalog {
     constructor({ assets, definition, objectSpriteAssets = null }) {
         this.renderers = Object.freeze({
             [OBJECT_KIND.WARDEN]: new ContinuityWardenSpriteRenderer({ assets, definition }),
+            [CONTINUITY_WARDEN_OBJECT_KIND.GATE]: new DepartureGateSpriteRenderer({
+                assets: objectSpriteAssets
+            }),
             [CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE]: new MaintenanceShuttleSpriteRenderer({
                 assets: objectSpriteAssets
             })

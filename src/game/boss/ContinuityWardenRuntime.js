@@ -22,6 +22,8 @@ import { CONTINUITY_WARDEN_STATE_LANE, ContinuityWardenStatePool } from "./Conti
 import {
     CONTINUITY_WARDEN_ACTION_PHASE as ACTION_PHASE,
     CONTINUITY_WARDEN_EVENT,
+    CONTINUITY_WARDEN_GATE_SIZE,
+    CONTINUITY_WARDEN_GATE_STATE,
     CONTINUITY_WARDEN_HAZARD,
     CONTINUITY_WARDEN_HUD_LABEL,
     CONTINUITY_WARDEN_ID,
@@ -183,6 +185,18 @@ function bounds(value, fallback) {
         : { ...fallback };
 }
 
+function gatePresentationState({ open, lit }) {
+    if (open) return CONTINUITY_WARDEN_GATE_STATE.OPEN;
+    if (lit) return CONTINUITY_WARDEN_GATE_STATE.LIGHT;
+    return CONTINUITY_WARDEN_GATE_STATE.LOCKED;
+}
+
+function gateOpeningProgress({ stage, elapsed, offsets, open }) {
+    if (open) return 1;
+    if (stage !== "gate-light") return 0;
+    return Math.min(1, Math.max(0, (elapsed - offsets.gateLightAt) / (offsets.gateOpenAt - offsets.gateLightAt)));
+}
+
 function finiteNumbers(value, fallback) {
     return Array.isArray(value) && value.length === fallback.length && value.every(Number.isFinite)
         ? Object.freeze([...value])
@@ -319,6 +333,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             .filter(({ kind }) => kind === CONTINUITY_WARDEN_SURFACE_KIND.LEDGE)
             .map((surface) => landingPosition(surface, bodyHeight))
             .sort((left, right) => left.x - right.x);
+        const gateBounds = bounds(parameters.gateBounds, { x: 4360, y: -1750, width: 480, height: 760 });
+        const boardingBounds = bounds(parameters.boardingBounds, { x: 4920, y: -1220, width: 360, height: 235 });
         const halfBodyWidth = bodyWidth * 0.5;
         const guardInset = positive(parameters.guardEdgeInset, 200);
         return freezeComposite({
@@ -334,10 +350,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             ledgeTargets,
             lowBeamBounds: bounds(parameters.lowBeamBounds, { x: 980, y: -1200, width: 3160, height: 130 }),
             highBeamBounds: bounds(parameters.highBeamBounds, { x: 980, y: -1485, width: 3160, height: 270 }),
-            gateBounds: bounds(parameters.gateBounds, { x: 4360, y: -1750, width: 480, height: 760 }),
+            gateBounds,
             bridgeBounds: bounds(parameters.bridgeBounds, { x: 4120, y: -1115, width: 240, height: 130 }),
-            boardingBounds: bounds(parameters.boardingBounds, { x: 4920, y: -1220, width: 360, height: 235 }),
-            shuttlePosition: point(parameters.shuttlePosition, { x: 5150, y: -1345 }),
+            boardingBounds,
+            shuttlePosition: point(parameters.shuttlePosition, {
+                x: boardingBounds.x + boardingBounds.width * 0.5,
+                y: gateBounds.y + gateBounds.height
+            }),
             meleeTelegraphSeconds: positive(parameters.meleeTelegraphSeconds, DEFAULT.meleeTelegraphSeconds),
             meleeActiveSeconds: positive(parameters.meleeActiveSeconds, DEFAULT.meleeActiveSeconds),
             meleeRecoverySeconds: positive(parameters.meleeRecoverySeconds, DEFAULT.meleeRecoverySeconds),
@@ -1649,8 +1668,16 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         const completed = this.status === "completed";
         const jumpMotion = this.jumpMotion.snapshot();
         const victoryStage = completed ? this.#victoryStage() : null;
+        const victoryOffsets = completed ? this.#victoryOffsets() : null;
+        const victoryElapsed = completed ? this.#victoryElapsed() : 0;
         const gateOpen = this.#victoryGateOpen();
         const gateLit = completed && (gateOpen || victoryStage === "gate-light");
+        const gateProgress = gateOpeningProgress({
+            stage: victoryStage,
+            elapsed: victoryElapsed,
+            offsets: victoryOffsets,
+            open: gateOpen
+        });
         const shuttleRevealed = completed && (victoryStage === "shuttle-reveal" || victoryStage === "player-control");
         const beamBand =
             this.state === CONTINUITY_WARDEN_STATE.SECURITY_ACTIVE ? this.securitySequence[this.securityIndex] : null;
@@ -1705,12 +1732,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 position: compositeWorldPoint(
                     {
                         x: this.config.gateBounds.x + this.config.gateBounds.width * 0.5,
-                        y: this.config.gateBounds.y + this.config.gateBounds.height * 0.5
+                        y: this.config.gateBounds.y + this.config.gateBounds.height
                     },
                     worldOffset
                 ),
-                size: { width: this.config.gateBounds.width, height: this.config.gateBounds.height },
-                state: gateOpen ? "open" : gateLit ? "light" : "locked",
+                size: CONTINUITY_WARDEN_GATE_SIZE,
+                state: gatePresentationState({ open: gateOpen, lit: gateLit }),
+                stateProgress: gateProgress,
                 active: true
             },
             {
@@ -1827,7 +1855,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             objects.push({
                 id: CONTINUITY_WARDEN_ID.VICTORY_CAMERA,
                 kind: OBJECT_KIND.CAMERA,
-                position: compositeWorldPoint(this.config.shuttlePosition, worldOffset),
+                position: compositeWorldPoint(
+                    {
+                        x: this.config.shuttlePosition.x,
+                        y: this.config.shuttlePosition.y - CONTINUITY_WARDEN_SHUTTLE_SIZE.height * 0.5
+                    },
+                    worldOffset
+                ),
                 size: { width: 1, height: 1 },
                 state: "pan-right",
                 remainingSeconds: this.victoryCameraRemaining,

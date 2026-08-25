@@ -442,7 +442,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
                 securityTelegraphSeconds: 1,
                 shuttlePosition: {
                     x: 4460,
-                    y: -1330
+                    y: -1055
                 },
                 summonLeft: {
                     x: 1280,

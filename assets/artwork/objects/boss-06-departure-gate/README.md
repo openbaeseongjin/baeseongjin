@@ -1,6 +1,6 @@
 # Boss06 Departure Gate
 
-Status: `AUTHORING CANDIDATE / LOCKED-LIGHT-OPEN + TRANSITION MOTION / NOT RUNTIME-INTEGRATED`
+Status: `RUNTIME-INTEGRATED / LOCKED-LIGHT-OPEN + TRANSITION MOTION`
 
 ## Purpose
 
@@ -46,6 +46,12 @@ The silhouette follows the current `ContinuityWardenRuntime` Gate bounds rather 
 
 ## Non-scope / integration needs
 
-- This authoring candidate does not change Gate collision, `gateOpen`, victory timing, bridge deployment, Shuttle reveal, renderer, gameplay, physics or network authority.
+- Runtime package: `assets/runtime/objects/boss-06-departure-gate/`
+- Loader boundary: `RuntimeAssetCatalog` + `WorldObjectSpriteAssetCatalog`
+- Renderer: `ContinuityWardenSpriteObjectRendererCatalog`
+- `locked`는 전투 중 닫힌 문, `light`는 기존 0.3초 동안 `opening-00..07`, `open`은 열린 통로를 표시한다.
+- bottom-center anchor는 기존 Gate collision bounds 하단과 Departure Deck 보행면이 공유하는 좌표를 사용한다.
+- 준비 전 또는 상태별 이미지 로드 실패 시 기존 `DepartureGateRenderer` Canvas 표현으로 독립 복구한다.
+- 이 Runtime 연결은 Gate collision, `gateOpen`, victory timing, bridge deployment, Shuttle reveal, gameplay, physics or network authority를 변경하지 않는다.
 - The `opening-00..07` files are presentation frames, not a new gameplay state. Runtime remains `locked / light / open`.
-- World objects do not yet have a dedicated runtime image package contract; integration requires a separate developer task and visual verification.
+- World objects do not yet have a dedicated runtime image package validator; exact PNG size, loader validation and Boss06 브라우저 화면 확인을 runtime evidence로 사용한다.

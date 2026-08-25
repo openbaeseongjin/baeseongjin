@@ -1,5 +1,7 @@
 import { bossBodyPolygonVertices } from "../../game/boss/BossBodyPolygon.js";
 import {
+    CONTINUITY_WARDEN_GATE_SIZE,
+    CONTINUITY_WARDEN_GATE_STATE,
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
     CONTINUITY_WARDEN_OBJECT_KIND,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
@@ -497,29 +499,30 @@ class SecurityBeamRenderer extends BossPolygonObjectRenderer {
 
 class DepartureGateRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
-        const { width, height } = size(object, 480, 760);
-        const lit = object.state === "open" || object.state === "light";
+        const { width, height } = size(object, CONTINUITY_WARDEN_GATE_SIZE.width, CONTINUITY_WARDEN_GATE_SIZE.height);
+        const lit =
+            object.state === CONTINUITY_WARDEN_GATE_STATE.OPEN || object.state === CONTINUITY_WARDEN_GATE_STATE.LIGHT;
         context.strokeStyle = lit ? "#ffe998" : "#a4b5bd";
-        context.fillStyle = object.state === "open" ? "rgba(255,233,152,0.08)" : "#28353d";
+        context.fillStyle = object.state === CONTINUITY_WARDEN_GATE_STATE.OPEN ? "rgba(255,233,152,0.08)" : "#28353d";
         context.lineWidth = 6;
-        if (object.state === "open") {
+        if (object.state === CONTINUITY_WARDEN_GATE_STATE.OPEN) {
             context.beginPath();
-            context.moveTo(-width * 0.5, height * 0.5);
-            context.lineTo(-width * 0.5, -height * 0.5);
-            context.lineTo(-width * 0.22, -height * 0.72);
-            context.moveTo(width * 0.5, height * 0.5);
-            context.lineTo(width * 0.5, -height * 0.5);
-            context.lineTo(width * 0.22, -height * 0.72);
+            context.moveTo(-width * 0.5, 0);
+            context.lineTo(-width * 0.5, -height);
+            context.lineTo(-width * 0.22, -height);
+            context.moveTo(width * 0.5, 0);
+            context.lineTo(width * 0.5, -height);
+            context.lineTo(width * 0.22, -height);
             context.stroke();
             return;
         }
-        context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
+        context.fillRect(-width * 0.5, -height, width, height);
+        context.strokeRect(-width * 0.5, -height, width, height);
         context.strokeStyle = "#647a84";
         for (let x = -width * 0.3; x <= width * 0.3; x += width * 0.2) {
             context.beginPath();
-            context.moveTo(x, -height * 0.48);
-            context.lineTo(x, height * 0.48);
+            context.moveTo(x, -height * 0.98);
+            context.lineTo(x, -height * 0.02);
             context.stroke();
         }
     }
@@ -549,22 +552,23 @@ class MaintenanceShuttleRenderer extends BossPolygonObjectRenderer {
         context.strokeStyle = "#dce8ec";
         context.lineWidth = 6;
         context.beginPath();
-        context.roundRect(-width * 0.5, -height * 0.5, width, height, 48);
+        context.roundRect(-width * 0.5, -height, width, height, 48);
         context.fill();
         context.stroke();
         context.fillStyle = "#174c5d";
         context.strokeStyle = "#71dff5";
         context.lineWidth = 4;
-        context.fillRect(-width * 0.22, -height * 0.32, width * 0.44, height * 0.23);
-        context.strokeRect(-width * 0.22, -height * 0.32, width * 0.44, height * 0.23);
+        context.fillRect(-width * 0.22, -height * 0.82, width * 0.44, height * 0.23);
+        context.strokeRect(-width * 0.22, -height * 0.82, width * 0.44, height * 0.23);
         context.fillStyle = "#17252c";
         context.strokeStyle = "#8fa4ae";
-        context.fillRect(-width * 0.18, -height * 0.02, width * 0.36, height * 0.48);
-        context.strokeRect(-width * 0.18, -height * 0.02, width * 0.36, height * 0.48);
+        context.fillRect(-width * 0.18, -height * 0.52, width * 0.36, height * 0.48);
+        context.strokeRect(-width * 0.18, -height * 0.52, width * 0.36, height * 0.48);
+        const wheelRadius = height * 0.11;
         for (const x of [-width * 0.38, width * 0.38]) {
             context.fillStyle = "#202e35";
             context.beginPath();
-            context.arc(x, height * 0.42, height * 0.11, 0, Math.PI * 2);
+            context.arc(x, -wheelRadius, wheelRadius, 0, Math.PI * 2);
             context.fill();
             context.stroke();
         }
