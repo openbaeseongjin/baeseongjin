@@ -1,8 +1,8 @@
 # BOSS03 LOWER SECTOR COMMANDER 이미지 생성 기획
 
-> 상태: **REFERENCE-ONLY / 주 시각 콘셉트·본체 기본 스프라이트 승인**
+> 상태: **CODE-AUDITED / REFERENCE-ONLY GRAPHICS / 주 시각 콘셉트·본체·사슬 훅·휴대형 해머·그랩 예고·끌어오기·구속 승인**
 >
-> 범위: 아래 이미지는 사용자 제공 주 콘셉트다. Boss03 재도입, Runtime 스프라이트, Arena geometry, Collision, Rope Anchor 또는 공격 판정의 근거가 아니며, 전투 규칙은 [Commander 참고 계약](./LOWER-SECTOR-COMMANDER-REFERENCE-CONTRACT.md)이 소유한다.
+> 범위: 아래 이미지는 현재 Boss03 Polygon Runtime의 그래픽 검수 기준이다. PNG는 Arena geometry, Collision, Rope Anchor 또는 공격 판정의 근거가 아니며, 전투 규칙은 [Commander 참고 계약](./LOWER-SECTOR-COMMANDER-REFERENCE-CONTRACT.md)이 소유한다.
 
 ![Boss03 주 시각 콘셉트](./images/commander-main-concept-reference-v2.png)
 
@@ -25,4 +25,48 @@
 | 9 | 전투 규칙 | 승인 이미지가 새 공격이나 수치를 만들 수 있다. | 훅은 그랩, 해머는 확정 내려찍기 표현만 담당하며 피해 `20+40`·0.5초 해머 연계·15초 대기는 바꾸지 않는다. **통과** |
 | 10 | Runtime 경계 | 크기·alpha 통과만으로 Runtime-ready로 오인할 수 있다. | 한 프레임 검토 export이며 Boss 전용 manifest·상태·validator가 없다. **REFERENCE-ONLY / Runtime 미착수**. |
 
-다음 생성 승인 단위는 승인 외형을 유지한 **사슬 훅 분리 파츠** 한 장이다. Player Rope·전기 무기·별도 공격으로 보이지 않는 중립 파츠만 검수한다.
+![Boss03 승인 사슬 훅 분리 파츠](../../../assets/artwork/characters/boss03-lower-sector-commander/export/commander-chain-hook-approved-128x192.png)
+
+> 사슬 훅 기준: 단일 체인·단일 대형 곡선 훅·중량형 분절 팔의 중립 파츠 · 현재 Polygon Runtime의 그랩 판정이나 범위를 바꾸지 않는다.
+
+![Boss03 승인 휴대형 해머 분리 파츠](../../../assets/artwork/characters/boss03-lower-sector-commander/export/commander-hammer-arm-approved-128x192.png)
+
+> 휴대형 해머 기준: 중량형 분절 팔·관절형 기계 손·별도 손잡이·대형 사각 머리의 중립 파츠 · 손은 손잡이 하단을 감싸 쥐고 머리는 손 위에 둔다. 현재 Polygon Runtime의 해머 판정이나 범위를 바꾸지 않는다.
+
+![Boss03 승인 그랩 대상 고정 예고](../../../assets/artwork/characters/boss03-lower-sector-commander/source/commander-grab-target-lock-telegraph-approved.png)
+
+> 그랩 예고 기준: 몸 중앙의 두 눈 사이 센서부에서 고정 대상에게 이어지는 황색 조준 레이저와 대상 발밑 경고 원을 동시에 표시한다. 훅 손목은 발광하지 않고 사슬 훅은 발사 전 상태를 유지한다. 이 넓은 프레임은 시각 가독성 참고이며 Arena·사거리·판정을 정하지 않는다.
+
+![Boss03 승인 그랩 끌어오기 성공](../../../assets/artwork/characters/boss03-lower-sector-commander/source/commander-grab-pull-success-approved.png)
+
+> 끌어오기 기준: 훅 팔에서 이어지는 하나의 팽팽한 사슬과 하나의 대형 곡선 훅이 Player 허리를 붙잡아 보스 앞으로 당긴다. 눈 조준선·경고 원은 종료되고 해머는 중립 상태다. 이 넓은 프레임은 시각 가독성 참고이며 실제 이동·피해·충돌 판정을 정하지 않는다.
+
+## 코드 기준 이미지 생성 범위
+
+| # | AS-IS | TO-BE / 생성·판정 |
+| ---: | --- | --- |
+| 1 | Boss03은 `128×192` Polygon 본체로 제품에 반영되어 있고 전용 sprite binding이 없다. | 모든 생성물은 binding 전까지 **REFERENCE-ONLY**이며 collider·판정·Arena를 소유하지 않는다. |
+| 2 | `neutral`은 승인 본체 한 프레임만 있다. | 동일 외형의 중립 호흡·회복 기준을 만든다. 기존 승인 본체가 외형 원본이다. |
+| 3 | `walk`은 속도만 바뀌고 전용 시각 자료가 없다. | 우향 보행 기준 자세를 만든다. 체력 70%·35% 구간은 새 외형이 아니라 같은 보행의 속도 차이로 읽는다. **우선 생성** |
+| 4 | `chain-hook-grab/telegraph`는 1.5초 대상 고정이며 코드 조준선은 본체 중심에서 시작한다. | 보스 자세와 훅 준비 자세를 만들고, 동적 조준선·발밑 원은 PNG에 굽지 않는다. 승인안의 **두 눈 사이 시작점**은 renderer 정렬 전까지 미연결 요구사항이다. |
+| 5 | `chain-hook-grab/active` 안의 탐색·당김·구속·확정 해머 단계가 화면 객체에 전달되지 않는다. | 훅 발사, 팽팽한 당김, 보스 앞 구속, 확정 내려찍기를 서로 다른 참고 이미지로 만들되 `grabStage` 또는 capture phase가 노출되기 전에는 Runtime-ready라 부르지 않는다. |
+| 6 | `hammer-slam`은 0.8초 예고와 0.2초 공격이 같은 든 자세에 가깝다. | 해머를 손으로 쥔 채 준비 자세와 지면 충돌 자세를 분리하고, 충격 VFX는 본체 PNG와 분리한다. |
+| 7 | `body-charge`는 0.8초 예고 자세만 구분되고 0.6초 돌진 중 본체는 기본 자세로 돌아간다. | 웅크린 예고, 전진 중량 자세, 미끄럼·분진 VFX를 분리한다. |
+| 8 | `boss-damaged` 사건은 있으나 Boss03 전용 피격 자세가 없다. | 전·후방 피격 반응 참고 이미지를 만들되 전용 controller binding 전까지 미연결로 표시한다. |
+| 9 | `defeated`는 Polygon을 1.5초 회전시켜 끝낸다. | 센서 소등, 균형 붕괴, 지면 정지의 처치 상태를 만든다. |
+| 10 | 현재 체인 길이·위험 범위·조준선·충격은 절차 그래픽이다. | 훅 머리·체인 반복 조각·손목 결합부·해머·충격·돌진 VFX를 역할별로 분리하며 고정 길이 체인, 사거리 원, 피해 숫자, HUD는 생성하지 않는다. |
+
+## 이미지 생성·승인 순서
+
+1. **중립** — 기존 승인 본체를 기준으로 완료했다.
+2. **보행** — 우향 보행 접지 자세와 투명 `128×192` authoring export를 승인했다. Runtime 연결·Stage 1x 검수는 별도다.
+3. **그랩 예고** — 넓은 대상 고정 관계 이미지와 본체만 분리한 투명 `128×192` 자세를 승인했다. 조준선·경고 원은 동적 표현으로 분리한다.
+4. **당김** — 팽팽한 단일 사슬과 훅의 넓은 관계 이미지와 본체 `128×192`, 훅 머리 `48×48`, 체인 링크 `16×16` 분리 export를 승인했다. Runtime 연결·Stage 1x 검수는 별도다.
+5. **구속** — Player가 보스 앞에 고정되고 해머가 중립인 넓은 관계 이미지와 본체 `128×192`, 재사용 훅 머리 `48×48`, 재사용 체인 링크 `16×16` 투명 export를 승인했다. Runtime 연결·Stage 1x 검수는 별도다.
+6. **확정 해머** — 그랩 성공 뒤 회피 불가능한 내려찍기를 검수한다.
+7. **독립 해머** — 별도 해머 공격의 준비·충돌 상태를 검수한다.
+8. **돌진** — 웅크린 예고와 전진 중량 자세를 검수한다.
+9. **피격** — 전·후방 피격 반응을 검수한다.
+10. **처치** — 센서 소등·균형 붕괴·지면 정지 상태를 검수한다.
+
+각 단위는 앞 단위의 외형 승인을 유지한다. 프레임 수와 Runtime 결합 방식은 이 문서에서 정하지 않는다.
