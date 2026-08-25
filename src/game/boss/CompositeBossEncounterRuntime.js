@@ -1,5 +1,6 @@
 const STAGE_STATUS = Object.freeze({ INACTIVE: "inactive", ACTIVE: "active", COMPLETED: "completed" });
 const PARTICIPANT_STATUS = Object.freeze({ ACTIVE: "active", SPECTATING: "spectating", DISCONNECTED: "disconnected" });
+const INDIVIDUAL_RESPAWN_POLICY = "individual-respawn";
 const VALID_PARTICIPANT_STATUS = Object.freeze(
     Object.fromEntries(Object.values(PARTICIPANT_STATUS).map((status) => [status, true]))
 );
@@ -153,8 +154,17 @@ export class CompositeBossEncounterRuntime {
                 retryStarted: false
             });
         }
-        this.participants.set(playerId, PARTICIPANT_STATUS.SPECTATING);
         this.emit("boss-participant-defeated", { playerId, cause, attempt: this.attempt });
+        if (this.definition.participantDefeatPolicy === INDIVIDUAL_RESPAWN_POLICY) {
+            return freezeComposite({
+                accepted: true,
+                changed: true,
+                retryStarted: false,
+                individualRespawn: true,
+                attempt: this.attempt
+            });
+        }
+        this.participants.set(playerId, PARTICIPANT_STATUS.SPECTATING);
         const connected = [...this.participants.values()].filter(
             (status) => status !== PARTICIPANT_STATUS.DISCONNECTED
         );

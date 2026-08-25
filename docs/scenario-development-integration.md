@@ -3,12 +3,12 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: d019865567c39fb44e073562cf1df11157fccb6cb4aba140bd3ee989883dc2ee
+scenario-source-sha256: 46affc2a3a47301789b47b4f23c6f6dd4d2480380c6cbcfb101f25bd17d1a3b8
 authored-area-sha256: 006b82b383ea3d7bdebd21f322c1dbb54de85af8b3fc02cfa60a9dbd42477904
-authored-sector-sha256: 99c751acb18faedf06752634d14325e0d8782139da0148952039997a311189f6
+authored-sector-sha256: a07ac64990545eefa1fc94a10afedd6ca0e022ffa56e2cd6ee2595fb6f80a945
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
+reviewed-upstream: 2fddc3eab8664a60e17e619946cf9b4ad61cbf5e
 -->
 
 ## 현재 확인 체크포인트
@@ -24,7 +24,7 @@ reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
 | ------------------- | ---------------------------------------------------------- | ---------------------------------------- |
 | Sector 01 / 1-1~1-8 | canonical v2/generated 8개, Access 3-of-3, `1-8→2-1`       | 실제 전체 traversal·Direction migration  |
 | Sector 02 / 2-1~2-8 | canonical v2/generated 8개, Access 3-of-3, `2-8→3-1`       | 실제 전체 traversal·Story/Audio/Lighting |
-| Sector 03 / 3-1~3-8 | canonical v2/generated 8개, Access 3-of-3, `3-8→4-1`       | Direction migration·실제 traversal       |
+| Sector 03 / 3-1~3-8 | canonical v2/generated 8개, Access 3-of-3, `3-8→Boss03→4-1` | Boss03 desktop/mobile·1~4인 검증          |
 | Sector 04 / 4-1~4-8 | canonical v2/generated 8개, 2-of-3, `4-8→5-1`              | 실제 traversal·quorum 멀티 수렴          |
 | Sector 05 / 5-1~5-8 | canonical v2/generated 8개, dynamic Jammer/감전, `5-8→6-1` | 재머 가독성·장시간 멀티 수렴             |
 | Sector 06 / 6-1~6-8 | canonical v2/generated 8개, `6-8→Boss06→Boarding→Escape`   | Boss06 full combat·1~4인 boarding        |
@@ -44,7 +44,7 @@ reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
 - 전수 공간 감사에서 발견한 2-8의 Final Control 이중 발판을 Editor 소유 `exit-deck` 하나로 정리하고, 5-1 인접 Entry Deck의 1px 내부 겹침을 맞닿는 경계로 보정했다. Anchor의 collision 부착 target이 발판에 물리는 구조는 Rope capability 계약을 유지하므로 변경하지 않았다.
 - Map Editor에서 저장한 Sector 06의 6-1~6-8 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. 일반 Stage는 catalog의 선택 경로가 없어도 stable Stage ID로 `MAP-PREVIEW.html`을 찾아 시나리오 비교 화면을 제공하며, Boss Stage만 이 비교 대상에서 제외한다. 실제 전체 traversal과 Boss06·멀티플레이 체감은 별도 검증 범위다.
 - Map Editor에서 저장한 Sector 04·05의 4-1~~4-8, 5-1~~5-8 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. 4-8 Quorum 진행 게이트는 목표 완료 전후에만 전환되며, 적 슬롯을 움직이면 legacy activation bounds도 같은 delta로 이동해 드론 위치와 공격·활성 범위 표시가 분리되지 않는다.
-- Boss03 authoring·Runtime·Map Editor entry를 제거했다. 3-8의 existing content-boundary Gate는 source objective와 Sector03 Access 3-of-3 뒤 4-1 authored Entry로 직접 이동하며, 일반 Stage geometry·objective와 4-1 Entry는 변경하지 않았다.
+- Boss03 `LOWER SECTOR COMMANDER`를 제거 가능한 catalog 모듈로 재도입했다. 3-8 source objective와 Access 3-of-3 뒤 각 Player가 독립 Arena로 들어가며, 처치 후 각자 4-1 Entry로 이동한다. catalog 항목이 없으면 기존 direct portal이 자동 복구된다.
 - Map Editor에서 저장한 Sector 03 3-1~3-8의 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. 삭제된 Scanner 대상 Surface의 참조와 대상이 전부 삭제된 Scanner 그룹도 함께 제거해 production Gameplay View가 연속 월드를 조립할 수 있게 했다.
 - Map Editor에서 저장한 Sector 02 2-1~2-8의 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. Runtime은 이 8개 `AREA-SPEC.v2.json`을 단일 권위로 compile하며, 실제 traversal 체감은 아직 별도 검증 범위다.
 - Map Editor에서 저장한 Sector 01 1-1~1-8의 canonical 지형·Anchor·월드 오브젝트·Wind·Camera 배치를 generated Stage 모듈에 함께 반영했다. Runtime은 이 8개 `AREA-SPEC.v2.json`을 단일 권위로 compile하며, 실제 traversal 체감은 아직 별도 검증 범위다.
@@ -52,7 +52,7 @@ reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
 - Issue #946은 Sector 02~05 authored geometry를 유지한 채 environment package의 role·stable surface ID로 terrain/decoration preset을 결정한다.
 - Issue #940은 Sector 06 environment package를 연결하고 `5-8→6-1`에서 Sector 05 backdrop을 smoothstep blur/fade로 전환한다.
 - Issue #936은 Boss06의 hazard 판정/표현 geometry, participant 복귀, local camera와 authority Boss DTO 계약을 공통 Runtime 경계로 정렬한다.
-- Boss catalog는 Boss06 하나만 유지한다. 제거된 Boss01~05의 상세 구현과 전환은 현재 입력이 아니며 대체 이유만 `decision-history.md`가 보존한다.
+- Boss catalog는 Boss03과 Boss06을 유지한다. Boss01·02·04·05의 제거 이유는 `decision-history.md`가 보존한다.
 - Issue #934는 canonical Area와 남은 Boss arena의 모든 정적 collision platform·wall을 Ropeable로 정렬했다. Boss 본체·적·투사체·hazard actor는 별도 capability를 유지한다.
 - `1-2:p0` 진입 Platform의 오른쪽 32px(x 608~~640)가 seam 건너 `1-1:shaft-shell-right` solid wall과 world 좌표에서 겹쳐 있어(Runtime 조립 후 x:608~~640, y:-672~-640 정사각형) one-way platform과 solid wall이 같은 칸에 공존하던 collision 결함을 수정했다. `1-2:p0` 오른쪽 경계를 640→608로 정리해 겹침을 제거했으며, 그 칸은 `1-1`의 solid wall이 그대로 경계를 담당한다. 이 수정 전 48개 Stage 전수 검사에서 이 한 쌍 외의 cross-stage collision surface 겹침은 없었다.
 - Sector 02 environment package에서 이전 far/mid/near 3-layer 배경 세대(`backdrop-far.png`/`backdrop-mid.png`/`backdrop-near.png`)가 `backdrop-fixed` + island 2장 세대로 교체된 뒤에도 정리되지 않고 남아 있던 것을 확인해 삭제했다. `sprite-manifest.json` 어떤 atlas도 참조하지 않던 미사용 자산이었다.
@@ -62,7 +62,7 @@ reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
 ## 열린 기획·구현 게이트
 
 1. 일반 Timer `60초 / +10초 / cap 60초 / Purge 240px/s`는 physical mapping 확정 전까지 HOLD다.
-2. Boss06의 실제 desktop/mobile·1~4인 multiplayer full combat을 확인한다.
+2. Boss03·Boss06의 실제 desktop/mobile·1~4인 multiplayer full combat을 확인한다.
 3. Sector 01~06의 실제 전체 traversal과 두 기기 장시간 플레이를 확인한다.
 4. NPC는 예선 핵심 범위에서 제외한다.
 

@@ -5,34 +5,13 @@ import {
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
     CONTINUITY_WARDEN_STATE
 } from "../../game/boss/ContinuityWardenDefinition.js";
+import { resolveContinuityWardenPose } from "./ContinuityWardenPoseResolver.js";
 
 const OBJECT_KIND = Object.freeze({ WARDEN: "boss-continuity-warden" });
 const MOTION_STATE = Object.freeze({
     "ground-thruster-dash": true,
     "diagonal-thruster-dash": true,
     charge: true
-});
-const LOCOMOTION_POSE = Object.freeze({
-    [CONTINUITY_WARDEN_LOCOMOTION_STATE.TAKEOFF]: Object.freeze({
-        widthScale: 1.12,
-        heightScale: 0.78,
-        rotationScale: 0
-    }),
-    [CONTINUITY_WARDEN_LOCOMOTION_STATE.JUMP]: Object.freeze({
-        widthScale: 0.94,
-        heightScale: 1.08,
-        rotationScale: 0.14
-    }),
-    [CONTINUITY_WARDEN_LOCOMOTION_STATE.FALL]: Object.freeze({
-        widthScale: 1.04,
-        heightScale: 0.96,
-        rotationScale: -0.1
-    }),
-    [CONTINUITY_WARDEN_LOCOMOTION_STATE.LANDING]: Object.freeze({
-        widthScale: 1.18,
-        heightScale: 0.72,
-        rotationScale: 0
-    })
 });
 const MISSILE_RACK_VFX = Object.freeze({
     indexes: Object.freeze([-2, -1, 0, 1, 2]),
@@ -53,18 +32,6 @@ function direction(object) {
     return object.direction === "left" ? -1 : 1;
 }
 
-function locomotionPose(object, size) {
-    const pose = LOCOMOTION_POSE[object.locomotionState];
-    if (!pose) return Object.freeze({ size, rotation: 0 });
-    return Object.freeze({
-        size: Object.freeze({
-            width: size.width * pose.widthScale,
-            height: size.height * pose.heightScale
-        }),
-        rotation: direction(object) * pose.rotationScale
-    });
-}
-
 class ContinuityWardenSpriteRenderer {
     constructor({ assets, definition }) {
         this.assets = assets;
@@ -80,12 +47,15 @@ class ContinuityWardenSpriteRenderer {
         }
         const animation = this.controllerFor(object.id).update(object, presentation?.events, presentationTimeSeconds);
         const frame = this.definition.frameFor(object, animation);
-        const pose = locomotionPose(object, this.definition.size);
+        const pose = resolveContinuityWardenPose(object, this.definition.size);
         paintSpriteFrame({
             context,
             image: this.assets.imageFor(frame.atlasId),
             frame,
-            position: object.position,
+            position: {
+                x: object.position.x + pose.positionOffset.x,
+                y: object.position.y + pose.positionOffset.y
+            },
             size: pose.size,
             anchor: this.definition.anchor,
             pixelSnap: true,

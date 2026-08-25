@@ -4,6 +4,12 @@ import {
     CONTINUITY_WARDEN_OBJECT_KIND,
     CONTINUITY_WARDEN_STATE
 } from "../../game/boss/ContinuityWardenDefinition.js";
+import { resolveContinuityWardenPose } from "./ContinuityWardenPoseResolver.js";
+import {
+    LOWER_SECTOR_COMMANDER_ACTION_PHASE,
+    LOWER_SECTOR_COMMANDER_OBJECT_KIND,
+    LOWER_SECTOR_COMMANDER_STATE
+} from "../../game/boss/LowerSectorCommanderDefinition.js";
 
 const COLOR = Object.freeze({
     BODY: "#273442",
@@ -217,20 +223,10 @@ const WARDEN_DEFEAT_STAGE_ROTATION = Object.freeze({
 });
 
 function applyWardenLocomotionPose(context, object, height) {
-    const sign = direction(object);
-    if (object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.TAKEOFF) {
-        context.translate(0, height * 0.1);
-        context.scale(1.12, 0.78);
-    } else if (object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.JUMP) {
-        context.rotate(sign * 0.14);
-        context.scale(0.94, 1.08);
-    } else if (object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.FALL) {
-        context.rotate(-sign * 0.1);
-        context.scale(1.04, 0.96);
-    } else if (object.locomotionState === CONTINUITY_WARDEN_LOCOMOTION_STATE.LANDING) {
-        context.translate(0, height * 0.12);
-        context.scale(1.18, 0.72);
-    }
+    const pose = resolveContinuityWardenPose(object, { width: 1, height });
+    context.translate(pose.positionOffset.x, pose.positionOffset.y);
+    context.rotate(pose.rotation);
+    context.scale(pose.size.width, pose.size.height / height);
 }
 
 class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
@@ -304,6 +300,110 @@ class ContinuityWardenRenderer extends BossPolygonObjectRenderer {
     }
 }
 
+class LowerSectorCommanderRenderer extends BossPolygonObjectRenderer {
+    drawShape(context, object) {
+        const { width, height } = size(object, 128, 192);
+        const sign = direction(object);
+        const walkRadians = (((object.movementProgress ?? 0) % 36) / 36) * Math.PI * 2;
+        if (object.state === LOWER_SECTOR_COMMANDER_STATE.WALK) {
+            context.translate(0, -Math.abs(Math.sin(walkRadians)) * 4);
+            context.rotate(sign * Math.sin(walkRadians) * 0.035);
+        } else if (
+            object.state === LOWER_SECTOR_COMMANDER_STATE.CHARGE &&
+            object.actionState === LOWER_SECTOR_COMMANDER_ACTION_PHASE.TELEGRAPH
+        ) {
+            context.translate(-sign * width * 0.08, height * 0.08);
+            context.rotate(sign * 0.11);
+            context.scale(1.08, 0.9);
+        } else if (object.state === LOWER_SECTOR_COMMANDER_STATE.DEFEATED) {
+            context.rotate(-sign * Math.min(1, object.defeatProgress ?? 0) * 1.05);
+        }
+        context.fillStyle = "#30373b";
+        context.strokeStyle =
+            object.actionState === LOWER_SECTOR_COMMANDER_ACTION_PHASE.TELEGRAPH ? "#fbbf24" : "#d6c29a";
+        context.lineWidth = 4;
+        polygon(context, bossBodyPolygonVertices("lower-sector-commander", { width, height }));
+        context.fill();
+        context.stroke();
+
+        context.fillStyle = "#f97316";
+        for (const sensorX of [-0.14, 0.14]) {
+            context.beginPath();
+            context.arc(sign * width * 0.25 + sensorX * width, -height * 0.25, 5, 0, Math.PI * 2);
+            context.fill();
+        }
+
+        const shoulderY = -height * 0.08;
+        const hookReach = object.state === LOWER_SECTOR_COMMANDER_STATE.GRAB ? width * 0.95 : width * 0.62;
+        context.strokeStyle = "#8b7355";
+        context.lineWidth = 5;
+        context.setLineDash([8, 6]);
+        context.beginPath();
+        context.moveTo(sign * width * 0.32, shoulderY);
+        context.lineTo(sign * hookReach, shoulderY + height * 0.05);
+        context.stroke();
+        context.setLineDash([]);
+        context.strokeStyle = "#c7a66b";
+        context.lineWidth = 8;
+        context.beginPath();
+        context.arc(sign * (hookReach + width * 0.08), shoulderY + height * 0.07, width * 0.12, 0.2, Math.PI * 1.65);
+        context.stroke();
+
+        const hammerRaised = object.state === LOWER_SECTOR_COMMANDER_STATE.HAMMER;
+        context.save();
+        context.translate(-sign * width * 0.3, -height * 0.04);
+        context.rotate(sign * (hammerRaised ? -0.75 : 0.35));
+        context.strokeStyle = "#745c43";
+        context.lineWidth = 9;
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.lineTo(-sign * width * 0.68, height * 0.2);
+        context.stroke();
+        context.fillStyle = "#51463c";
+        context.strokeStyle = "#c9b28d";
+        context.lineWidth = 3;
+        context.fillRect(-sign * width * 0.92 - width * 0.2, height * 0.04, width * 0.4, height * 0.28);
+        context.strokeRect(-sign * width * 0.92 - width * 0.2, height * 0.04, width * 0.4, height * 0.28);
+        context.restore();
+    }
+}
+
+class CommanderGrabRangeRenderer extends BossPolygonObjectRenderer {
+    drawShape(context, object) {
+        const radius = (object.size?.width ?? 900) * 0.5;
+        context.strokeStyle = "rgba(251, 191, 36, 0.85)";
+        context.lineWidth = 4;
+        context.setLineDash([16, 12]);
+        context.beginPath();
+        context.arc(0, 0, radius, 0, Math.PI * 2);
+        context.stroke();
+        context.setLineDash([]);
+        if (!object.targetPosition) return;
+        const targetX = object.targetPosition.x - object.position.x;
+        const targetY = object.targetPosition.y - object.position.y;
+        context.strokeStyle = "rgba(251, 113, 133, 0.9)";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.lineTo(targetX, targetY);
+        context.stroke();
+        context.beginPath();
+        context.arc(targetX, targetY, 28, 0, Math.PI * 2);
+        context.stroke();
+    }
+}
+
+class CommanderArenaSurfaceRenderer extends BossPolygonObjectRenderer {
+    drawShape(context, object) {
+        const { width, height } = size(object, 240, 80);
+        context.fillStyle = object.variant === "commander-crossbeam" ? "#24313a" : "#354149";
+        context.strokeStyle = "#7f8f91";
+        context.lineWidth = 4;
+        context.fillRect(-width * 0.5, -height * 0.5, width, height);
+        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
+    }
+}
+
 class SecurityEmitterRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
         const { width, height } = size(object, 95, 650);
@@ -327,11 +427,11 @@ class SecurityBeamRenderer extends BossPolygonObjectRenderer {
         const active = object.state === "active";
         context.globalAlpha = active ? 0.62 : 0.32;
         context.fillStyle = active ? "rgba(255, 89, 98, 0.35)" : "rgba(251, 191, 36, 0.18)";
-        context.strokeStyle = active ? COLOR.HAZARD : COLOR.WARNING;
-        context.lineWidth = active ? 6 : 4;
-        context.setLineDash(active ? [] : [22, 14]);
+        context.strokeStyle = COLOR.WARNING;
+        context.lineWidth = 4;
+        context.setLineDash([22, 14]);
         context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
+        if (!active) context.strokeRect(-width * 0.5, -height * 0.5, width, height);
         context.setLineDash([]);
         context.globalAlpha = 1;
         if (active) this.drawActiveRangeImage(context, width, height);
@@ -502,16 +602,16 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
         const family = WARDEN_ATTACK_FAMILY[object.variant] ?? null;
         const meleeActive = active && family === "melee";
         const telegraphColor = wardenTelegraphColor(object.variant, family);
-        if (!meleeActive) {
+        if (!meleeActive && family !== "dash") {
             context.globalAlpha = active ? 0.62 : 0.32;
             context.fillStyle = active
                 ? "rgba(251, 113, 133, 0.35)"
                 : (WARDEN_TELEGRAPH_FILL[family] ?? "rgba(251, 191, 36, 0.2)");
-            context.strokeStyle = active ? COLOR.HAZARD : telegraphColor;
-            context.lineWidth = active ? 5 : 3;
-            context.setLineDash(active ? [] : family === "dash" ? [10, 8] : [20, 14]);
+            context.strokeStyle = telegraphColor;
+            context.lineWidth = 3;
+            context.setLineDash([20, 14]);
             context.fillRect(-width * 0.5, -height * 0.5, width, height);
-            context.strokeRect(-width * 0.5, -height * 0.5, width, height);
+            if (!active) context.strokeRect(-width * 0.5, -height * 0.5, width, height);
             context.setLineDash([]);
         }
         if (!active && family === "dash") {
@@ -584,6 +684,10 @@ class ZoneRenderer extends BossPolygonObjectRenderer {
 
 const GENERIC_RENDERER = new GenericRenderer();
 const RENDERER_BY_KIND = Object.freeze({
+    [LOWER_SECTOR_COMMANDER_OBJECT_KIND.BODY]: new LowerSectorCommanderRenderer(),
+    [LOWER_SECTOR_COMMANDER_OBJECT_KIND.GRAB_RANGE]: new CommanderGrabRangeRenderer(),
+    [LOWER_SECTOR_COMMANDER_OBJECT_KIND.HAZARD]: new ZoneRenderer(),
+    [LOWER_SECTOR_COMMANDER_OBJECT_KIND.ARENA_SURFACE]: new CommanderArenaSurfaceRenderer(),
     [KIND.GRAPPLE_ANCHOR]: new GrappleAnchorRenderer(),
     [KIND.CONTINUITY_WARDEN]: new ContinuityWardenRenderer(),
     [KIND.SECURITY_EMITTER]: new SecurityEmitterRenderer(),

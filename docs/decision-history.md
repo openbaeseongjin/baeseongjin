@@ -37,7 +37,8 @@
 - 결정: 제품 Boss는 terminal Boss06 하나만 유지한다. Boss03 authoring·Runtime·editor entry를 제거하고, 3-8 source objective와 Sector03 Access 3-of-3을 만족한 Player만 4-1 authored Entry로 직접 이동한다.
 - 영향: Boss03 전용 mechanic·renderer·spec·Map Editor catalog는 제거한다. 3-8과 4-1의 canonical geometry·objective·Entry는 바꾸지 않으며, Boss06 terminal Boarding 계약은 유지한다.
 - 대체: Sector03과 Sector04 사이의 `3-8→Boss03→4-1` 독립 Boss transition.
-- 검증 상태: `validateProductionMapParity`가 Boss06-only catalog와 3-8→4-1 direct route를, `validateBossStageSpecs`가 retained Boss06 spec을 검증한다.
+- 후속 대체: 2026-08-25 `LOWER SECTOR COMMANDER`를 catalog 한 항목으로 제거 가능한 독립 모듈로 다시 도입했다. 최신 제품 계약은 `docs/boss/03/LOWER-SECTOR-COMMANDER-REFERENCE-CONTRACT.md`가 소유한다.
+- 검증 상태: `validateProductionMapParity`는 active product catalog에서 Boss 흐름을 파생하고 Editor authoring inventory는 Boss03·06을 별도로 보존한다.
 
 ## [L1] 2026-08-23 — 모든 Sector 뒤에 독립 Boss를 둔다
 

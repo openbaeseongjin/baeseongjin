@@ -1,8 +1,10 @@
 import { BOSS_MECHANIC_TYPE } from "../boss-authoring/BossStageSpec.js";
 import { ContinuityWardenRuntime } from "./ContinuityWardenRuntime.js";
+import { LowerSectorCommanderRuntime } from "./LowerSectorCommanderRuntime.js";
 
 const ENCOUNTER_RUNTIME_BY_MECHANIC = Object.freeze({
-    [BOSS_MECHANIC_TYPE.CONTINUITY_WARDEN]: ContinuityWardenRuntime
+    [BOSS_MECHANIC_TYPE.CONTINUITY_WARDEN]: ContinuityWardenRuntime,
+    [BOSS_MECHANIC_TYPE.LOWER_SECTOR_COMMANDER]: LowerSectorCommanderRuntime
 });
 
 export function createBossEncounterRuntime(definition, snapshot = null, { worldSeed = 1 } = {}) {

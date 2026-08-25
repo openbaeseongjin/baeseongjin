@@ -2727,7 +2727,7 @@ NPC 도입은 별도 P4 design decision.
 
 ### 10. Boss06 cadence
 
-제품 Boss는 Sector 06 끝의 Boss06 하나다. Boss06은 최종 전투와 Boarding을 소유한다.
+Sector 06의 제품 Boss는 끝의 Boss06 하나다. 전체 제품 catalog에는 Sector03 경계의 Boss03도 있으며 Boss06은 최종 전투와 Boarding을 소유한다.
 
 ### 11. Sector05 Runtime Drift — 대부분 RESOLVED
 

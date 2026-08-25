@@ -343,6 +343,7 @@
     "closedBodyDamageMultiplier": 1,
     "generalDamageMode": "standard-combat",
     "lateJoinPolicy": "join-current-attempt-without-rescale",
+    "participantDefeatPolicy": "shared-wipe",
     "participantCountSnapshot": "boss-stage-start",
     "phaseOverflowPolicy": "discard-at-floor",
     "weakFixedPercent": 0,

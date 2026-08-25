@@ -1,4 +1,14 @@
 const NORMALIZED_VERTICES_BY_PRESET = Object.freeze({
+    "lower-sector-commander": Object.freeze([
+        [-0.36, -0.5],
+        [0.3, -0.48],
+        [0.5, -0.2],
+        [0.44, 0.18],
+        [0.32, 0.5],
+        [-0.32, 0.5],
+        [-0.46, 0.2],
+        [-0.5, -0.18]
+    ]),
     "continuity-warden": Object.freeze([
         [-0.22, -0.5],
         [0.22, -0.5],

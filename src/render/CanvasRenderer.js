@@ -379,10 +379,18 @@ export class CanvasRenderer {
                 barY + barHeight - 2
             );
         }
-        ctx.textAlign = "left";
-        ctx.fillStyle = "#cbd5e1";
-        ctx.font = `800 ${compact ? 8 : 10}px system-ui, sans-serif`;
-        ctx.fillText(hud.objective, x + padding, y + height - (compact ? 10 : 12), width * 0.58);
+        const warningLabel = typeof hud.warningLabel === "string" ? hud.warningLabel : "";
+        ctx.font = `900 ${compact ? 9 : 11}px ui-monospace, monospace`;
+        if (warningLabel) {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#fb7185";
+            ctx.fillText(warningLabel, x + width * 0.5, y + height - (compact ? 9 : 11), width - padding * 2);
+        } else {
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = `800 ${compact ? 8 : 10}px system-ui, sans-serif`;
+            ctx.fillText(hud.objective, x + padding, y + height - (compact ? 10 : 12), width * 0.58);
+        }
         ctx.textAlign = "right";
         ctx.fillStyle = hud.weakpointExposed ? "#fde047" : "#94a3b8";
         if (hud.showVulnerabilityCountdown && hud.weakpointExposed && hud.vulnerabilityDurationSeconds > 0) {

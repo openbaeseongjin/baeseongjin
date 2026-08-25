@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "boss-stage-spec-v2",
+  "specType": "boss-stage",
+  "id": "boss-03",
+  "name": "LOWER SECTOR COMMANDER",
+  "subtitle": "LOWER-SECTOR TRANSFER / RETURN PROTOCOL",
+  "sourceAreaId": "sector-03-08",
+  "nextAreaId": "sector-04-01",
+  "arena": {
+    "bounds": { "x": 0, "y": -1200, "width": 3200, "height": 1200 },
+    "baseHookReach": 400,
+    "entry": { "id": "boss-03:entry", "x": 320, "y": -160 },
+    "exit": { "id": "boss-03:exit", "x": 2880, "y": -160 },
+    "surfaces": [
+      {
+        "id": "boss-03:main-exchange-runway",
+        "kind": "commander-main-runway",
+        "bounds": { "x": 200, "y": -120, "width": 2800, "height": 120 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:crossbeam-left",
+        "kind": "commander-crossbeam",
+        "bounds": { "x": 680, "y": -1200, "width": 240, "height": 680 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:crossbeam-center",
+        "kind": "commander-crossbeam",
+        "bounds": { "x": 1480, "y": -1200, "width": 240, "height": 680 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:crossbeam-right",
+        "kind": "commander-crossbeam",
+        "bounds": { "x": 2280, "y": -1200, "width": 240, "height": 680 },
+        "grappleable": true
+      }
+    ],
+    "anchors": [],
+    "recoveryPoints": [],
+    "routeEdges": [],
+    "phaseZones": [
+      {
+        "id": "boss-03:zone:commander-floor",
+        "phaseId": "boss-03:combat",
+        "bounds": { "x": 200, "y": -620, "width": 2800, "height": 500 }
+      }
+    ]
+  },
+  "boss": {
+    "actorId": "boss-03:lower-sector-commander:body",
+    "mechanicId": "lower-sector-commander",
+    "visualPresetId": "lower-sector-commander",
+    "position": { "x": 1600, "y": -216 },
+    "collider": { "x": 1536, "y": -312, "width": 128, "height": 192 },
+    "impactTargetIds": ["boss-03:lower-sector-commander:body"]
+  },
+  "combat": {
+    "additionalPlayerMultiplier": 0.5,
+    "closedBodyDamageMultiplier": 1,
+    "generalDamageMode": "standard-combat",
+    "lateJoinPolicy": "join-current-attempt-without-rescale",
+    "participantCountSnapshot": "boss-stage-start",
+    "participantDefeatPolicy": "individual-respawn",
+    "phaseOverflowPolicy": "discard-at-floor",
+    "weakFixedPercent": 0,
+    "weakNormalDamageMultiplier": 1
+  },
+  "mechanics": [
+    {
+      "id": "boss-03:commander-combat",
+      "type": "lower-sector-commander",
+      "position": { "x": 1600, "y": -216 },
+      "bounds": { "x": 200, "y": -620, "width": 2800, "height": 500 },
+      "parameters": {
+        "acceleration": 600,
+        "deceleration": 900,
+        "walkSpeeds": [180, 220, 260],
+        "intensityHealthRatios": [0.7, 0.35],
+        "recoverySeconds": [1, 0.8, 0.6],
+        "grabRange": 450,
+        "grabTelegraphSeconds": 1.5,
+        "grabLeadSeconds": 0.25,
+        "grabTimeoutSeconds": 0.5,
+        "grabDamage": 20,
+        "grabHoldSeconds": 2,
+        "grabPullSeconds": 0.35,
+        "grabHammerDamage": 40,
+        "grabCooldownSeconds": 15,
+        "captureCliffMargin": 120,
+        "captureFrontGap": 50,
+        "hammerRange": 260,
+        "hammerHeight": 240,
+        "hammerTelegraphSeconds": 0.8,
+        "hammerActiveSeconds": 0.2,
+        "hammerDamage": 25,
+        "chargeDistance": 420,
+        "chargeSpeed": 700,
+        "chargeTelegraphSeconds": 0.8,
+        "chargeActiveSeconds": 0.6,
+        "chargeDamage": 20,
+        "chargeKnockback": 260
+      }
+    }
+  ],
+  "phases": [
+    {
+      "id": "boss-03:combat",
+      "order": 1,
+      "basePhaseHealth": 750,
+      "mechanicIds": ["boss-03:commander-combat"],
+      "vulnerability": {
+        "targetId": "boss-03:lower-sector-commander:body",
+        "trigger": "always-active",
+        "visualPresetId": "lower-sector-commander-body"
+      },
+      "hud": { "objective": "RETURN PROTOCOL을 돌파하고 상층 Gate를 개방" }
+    }
+  ],
+  "hud": {
+    "title": "LOWER SECTOR COMMANDER",
+    "healthBar": {
+      "style": "segmented-total",
+      "showNumbers": true,
+      "showPhaseBreaks": false,
+      "phaseMarkerCount": 0
+    },
+    "objectivePlacement": "below-health",
+    "phaseLabel": "",
+    "showVulnerabilityCountdown": false,
+    "vulnerabilityLabel": ""
+  },
+  "transition": {
+    "sourceAreaId": "sector-03-08",
+    "nextAreaId": "sector-04-01",
+    "entryTrigger": "checkpoint-complete",
+    "victoryTrigger": "all-phases-depleted",
+    "victoryPresentationId": "boss-03:return-protocol-offline",
+    "retainPlayerControl": true
+  }
+}

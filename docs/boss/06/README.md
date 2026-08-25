@@ -21,6 +21,8 @@
 
 Warden은 Rope를 사용하지 않는다. Shield, Baton, Thruster Dash와 Pad Security Beam Gate를 이용해 공간을 통제하고, Player는 Rope를 이용해 정면 통제를 우회한다.
 
+보행은 이동 거리 기반 Pose로 다리 움직임을 읽히게 하고 점프 전 TAKEOFF는 무릎을 굽힌 준비 자세를 사용한다. 돌진은 빨간 사각 범위가 아니라 본체 자세·방향·잔상으로 예고하며 Security Beam 예고 중 Boss HP 아래에 `WARNING`을 표시한다. 공격 범위 표현은 닫힌 실선 외곽을 사용하지 않는다.
+
 V4에서는 Warden이 좌표로 판정한 주 바닥·Raised Ledge를 평상 걷기·점프·내려가기 상태로 계속 추적한다. 공격은 실행 가능한 상태 풀에서 결정적 가중 랜덤으로 고르며, 정점의 5발 유도미사일과 제한 각속도는 유지한다.
 
 여러 Player가 있으면 Neutral에서 전투 구역 안의 active 참가자 중 거리·ID 순으로 최근접 대상을 선택한다. 공격을 시작한 뒤에는 target과 facing을 종료까지 고정해 Guard/Counter가 자동 회전하거나 미사일 예고 대상이 발사 직전에 바뀌지 않는다.

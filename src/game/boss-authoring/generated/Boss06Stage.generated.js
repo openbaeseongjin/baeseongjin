@@ -344,6 +344,7 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
         generalDamageMode: "standard-combat",
         lateJoinPolicy: "join-current-attempt-without-rescale",
         participantCountSnapshot: "boss-stage-start",
+        participantDefeatPolicy: "shared-wipe",
         phaseOverflowPolicy: "discard-at-floor",
         weakFixedPercent: 0,
         weakNormalDamageMultiplier: 1

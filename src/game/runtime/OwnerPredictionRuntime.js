@@ -6,6 +6,7 @@ import { GameSimulation } from "../simulation/GameSimulation.js";
 import { ROPE_AUTHORITY_EVENT_TYPE } from "../network/RopeAuthorityEvent.js";
 import { SPELL_SOURCE_KIND } from "../spells/SpellRuntimeDefinition.js";
 import { IncomingSpellImpactDetector } from "../spells/IncomingSpellImpactDetector.js";
+import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
 
 const APPLIED_AUTHORITY_EVENT_HISTORY_LIMIT = 64;
 
@@ -209,6 +210,7 @@ export class OwnerPredictionRuntime {
         }
         this.simulation.restoreHardpointJammers(snapshot.state.hardpointJammerStates ?? []);
         this.simulation.restoreBossRuntime(snapshot.state.bossStage ?? snapshot.state.bossRuntime ?? null);
+        this.simulation.restoreCombatInteractions(snapshot.state.combatInteractions, { preserveActive: true });
         if (!preserveCheckpoint) this.simulation.synchronizePredictionProgress(this.ownerId, progress);
     }
 
@@ -436,6 +438,19 @@ export class OwnerPredictionRuntime {
             return true;
         }
         this.pendingImpacts.delete(impactId);
+        if (pending.event.parameters?.sourceType === LOWER_SECTOR_COMMANDER_HAZARD.GRAB && snapshot) {
+            const displayedBefore = this.presentationState();
+            const targetTick = this.simulation.getTick();
+            const progress = this.simulation.predictionProgressState(this.ownerId);
+            this.prepareSnapshot(snapshot, progress);
+            this.simulation.restoreCombatInteractions(snapshot.state.combatInteractions, { preserveActive: false });
+            this.simulation.restoreOwnerPrediction(this.ownerId, pending.before, pending.tick);
+            const pendingImpacts = [...this.pendingImpacts.values()]
+                .filter(({ tick }) => tick >= pending.tick)
+                .sort((left, right) => left.tick - right.tick || left.order - right.order);
+            this.replayInputs(pending.tick, targetTick, new Map(), pendingImpacts);
+            this.startPresentationCorrection(displayedBefore, this.state());
+        }
         return true;
     }
 

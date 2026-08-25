@@ -8,13 +8,13 @@
 
 ## 2. Boss
 
-제품 Boss는 Sector 06 끝의 Boss06 하나다.
+제품 Boss는 Sector03 경계의 Boss03과 Sector06 끝의 Boss06이다.
 
 | 경계 | 계약 |
 | --- | --- |
 | 1-8 → 2-1 | 일반 Stage objective·Access 조건 뒤 직접 Gate portal |
 | 2-8 → 3-1 | 일반 Stage objective·Access 조건 뒤 직접 Gate portal |
-| 3-8 → 4-1 | Sector03 objective·Access 조건 뒤 직접 Gate portal |
+| 3-8 → Boss03 → 4-1 | Sector03 objective·Access 조건 뒤 Commander 전투와 개별 Gate portal |
 | 4-8 → 5-1 | 2-of-3 quorum과 objective 뒤 직접 Gate portal |
 | 5-8 → 6-1 | objective 뒤 직접 Gate portal |
 | 6-8 → Boss06 → Boarding → Escape | CONTINUITY WARDEN과 terminal completion 유지 |

@@ -12,7 +12,7 @@
 > - Runtime authority: canonical `AREA-SPEC.v2.json` + `AREA-CATALOG.sector04.json`
 > - Authoring snapshot: `cb4f690ac180a04868322e9c4cfe1384897c348b`
 > - Stage Direction Runtime v1: **VERIFIED AVAILABLE**
-> - Post-Sector03 transition → Sector04 entry: **DIRECT AUTHORED PORTAL — 3-8 → 4-1**
+> - Post-Sector03 transition → Sector04 entry: **3-8 → Boss03 → 4-1 authored Entry**
 
 ## Runtime promotion reconciliation
 

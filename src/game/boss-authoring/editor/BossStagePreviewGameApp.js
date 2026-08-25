@@ -1,7 +1,6 @@
 import { GameApp } from "../../GameApp.js";
 import { BOSS_VULNERABILITY_TRIGGER } from "../BossStageSpec.js";
 import { defineBossStage } from "../../boss/BossStageDefinition.js";
-import { CONTINUITY_WARDEN_SURFACE_KIND } from "../../boss/ContinuityWardenDefinition.js";
 import { PLAYER_CONFIG, resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../../config.js";
 import { LocalAuthority } from "../../runtime/LocalAuthority.js";
 import { PreviewFlightController } from "../../runtime/PreviewFlightController.js";
@@ -125,7 +124,9 @@ export class BossStagePreviewGameApp extends GameApp {
         if (!bossBody?.position) return Object.freeze({ accepted: false });
         const stage = this.authority.simulation.world.bossStages?.find(({ id }) => id === this.previewBossStageId);
         if (!stage) return Object.freeze({ accepted: false });
-        const mainSurface = stage.surfaces.find(({ kind }) => kind === CONTINUITY_WARDEN_SURFACE_KIND.MAIN);
+        const mainSurface = [...stage.surfaces]
+            .filter(({ width, height }) => Number.isFinite(width) && Number.isFinite(height) && width > height)
+            .sort((left, right) => right.width - left.width)[0];
         if (!mainSurface) return Object.freeze({ accepted: false });
         const target = {
             x: Math.max(

@@ -22,8 +22,8 @@ Current Runtime exit:
 `completionMode: content-boundary`
 
 따라서:
-- Sector04 direct 연결 금지
-- Boss entrance 임의 확정 금지
+- Boss03 catalog 활성 시 Gate route는 `LOWER SECTOR COMMANDER` 독립 Arena로 이어진다.
+- Boss03 처치 뒤 각 Player가 4-1 authored Entry로 이동하며 catalog 비활성 시 direct portal로 복구된다.
 
 ## 2. Gameplay Question
 

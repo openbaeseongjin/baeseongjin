@@ -7,15 +7,18 @@ export const BOSS_ANCHOR_ROLE = Object.freeze({
 });
 
 export const BOSS_MECHANIC_TYPE = Object.freeze({
-    CONTINUITY_WARDEN: "continuity-warden"
+    CONTINUITY_WARDEN: "continuity-warden",
+    LOWER_SECTOR_COMMANDER: "lower-sector-commander"
 });
 
 export const BOSS_VISUAL_PRESET_ID = Object.freeze({
-    CONTINUITY_WARDEN: "continuity-warden"
+    CONTINUITY_WARDEN: "continuity-warden",
+    LOWER_SECTOR_COMMANDER: "lower-sector-commander"
 });
 
 export const BOSS_VULNERABILITY_TARGET_ID = Object.freeze({
-    CONTINUITY_WARDEN_BODY: "boss-06:continuity-warden:body"
+    CONTINUITY_WARDEN_BODY: "boss-06:continuity-warden:body",
+    LOWER_SECTOR_COMMANDER_BODY: "boss-03:lower-sector-commander:body"
 });
 
 export const BOSS_VULNERABILITY_TRIGGER = Object.freeze({
@@ -33,7 +36,13 @@ export const BOSS_TERMINAL_COMPLETION = Object.freeze({
 });
 
 export const BOSS_VICTORY_PRESENTATION_ID = Object.freeze({
-    CONTINUITY_WARDEN_DEFEATED: "boss-06:continuity-warden-defeated"
+    CONTINUITY_WARDEN_DEFEATED: "boss-06:continuity-warden-defeated",
+    LOWER_SECTOR_COMMANDER_DEFEATED: "boss-03:return-protocol-offline"
+});
+
+export const BOSS_PARTICIPANT_DEFEAT_POLICY = Object.freeze({
+    SHARED_WIPE: "shared-wipe",
+    INDIVIDUAL_RESPAWN: "individual-respawn"
 });
 
 export const BOSS_HEALTH_BAR_STYLE = Object.freeze({

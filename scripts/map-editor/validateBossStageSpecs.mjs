@@ -8,15 +8,21 @@ import {
 } from "../../src/game/boss-authoring/BossStageSpec.js";
 import { validateBossStageSpec } from "../../src/game/boss-authoring/BossStageSpecValidator.js";
 import { BOSS_06_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss06Stage.generated.js";
+import { BOSS_03_STAGE_SPEC } from "../../src/game/boss-authoring/generated/Boss03Stage.generated.js";
 import { defineBossStage } from "../../src/game/boss/BossStageDefinition.js";
 import { createBossEncounterRuntime } from "../../src/game/boss/BossEncounterRuntimeFactory.js";
 
 const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
-const definitions = Object.freeze([Object.freeze({ id: "boss-06", generated: BOSS_06_STAGE_SPEC })]);
+const definitions = Object.freeze([
+    Object.freeze({ id: "boss-03", generated: BOSS_03_STAGE_SPEC }),
+    Object.freeze({ id: "boss-06", generated: BOSS_06_STAGE_SPEC })
+]);
 const EXPECTED_ROPEABLE_ACTOR_IDS = Object.freeze({
+    "boss-03": Object.freeze([]),
     "boss-06": Object.freeze([])
 });
 const EXPECTED_ROPE_PRESENTATION_IDS = Object.freeze({
+    "boss-03": Object.freeze([]),
     "boss-06": Object.freeze([])
 });
 
