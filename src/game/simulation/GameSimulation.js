@@ -8,6 +8,7 @@ import {
 import { BOSS_STAGE_CATALOG } from "../boss-authoring/BossStageCatalog.js";
 import { createBossEncounterRuntime } from "../boss/BossEncounterRuntimeFactory.js";
 import { CONTINUITY_WARDEN_EVENT, CONTINUITY_WARDEN_ID } from "../boss/ContinuityWardenDefinition.js";
+import { BOSS_ENEMY_SUMMON_EVENT, BOSS_SUMMONED_ENEMY_ID } from "../boss/BossEnemySummonPattern.js";
 import { BOSS_ANCHOR_ROLE } from "../boss-authoring/BossStageSpec.js";
 import { defineBossStage } from "../boss/BossStageDefinition.js";
 import { LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITIONS } from "../boss/LowerSectorCommanderDefinition.js";
@@ -539,10 +540,19 @@ export class GameSimulation {
     }
 
     #bossSummonedEnemies() {
-        return this.enemies.filter(({ id }) => CONTINUITY_WARDEN_ID.isSummonedEnemy(id));
+        const bossStageId = this.bossRuntime?.definition.id;
+        return bossStageId
+            ? this.enemies.filter(({ id }) => BOSS_SUMMONED_ENEMY_ID.belongsTo(bossStageId, id))
+            : Object.freeze([]);
     }
 
     #spawnBossSummonedEnemy(payload) {
+        if (
+            payload.bossStageId !== this.bossRuntime?.definition.id ||
+            !BOSS_SUMMONED_ENEMY_ID.belongsTo(payload.bossStageId, payload.enemyId)
+        ) {
+            return null;
+        }
         if (this.objects.enemies.find(payload.enemyId)) return null;
         const stage = this.#bossStageWorld();
         const radius = enemyInitialRadius(payload.enemyType, COMBAT_CONFIG.enemyRadius);
@@ -601,7 +611,7 @@ export class GameSimulation {
         for (const event of events) {
             const { eventId: bossEventId, eventType, sequence: bossSequence, ...payload } = event;
             if (eventType === CONTINUITY_WARDEN_EVENT.MISSILE_FIRED) this.#spawnBossMissile(payload);
-            if (eventType === CONTINUITY_WARDEN_EVENT.ENEMY_SUMMONED) this.#spawnBossSummonedEnemy(payload);
+            if (eventType === BOSS_ENEMY_SUMMON_EVENT.ENEMY_SUMMONED) this.#spawnBossSummonedEnemy(payload);
             const bossObjects = this.bossStageSnapshot()?.presentation?.objects ?? Object.freeze([]);
             const bossBody = bossObjects.find(({ physicsBody }) => physicsBody === true);
             const activeHazard = bossObjects.find(

@@ -66,7 +66,7 @@ export const withEnemyHitPrediction = createSimulationCapabilityMixin({
 export const withPlayerImpactPrediction = createSimulationCapabilityMixin({
     id: CLIENT_PROJECTILE_COLLISION_CAPABILITY,
     order: 30,
-    apply({ state, clientTick, impactBudget }) {
+    apply({ state, clientTick }) {
         const player = state?.localPlayer;
         const canHitPlayer = player?.lifeState === "active";
         const segments = this.consumeClientCollisionSegments();
@@ -105,7 +105,6 @@ export const withPlayerImpactPrediction = createSimulationCapabilityMixin({
         const bodyHit = !ropeHit && (currentBodyHit || Boolean(bodyHitContact));
         const isOverlapping = ropeHit || bodyHit;
         if (!this.observeClientCollision(isOverlapping, currentRopeHit || currentBodyHit) || !player) return null;
-        if (!impactBudget.tryClaim()) return null;
         this.beginClientCollision();
         return Object.freeze({
             eventType: "predicted-resolve",

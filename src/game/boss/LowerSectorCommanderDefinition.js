@@ -7,6 +7,7 @@ export const LOWER_SECTOR_COMMANDER_STATE = Object.freeze({
     GRAB: "chain-hook-grab",
     HAMMER: "hammer-slam",
     CHARGE: "body-charge",
+    SUMMON: "enemy-summon",
     DEFEATED: "defeated"
 });
 

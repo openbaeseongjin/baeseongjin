@@ -14,6 +14,7 @@ import { createLowerSectorCommanderStateCatalog } from "./LowerSectorCommanderSt
 import { CommanderLocomotion } from "./CommanderLocomotion.js";
 import { BOSS_ARENA_SUPPORT_KIND, BossArenaSpatialQuery } from "./BossArenaSpatialQuery.js";
 import { KinematicJumpMotion } from "./KinematicJumpMotion.js";
+import { BOSS_ENEMY_SUMMON_EVENT, BossEnemySummonPattern } from "./BossEnemySummonPattern.js";
 import {
     LOWER_SECTOR_COMMANDER_ACTION_PHASE as ACTION_PHASE,
     LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITION as CAPTURE_DEFINITION,
@@ -68,6 +69,10 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         super(definition);
         this.worldSeed = worldSeed;
         this.config = this.#configuration();
+        this.summonPattern = new BossEnemySummonPattern({
+            bossStageId: definition.id,
+            ...this.config.summonPattern
+        });
         this.stateCatalog = createLowerSectorCommanderStateCatalog();
         this.statePool = new BossStatePool({ catalog: this.stateCatalog, worldSeed, attempt: this.attempt });
         this.scaledHealth = null;
@@ -153,7 +158,25 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             chargeTelegraphSeconds: positive(parameters.chargeTelegraphSeconds, 0.8),
             chargeActiveSeconds: positive(parameters.chargeActiveSeconds, 0.6),
             chargeDamage: positive(parameters.chargeDamage, 20),
-            chargeKnockback: positive(parameters.chargeKnockback, 260)
+            chargeKnockback: positive(parameters.chargeKnockback, 260),
+            summonPattern: freezeComposite({
+                count: parameters.minionSummonCount,
+                cooldownSeconds: parameters.minionSummonCooldownSeconds,
+                skipAliveCount: parameters.minionSummonSkipAliveCount,
+                telegraphSeconds: parameters.minionSummonTelegraphSeconds,
+                recoverySeconds: parameters.minionSummonRecoverySeconds,
+                warningSize: parameters.minionSummonWarningSize,
+                spawnPoints: [
+                    {
+                        x: parameters.summonLeft?.x ?? main.bounds.x + main.bounds.width * 0.25,
+                        y: parameters.summonLeft?.y ?? main.bounds.y - 80
+                    },
+                    {
+                        x: parameters.summonRight?.x ?? main.bounds.x + main.bounds.width * 0.75,
+                        y: parameters.summonRight?.y ?? main.bounds.y - 80
+                    }
+                ]
+            })
         });
     }
 
@@ -178,6 +201,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.grabCapturedPlayerId = null;
         this.grabStage = GRAB_STAGE.IDLE;
         this.chargeDistanceRemaining = 0;
+        this.summonPattern.reset();
         this.victoryRemaining = completed ? 0 : this.victoryRemaining;
         this.statusEffects.reset();
         this.body?.setPhysicsPosition(this.definition.arena.boss.position);
@@ -315,6 +339,10 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         return Boolean(target && distance > this.config.hammerRange && distance <= this.config.chargeDistance);
     }
 
+    canSummon(target, context = {}) {
+        return Boolean(target && this.summonPattern.canSummon(context.bossSummonedEnemyCount));
+    }
+
     #beginAttack(state, target, telegraphSeconds) {
         this.#faceTarget(target);
         this.state = state;
@@ -336,6 +364,34 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
     beginCharge(target) {
         this.#beginAttack(STATE.CHARGE, target, this.config.chargeTelegraphSeconds);
         this.chargeDistanceRemaining = this.config.chargeDistance;
+    }
+
+    beginSummon(target) {
+        this.#beginAttack(STATE.SUMMON, target, this.summonPattern.telegraphSeconds);
+    }
+
+    advanceSummon(dt, target, context = {}) {
+        if (this.actionPhase === ACTION_PHASE.TELEGRAPH) {
+            this.timer = Math.max(0, this.timer - dt);
+            if (this.timer > 0) return;
+        }
+        if (!this.canSummon(target, context)) {
+            this.#finishAttack();
+            return;
+        }
+        this.actionPhase = ACTION_PHASE.ACTIVE;
+        const wave = this.summonPattern.summon({
+            attempt: this.attempt,
+            worldOffset: context.worldOffset ?? { x: 0, y: 0 }
+        });
+        this.emit("boss-attack-started", {
+            kind: STATE.SUMMON,
+            sequence: wave.sequence,
+            summonCount: this.summonPattern.count
+        });
+        for (const request of wave.requests) this.emit(BOSS_ENEMY_SUMMON_EVENT.ENEMY_SUMMONED, request);
+        this.#finishAttack();
+        this.timer = this.summonPattern.recoverySeconds;
     }
 
     beginJump(target) {
@@ -449,7 +505,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         return true;
     }
 
-    #advanceNeutral(dt, target, { canSelectAttack = true } = {}) {
+    #advanceNeutral(dt, target, context = {}, { canSelectAttack = true } = {}) {
         if (this.timer > 0) {
             this.timer = Math.max(0, this.timer - dt);
             return;
@@ -461,7 +517,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         const selection = canSelectAttack
             ? this.statePool.select({
                   lane: BOSS_STATE_LANE.ATTACK,
-                  context: { runtime: this, target }
+                  context: { runtime: this, target, context }
               })
             : null;
         if (selection) {
@@ -498,6 +554,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             return freezeComposite({ accepted: true, changed: true });
         }
         this.grabCooldownRemaining = Math.max(0, this.grabCooldownRemaining - dt);
+        this.summonPattern.advance(dt);
         for (const outcome of this.statusEffects.advance(dt)) {
             if (outcome.type === "damage") this.health = Math.max(0, this.health - outcome.damage);
         }
@@ -516,8 +573,8 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             : context.canSelectTarget !== false
               ? nearestTarget(players, this.body.position)
               : null;
-        if (this.stateCatalog[this.state]) this.statePool.advance(this.state, { runtime: this, dt, target });
-        else this.#advanceNeutral(dt, target, { canSelectAttack: context.canSelectTarget !== false });
+        if (this.stateCatalog[this.state]) this.statePool.advance(this.state, { runtime: this, dt, target, context });
+        else this.#advanceNeutral(dt, target, context, { canSelectAttack: context.canSelectTarget !== false });
         return freezeComposite({ accepted: true, changed: true });
     }
 
@@ -805,6 +862,16 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
                 active: true
             });
         }
+        if (this.state === STATE.SUMMON && this.actionPhase === ACTION_PHASE.TELEGRAPH) {
+            objects.push(
+                ...this.summonPattern.presentationWarnings({
+                    kind: OBJECT_KIND.HAZARD,
+                    variant: STATE.SUMMON,
+                    state: ACTION_PHASE.TELEGRAPH,
+                    worldOffset
+                })
+            );
+        }
         for (const hazard of this.activeHazards(worldOffset)) {
             const bounds =
                 hazard.bounds ??
@@ -864,7 +931,8 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
                 actionPhase: this.actionPhase,
                 targetPlayerId: this.targetPlayerId,
                 direction: this.facing,
-                grabCooldownRemaining: this.grabCooldownRemaining
+                grabCooldownRemaining: this.grabCooldownRemaining,
+                summonCooldownRemaining: this.summonPattern.cooldownRemaining
             }),
             state: this.state,
             actionPhase: this.actionPhase,
@@ -878,6 +946,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             grabCapturedPlayerId: this.grabCapturedPlayerId,
             grabStage: this.grabStage,
             chargeDistanceRemaining: this.chargeDistanceRemaining,
+            summonPattern: this.summonPattern.snapshot(),
             victoryRemaining: this.victoryRemaining,
             locomotion: this.locomotion.snapshot(),
             jumpMotion: this.jumpMotion.snapshot(),
@@ -901,6 +970,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.grabCapturedPlayerId = snapshot.grabCapturedPlayerId ?? null;
         this.grabStage = snapshot.grabStage ?? GRAB_STAGE.IDLE;
         this.chargeDistanceRemaining = snapshot.chargeDistanceRemaining ?? 0;
+        this.summonPattern.restore(snapshot.summonPattern ?? null);
         this.victoryRemaining = snapshot.victoryRemaining ?? 0;
         this.locomotion.restore(snapshot.locomotion);
         if (snapshot.jumpMotion) this.jumpMotion.restore(snapshot.jumpMotion);

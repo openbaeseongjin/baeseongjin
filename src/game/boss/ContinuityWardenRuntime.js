@@ -19,6 +19,7 @@ import {
     createContinuityWardenStateCatalog
 } from "./ContinuityWardenStateCatalog.js";
 import { CONTINUITY_WARDEN_STATE_LANE, ContinuityWardenStatePool } from "./ContinuityWardenStatePool.js";
+import { BOSS_ENEMY_SUMMON_EVENT, BossEnemySummonPattern } from "./BossEnemySummonPattern.js";
 import {
     CONTINUITY_WARDEN_ACTION_PHASE as ACTION_PHASE,
     CONTINUITY_WARDEN_EVENT,
@@ -35,7 +36,6 @@ import {
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE,
-    CONTINUITY_WARDEN_SUMMON_ENEMY_TYPES,
     CONTINUITY_WARDEN_SURFACE_KIND
 } from "./ContinuityWardenDefinition.js";
 
@@ -141,10 +141,6 @@ const DEFAULT = Object.freeze({
     missileLifetimeSeconds: 5,
     missileTurnRateRadiansPerSecond: 1.75,
     missileFanAnglesDegrees: Object.freeze([-50, -25, 0, 25, 50]),
-    summonCount: 2,
-    summonCooldownSeconds: 15,
-    summonSkipAliveCount: 6,
-    summonWarningSize: 110,
     walkSpeed: 240,
     trackingStopDistance: 220,
     locomotionLandingSeconds: 0.15,
@@ -166,10 +162,6 @@ function positive(value, fallback) {
 
 function finite(value, fallback) {
     return Number.isFinite(value) ? value : fallback;
-}
-
-function positiveInteger(value, fallback) {
-    return Number.isSafeInteger(value) && value > 0 ? value : fallback;
 }
 
 function point(value, fallback) {
@@ -249,6 +241,10 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         super(definition);
         this.worldSeed = worldSeed;
         this.config = this.#configuration();
+        this.summonPattern = new BossEnemySummonPattern({
+            bossStageId: definition.id,
+            ...this.config.summonPattern
+        });
         this.spatialQuery = new ContinuityWardenSpatialQuery({ surfaces: definition.arena.surfaces });
         this.stateCatalog = createContinuityWardenStateCatalog();
         this.statePool = new ContinuityWardenStatePool({
@@ -276,8 +272,6 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.chainBonusPattern = null;
         this.missileSalvoSequence = 0;
         this.missileFiredThisJump = false;
-        this.minionSummonSequence = 0;
-        this.summonCooldownRemaining = 0;
         this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED;
         this.locomotionTarget = null;
         this.locomotionLandingPending = false;
@@ -400,19 +394,24 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 DEFAULT.missileTurnRateRadiansPerSecond
             ),
             missileFanAnglesDegrees: finiteNumbers(parameters.missileFanAnglesDegrees, DEFAULT.missileFanAnglesDegrees),
-            summonCount: positiveInteger(parameters.minionSummonCount, DEFAULT.summonCount),
-            summonCooldownSeconds: positive(parameters.minionSummonCooldownSeconds, DEFAULT.summonCooldownSeconds),
-            summonSkipAliveCount: positiveInteger(parameters.minionSummonSkipAliveCount, DEFAULT.summonSkipAliveCount),
-            summonPoints: Object.freeze([
-                point(parameters.summonLeft, {
-                    x: mainBounds.x + mainBounds.width * 0.25,
-                    y: mainBounds.y - 180
-                }),
-                point(parameters.summonRight, {
-                    x: mainBounds.x + mainBounds.width * 0.75,
-                    y: mainBounds.y - 180
-                })
-            ]),
+            summonPattern: freezeComposite({
+                count: parameters.minionSummonCount,
+                cooldownSeconds: parameters.minionSummonCooldownSeconds,
+                skipAliveCount: parameters.minionSummonSkipAliveCount,
+                telegraphSeconds: parameters.minionSummonTelegraphSeconds,
+                recoverySeconds: parameters.minionSummonRecoverySeconds,
+                warningSize: parameters.minionSummonWarningSize,
+                spawnPoints: [
+                    point(parameters.summonLeft, {
+                        x: mainBounds.x + mainBounds.width * 0.25,
+                        y: mainBounds.y - 180
+                    }),
+                    point(parameters.summonRight, {
+                        x: mainBounds.x + mainBounds.width * 0.75,
+                        y: mainBounds.y - 180
+                    })
+                ]
+            }),
             emitterLeft: point(parameters.emitterLeft, {
                 x: mainBounds.x + DEFAULT.emitterSize.width * 0.5,
                 y: mainBounds.y - DEFAULT.emitterSize.height * 0.5
@@ -455,8 +454,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.chainBonusPattern = null;
         this.missileSalvoSequence = 0;
         this.missileFiredThisJump = false;
-        this.minionSummonSequence = 0;
-        this.summonCooldownRemaining = 0;
+        this.summonPattern.reset();
         this.locomotionState = CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED;
         this.jumpTarget = { ...this.bodyPosition };
         this.locomotionTarget = null;
@@ -758,7 +756,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
 
     #summonPatternAvailable(context) {
         const aliveCount = Number.isSafeInteger(context.bossSummonedEnemyCount) ? context.bossSummonedEnemyCount : 0;
-        return this.summonCooldownRemaining <= 0 && aliveCount < this.config.summonSkipAliveCount;
+        return this.summonPattern.canSummon(aliveCount);
     }
 
     canBaton(target) {
@@ -1047,42 +1045,36 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
     _beginSummon(target) {
         this.state = CONTINUITY_WARDEN_STATE.SUMMON;
         this.actionPhase = ACTION_PHASE.TELEGRAPH;
-        this.timer = this.config.securityTelegraphSeconds;
+        this.timer = this.summonPattern.telegraphSeconds;
         this.facing = target.position.x < this.bodyPosition.x ? -1 : 1;
         this.emit("boss-attack-telegraphed", {
             kind: CONTINUITY_WARDEN_STATE.SUMMON,
             targetPlayerId: target.id,
-            summonCount: this.config.summonCount
+            summonCount: this.summonPattern.count
         });
     }
 
-    _advanceSummon(_dt, context = {}) {
+    _advanceSummon(dt, context = {}) {
+        if (this.actionPhase === ACTION_PHASE.TELEGRAPH) {
+            this.timer = Math.max(0, this.timer - dt);
+            if (this.timer > 0) return;
+        }
         if (!this.#summonPatternAvailable(context)) {
             this._beginNeutral();
             return;
         }
         this.actionPhase = ACTION_PHASE.ACTIVE;
-        this.minionSummonSequence += 1;
-        this.summonCooldownRemaining = this.config.summonCooldownSeconds;
+        const wave = this.summonPattern.summon({
+            attempt: this.attempt,
+            worldOffset: context.worldOffset ?? { x: 0, y: 0 }
+        });
         this.emit("boss-attack-started", {
             kind: CONTINUITY_WARDEN_STATE.SUMMON,
-            sequence: this.minionSummonSequence,
-            summonCount: this.config.summonCount
+            sequence: wave.sequence,
+            summonCount: this.summonPattern.count
         });
-        for (let index = 0; index < this.config.summonCount; index += 1) {
-            const poolIndex =
-                ((this.minionSummonSequence - 1) * this.config.summonCount + index) %
-                CONTINUITY_WARDEN_SUMMON_ENEMY_TYPES.length;
-            const localPosition = this.config.summonPoints[index % this.config.summonPoints.length];
-            this.emit(CONTINUITY_WARDEN_EVENT.ENEMY_SUMMONED, {
-                enemyId: CONTINUITY_WARDEN_ID.SUMMONED_ENEMY(this.attempt, this.minionSummonSequence, index),
-                enemyType: CONTINUITY_WARDEN_SUMMON_ENEMY_TYPES[poolIndex],
-                position: compositeWorldPoint(localPosition, context.worldOffset ?? { x: 0, y: 0 }),
-                summonSequence: this.minionSummonSequence,
-                summonIndex: index
-            });
-        }
-        this._beginNeutral(this.config.meleeRecoverySeconds);
+        for (const request of wave.requests) this.emit(BOSS_ENEMY_SUMMON_EVENT.ENEMY_SUMMONED, request);
+        this._beginNeutral(this.summonPattern.recoverySeconds);
     }
 
     _beginGuard(target) {
@@ -1271,7 +1263,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         }
         if (this.status !== "active") return freezeComposite({ accepted: false, changed: false });
         this.previousBodyPosition = { ...this.bodyPosition };
-        this.summonCooldownRemaining = Math.max(0, this.summonCooldownRemaining - dt);
+        this.summonPattern.advance(dt);
         if (this.reactionState) {
             this.statePool.advance(this.reactionState, { runtime: this, dt, context });
         }
@@ -1767,19 +1759,15 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             }
         ];
         if (this.state === CONTINUITY_WARDEN_STATE.SUMMON && this.actionPhase === ACTION_PHASE.TELEGRAPH) {
-            for (const [index, summonPoint] of this.config.summonPoints.entries()) {
-                objects.push({
-                    id: CONTINUITY_WARDEN_ID.SUMMON_WARNING(index),
+            objects.push(
+                ...this.summonPattern.presentationWarnings({
                     kind: OBJECT_KIND.HAZARD,
                     variant: CONTINUITY_WARDEN_STATE.SUMMON,
-                    position: compositeWorldPoint(summonPoint, worldOffset),
-                    size: { width: DEFAULT.summonWarningSize, height: DEFAULT.summonWarningSize },
                     state: ACTION_PHASE.TELEGRAPH,
-                    damaging: false,
-                    active: true,
+                    worldOffset,
                     cameraPriority: CAMERA_PRIORITY.HAZARD
-                });
-            }
+                })
+            );
         }
         if (
             (MELEE_HAZARD_STATE[this.state] === true ||
@@ -1914,7 +1902,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 direction: this.facing,
                 targetPlayerId: this.targetPlayerId,
                 locomotionState: this.locomotionState,
-                summonCooldownRemaining: this.summonCooldownRemaining,
+                summonCooldownRemaining: this.summonPattern.cooldownRemaining,
                 securitySequence: this.securitySequence,
                 securityIndex: this.securityIndex
             }),
@@ -1937,8 +1925,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             chainBonusPattern: this.chainBonusPattern,
             missileSalvoSequence: this.missileSalvoSequence,
             missileFiredThisJump: this.missileFiredThisJump,
-            minionSummonSequence: this.minionSummonSequence,
-            summonCooldownRemaining: this.summonCooldownRemaining,
+            summonPattern: this.summonPattern.snapshot(),
             locomotionState: this.locomotionState,
             reactionState: this.reactionState,
             reactionTimer: this.reactionTimer,
@@ -1981,9 +1968,12 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         }
         this.missileSalvoSequence = snapshot.missileSalvoSequence ?? 0;
         this.missileFiredThisJump = snapshot.missileFiredThisJump ?? false;
-        this.minionSummonSequence = snapshot.minionSummonSequence ?? 0;
-        this.summonCooldownRemaining =
-            snapshot.summonCooldownRemaining ?? snapshot.mechanism?.summonCooldownRemaining ?? 0;
+        this.summonPattern.restore(
+            snapshot.summonPattern ?? {
+                sequence: snapshot.minionSummonSequence,
+                cooldownRemaining: snapshot.summonCooldownRemaining ?? snapshot.mechanism?.summonCooldownRemaining
+            }
+        );
         this.locomotionState =
             snapshot.locomotionState ??
             snapshot.mechanism?.locomotionState ??

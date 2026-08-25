@@ -197,7 +197,7 @@ Boss03 사슬 훅 Grab은 서버 중립 Boss가 target·telegraph를 시작하�
 
 Boss06 승리 뒤 Boarding은 Player별 위치 주도 사건과 공용 완료 상태를 분리한다. 각 소유 Player는 Gate/Bridge를 직접 건너 boarding zone에 들어가고 서버는 Player별 ready ID를 공유한다. 연결된 모든 참가자가 ready일 때만 run completion을 확정하며 첫 ready Player가 동료를 순간이동시키지 않는다. Boss spectator는 승리 시 ID 순서로 final safe Bridge deck에 간격을 두고 복귀하며 참가 상태도 `active`로 함께 전환한 뒤 같은 Boarding 경로를 사용한다. Wipe respawn도 같은 정렬·간격 계약을 사용한다.
 
-Boss06 공격형 몹 소환은 서버 중립 사건이다. Boss Runtime이 15초 cooldown·live 6개 skip과 wave 순서를 결정하고 서버 `GameSimulation`만 authored spawn point에 2개 Enemy를 등록한다. 클라이언트 owner prediction은 소환 Enemy를 별도 생성하지 않고 일반 Enemy snapshot으로 수렴하며, wipe·Boss defeat는 Boss 소유 소환몹과 그 잔탄을 함께 제거한다.
+Boss03·06 공격형 몹 소환은 서버 중립 사건이다. 공용 `BossEnemySummonPattern`이 15초 cooldown·live 6개 skip과 wave 순서를 결정하고 서버 `GameSimulation`만 각 Boss authored spawn point에 2개 Enemy를 등록한다. 클라이언트 owner prediction은 소환 Enemy를 별도 생성하지 않고 일반 Enemy snapshot으로 수렴하며, attempt reset·Boss defeat는 active Boss ID가 소유한 소환몹과 그 잔탄을 함께 제거한다.
 
 Boss06 body ImpactTarget은 WorldSnapshot의 Boss Stage 안에 Polygon collider로 포함한다. Player projectile client prediction은 일반 Enemy와 Boss ImpactTarget을 `combatTargets`로 조합해 같은 homing·swept collision capability를 실행하고, 실제 projectile 접촉 위치를 claim해 Guard/Counter 정면·후면 판정까지 보존한다. Neutral의 최근접 target 선택은 서버만 수행하고 owner prediction은 snapshot의 committed target을 덮어쓰지 않는다.
 
@@ -380,7 +380,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 로프 입력은 누르는 순간과 해제 전이, 짧은 부착 버퍼, 부착당 한 번인 스윙 드래그 진행과 `RopeImpactState`에 상태가 있다. 자기 플레이어 재적용은 승인 틱의 `aimWorld`, 마지막 pointer·viewport, `wasPointerDown`, `attachBufferRemaining`, `swingDrag`, 성공 스윙·해제 carry·접촉 집합에서 시작한다. `attachmentCandidate`는 정적 월드와 aim으로 다시 계산하며 전송하지 않는다.
 
-`PredictableProjectileStore`는 최근 이벤트를 명시적으로 drain해 `spawn`을 투사체 팩토리에 전달하고 `resolve`에서 제거한다. 저장소는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 소유하며 투사체 종류를 보고 운동·충돌 정책을 분기하지 않는다. 늦게 받은 생성 이벤트는 현재 serverTick과 생성 tick의 차이만큼 먼저 진행한다. 적·플레이어 투사체는 Player·Enemy와 같은 공통 `PhysicsMixin` 및 단일 `projectile-motion` capability를 사용하고 lifetime과 Homing steering만 선택 mixin으로 조합한다. Boss06 점프 정점의 5발 미사일은 서버만 enemy+homing 객체를 생성하고, fan 초기 속도·target Player ID·제한 turn rate·개별 lifetime을 spawn 사건으로 공유한다. owner prediction은 별도 미사일을 만들지 않으며 Boss defeat/wipe는 Boss 소유 잔탄을 resolve한다. 클라이언트 충돌은 같은 `client-projectile-collision` ID의 서로 다른 믹스인을 사용한다. 서버와 클라이언트는 동일 초기 상태·tick의 위치와 속도가 정확히 일치하는 진단으로 잠근다. claim 대기 객체의 표시와 재충돌 가능 여부도 객체 수명주기가 결정한다. 자기 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 적중으로 소비되며 receipt 거절로 되살리지 않는다. 투사체 매 틱 좌표 배열은 스냅샷에 추가하지 않는다.
+`PredictableProjectileStore`는 최근 이벤트를 명시적으로 drain해 `spawn`을 투사체 팩토리에 전달하고 `resolve`에서 제거한다. 저장소는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 소유하며 투사체 종류를 보고 운동·충돌 정책을 분기하지 않는다. 늦게 받은 생성 이벤트는 현재 serverTick과 생성 tick의 차이만큼 먼저 진행한다. 적·플레이어 투사체는 Player·Enemy와 같은 공통 `PhysicsMixin` 및 단일 `projectile-motion` capability를 사용하고 lifetime과 Homing steering만 선택 mixin으로 조합한다. Boss06 점프 정점의 5발 미사일은 서버만 enemy+homing 객체를 생성하고, fan 초기 속도·target Player ID·제한 turn rate·개별 lifetime을 spawn 사건으로 공유한다. owner prediction은 별도 미사일을 만들지 않으며 Boss defeat/wipe는 Boss 소유 잔탄을 resolve한다. 클라이언트 충돌은 같은 `client-projectile-collision` ID의 서로 다른 믹스인을 사용하고, 서로 다른 projectile ID의 유효 swept contact를 frame 전체 quota로 합치지 않는다. 서버와 클라이언트는 동일 초기 상태·tick의 위치와 속도가 정확히 일치하는 진단으로 잠근다. claim 대기 객체의 표시와 재충돌 가능 여부도 객체 수명주기가 결정한다. 자기 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 적중으로 소비되며 receipt 거절로 되살리지 않는다. 투사체 매 틱 좌표 배열은 스냅샷에 추가하지 않는다.
 
 - `snapshot()`은 화면이 읽을 소유자 로컬 상태와 원격·중립 공유 상태를 구분해 반환한다.
 - 연결 상태와 네트워크 지표는 게임 규칙 스냅샷과 분리한다.

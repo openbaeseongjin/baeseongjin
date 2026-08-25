@@ -51,17 +51,6 @@ function advanceProjectile(projectile, dt, state) {
     }
 }
 
-function createImpactBudget() {
-    let claimed = false;
-    return Object.freeze({
-        tryClaim() {
-            if (claimed) return false;
-            claimed = true;
-            return true;
-        }
-    });
-}
-
 function findPendingPrediction(objects, event) {
     if (!event.parameters?.predictionId) return null;
     for (const projectile of objects.values()) {
@@ -199,7 +188,7 @@ export class PredictableProjectileStore {
         const outcomes = simulationDispatcher.dispatch({
             objects: projectiles,
             capabilityId: CLIENT_PROJECTILE_COLLISION_CAPABILITY,
-            context: { state: simulationState, clientTick, impactBudget: createImpactBudget() }
+            context: { state: simulationState, clientTick }
         });
         if (outcomes.length !== projectiles.length) {
             throw new Error("every replicated projectile must expose client collision capability");
