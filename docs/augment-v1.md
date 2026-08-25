@@ -56,6 +56,6 @@
 ## 멀티와 표현
 
 - Player Spell은 owner가 먼저 생성하고, 중립 Enemy·Boss는 서버, 원격 Player 피격은 피해 Player가 최초 판정한다. 상태 pulse는 전송하지 않는다.
-- owner-motion v11은 projectile·area·charge·지속 버프·Passive, augment-impact v5는 impulse, WorldSnapshot v19는 확장 Player 상태와 Boss Polygon ImpactTarget을 전송한다. player-impact v15는 피격 후 시간 기반 무적을 상태나 성공 `duplicate` 결과로 사용하지 않는다.
+- owner-motion v11은 projectile·area·charge·지속 버프·Passive, augment-impact v5는 impulse, WorldSnapshot v19는 확장 Player 상태와 Boss Polygon ImpactTarget을 전송한다. player-impact v16은 피격 후 시간 기반 무적을 상태나 성공 `duplicate` 결과로 사용하지 않는다.
 - 메테오는 암석 핵·화염 꼬리·반경 350 폭발, 전기 구체는 본체와 반경 175 영역, 열선·검격·빙결 폭발은 판정 형상을 표시한다. HUD는 연속 대시 charge와 사망 XP 손실을 표시한다.
 - `npm run simulate:multiplayer-combat`은 브라우저·오디오 없이 command·owner motion·impact claim·World snapshot wire를 통과해 신규 Spell·상태·Passive·사망 XP 수렴을 검증한다.

@@ -34,7 +34,12 @@ import {
 import { createEnemyObject } from "../combat/EnemyObject.js";
 import { ENEMY_LIFECYCLE_EVENT_TYPE, recordEnemyImpactTombstone } from "../combat/EnemyImpactTombstones.js";
 import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js";
-import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
+import {
+    PLATFORM_COLLISION_DAMAGE_EVENT_TYPE,
+    PLATFORM_COLLISION_DAMAGE_ID,
+    PLATFORM_COLLISION_DAMAGE_RESOLUTION,
+    platformCollisionDamageForImpactSpeed
+} from "../combat/PlatformCollisionDamage.js";
 import { ROPE_IMPACT_EVENT_TYPE, ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
 import { IMPACT_TARGET_KIND, ImpactTarget } from "../combat/ImpactTarget.js";
 import { createProjectileObject, HomingProjectileObject } from "../combat/ProjectileObject.js";
@@ -42,7 +47,7 @@ import { PROJECTILE_MOTION_KIND, PROJECTILE_TYPE } from "../combat/ProjectileDef
 import {
     COMBAT_CONFIG,
     COLLISION_BROAD_PHASE_CONFIG,
-    FALL_DAMAGE_CONFIG,
+    PLATFORM_COLLISION_DAMAGE_CONFIG,
     PLAYER_CONFIG,
     ROPE_CONFIG,
     AUGMENT_IMPACT_CONFIG,
@@ -2098,7 +2103,7 @@ export class GameSimulation {
         this.#prepareOwnerStep(player, dt);
         const wallImpactEvents = this.#advanceEnemyImpactKnockbacks(dt, { emitWallImpacts: true });
         this.#applyWorldForce(player, dt);
-        const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt, { replicateLandingImpacts: false });
+        const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt, { replicateSurfaceCollisionImpacts: false });
         const bossImpactEvents = this.#resolveBossHazardContacts({ players: [player], replicate: false });
         if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
         const ropeImpactOutcome = this.#advanceRopeImpactAttacks(player, { commit: false });
@@ -2121,7 +2126,7 @@ export class GameSimulation {
         return Object.freeze({
             projectile,
             ropeAugmentEvents: inputOutcome.ropeAugmentEvents,
-            fallImpactEvents: inputOutcome.fallImpactEvents,
+            platformCollisionImpactEvents: inputOutcome.platformCollisionImpactEvents,
             jammerImpactEvents: inputOutcome.jammerImpactEvents,
             bossImpactEvents,
             ropeImpactEvents: collisionExplosionEvents === null ? ropeImpactOutcome.impacts : Object.freeze([]),
@@ -2595,7 +2600,7 @@ export class GameSimulation {
         };
     }
 
-    dispatchOwnerInput(ownerId, command, dt, { replicateLandingImpacts = true } = {}) {
+    dispatchOwnerInput(ownerId, command, dt, { replicateSurfaceCollisionImpacts = true } = {}) {
         const player = this.#requirePlayer(ownerId);
         if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
         const collisionEnemies = this.#playerCollisionActors();
@@ -2604,7 +2609,7 @@ export class GameSimulation {
             ...this.players.filter((target) => target.id !== player.id && target.lifeState === "active")
         ];
         const ropeAugmentEvents = [];
-        const fallImpactEvents = [];
+        const platformCollisionImpactEvents = [];
         const augmentImpactEvents = [];
         const spellEvents = [];
         const jammerImpactEvents = [];
@@ -2698,11 +2703,11 @@ export class GameSimulation {
                 onFlash: (eventFlash) => {
                     this.eventFlash = { ...eventFlash, playerId: player.id };
                 },
-                onLanding: (landing) => {
-                    const event = this.#applyLandingImpact(player, landing, {
-                        replicate: replicateLandingImpacts
+                onSurfaceCollision: (collision) => {
+                    const event = this.#applySurfaceCollisionImpact(player, collision, {
+                        replicate: replicateSurfaceCollisionImpacts
                     });
-                    if (event) fallImpactEvents.push(event);
+                    if (event) platformCollisionImpactEvents.push(event);
                 }
             }
         });
@@ -2730,38 +2735,42 @@ export class GameSimulation {
         spellEvents.push(...augmentOutcome.presentationEvents);
         return Object.freeze({
             ropeAugmentEvents: Object.freeze(ropeAugmentEvents),
-            fallImpactEvents: Object.freeze(fallImpactEvents),
+            platformCollisionImpactEvents: Object.freeze(platformCollisionImpactEvents),
             jammerImpactEvents: Object.freeze(jammerImpactEvents),
             augmentImpactEvents: Object.freeze(augmentImpactEvents),
             spellEvents: Object.freeze(spellEvents)
         });
     }
 
-    #applyLandingImpact(player, landing, { replicate }) {
+    #applySurfaceCollisionImpact(player, collision, { replicate }) {
         if (player.lifeState !== "active") return null;
-        const damage = fallDamageForImpactSpeed(landing.impactSpeed, player.maxHealth, FALL_DAMAGE_CONFIG);
+        const damage = platformCollisionDamageForImpactSpeed(
+            collision.impactSpeed,
+            player.maxHealth,
+            PLATFORM_COLLISION_DAMAGE_CONFIG
+        );
         if (damage <= 0) return null;
         const position = Object.freeze({ x: player.physics.position.x, y: player.physics.position.y });
-        const impactId = `${player.id}:fall-damage:${this.tick}`;
+        const impactId = PLATFORM_COLLISION_DAMAGE_ID.forPlayerTick(player.id, this.tick);
         player.health = Math.max(0, player.health - damage);
-        this.metrics.recordPlayerImpact("fall-damage", damage);
+        this.metrics.recordPlayerImpact(PLATFORM_COLLISION_DAMAGE_RESOLUTION, damage);
         const respawned = player.health <= 0;
         const event = Object.freeze({
-            eventType: "player-fall-damaged",
-            resolution: "fall-damage",
+            eventType: PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.APPLIED,
+            resolution: PLATFORM_COLLISION_DAMAGE_RESOLUTION,
             impactId,
             clientTick: this.tick,
             targetId: player.id,
             playerId: player.id,
             position,
-            velocity: landing.impactVelocity,
-            impactSpeed: landing.impactSpeed,
+            velocity: collision.impactVelocity,
+            impactSpeed: collision.impactSpeed,
             damage,
             respawned
         });
         if (replicate) this.recordReplicationEvent(event.eventType, event);
-        this.eventFlash = { type: "fall-damage", age: 0, ...event };
-        if (respawned) this.respawnPlayerAtCheckpoint(player, "fall-damage", impactId);
+        this.eventFlash = { type: PLATFORM_COLLISION_DAMAGE_RESOLUTION, age: 0, ...event };
+        if (respawned) this.respawnPlayerAtCheckpoint(player, PLATFORM_COLLISION_DAMAGE_RESOLUTION, impactId);
         return event;
     }
 
@@ -4087,9 +4096,10 @@ export class GameSimulation {
                 : this.#validateHardpointJammerClaim(player, claim);
         if (!hardpointJammer.accepted) return hardpointJammer;
         const impactId = claim.impactId ?? claim.projectileId;
-        const isFallDamage = claim.impactType === PLAYER_IMPACT_TYPE.FALL_DAMAGE;
+        const isPlatformCollisionDamage = claim.impactType === PLAYER_IMPACT_TYPE.PLATFORM_COLLISION_DAMAGE;
         const isJammerShock = claim.impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK;
-        const projectile = isFallDamage || isJammerShock ? null : this.objects.enemyProjectiles.find(impactId);
+        const projectile =
+            isPlatformCollisionDamage || isJammerShock ? null : this.objects.enemyProjectiles.find(impactId);
         if (projectile && this.debugTrainingDummy.ownsProjectile(projectile)) {
             this.objects.enemyProjectiles.remove(projectile.id);
             this.recordProjectileResolution({
@@ -4107,17 +4117,21 @@ export class GameSimulation {
         if (projectile && claim.impactType === "rope-cut" && !projectile.canCutRope) {
             return Object.freeze({ accepted: false, reason: "rope-cut-disallowed" });
         }
-        const fallDamage = isFallDamage
-            ? fallDamageForImpactSpeed(Math.max(0, claim.velocity.y), player.maxHealth, FALL_DAMAGE_CONFIG)
+        const platformCollisionDamage = isPlatformCollisionDamage
+            ? platformCollisionDamageForImpactSpeed(
+                  Math.hypot(claim.velocity.x, claim.velocity.y),
+                  player.maxHealth,
+                  PLATFORM_COLLISION_DAMAGE_CONFIG
+              )
             : null;
-        if (isFallDamage && (fallDamage <= 0 || claim.damage !== fallDamage)) {
-            return Object.freeze({ accepted: false, reason: "fall-damage-mismatch" });
+        if (isPlatformCollisionDamage && (platformCollisionDamage <= 0 || claim.damage !== platformCollisionDamage)) {
+            return Object.freeze({ accepted: false, reason: "platform-collision-damage-mismatch" });
         }
         if (claim.outcome) {
             const damage =
                 bossHazard.damage ??
                 hardpointJammer.damage ??
-                (isFallDamage ? fallDamage : (projectile?.damage ?? claim.damage));
+                (isPlatformCollisionDamage ? platformCollisionDamage : (projectile?.damage ?? claim.damage));
             let bossContactApplied = false;
             if (claim.outcome.state) {
                 if (!allowRecoveryState) {
@@ -4174,7 +4188,8 @@ export class GameSimulation {
             }
             return this.#finalizeVictimImpact(player, claim, projectile, damage);
         }
-        if (isFallDamage || isJammerShock) return Object.freeze({ accepted: false, reason: "impact-outcome-required" });
+        if (isPlatformCollisionDamage || isJammerShock)
+            return Object.freeze({ accepted: false, reason: "impact-outcome-required" });
         if (!projectile) return Object.freeze({ accepted: false, reason: "projectile-missing" });
         if (projectile.targetId !== authenticatedPlayerId) {
             return Object.freeze({ accepted: false, reason: "target-mismatch" });
@@ -4262,7 +4277,7 @@ export class GameSimulation {
             player.ropeDisabledRemaining = this.ropeDisabledSeconds;
             return;
         }
-        if (claim.impactType === "fall-damage") {
+        if (claim.impactType === PLAYER_IMPACT_TYPE.PLATFORM_COLLISION_DAMAGE) {
             player.health = Math.max(0, player.health - damage);
             if (claim.outcome.respawned) this.#resetPlayerAtCheckpoint(player);
             return;
@@ -4335,20 +4350,20 @@ export class GameSimulation {
 
     #finalizeVictimImpact(player, claim, projectile, damage) {
         const impactId = claim.impactId ?? claim.projectileId;
-        if (claim.impactType === "fall-damage") {
-            this.recordReplicationEvent("player-fall-damaged", {
+        if (claim.impactType === PLAYER_IMPACT_TYPE.PLATFORM_COLLISION_DAMAGE) {
+            this.recordReplicationEvent(PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.APPLIED, {
                 impactId,
                 playerId: player.id,
                 targetId: player.id,
                 position: new Vector2(claim.position.x, claim.position.y),
                 velocity: new Vector2(claim.velocity.x, claim.velocity.y),
-                impactSpeed: Math.max(0, claim.velocity.y),
+                impactSpeed: Math.hypot(claim.velocity.x, claim.velocity.y),
                 damage,
                 respawned: claim.outcome.respawned
             });
             this.metrics.recordPlayerImpact(claim.impactType, damage);
             if (claim.outcome.respawned) {
-                this.#recordPlayerRespawn(player, "fall-damage", impactId, claim.position);
+                this.#recordPlayerRespawn(player, PLATFORM_COLLISION_DAMAGE_RESOLUTION, impactId, claim.position);
             }
             return Object.freeze({ accepted: true, resolution: claim.impactType, damage });
         }

@@ -25,7 +25,7 @@ export function createClientFeedbackEventRules() {
             CLIENT_FEEDBACK_EVENT.ARTILLERY_HIT_PARTICLE
         ),
         combat: rules(
-            CLIENT_FEEDBACK_EVENT.FALL_DAMAGE_COMBAT,
+            CLIENT_FEEDBACK_EVENT.PLATFORM_COLLISION_DAMAGE_COMBAT,
             CLIENT_FEEDBACK_EVENT.RESOLVE_COMBAT,
             CLIENT_FEEDBACK_EVENT.DIRECT_PLAYER_HIT_COMBAT
         ),

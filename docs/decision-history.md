@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-25 — 낙하 피해를 플랫폼 충돌 피해로 대체한다
+
+- 맥락: 여러 Stage 높이를 가로지른 고속 충돌에서 공중→접지 전이와 하강 Y 속도에 묶인 피해가 누락됐다.
+- 결정: authored collision surface와 새 충돌이 시작된 tick의 보정 전 2D 속력으로 플랫폼 충돌 피해를 한 번 계산하고 Stage 활성 상태와 분리한다.
+- 영향: player-impact protocol v16의 `platform-collision-damage`를 owner-first로 공유하며 카메라는 authored Shot 보간 뒤 실제 로컬 Player를 viewport 안에 clamp한다.
+- 대체: `FallDamage`의 공중→접지 전이와 충돌 전 하강 Y 속도 기준.
+- 검증 상태: 현재 계약은 `docs/architecture.md`와 `docs/multiplayer-synchronization.md`가 소유한다.
+
 ## [L1] 2026-08-25 — Boss06 V3 Recovery Arena와 고정 패턴 순서를 대체한다
 
 - 맥락: 좌우 하단 Recovery와 시각 벽·충돌 불일치가 보스 이동을 막았고, 좌표 clamp와 고정 패턴 순서가 플랫폼 확장을 상태별 예외 처리로 만들었다.

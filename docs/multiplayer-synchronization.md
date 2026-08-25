@@ -12,7 +12,7 @@
 | 자기 자동 발사와 플레이어 탄환 적중 | 공격자 클라이언트                  | 생성·적중 claim을 서버가 검증하고 고유 사건으로 공유                                    |
 | 적 탄환의 본체 피격·로프 절단       | 피해자 클라이언트                  | HP·넉백·절단·부활을 즉시 적용한 뒤 impact claim으로 공유                                |
 | 재밍 표면 부착·감전·로프 절단       | Rope 소유 클라이언트               | 부착 직후 `jammer-shock` 시작 claim 1회, 0.05초 피해 pulse는 공용 상태로 로컬·서버 진행 |
-| 고속 착지 피해                      | 착지한 소유 클라이언트             | 충돌 직전 하강 속도로 HP·치명 부활을 즉시 적용한 뒤 impact claim으로 공유               |
+| 고속 플랫폼 충돌 피해               | 충돌한 소유 클라이언트             | 충돌 직전 2D 속력으로 HP·치명 부활을 즉시 적용한 뒤 impact claim으로 공유                |
 | 로프 몸체 충돌의 적 피해            | 공격자 클라이언트                  | 로프 부착·최소 속도·새 접촉을 즉시 예측하고 `rope-impact` claim으로 서버 적 HP를 확정   |
 | 몹·적 투사체·공용 월드              | 서버                               | 서버 고정 틱에서 진행하고 스냅샷 또는 생성·해결 사건으로 공유                           |
 | Sector 개인 부활                    | 피해·낙사 플레이어 소유 클라이언트 | receipt 전 Sector entry로 즉시 부활하고 공용 진행은 유지                                |
@@ -59,9 +59,9 @@
 
 ### impact claim과 최종 수렴
 
-사용자 체감의 핵심은 **본체 피격·로프 절단·착지 피해의 최종 판정 주체가 피해 또는 소유 클라이언트**라는 점이다. 피해 클라이언트는 서버 응답 전에 HP·넉백·로프 절단·착지 피해·치명 시 부활을 적용한다. 정상 impact claim은 사건 자료와 적용 결과의 작은 상태 지문만 보내며 전체 소유자 상태를 반복 전송하지 않는다. 서버 receipt나 이후 snapshot은 이 결과를 복구하거나 소비한 탄환을 되살리지 않는다.
+사용자 체감의 핵심은 **본체 피격·로프 절단·플랫폼 충돌 피해의 최종 판정 주체가 피해 또는 소유 클라이언트**라는 점이다. 피해 클라이언트는 서버 응답 전에 HP·넉백·로프 절단·플랫폼 충돌 피해·치명 시 부활을 적용한다. 정상 impact claim은 사건 자료와 적용 결과의 작은 상태 지문만 보내며 전체 소유자 상태를 반복 전송하지 않는다. 서버 receipt나 이후 snapshot은 이 결과를 복구하거나 소비한 탄환을 되살리지 않는다.
 
-서버의 impact 검증은 피해 결과를 다시 판정하기 위한 권위 판정이 아니다. 인증된 연결, 메시지 형식과 impact ID 중복 여부를 확인한 뒤 공용 `GameSimulation`으로 같은 피해 전이를 적용하고 상태 지문을 비교한다. 적 탄환 impact는 서버 projectile, 착지 impact는 보고된 충돌 전 하강 속도와 공용 `FallDamage` 규칙을 사용한다. 지문이 같으면 전체 상태 없이 사건을 확정한다. 지문이 다르면 서버의 임시 전이를 되돌리고 같은 `impact-claim-receipt`에 `accepted: true`, `resolution: recovery-required`, 해당 impact·피해자 연결에 묶인 일회용 `recoveryId`를 보낸다. 피해 클라이언트는 응답 시점의 최신 소유자 상태, 그 상태를 만든 `stateTick`, 새 지문과 `recoveryId`를 한 번 전송한다. 서버는 실제로 발급해 보관 중인 challenge와 일치할 때만 전체 상태를 흡수하고, 상태와 플레이어별 `ownerMotionTick`·로프 tick을 같은 처리에서 갱신한다. challenge 없는 첫 claim이나 다른 impact ID로 전체 상태를 보내면 `recovery-not-requested`로 거부한다. 복구 요청은 피해 클라이언트를 서버 상태로 되감지 않는다.
+서버의 impact 검증은 피해 결과를 다시 판정하기 위한 권위 판정이 아니다. 인증된 연결, 메시지 형식과 impact ID 중복 여부를 확인한 뒤 공용 `GameSimulation`으로 같은 피해 전이를 적용하고 상태 지문을 비교한다. 적 탄환 impact는 서버 projectile, 플랫폼 충돌 impact는 보고된 충돌 보정 전 2D 속력과 공용 `PlatformCollisionDamage` 규칙을 사용한다. 지문이 같으면 전체 상태 없이 사건을 확정한다. 지문이 다르면 서버의 임시 전이를 되돌리고 같은 `impact-claim-receipt`에 `accepted: true`, `resolution: recovery-required`, 해당 impact·피해자 연결에 묶인 일회용 `recoveryId`를 보낸다. 피해 클라이언트는 응답 시점의 최신 소유자 상태, 그 상태를 만든 `stateTick`, 새 지문과 `recoveryId`를 한 번 전송한다. 서버는 실제로 발급해 보관 중인 challenge와 일치할 때만 전체 상태를 흡수하고, 상태와 플레이어별 `ownerMotionTick`·로프 tick을 같은 처리에서 갱신한다. challenge 없는 첫 claim이나 다른 impact ID로 전체 상태를 보내면 `recovery-not-requested`로 거부한다. 복구 요청은 피해 클라이언트를 서버 상태로 되감지 않는다.
 
 상태가 크게 벌어졌을 때 수렴 기준은 상태 소유권에 따라 다르다.
 
@@ -72,7 +72,7 @@
 | 몹·적 투사체·공용 월드         | 서버 상태                                   | 서버 스냅샷과 생성·해결 사건을 적용하고 연속 위치만 보간·제한 외삽                                                                                |
 | 최초 입장·재접속               | 서버가 보존한 최신 공유 상태                | 전체 소유자 상태를 한 번 복원한 뒤 다시 클라이언트 우선 시뮬레이션 시작                                                                           |
 
-현재 player-impact 프로토콜 v15는 impact ID, client tick, 충돌 자료, 관측 피해, 부활 여부와 공통 상태이상·Spell·Experience를 포함한 상태 지문을 운반한다. 피격 후 무적 타이머는 recovery state와 지문에 포함하지 않는다. augment-impact v5의 성공 결과도 `applied`, `shield-blocked`, `target-already-dead`만 허용하고 시간 기반 무적으로 후속 피해를 `duplicate` 처리하지 않는다. `jammer-shock`은 owner-motion v11의 Rope attachment와 감전 Pool 상태를 검증한다. 결과 지문이 다를 때만 최신 피해자 상태를 한 번 요청한다.
+현재 player-impact 프로토콜 v16은 impact ID, client tick, 충돌 자료, 관측 피해, 부활 여부와 공통 상태이상·Spell·Experience를 포함한 상태 지문을 운반한다. 피격 후 무적 타이머는 recovery state와 지문에 포함하지 않는다. augment-impact v5의 성공 결과도 `applied`, `shield-blocked`, `target-already-dead`만 허용하고 시간 기반 무적으로 후속 피해를 `duplicate` 처리하지 않는다. `jammer-shock`은 owner-motion v11의 Rope attachment와 감전 Pool 상태를 검증한다. 결과 지문이 다를 때만 최신 피해자 상태를 한 번 요청한다.
 
 상태 지문은 raw 플레이어 객체 전체의 정확 일치 해시가 아니다. impact가 소유하는 지속 결과만 결정적 순서로 투영하고, 위치·속도·로프 기하는 0.1 단위, 남은 수명 타이머는 1/120초 tick, 체력·무기 수치는 0.001 단위로 양자화한 뒤 비암호학적 64비트 FNV-1a를 계산한다. 일반 본체 피격은 HP·속도·생명 상태, 로프 절단은 부착 여부·재부착 제한, 치명 피격은 여기에 체크포인트 위치·로프·무기·generic Augment 순간 상태를 포함한다. 입력 포인터·렌더 상태와 다른 동기화 경계가 소유한 값은 제외한다. 이 지문은 불일치 감지용이며 인증이나 치트 방지 증거가 아니다.
 
@@ -86,7 +86,7 @@
 
 몹·적 투사체 생성과 궤적처럼 특정 클라이언트에 귀속할 수 없는 중립 시뮬레이션 사건은 서버가 진행한다. 중립 사건을 안정적인 플레이어 ID의 대표 클라이언트에게 위임하지 않으며, 참가자 퇴장과 무관하게 같은 월드 상태를 유지한다.
 
-현재 플레이어 당사자 경로의 전환이 끝난 범위는 자기 이동·로프·로프 몸체 공격 충돌·자기 피격·로프 절단·착지 피해·낙사·체크포인트 도달·generic Augment 선택·정상 도달이다. 적 발사 생성과 적 투사체 궤적은 중립 서버 소유 경로로 확정한다.
+현재 플레이어 당사자 경로의 전환이 끝난 범위는 자기 이동·로프·로프 몸체 공격 충돌·자기 피격·로프 절단·플랫폼 충돌 피해·낙사·체크포인트 도달·generic Augment 선택·정상 도달이다. 적 발사 생성과 적 투사체 궤적은 중립 서버 소유 경로로 확정한다.
 
 싱글과 협동은 모두 하나의 **권위 시뮬레이션**을 사용한다.
 
@@ -277,7 +277,7 @@ Hardpoint Jammer는 서버가 Jam target/phase를 진행하지만 실제 부착�
 
 서버는 인증된 연결과 결정적 projectile ID 중복을 검사하고 같은 `GameSimulation` impact 전이를 임시 적용한다. 결과 지문이 같으면 resolve 사건을 한 번 확정하고 동료에게 공유한다. 다르면 임시 전이를 되돌린 뒤 `accepted: true`, `resolution: recovery-required`와 일회용 `recoveryId`를 보내며, 클라이언트는 그 응답을 받은 시점의 최신 소유자 상태·`stateTick`·새 지문을 한 번 보낸다. 서버는 발급 대기 중인 challenge, 피해자 ID, 단조 tick과 전체 복구 스키마가 모두 맞을 때만 이 상태를 흡수하고 challenge를 소비한 뒤 사건을 확정한다. 복구 대기는 유실된 응답이 세션 메모리에 무한히 남지 않도록 10초 뒤 정리한다. 탄환이 아직 서버에 있으면 서버 탄환 대미지를 사건 기록에 사용하고 제거하며, 이미 만료됐으면 claim의 관측 대미지를 사용한다. 서버 위치·server tick·기존 target ID 차이는 피해자 결과를 취소하는 gameplay 거부 조건이 아니다. 서로 다른 유효 impact는 시간 간격과 관계없이 각각 적용하고, 동일 projectile/contact/event ID의 재전송만 수명주기별 dedupe가 한 번으로 제한한다. 소비한 적 탄환을 다시 표시하거나 같은 충돌을 반복하지 않는다. 중간 입장과 재연결 welcome에는 아직 살아 있는 예측 객체의 원래 생성 이벤트를 같은 이벤트 ID로 다시 제공해 생성 tick부터 복원한다.
 
-착지 피해는 소유 클라이언트의 `PlayerPhysics`가 공중→접지 전이에서 충돌 보정 전 하강 속도를 보존하고 같은 스텝의 `GameSimulation`이 HP·치명 부활·피드백을 먼저 적용한다. 최신 착지 후 `owner-motion` 다음 `fall-damage` impact claim은 impact ID, client tick, 착지 위치·충돌 전 속도, 계산 피해, 부활 여부와 결과 지문만 보낸다. 서버는 같은 `FallDamage` 규칙으로 피해를 다시 계산하고 다른 피해량을 거부하며, 정상 지문이 다를 때만 기존 impact recovery challenge를 사용한다. 승인 receipt와 snapshot은 소유자의 착지 HP나 부활을 되감지 않는다.
+플랫폼 충돌 피해는 소유 클라이언트의 `PlayerPhysics`가 authored collision surface와 새 충돌이 시작된 tick의 보정 전 2D 속도 벡터를 보존하고 같은 스텝의 `GameSimulation`이 HP·치명 부활·피드백을 먼저 적용한다. 같은 접촉을 유지하는 tick은 새 사건을 만들지 않는다. 충돌 후 `owner-motion` 다음 `platform-collision-damage` impact claim은 impact ID, client tick, 충돌 위치·보정 전 속도, 계산 피해, 부활 여부와 결과 지문만 보낸다. 서버는 같은 `PlatformCollisionDamage` 규칙과 벡터 크기로 피해를 다시 계산하고 다른 피해량을 거부하며, 정상 지문이 다를 때만 기존 impact recovery challenge를 사용한다. 승인 receipt와 snapshot은 소유자의 충돌 HP나 부활을 되감지 않는다.
 
 v9는 측정된 대역폭의 대부분을 차지하던 authored enemy의 정적 필드를 제거하고 `worldRevision + objectId`로 복원한다. 플레이어·enemy 동적 상태는 아직 20Hz 전체 목록으로 보내며 delta나 관심 영역은 사용하지 않는다. 이후 메시지 크기나 head-of-line 지연이 다시 문제가 되면 동일한 논리 계약을 유지한 채 동적 delta·관심 영역 또는 채널 전환을 검토한다.
 

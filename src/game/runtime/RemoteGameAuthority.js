@@ -9,6 +9,7 @@ import {
     createPlayerImpactClaimFromEvent,
     createPlayerImpactStateDigest,
     PLAYER_IMPACT_SOURCE_KIND,
+    PLAYER_IMPACT_TYPE,
     serializePlayerImpactClaim
 } from "../network/PlayerImpactClaim.js";
 import {
@@ -26,6 +27,7 @@ import { createGameSimulationForWorldRevision } from "../simulation/GameSimulati
 import { routeServerMessage } from "./RemoteServerMessageRouter.js";
 import { ClientServerTickProjection } from "./ClientServerTickProjection.js";
 import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
+import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "../combat/PlatformCollisionDamage.js";
 import {
     createPartyChatMessage,
     createPartyChatSubmission,
@@ -79,8 +81,8 @@ export class RemoteGameAuthority {
         this.locallyPredictedRopeImpactIds = new Set();
         this.locallyPredictedRopeImpactOrder = [];
         this.predictedRopeImpactResolutions = new Map();
-        this.locallyPredictedFallImpactIds = new Set();
-        this.locallyPredictedFallImpactOrder = [];
+        this.locallyPredictedPlatformCollisionImpactIds = new Set();
+        this.locallyPredictedPlatformCollisionImpactOrder = [];
         this.pendingImpactClaims = new Map();
         this.checkpointClaimReceipts = [];
         this.debugTeleportReceipts = [];
@@ -337,22 +339,24 @@ export class RemoteGameAuthority {
         return this.submitImpactClaim(event, outcome);
     }
 
-    submitPredictedFallImpact(event) {
+    submitPredictedPlatformCollisionImpact(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
         if (!this.submitOwnerMotion()) return false;
         const state = this.ownerRuntime.impactClaimState();
         const outcome = {
             respawned: event.respawned,
             digest: createPlayerImpactStateDigest(state, {
-                impactType: "fall-damage",
+                impactType: PLAYER_IMPACT_TYPE.PLATFORM_COLLISION_DAMAGE,
                 respawned: event.respawned
             })
         };
         this.pendingImpactClaims.set(event.impactId, { event, outcome });
-        this.locallyPredictedFallImpactIds.add(event.impactId);
-        this.locallyPredictedFallImpactOrder.push(event.impactId);
-        while (this.locallyPredictedFallImpactOrder.length > MAX_TRACKED_COMMANDS) {
-            this.locallyPredictedFallImpactIds.delete(this.locallyPredictedFallImpactOrder.shift());
+        this.locallyPredictedPlatformCollisionImpactIds.add(event.impactId);
+        this.locallyPredictedPlatformCollisionImpactOrder.push(event.impactId);
+        while (this.locallyPredictedPlatformCollisionImpactOrder.length > MAX_TRACKED_COMMANDS) {
+            this.locallyPredictedPlatformCollisionImpactIds.delete(
+                this.locallyPredictedPlatformCollisionImpactOrder.shift()
+            );
         }
         return this.submitImpactClaim(event, outcome);
     }
@@ -722,9 +726,9 @@ export class RemoteGameAuthority {
         return Object.freeze(
             this.buffer.drainEvents().filter((event) => {
                 if (
-                    event.eventType === "player-fall-damaged" &&
+                    event.eventType === PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.APPLIED &&
                     event.impactId &&
-                    this.locallyPredictedFallImpactIds.delete(event.impactId)
+                    this.locallyPredictedPlatformCollisionImpactIds.delete(event.impactId)
                 ) {
                     return false;
                 }
