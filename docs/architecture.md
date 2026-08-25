@@ -238,7 +238,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - `createAuthoredSeamlessSectorRuntimeWorld()`가 Sector 01~~06의 generated Stage 48개를 authored bounds 그대로 맞닿는 48 landmark와 개별 Player portal 47개로 조립한다. 1-8·2-8·3-8·4-8·5-8 portal은 다음 Sector Entry로 직접 이동하고, 6-8은 terminal Boss06 전환을 소유한다.
 - `GameSimulation`이 Sector objective·route·content boundary와 플레이어별 진행 상태를 권위 상태로 보존한다.
 - 사망 재개는 월드와 공용 진행을 유지한 채 사망 Player 자신의 `respawnAnchorId`로 복귀한다. 각 anchor는 `StageSavePointGeometry`가 계산한 `triggerBounds`와 `level/radius/label` 표현 metadata를 포함하고 polygon·pixel renderer가 같은 최외곽 bounds 안에 `STAGE SAVE` 구조물을 그린다. player circle과 trigger가 겹치면 공용 `landmark-entered`와 별도로 해당 Player 체크포인트만 갱신하고, 저장 지표·cue·`stage-saved` 안내도 당사자에게 한 번 만든다. 전원 사망도 공용 진행을 초기화하지 않는다.
-- 몹 막타 경험치는 Player별 `PlayerExperienceState`에 한 번 귀속된다. 레벨업마다 개인 Augment 보상 선택을 열고 선택 중인 Player의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
+- 모든 Enemy는 `EnemyDamageAttribution`을 Has-A로 소유하고 권위 시뮬레이션이 마지막으로 승인한 양수 Player 피해의 `sourcePlayerId`를 기억한다. 이후 밀치기·낙하·환경 피해로 죽어도 해당 Player의 `PlayerExperienceState`에 경험치를 한 번 지급한다. 피해 귀속은 완전 회복 또는 Encounter reset에서만 초기화하며 Player 피해 이력이 없는 Enemy의 비Player 원인 사망은 경험치를 지급하지 않는다. 레벨업마다 개인 Augment 보상 선택을 열고 선택 중인 Player의 gameplay 명령만 중립화하며 공용 월드·전투·동료는 계속 진행한다.
 - Augment 선택 피드백은 `eventFlash`의 일시 이벤트로 렌더러에 전달하며, 영구 선택 상태와 분리한다.
 - 정적 Sector surface, 독립 objective, Player별 savepoint respawn, 전원 사망 진행 보존과 마지막 content boundary는 관련 validator와 실제 브라우저·멀티플레이 smoke에서 확인한다.
 - `RunMetrics`는 렌더러나 입력 장치가 아니라 `GameSimulation`의 실제 이벤트에서만 증가한다. 기본 Runtime은 `landmarkTiming`으로 현재 landmark 체류와 route 진행 시간을 기록한다.
@@ -249,6 +249,7 @@ InputSampler → 불변 입력 프레임 → InputDispatcher
 - Augment offer는 플레이어별 선택·pending entitlement·consumed source 상태만 소유하며 `GameSimulation`의 시간·전투를 멈추지 않는다. 첫 메테오·기동 증폭 뒤에는 미획득 24장 Catalog에서 최대 3장을 결정적으로 제시하고 선택 중인 플레이어의 메뉴 입력만 중립 게임 명령으로 치환한다.
 - 보상 Canvas 오버레이는 반투명 배경과 실시간 전투 경고를 사용해 선택 카드와 진행 중인 위험을 동시에 보여준다.
 - `AugmentRewardSelection`은 경험치 레벨업 보상의 카드 이동·Confirm·진입 Input Gate를 소유한다. 첫 레벨은 메테오, 두 번째는 기동 증폭을 해금하고 이후 미획득 Rope 패시브를 제시한다.
+- 이미 획득한 Augment 때문에 경험치 보상 후보가 0개면 빈 선택 UI를 만들지 않고 해당 보상 단계를 해결한 뒤 다음 유효 보상을 찾는다. 멀티 예측 보상 거부는 receipt의 source, 실제 마지막 선택과 결정적 보상 후보가 모두 일치할 때만 직전 Augment 제거·경험치 해결 단계 복원·동일 보상 재개를 한 transaction으로 적용한다.
 - `AugmentLoadoutState`는 Rope·Passive와 해금된 Spell ID를 소유한다. Spell은 역할 슬롯을 교체하고 획득 이력은 유지한다. 과거 Foundation·Action·Signature·Modifier snapshot은 변환하지 않고 버전 전환 시 초기화한다.
 - `augment-selection` claim은 열린 개인 경험치 보상과 후보를 검증하고 선택한 Spell을 역할 슬롯에 자동 장착하거나 Rope 패시브를 추가한다. 별도 장착 UI와 authored Node 소비 상태는 없다.
 - 고정 HUD는 local Player의 좌표 기반 Stage·HP를 표시하고, 화면 하단 중앙은 네 Spell 슬롯·커맨드·독립 쿨다운과 경험치 진행을 표시한다. 잠긴 슬롯도 같은 위치에 잠김으로 남는다. HUD 토글은 표현 상태이며 gameplay command나 network snapshot에 넣지 않는다.

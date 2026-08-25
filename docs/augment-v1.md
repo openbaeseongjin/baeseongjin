@@ -46,8 +46,10 @@
 
 ## 경험치와 사망
 
-- Enemy XP는 군집 10, 경계·순찰·추격 25, 방패·지원 30, 포격·재머 35를 유지하고 막타 Player에게 귀속한다.
+- Enemy XP는 군집 10, 경계·순찰·추격 25, 방패·지원 30, 포격·재머 35를 유지한다. 마지막으로 양수 피해를 준 Player의 귀속은 완전 회복 또는 Encounter reset까지 유지되므로 이후 밀치기·낙하·환경 피해로 죽어도 해당 Player가 경험치를 받는다. Player 피해 이력이 없으면 비Player 원인 사망은 경험치를 지급하지 않는다.
+- 현재 Runtime은 지상 보행형 Enemy와 Enemy 전용 낙하·착지 피해를 아직 만들지 않는다. `EnemyDamageAttribution`은 후속 중립·환경 피해가 Enemy를 사망시킬 때 기존 Player 귀속을 보존하는 경계다.
 - 요구 XP는 `roundToStep(50 × 1.2^(level - 1), 5)`이며 총 XP는 최대 보상 레벨 누적 요구량에서 고정한다.
+- 미획득 후보가 없으면 빈 보상 화면을 열지 않고 해당 레벨을 해결한다. 예측 선택 거부는 source·마지막 선택·결정적 후보가 모두 일치할 때만 선택과 해결 레벨을 함께 되돌리고 같은 보상을 다시 연다.
 - 실제 사망은 `roundToStep(requirementForLevel(min(currentLevel + 1, maximumRewardLevel)) × 0.5, 5)`를 잃는다. 포털·Boss 승리 재배치는 제외한다.
 - 현재 레벨은 내려가도 선택 Augment와 `resolvedRewardLevel`은 유지하므로 이미 보상받은 레벨 재달성은 선택 화면을 열지 않는다.
 

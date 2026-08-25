@@ -3,19 +3,19 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: c0688561cb4a2148436eedac3fc923b41c54e39a126c0669e72d12b95beadf69
+scenario-source-sha256: a146f73b4acc123c295c2343d7b081a43b83bfda2931d9ff8f1274f0d8db48bf
 authored-area-sha256: 92635c93c5d27c073e620ecc6aee566a0b697d19e87b600b72f2388d74238adc
 authored-sector-sha256: 9a896e7dc3ea516853888afb5245194daf7ab607644e4d0ae665b60e02837bec
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 8e09d7557dde27ffcb58e9a7d27ad66ddfea525c
+reviewed-upstream: 9173cd1bb18aa4c6a3acf839bde020f193d5fbfa
 -->
 
 ## 현재 확인 체크포인트
 
 - Sector 01~06의 48개 canonical `AREA-SPEC.v2.json`은 generated Stage/catalog를 거쳐 authored Stage 48개와 개별 Player portal 47개로 compile된다. Runtime derived geometry와 scenario-only Stage는 0개다.
 - Enemy slot은 1-1·1-2만 도입부 예외로 두고 1-3 이후 최소 3개를 보장한다. Sector 01~02는 최소 3개, 03~04는 최소 4개, 05~06은 최소 5개이며 exact Stage 예산은 `enemy-density-composition.md`가 소유한다.
-- 0.67.0은 기존 연속 Stage portal을 유지하고 1-4·2-3·3-5의 authored Augment Node와 선택 prerequisite만 제거했다. 증강은 Enemy 막타 XP 레벨업이 소유한다.
+- 0.67.0은 기존 연속 Stage portal을 유지하고 1-4·2-3·3-5의 authored Augment Node와 선택 prerequisite만 제거했다. 증강은 마지막으로 확정한 양수 Player 피해 귀속 XP 레벨업이 소유한다.
 - Player별 Stage Save·Gate 이동과 공용 objective를 유지한다. Access 조건은 portal 사용 가능 여부만 바꾸며 barrier collision이나 영구 Stage cursor를 만들지 않는다.
 - Sector 05 Hardpoint Jammer는 Enemy 슬롯에서 field group을 자동 파생하고 일반 Hook-reachable surface를 선택한다. active target 부착은 owner-first Rope 절단과 단일 Electrified 상태를 시작한다.
 - 아직 확인하지 못한 범위는 전체 desktop/mobile 등반, 실제 두 기기 장시간 멀티플레이와 Boss06 full combat 체감이다.
@@ -31,6 +31,7 @@ reviewed-upstream: 8e09d7557dde27ffcb58e9a7d27ad66ddfea525c
 
 ## 최근 반영된 시나리오 변화
 
+- Stage의 authored geometry·objective·Enemy slot은 바꾸지 않고 증강 획득 설명을 현재 전투 계약에 맞췄다. Enemy XP는 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존하며, 이후 환경 원인 사망에도 해당 Player에게 한 번 귀속한다.
 - 48개 canonical Stage의 Enemy slot을 86개에서 189개로 늘렸다. Entry·Exit·Story·Safe 지점은 피하고 기존 route와 Stage-local activation band에 분산했으며 Swarm은 추가 pool에서 제외했다. production map parity가 1-3 이후 Sector별 최소 밀도를 검사한다.
 - Boss06 V3 candidate는 V2 평면 Security Court를 3920px Main·좌/중/우 Ledge·U1~~U10·좌우 Recovery·220px Victory Bridge로 교체했다. Warden은 authored landing point로 점프하고 정점에서 5발 fan 유도미사일을 생성하며, 별도 패턴은 이동형 공격 Enemy를 `2마리 / 최소 15초 / live 6 skip`으로 서버에 등록한다. Boss source와 generated module은 Map Editor Apply 한 transaction으로 갱신했으며 validator/parity는 통과했고 실제 desktop/mobile·1~~4인 Gameplay View는 아직 열린 검증이다.
 - Sector 01~06의 Gate/Exit Panel 73개를 전수 감사해 이미 정확한 62개는 유지하고, 2-5 보조 Gate·Sector 04 Exit Panel 7개·5-7 Gate/Panel·6-8 Panel의 11개 `bottom-center`를 실제 collision surface top에 맞췄다. Resident Override A/B/C와 Service Relay B-03은 Gate Panel이 아닌 벽 장착 `terminal` 정체성으로 분리해 pedestal sprite가 공중에 표시되지 않게 했다. surface geometry·objective·interaction·portal·network 계약은 변경하지 않았으며 production map parity가 이 접지와 정체성 불변식을 검사한다.

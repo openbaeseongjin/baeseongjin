@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-25 — Enemy XP를 마지막 체력 제거 Player에게만 귀속한다
+
+- 맥락: 경험치 성장 도입 시 투사체·Rope·Spell의 치명타 사건에서 보상 Player를 즉시 정하는 단순 계약이 필요했다.
+- 결정: Enemy의 마지막 체력을 제거한 Player ID만 임시 필드에 기록하고 해당 처치에서 경험치를 한 번 지급한다.
+- 영향: Player가 먼저 피해를 주고 밀치기·낙하·환경 피해가 마지막 체력을 제거하면 귀속이 사라지며, 피해 source 기록과 처치 metrics가 공격 경로마다 중복됐다.
+- 대체: 마지막으로 승인된 양수 Player 피해 source를 `EnemyDamageAttribution`이 소유한다. 완전 회복·Encounter reset 전에는 이후 비Player 원인 사망도 해당 Player에게 귀속하고 처치 metrics와 XP는 Enemy 제거 경계에서 한 번 확정한다.
+- 검증 상태: 실제 `GameSimulation` 진단과 멀티 전투 시뮬레이션에서 환경사망 귀속·완전 회복 초기화·단일 metrics·보상 rollback을 확인한다.
+
 ## [L1] 2026-08-24 — Boss03을 제거하고 Sector03→04를 직접 연결한다
 
 - 맥락: Boss03의 임시 Scanner·Arm Runtime이 3-8과 4-1 사이의 이미 authored된 수직 portal을 점유해, 별도 보스 콘텐츠 유지 비용과 Sector 연결을 함께 막고 있었다.

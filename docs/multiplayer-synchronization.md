@@ -203,7 +203,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 
 현재 저작 시나리오는 영구 Stage cursor나 summit claim을 사용하지 않는다. 서버와 owner prediction의 같은 `GameSimulation`은 authored Gate objective·trigger를 통과한 Player 한 명에게 `gate-portal-entered`를 만들고 다음 authored Entry로 즉시 이동한다. Player별 savepoint 충돌은 owner-first claim으로 수렴한다. 3-8·4-8·5-8은 각각 4-1·5-1·6-1 Entry로 직접 이동하고 6-8은 terminal Boss06 entry만 연다.
 
-서버가 중립 Enemy의 막타를 확정하면 해당 Player에게 Enemy definition의 XP를 한 번 지급한다. 레벨 도달 시 서버와 owner가 같은 seed·Player ID·reward level로 offer를 계산하고, owner가 즉시 선택한 `augment-selection` claim을 서버가 공식 offer membership으로 검증한다. Node source·`augment-offer` claim·공용 objective는 없다.
+서버는 중립 Enemy에 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존한다. 이후 환경 원인으로 죽어도 해당 Player에게 Enemy definition의 XP를 한 번 지급한다. 레벨 도달 시 서버와 owner가 같은 seed·Player ID·reward level로 offer를 계산하고, owner가 즉시 선택한 `augment-selection` claim을 서버가 공식 offer membership으로 검증한다. Node source·`augment-offer` claim·공용 objective는 없다.
 
 해제 추진·감전 로프 같은 Rope Augment 효과와 Spell은 소유 클라이언트가 즉시 적용하고 `owner-motion`, `augment-impact`와 snapshot으로 공유한다.
 
@@ -382,7 +382,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 ## 증강 선택·피해 동기화
 
 - offer는 owner와 서버가 `runSeed + stablePlayerId + rewardLevel`로 독립 재계산하고 snapshot의 pending XP reward를 보존한다.
-- Rope·Spell의 Enemy·Boss 적중은 공격 owner가 먼저 시뮬레이션하고 서버가 확정한다. 다른 Player 피격은 피해 Player가 먼저 적용해 claim하며, 막타 XP는 서버 확정 결과에서 한 번 귀속한다.
+- Rope·Spell의 Enemy·Boss 적중은 공격 owner가 먼저 시뮬레이션하고 서버가 확정한다. 다른 Player 피격은 피해 Player가 먼저 적용해 claim한다. 서버 Enemy는 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존하고, 이후 비Player 원인 사망에도 해당 Player XP를 한 번 귀속한다.
 - 피해 클라이언트의 `IncomingSpellImpactDetector`는 owner-motion v11에 복제된 원격 Spell projectile·이동 aura·단발 area의 이전·현재 형상을 검사한다. 피해·상태이상·외부 Impulse를 로컬 `GameSimulation`에 먼저 적용하고 인증된 피해 Player가 Augment impact v5 claim을 보낸다. 서버는 원인 Spell definition과 source Player loadout을 검증하며 같은 Spell 객체 ID와 대상 ID로 만든 event ID는 한 번만 확정하고 상태 pulse는 전송하지 않는다.
 - `augment-impact`는 event ID, tick, source/target/effect, 접촉 위치, 공식 damage와 선택적 movement intent만 보낸다. 서버는 source card 보유와 수치 공식을 다시 계산한다.
 - live enemy는 `blocksImpactFrom`을 먼저 호출하고, lethal event의 own knockback을 적용하지 않는다. Boss displacement 면역은 public reaction에서 처리한다.

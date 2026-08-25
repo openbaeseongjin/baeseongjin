@@ -2454,22 +2454,13 @@ export class GameSimulation {
         }
         const combatEvents = playerProjectileEvents.hits;
         for (const event of combatEvents) {
-            if (event.type !== "enemy-defeated") continue;
             const enemy = this.objects.enemies.find(event.targetId);
-            if (enemy) enemy.defeatedByPlayerId = event.sourcePlayerId;
+            if (enemy && event.damage > 0) enemy.recordPlayerDamage(event.sourcePlayerId, event.damage);
         }
         const hitByProjectileId = new Map(combatEvents.map((event) => [event.projectileId, event]));
         for (const resolution of playerProjectileEvents.resolutions) {
             this.recordProjectileResolution(resolution, hitByProjectileId.get(resolution.projectileId));
         }
-        this.metrics.recordEnemyOutcomes({
-            ...playerProjectileEvents,
-            hits: playerProjectileEvents.hits.filter(
-                (event) =>
-                    this.objects.enemies.find(event.targetId) !== null &&
-                    !this.debugTrainingDummy.matches(event.targetId)
-            )
-        });
         this.#removeDefeatedEnemies();
         if (recoverPlayerDeaths) {
             for (const player of this.players) {
@@ -2820,11 +2811,8 @@ export class GameSimulation {
             return Object.freeze({ accepted: false, reason: "shield-blocked" });
         }
         if (!result.accepted || !result.emitEffects) return result;
+        if (target && result.damage > 0) target.recordPlayerDamage(event.sourcePlayerId, result.damage);
         const resolution = result.resolution;
-        if (resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(event.targetId)) {
-            this.metrics.enemyDefeats += 1;
-            if (target) target.defeatedByPlayerId = event.sourcePlayerId;
-        }
         this.recordReplicationEvent("resolve", {
             objectId: event.predictionId,
             resolution,
@@ -3125,12 +3113,9 @@ export class GameSimulation {
             target.knockbackState.wallImpactTriggered = false;
         }
         if (!result.accepted || !result.emitEffects) return result;
+        if (target && result.damage > 0) target.recordPlayerDamage(authenticatedPlayerId, result.damage);
         const statusEffectId = SPELL_STATUS_EFFECT[claim.effectId] ?? null;
         if (statusEffectId && target) target.statusEffects.apply(statusEffectId, { sourceId: authenticatedPlayerId });
-        if (result.resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(claim.targetId)) {
-            this.metrics.enemyDefeats += 1;
-            if (target) target.defeatedByPlayerId = authenticatedPlayerId;
-        }
         if (replicate)
             this.recordReplicationEvent("resolve", {
                 objectId: claim.predictionId,
@@ -3259,7 +3244,7 @@ export class GameSimulation {
             for (const outcome of enemy.statusEffects.advance(dt)) {
                 if (outcome.type !== "damage" || outcome.damage <= 0) continue;
                 enemy.health = Math.max(0, enemy.health - outcome.damage);
-                if (enemy.health <= 0) enemy.defeatedByPlayerId = outcome.sourceId;
+                if (this.#findPlayer(outcome.sourceId)) enemy.recordPlayerDamage(outcome.sourceId, outcome.damage);
             }
         }
     }
@@ -3398,17 +3383,21 @@ export class GameSimulation {
 
     #openPendingExperienceRewards() {
         for (const player of this.players) {
-            if (player.experience.pendingRewardCount <= 0 || this.augmentRewards.has(player.id)) continue;
-            const rewardLevel = player.experience.resolvedRewardLevel + 1;
-            this.augmentRewards.set(
-                player.id,
-                createExperienceAugmentRewardSelection({
+            if (this.augmentRewards.has(player.id)) continue;
+            while (player.experience.pendingRewardCount > 0) {
+                const rewardLevel = player.experience.resolvedRewardLevel + 1;
+                const reward = createExperienceAugmentRewardSelection({
                     runSeed: this.world.seed,
                     stablePlayerId: player.id,
                     rewardLevel,
                     selectedAugmentIds: player.augmentLoadout.selectedAugmentIds
-                })
-            );
+                });
+                if (reward) {
+                    this.augmentRewards.set(player.id, reward);
+                    break;
+                }
+                if (!player.experience.resolveNextReward()) break;
+            }
         }
     }
 
@@ -3665,9 +3654,23 @@ export class GameSimulation {
 
     clearAugmentSelection(playerId, sourceId = null, augmentId = null) {
         const player = this.#requirePlayer(playerId);
-        if (augmentId) player.augmentLoadout.deselect(augmentId);
+        const rewardLevel = player.experience.resolvedRewardLevel;
+        const resolvedSourceId = EXPERIENCE_REWARD_KEY.source(player.id, rewardLevel);
+        const selectedAugmentIds = player.augmentLoadout.selectedAugmentIds;
+        if (!augmentId || sourceId !== resolvedSourceId || selectedAugmentIds.at(-1) !== augmentId) {
+            return this.playerState(playerId);
+        }
+        const restoredReward = createExperienceAugmentRewardSelection({
+            runSeed: this.world.seed,
+            stablePlayerId: player.id,
+            rewardLevel,
+            selectedAugmentIds: selectedAugmentIds.slice(0, -1)
+        });
+        if (!restoredReward?.choices.some(({ id }) => id === augmentId)) return this.playerState(playerId);
+        player.augmentLoadout.deselect(augmentId);
         player.augmentCombat.syncLoadout(player.augmentLoadout, player.maxHealth);
         player.experience.rejectLatestReward();
+        this.augmentRewards.set(playerId, restoredReward);
         return this.playerState(playerId);
     }
 
@@ -3829,15 +3832,12 @@ export class GameSimulation {
         const damage = projectile?.damage ?? COMBAT_CONFIG.weaponDamage;
         if (projectile) this.objects.playerProjectiles.remove(projectile.id);
         target.health = Math.max(0, target.health - damage);
+        target.recordPlayerDamage(authenticatedPlayerId, damage);
         const resolution = target.health <= 0 ? "enemy-defeated" : "enemy-hit";
         this.recordProjectileResolution(
             { projectileId: projectile?.id ?? claim.predictionId, resolution, position: target.position },
             { damage, sourcePlayerId: authenticatedPlayerId, targetId: claim.targetId }
         );
-        if (resolution === "enemy-defeated" && !this.debugTrainingDummy.matches(claim.targetId)) {
-            this.metrics.enemyDefeats += 1;
-            target.defeatedByPlayerId = authenticatedPlayerId;
-        }
         this.#removeDefeatedEnemies();
         return Object.freeze({ accepted: true, resolution, damage });
     }
@@ -3848,7 +3848,8 @@ export class GameSimulation {
         for (const enemy of this.enemies) {
             if (this.debugTrainingDummy.matches(enemy)) continue;
             if (enemy.health > 0 || this.enemyImpactTombstones.has(enemy.id)) continue;
-            const creditedPlayer = this.#findPlayer(enemy.defeatedByPlayerId);
+            this.metrics.enemyDefeats += 1;
+            const creditedPlayer = this.#findPlayer(enemy.experienceCreditPlayerId);
             if (creditedPlayer) {
                 const experience = creditedPlayer.experience.add(enemy.experienceReward);
                 this.recordReplicationEvent("experience-gained", {

@@ -43,6 +43,7 @@ export function createDeterministicAugmentRewardSelection({
         selectedAugmentIds,
         sourceId
     });
+    if (entitlement.choices.length === 0) return null;
     const choices = entitlement.choices.map((id) => augmentById(id));
     return createAugmentRewardSelection({
         sourceId,
