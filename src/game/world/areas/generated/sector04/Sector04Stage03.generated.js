@@ -215,8 +215,8 @@ const SPEC = {
         "kind": "terminal",
         "objectiveId": "sector-04-03:service-relay-b03",
         "position": {
-          "x": 577,
-          "y": -554
+          "x": 500,
+          "y": -525
         },
         "presentationId": "world-object:terminal"
       },

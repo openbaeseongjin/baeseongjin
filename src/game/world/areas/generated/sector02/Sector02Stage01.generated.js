@@ -29,8 +29,8 @@ const SPEC = {
     },
     "exit": {
       "id": "sector-02-01:exit",
-      "x": 664,
-      "y": -800
+      "x": 658,
+      "y": -782
     },
     "gate": {
       "id": "sector-02-01:gate",
@@ -41,8 +41,8 @@ const SPEC = {
       "trigger": {
         "height": 62,
         "width": 52,
-        "x": 638,
-        "y": -830
+        "x": 632,
+        "y": -812
       }
     },
     "id": "sector-02-01",
@@ -97,8 +97,8 @@ const SPEC = {
         "id": "sector-02-01:community-notice",
         "kind": "story-display",
         "position": {
-          "x": 568,
-          "y": -768
+          "x": 685,
+          "y": -755
         },
         "presentationId": "world-object:story-display"
       },
@@ -110,8 +110,8 @@ const SPEC = {
         "kind": "gate-panel",
         "objectiveId": "sector-02-01:exit-panel-engaged",
         "position": {
-          "x": 552,
-          "y": -768
+          "x": 546,
+          "y": -750
         },
         "presentationId": "world-object:gate-panel"
       },
@@ -121,8 +121,8 @@ const SPEC = {
         "id": "sector-02-01:exit-gate",
         "kind": "gate",
         "position": {
-          "x": 664,
-          "y": -768
+          "x": 658,
+          "y": -750
         },
         "presentationId": "world-object:gate"
       },
@@ -293,8 +293,8 @@ const SPEC = {
       },
       {
         "id": "sector-02-01:route-exit",
-        "x": 600,
-        "y": -800
+        "x": 594,
+        "y": -782
       }
     ],
     "routes": [
@@ -521,25 +521,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 536,
-          "y": -768
+          "x": 530,
+          "y": -750
         },
         "vertices": [
           {
-            "x": 376,
-            "y": -768
+            "x": 370,
+            "y": -750
           },
           {
-            "x": 696,
-            "y": -768
+            "x": 690,
+            "y": -750
           },
           {
-            "x": 696,
-            "y": -736
+            "x": 690,
+            "y": -718
           },
           {
-            "x": 376,
-            "y": -736
+            "x": 370,
+            "y": -718
           }
         ]
       }

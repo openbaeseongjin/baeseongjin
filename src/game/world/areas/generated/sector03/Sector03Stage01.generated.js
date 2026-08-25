@@ -107,7 +107,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": -870,
-          "y": -224
+          "y": -230
         },
         "presentationId": "world-object:story-display"
       },

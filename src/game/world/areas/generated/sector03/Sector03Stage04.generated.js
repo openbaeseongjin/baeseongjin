@@ -289,8 +289,8 @@ const SPEC = {
         "id": "sector-03-04:public-route",
         "kind": "story-display",
         "position": {
-          "x": -640,
-          "y": -410
+          "x": -1405,
+          "y": -645
         },
         "presentationId": "world-object:story-display"
       },
@@ -302,8 +302,8 @@ const SPEC = {
         "id": "sector-03-04:service-route",
         "kind": "story-display",
         "position": {
-          "x": 576,
-          "y": -474
+          "x": 985,
+          "y": -515
         },
         "presentationId": "world-object:story-display"
       },
@@ -315,8 +315,8 @@ const SPEC = {
         "id": "sector-03-04:service-node-upper",
         "kind": "story-display",
         "position": {
-          "x": 585,
-          "y": -1312
+          "x": 580,
+          "y": -1315
         },
         "presentationId": "world-object:story-display"
       },

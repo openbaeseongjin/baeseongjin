@@ -194,8 +194,8 @@ const SPEC = {
         "id": "sector-01-03:employee-scanner",
         "kind": "trigger",
         "position": {
-          "x": -96,
-          "y": -64
+          "x": 35,
+          "y": -5
         },
         "presentationId": "world-object:trigger",
         "trigger": {

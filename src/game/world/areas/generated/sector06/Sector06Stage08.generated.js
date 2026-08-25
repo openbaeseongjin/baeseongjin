@@ -10,26 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "sector-06-08:p0",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P0",
-          "sourceId": "sector-06-08:p0"
-        },
-        "x": -760,
-        "y": -100
-      },
-      "target": {
-        "id": "sector-06-08:p0-surface",
-        "properties": {
-          "sourceId": "sector-06-08:p0"
-        },
-        "x": -760,
-        "y": -100
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-06-08:h1",
         "properties": {
           "coordinateAnchor": "center",
@@ -261,8 +241,8 @@ const SPEC = {
     "cueIds": [],
     "entry": {
       "id": "sector-06-08:entry",
-      "x": -760,
-      "y": -100
+      "x": -730,
+      "y": -150
     },
     "exit": {
       "id": "sector-06-08:exit",
@@ -659,54 +639,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -760,
-          "y": -68
+          "x": -730,
+          "y": -118
         },
         "vertices": [
           {
-            "x": -856,
-            "y": -68
+            "x": -826,
+            "y": -118
           },
           {
-            "x": -664,
-            "y": -68
+            "x": -634,
+            "y": -118
           },
           {
-            "x": -664,
-            "y": -36
+            "x": -634,
+            "y": -86
           },
           {
-            "x": -856,
-            "y": -36
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "pad-entry",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -805,
-          "y": -130
-        },
-        "vertices": [
-          {
-            "x": -805,
-            "y": -130
-          },
-          {
-            "x": -575,
-            "y": -130
-          },
-          {
-            "x": -575,
-            "y": -100
-          },
-          {
-            "x": -805,
-            "y": -100
+            "x": -826,
+            "y": -86
           }
         ]
       },

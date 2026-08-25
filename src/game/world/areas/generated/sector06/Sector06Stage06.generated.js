@@ -10,26 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "sector-06-06:p0",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P0",
-          "sourceId": "sector-06-06:p0"
-        },
-        "x": -520,
-        "y": -80
-      },
-      "target": {
-        "id": "sector-06-06:p0-surface",
-        "properties": {
-          "sourceId": "sector-06-06:p0"
-        },
-        "x": -520,
-        "y": -80
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-06-06:h1",
         "properties": {
           "coordinateAnchor": "center",
@@ -201,8 +181,8 @@ const SPEC = {
     "cueIds": [],
     "entry": {
       "id": "sector-06-06:entry",
-      "x": -520,
-      "y": -80
+      "x": -530,
+      "y": -135
     },
     "exit": {
       "id": "sector-06-06:exit",
@@ -433,12 +413,6 @@ const SPEC = {
     ],
     "routePoints": [
       {
-        "id": "sector-06-06:route-sector-06-06:p0",
-        "sourceId": "sector-06-06:p0",
-        "x": -520,
-        "y": -80
-      },
-      {
         "id": "sector-06-06:route-sector-06-06:h1",
         "sourceId": "sector-06-06:h1",
         "x": -520,
@@ -584,54 +558,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -520,
-          "y": -48
+          "x": -530,
+          "y": -103
         },
         "vertices": [
           {
-            "x": -616,
-            "y": -48
+            "x": -626,
+            "y": -103
           },
           {
-            "x": -424,
-            "y": -48
+            "x": -434,
+            "y": -103
           },
           {
-            "x": -424,
-            "y": -16
+            "x": -434,
+            "y": -71
           },
           {
-            "x": -616,
-            "y": -16
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "beacon-entry",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -650,
-          "y": -115
-        },
-        "vertices": [
-          {
-            "x": -650,
-            "y": -115
-          },
-          {
-            "x": -390,
-            "y": -115
-          },
-          {
-            "x": -390,
-            "y": -85
-          },
-          {
-            "x": -650,
-            "y": -85
+            "x": -626,
+            "y": -71
           }
         ]
       },

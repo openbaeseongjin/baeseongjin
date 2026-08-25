@@ -234,8 +234,8 @@ const SPEC = {
         "id": "sector-03-03:retail-security",
         "kind": "story-display",
         "position": {
-          "x": -1125,
-          "y": -205
+          "x": -1115,
+          "y": -210
         },
         "presentationId": "world-object:story-display"
       },
@@ -247,8 +247,8 @@ const SPEC = {
         "id": "sector-03-03:route-state",
         "kind": "story-display",
         "position": {
-          "x": -1024,
-          "y": -770
+          "x": -1320,
+          "y": -780
         },
         "presentationId": "world-object:story-display"
       },
@@ -261,7 +261,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": 410,
-          "y": -1120
+          "y": -1125
         },
         "presentationId": "world-object:story-display"
       },

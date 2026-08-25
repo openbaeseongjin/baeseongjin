@@ -293,8 +293,8 @@ const SPEC = {
         "id": "sector-02-08:sector-end-checkpoint-object",
         "kind": "checkpoint",
         "position": {
-          "x": 112,
-          "y": -1248
+          "x": 220,
+          "y": -1255
         },
         "presentationId": "world-object:checkpoint"
       },

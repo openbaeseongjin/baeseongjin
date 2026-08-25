@@ -569,8 +569,8 @@ const SPEC = {
         "kind": "terminal",
         "objectiveId": "sector-04-05:override-b-acquired",
         "position": {
-          "x": 640,
-          "y": -1790
+          "x": 2395,
+          "y": -1185
         },
         "presentationId": "world-object:terminal"
       },

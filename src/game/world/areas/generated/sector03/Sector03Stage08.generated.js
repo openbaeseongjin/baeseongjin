@@ -457,8 +457,8 @@ const SPEC = {
         "id": "sector-03-08:market-gate",
         "kind": "story-display",
         "position": {
-          "x": -530,
-          "y": -640
+          "x": -515,
+          "y": -645
         },
         "presentationId": "world-object:story-display"
       },
@@ -470,8 +470,8 @@ const SPEC = {
         "id": "sector-03-08:market-directory",
         "kind": "story-display",
         "position": {
-          "x": 128,
-          "y": -1178
+          "x": 315,
+          "y": -1115
         },
         "presentationId": "world-object:story-display"
       },
@@ -483,8 +483,8 @@ const SPEC = {
         "id": "sector-03-08:evacuation-archive",
         "kind": "story-display",
         "position": {
-          "x": -195,
-          "y": -1980
+          "x": -225,
+          "y": -1845
         },
         "presentationId": "world-object:story-display"
       },
@@ -496,8 +496,8 @@ const SPEC = {
         "id": "sector-03-08:access-archive",
         "kind": "story-display",
         "position": {
-          "x": 195,
-          "y": -1980
+          "x": 270,
+          "y": -1840
         },
         "presentationId": "world-object:story-display"
       },
@@ -542,12 +542,6 @@ const SPEC = {
     "order": 8,
     "recoveryPoints": [],
     "routePoints": [
-      {
-        "id": "sector-03-08:route-route-5-1-central-path-1-3",
-        "sourceId": "route-5-1-central-path-1-3",
-        "x": -512,
-        "y": -640
-      },
       {
         "id": "sector-03-08:route-route-5-1-central-path-2-4",
         "sourceId": "route-5-1-central-path-2-4",
@@ -609,12 +603,6 @@ const SPEC = {
         "y": -1120
       },
       {
-        "id": "sector-03-08:route-route-5-1-east-path-1-14",
-        "sourceId": "route-5-1-east-path-1-14",
-        "x": -512,
-        "y": -640
-      },
-      {
         "id": "sector-03-08:route-route-5-1-east-path-2-15",
         "sourceId": "route-5-1-east-path-2-15",
         "x": -192,
@@ -637,12 +625,6 @@ const SPEC = {
         "sourceId": "route-5-1-east-path-5-18",
         "x": 320,
         "y": -1088
-      },
-      {
-        "id": "sector-03-08:route-route-5-1-east-path-6-19",
-        "sourceId": "route-5-1-east-path-6-19",
-        "x": 320,
-        "y": -1120
       },
       {
         "id": "sector-03-08:route-route-5-2-central-path-1-22",
@@ -914,26 +896,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 128,
-          "y": -1120
+          "x": 130,
+          "y": -1110
         },
         "sourceId": "safe-hub-mx",
         "vertices": [
           {
-            "x": -64,
-            "y": -1120
+            "x": -62,
+            "y": -1110
           },
           {
-            "x": 320,
-            "y": -1120
+            "x": 322,
+            "y": -1110
           },
           {
-            "x": 320,
-            "y": -1090
+            "x": 322,
+            "y": -1080
           },
           {
-            "x": -64,
-            "y": -1090
+            "x": -62,
+            "y": -1080
           }
         ]
       },
