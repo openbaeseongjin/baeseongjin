@@ -6,6 +6,8 @@ import {
     CONTINUITY_WARDEN_GATE_SIZE,
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
     CONTINUITY_WARDEN_OBJECT_KIND,
+    CONTINUITY_WARDEN_SECURITY_STAR_SIZE,
+    CONTINUITY_WARDEN_SECURITY_STAR_STATE,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE
@@ -30,6 +32,29 @@ const COLOR = Object.freeze({
     SKY: "#38bdf8",
     WHITE: "#ecfeff",
     WARNING: "#fbbf24"
+});
+const SECURITY_STAR_CELL = Object.freeze({ width: 64, height: 64 });
+const SECURITY_STAR_ENDING_SECONDS = 0.44;
+const SECURITY_STAR_CLIP = Object.freeze({
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.IDLE]: Object.freeze({ start: 0, count: 3, seconds: 0.16, loop: true }),
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.TELEGRAPH]: Object.freeze({
+        start: 3,
+        count: 4,
+        seconds: 0.11,
+        loop: false
+    }),
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.ACTIVE]: Object.freeze({ start: 7, count: 2, seconds: 0.08, loop: true }),
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.ENDING]: Object.freeze({
+        start: 9,
+        count: 4,
+        seconds: 0.11,
+        loop: false
+    })
+});
+const SECURITY_STAR_TERMINAL_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.TELEGRAPH]: true,
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.ACTIVE]: true,
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.ENDING]: true
 });
 
 function direction(object) {
@@ -142,6 +167,92 @@ class ContinuityWardenSpriteRenderer {
     }
 }
 
+class SecurityStarAnimationController {
+    constructor() {
+        this.incomingState = null;
+        this.endingStartedAt = null;
+    }
+
+    resolve(object, presentationTimeSeconds) {
+        const incomingState = SECURITY_STAR_CLIP[object.state]
+            ? object.state
+            : CONTINUITY_WARDEN_SECURITY_STAR_STATE.IDLE;
+        if (incomingState !== this.incomingState) {
+            if (
+                incomingState === CONTINUITY_WARDEN_SECURITY_STAR_STATE.IDLE &&
+                SECURITY_STAR_TERMINAL_STATE[this.incomingState] === true
+            ) {
+                this.endingStartedAt = presentationTimeSeconds;
+            } else {
+                this.endingStartedAt = null;
+            }
+            this.incomingState = incomingState;
+        }
+        if (this.endingStartedAt !== null) {
+            const progress = Math.max(
+                0,
+                Math.min(1, (presentationTimeSeconds - this.endingStartedAt) / SECURITY_STAR_ENDING_SECONDS)
+            );
+            if (progress < 1) {
+                return Object.freeze({ state: CONTINUITY_WARDEN_SECURITY_STAR_STATE.ENDING, progress });
+            }
+            this.endingStartedAt = null;
+        }
+        return Object.freeze({ state: incomingState, progress: object.animationProgress ?? 0 });
+    }
+}
+
+function securityStarFrame(state, progress, presentationTimeSeconds) {
+    const clip = SECURITY_STAR_CLIP[state] ?? SECURITY_STAR_CLIP[CONTINUITY_WARDEN_SECURITY_STAR_STATE.IDLE];
+    const localIndex = clip.loop
+        ? Math.floor(presentationTimeSeconds / clip.seconds) % clip.count
+        : Math.min(clip.count - 1, Math.floor(Math.max(0, Math.min(1, progress)) * clip.count));
+    return Object.freeze({
+        x: (clip.start + localIndex) * SECURITY_STAR_CELL.width,
+        y: 0,
+        width: SECURITY_STAR_CELL.width,
+        height: SECURITY_STAR_CELL.height
+    });
+}
+
+class SecurityStarSpriteRenderer {
+    constructor({ assets }) {
+        this.assets = assets;
+        this.controllers = new Map();
+        this.fallback = bossPolygonObjectRenderer(CONTINUITY_WARDEN_OBJECT_KIND.SECURITY_STAR);
+    }
+
+    draw(context, object, _presentation, presentationTimeSeconds = 0) {
+        const image = this.assets?.securityStarImage();
+        if (!image) {
+            this.fallback.draw(context, object);
+            return;
+        }
+        const controller = this.controllerFor(object.id);
+        const animation = controller.resolve(object, presentationTimeSeconds);
+        paintSpriteFrame({
+            context,
+            image,
+            frame: securityStarFrame(animation.state, animation.progress, presentationTimeSeconds),
+            position: object.position,
+            size: object.size ?? CONTINUITY_WARDEN_SECURITY_STAR_SIZE,
+            anchor: { x: 0.5, y: 0.5 },
+            pixelSnap: true,
+            flipX: object.variant === "right"
+        });
+    }
+
+    controllerFor(objectId) {
+        const key = objectId ?? CONTINUITY_WARDEN_OBJECT_KIND.SECURITY_STAR;
+        let controller = this.controllers.get(key);
+        if (!controller) {
+            controller = new SecurityStarAnimationController();
+            this.controllers.set(key, controller);
+        }
+        return controller;
+    }
+}
+
 class MaintenanceShuttleSpriteRenderer {
     constructor({ assets }) {
         this.assets = assets;
@@ -201,6 +312,9 @@ export class ContinuityWardenSpriteObjectRendererCatalog {
     constructor({ assets, definition, objectSpriteAssets = null }) {
         this.renderers = Object.freeze({
             [OBJECT_KIND.WARDEN]: new ContinuityWardenSpriteRenderer({ assets, definition }),
+            [CONTINUITY_WARDEN_OBJECT_KIND.SECURITY_STAR]: new SecurityStarSpriteRenderer({
+                assets: objectSpriteAssets
+            }),
             [CONTINUITY_WARDEN_OBJECT_KIND.GATE]: new DepartureGateSpriteRenderer({
                 assets: objectSpriteAssets
             }),

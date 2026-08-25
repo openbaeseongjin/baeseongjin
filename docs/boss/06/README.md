@@ -81,7 +81,8 @@ Boss06는 이를 우선 재사용하고, 별도의 Rope AI나 새 범용 hazard 
 - 점프 물리는 공용 Physics mixin 기반 Has-A 컴포넌트, 5발 유도탄은 `enemy + homing` projectile 조합과 서버 spawn/resolve 사건을 사용한다.
 - Boss03·06은 공용 `BossEnemySummonPattern`을 조합해 2마리·15초 cooldown·live 6 skip과 결정적 Patrol·Pursuit·Shield·Artillery 순서를 공유한다. 서버 `GameSimulation`만 동적 Enemy를 등록하며 attempt reset·승리 때 해당 Boss 소환몹과 잔탄을 제거한다.
 - 승인된 Phase1 Warden pixel sprite를 유지한다. `walk`는 이동 거리 기반 전용 6프레임 보폭 atlas를 사용하고, 전용 locomotion atlas가 없는 V4 `jump/descend/fall/landing`만 `combat-idle` body의 renderer-local pose fallback으로 표현한다. 소환 명령은 `security-command` clip을 재사용한다.
-- `boss-06.json`의 3200px Main·단방향 Ledge 3개·U1~U10·Gate·220px Bridge·Boarding Deck을 authored geometry로 실행한다. 모든 solid surface는 일반 부착 가능하다.
+- `boss-06.json`의 3200px Main·단방향 Ledge 3개·U1~U10·Gate·220px Bridge·Boarding Deck을 authored geometry로 실행한다. 모든 solid surface는 일반 부착 가능하며, World surface가 전용 Boss terrain atlas를 그리는 단일 권위다. Boss presentation object로 같은 발판을 다시 그리지 않는다.
+- Security Beam 양 끝은 세로 기둥 없이 떠 있는 `64×64` Security Star 두 개만 표시한다. `idle`·amber `telegraph`·red `active`·amber `ending`은 기존 Security state와 beam gap에서 파생하며 collision·Rope·damage·network state를 추가하지 않는다.
 - 승리 뒤 Warden은 기절하고 Gate light/open → Threshold Bridge → Shuttle reveal → Player별 Boarding → 모든 active Player ready → `beginCompletion()` 순서로 진행한다. 첫 Player가 동료를 순간이동시키지 않는다.
 - Shuttle reveal은 `assets/runtime/objects/boss-06-maintenance-shuttle/maintenance-shuttle-boarding.png`의 `500×390` bottom-center 픽셀 sprite를 사용한다. 승리 카메라는 좁은 모바일 화면에서도 셔틀이 화면 밖에 남지 않도록 접촉점에서 sprite 중심을 파생해 목표로 삼는다. asset 준비 전·실패 시 기존 Canvas 셔틀로 복구하며 Boarding 판정·승리 타임라인은 바꾸지 않는다.
 - Departure Gate는 `480×760` locked/light/open sprite와 기존 0.3초 `light → open` 8-frame motion을 사용한다. Gate와 Shuttle의 bottom-center는 Departure Deck top에 맞추고 asset 준비 전·상태별 실패 시 각 Canvas 표현으로 독립 복구한다. 충돌 bounds·Bridge·Boarding zone·상태 권한은 유지한다.

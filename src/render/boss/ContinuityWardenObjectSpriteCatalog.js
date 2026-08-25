@@ -2,12 +2,15 @@ import {
     CONTINUITY_WARDEN_GATE_SIZE,
     CONTINUITY_WARDEN_GATE_STATE,
     CONTINUITY_WARDEN_OBJECT_KIND,
+    CONTINUITY_WARDEN_SECURITY_STAR_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_SIZE
 } from "../../game/boss/ContinuityWardenDefinition.js";
 import { WorldObjectSpriteAssetCatalog } from "../assets/WorldObjectSpriteAssetCatalog.js";
 import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 
 const GATE_PACKAGE_ID = "boss-06-departure-gate";
+const SECURITY_STAR_PACKAGE_ID = "boss-06-security-star";
+const SECURITY_STAR_ATLAS_SIZE = Object.freeze({ width: 832, height: 64 });
 const GATE_OPENING_FRAME_COUNT = 8;
 const GATE_OPENING_SPRITE_STATE = Object.freeze(
     Array.from({ length: GATE_OPENING_FRAME_COUNT }, (_, index) => `opening-${String(index).padStart(2, "0")}`)
@@ -45,6 +48,11 @@ const GATE_SPRITE = Object.freeze({
 });
 
 const CONTINUITY_WARDEN_OBJECT_PRESENTATION = Object.freeze({
+    [CONTINUITY_WARDEN_OBJECT_KIND.SECURITY_STAR]: Object.freeze({
+        id: CONTINUITY_WARDEN_OBJECT_KIND.SECURITY_STAR,
+        size: CONTINUITY_WARDEN_SECURITY_STAR_SIZE,
+        sprite: sprite(SECURITY_STAR_PACKAGE_ID, "security-star.png", SECURITY_STAR_ATLAS_SIZE)
+    }),
     [CONTINUITY_WARDEN_OBJECT_KIND.GATE]: Object.freeze({
         id: CONTINUITY_WARDEN_OBJECT_KIND.GATE,
         size: CONTINUITY_WARDEN_GATE_SIZE,
@@ -76,6 +84,7 @@ export class ContinuityWardenObjectSpriteAssetCatalog {
             autoStart
         });
         this.assets = Object.freeze([
+            this.catalog.assetFor(CONTINUITY_WARDEN_OBJECT_KIND.SECURITY_STAR),
             this.catalog.assetFor(CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE),
             ...Object.keys(GATE_SPRITE).map((state) => this.catalog.assetFor(CONTINUITY_WARDEN_OBJECT_KIND.GATE, state))
         ]);
@@ -91,6 +100,10 @@ export class ContinuityWardenObjectSpriteAssetCatalog {
 
     imageFor(kind, state) {
         return this.catalog.imageFor(kind, state);
+    }
+
+    securityStarImage() {
+        return this.imageFor(CONTINUITY_WARDEN_OBJECT_KIND.SECURITY_STAR);
     }
 
     gateImageFor(state, progress = 0) {

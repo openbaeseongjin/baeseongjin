@@ -20,3 +20,4 @@ npm run validate:environment-assets -- assets/runtime/environments/boss-06-conti
 
 - 2026-08-25 validator: **PASS** — 3 atlases, 5 zones, 1 backdrop layer
 - Map Editor production Gameplay View: `boss-06` 전용 definition 선택, Boss 전용 surface 15개와 기존 collision 배치 유지 확인
+- Boss Runtime은 같은 geometry를 `boss-pad-surface` Polygon으로 중복 표시하지 않는다. World surface와 `PixelTerrainRenderer`가 지형 표현의 단일 권위이며 전용 atlas 위를 회색 fallback이 덮지 않는다.
