@@ -8,7 +8,7 @@ Boss06 `CONTINUITY WARDEN`의 사용자 승인 64×96 logical pixel motion을 �
 - Source: 수작업 direct-pixel RGBA PNG
 - Runtime atlas cell: `128×192`
 - World output: `128×192`
-- Anchor: `(0.5, 113/192)`; 기존 96×150 Boss collider의 발 접점과 분리
+- Anchor: `(0.5, 113/192)`; idle 불투명 body의 중심 기준 범위 `x=-52..49`, `y=-61..74`를 120×150 Boss Polygon 안에 정렬
 - Facing: 원본 우향, 좌향은 renderer `flipX`
 - License: 저장소 내부 직접 제작물; 외부 reference provenance는 authoring README 상태를 따른다.
 
@@ -29,7 +29,7 @@ Boss06 V3의 `jump`·`landing`은 신규 atlas를 가장하지 않고 승인된 
 
 ## VFX 경계
 
-전용 effects manifest·loader·validator가 없으므로 VFX PNG를 이 character package에 합치지 않는다. `continuity-warden-combat-vfx-v2`는 Boss hazard renderer가 판정 bounds 안에 고정 pixel range image를 먼저 그리고 기존 procedural Canvas particle을 추가 효과로 합성한다. 근접 active는 큰 계단형 amber/pink/white 충격봉 궤적, Security Beam active는 전 폭을 잇는 pink band와 white core를 사용한다. 실제 `boss-player-hit`에서는 근접 shard 또는 beam streak impact를 한 번 생성한다. 판정 bounds·피해·수명·Boss FSM·network payload는 기존 gameplay가 계속 소유하고 고정 range image와 telegraph 경계는 particle cap과 관계없이 유지한다.
+전용 effects manifest·loader·validator가 없으므로 VFX PNG를 이 character package에 합치지 않는다. 근접 active는 판정 bounds 안의 부드러운 Canvas quadratic slash 3겹과 기존 procedural particle을 합성하고, Security Beam은 전 폭 pink band와 white core를 사용한다. 실제 `boss-player-hit`에서는 근접 shard 또는 beam streak impact를 한 번 생성한다. 판정 bounds·피해·수명·Boss FSM·network payload는 gameplay가 계속 소유하며 telegraph 경계는 particle cap과 관계없이 유지한다.
 
 - Runtime feedback: `src/game/combat/ContinuityWardenCombatFeedback*.js`
 - Preset owner: `src/game/combat/ParticlePresentation.js`

@@ -1,5 +1,10 @@
 import { withPhysics } from "../physics/PhysicsMixin.js";
 import { pointInPolygon } from "../world/PolygonGeometry.js";
+import {
+    combatTargetOverlapsCircle,
+    combatTargetOverlapsSweptCircle,
+    combatTargetSweptCircleContact
+} from "../combat/CombatTargetGeometry.js";
 import { SPELL_EVENT_TYPE, SPELL_KEY, SPELL_RUNTIME_SPEC, SPELL_SOURCE_KIND } from "./SpellRuntimeDefinition.js";
 import { SPELL_ID } from "./SpellDefinition.js";
 import { spellProjectileCollisionPolicy } from "./SpellProjectileCollisionPolicy.js";
@@ -152,16 +157,7 @@ export class SpellProjectileState {
         this.projectiles.push(new SpellProjectile(definition));
     }
 
-    advance({
-        enemies,
-        targets = enemies,
-        surfaces,
-        collisionBroadPhase,
-        dt,
-        distancePointToSegment,
-        emitImpact,
-        presentationEvents
-    }) {
+    advance({ enemies, targets = enemies, surfaces, collisionBroadPhase, dt, emitImpact, presentationEvents }) {
         const survivors = [];
         for (const projectile of this.projectiles) {
             const start = { x: projectile.position.x, y: projectile.position.y };
@@ -169,7 +165,6 @@ export class SpellProjectileState {
             const destination = projectile.physicsDestination(travel / projectile.speed);
             const end = { x: destination.x, y: destination.y };
             const delta = { x: end.x - start.x, y: end.y - start.y };
-            const lengthSquared = delta.x * delta.x + delta.y * delta.y;
             const collisionSurfaces = collisionBroadPhase
                 ? collisionBroadPhase.querySurfaces({
                       collider: { type: SPELL_RUNTIME_SPEC.FALLBACK_COLLIDER_TYPE, radius: projectile.radius },
@@ -184,8 +179,7 @@ export class SpellProjectileState {
                         projectile.auraTargetIds.has(target.id) ||
                         !projectile.targetPolicy.allows(projectile.ownerId, target.id) ||
                         target.health <= SPELL_RUNTIME_SPEC.ZERO ||
-                        distancePointToSegment(target.position, start, end) >
-                            projectile.auraRadius + (target.radius ?? target.collider?.radius ?? 0)
+                        !combatTargetOverlapsSweptCircle(target, start, end, projectile.auraRadius)
                     )
                         continue;
                     projectile.auraTargetIds.add(target.id);
@@ -206,31 +200,20 @@ export class SpellProjectileState {
                     (target) =>
                         projectile.targetPolicy.allows(projectile.ownerId, target.id) &&
                         target.health > SPELL_RUNTIME_SPEC.ZERO &&
-                        !projectile.piercedTargetIds.has(target.id) &&
-                        distancePointToSegment(target.position, start, end) <=
-                            (target.radius ?? target.collider?.radius ?? 0) + projectile.radius
+                        !projectile.piercedTargetIds.has(target.id)
                 )
                 .map((target) => ({
                     target,
-                    ratio:
-                        lengthSquared <= SPELL_RUNTIME_SPEC.GEOMETRY_EPSILON
-                            ? SPELL_RUNTIME_SPEC.ZERO
-                            : Math.max(
-                                  SPELL_RUNTIME_SPEC.ZERO,
-                                  Math.min(
-                                      SPELL_RUNTIME_SPEC.UNIT,
-                                      ((target.position.x - start.x) * delta.x +
-                                          (target.position.y - start.y) * delta.y) /
-                                          lengthSquared
-                                  )
-                              )
+                    contact: combatTargetSweptCircleContact(target, start, end, projectile.radius)
                 }))
+                .filter(({ contact }) => contact !== null)
+                .map(({ target, contact }) => ({ target, ratio: contact.ratio, contactPosition: contact.position }))
                 .filter(({ ratio }) => wallRatio === null || ratio <= wallRatio + SPELL_RUNTIME_SPEC.GEOMETRY_EPSILON)
                 .sort(({ target: left, ratio: leftRatio }, { target: right, ratio: rightRatio }) =>
                     leftRatio === rightRatio ? left.id.localeCompare(right.id) : leftRatio - rightRatio
                 );
             const resolvedContacts = projectile.collisionPolicy.resolvedContacts(contacts);
-            for (const { target } of resolvedContacts) {
+            for (const { target, contactPosition } of resolvedContacts) {
                 projectile.piercedTargetIds.add(target.id);
                 emitImpact({
                     eventId: SPELL_KEY.projectileImpact(projectile.id, target.id),
@@ -239,7 +222,7 @@ export class SpellProjectileState {
                     sourceKind: SPELL_SOURCE_KIND.PROJECTILE,
                     damage: projectile.damage,
                     sourcePosition: start,
-                    contactPosition: target.position,
+                    contactPosition,
                     statusEffectId: projectile.statusEffectId,
                     knockback:
                         projectile.knockbackMode === "inward"
@@ -274,8 +257,7 @@ export class SpellProjectileState {
                         !projectile.targetPolicy.allows(projectile.ownerId, target.id) ||
                         resolvedContacts.some((contact) => contact.target.id === target.id) ||
                         target.health <= SPELL_RUNTIME_SPEC.ZERO ||
-                        Math.hypot(target.position.x - impactPosition.x, target.position.y - impactPosition.y) >
-                            projectile.explosionRadius + (target.radius ?? target.collider?.radius ?? 0)
+                        !combatTargetOverlapsCircle(target, impactPosition, projectile.explosionRadius)
                     ) {
                         continue;
                     }

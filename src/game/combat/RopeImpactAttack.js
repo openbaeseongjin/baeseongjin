@@ -1,4 +1,5 @@
 import { createImpactDamage } from "./ImpactTarget.js";
+import { combatTargetBlocksImpactFrom } from "./CombatTargetGeometry.js";
 import { ROPE_IMPACT_STATE_REASON } from "./RopeImpactState.js";
 
 export const ROPE_IMPACT_REJECTION_REASON = Object.freeze({
@@ -103,7 +104,7 @@ export class RopeImpactAttack {
             if (reason === null && impactSpeed < this.minimumSpeed) {
                 reason = ROPE_IMPACT_REJECTION_REASON.SPEED_BELOW_MINIMUM;
             }
-            if (reason === null && target.blocksImpactFrom?.(contact.position)) {
+            if (reason === null && combatTargetBlocksImpactFrom(target, contact.position)) {
                 reason = ROPE_IMPACT_REJECTION_REASON.SHIELD_BLOCKED;
             }
             if (reason !== null) {

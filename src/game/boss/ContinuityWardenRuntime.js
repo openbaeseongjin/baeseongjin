@@ -11,6 +11,7 @@ import { PHYSICS_ACTOR_KIND } from "../physics/PlayerPhysicsDefinition.js";
 import { PolygonCollider } from "../physics/colliders/PolygonCollider.js";
 import { bossBodyPolygonVertices } from "./BossBodyPolygon.js";
 import { CombatStatusEffectPool } from "../status-effects/CombatStatusEffectPool.js";
+import { selectNearestPositionTarget } from "../combat/CombatTargeting.js";
 import { ContinuityWardenJumpMotion } from "./ContinuityWardenJumpMotion.js";
 import { CONTINUITY_WARDEN_SUPPORT_KIND, ContinuityWardenSpatialQuery } from "./ContinuityWardenSpatialQuery.js";
 import {
@@ -95,7 +96,7 @@ const OPENING_DIALOGUE = Object.freeze([
 ]);
 const TARGET_ID = CONTINUITY_WARDEN_ID.BODY;
 const DEFAULT = Object.freeze({
-    bodyWidth: 96,
+    bodyWidth: 120,
     bodyHeight: 150,
     neutralSeconds: 0.55,
     meleeTelegraphSeconds: 0.6,
@@ -146,6 +147,10 @@ const STABLE_LOCOMOTION_STATE = Object.freeze({
     [CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED]: true,
     [CONTINUITY_WARDEN_LOCOMOTION_STATE.WALK]: true
 });
+const FRONT_BLOCKING_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_STATE.GUARD]: true,
+    [CONTINUITY_WARDEN_STATE.COUNTER_READY]: true
+});
 
 function positive(value, fallback) {
     return Number.isFinite(value) && value > 0 ? value : fallback;
@@ -178,10 +183,10 @@ function finiteNumbers(value, fallback) {
         : fallback;
 }
 
-function landingPosition(surface) {
+function landingPosition(surface, bodyHeight) {
     return freezeComposite({
         x: surface.bounds.x + surface.bounds.width * 0.5,
-        y: surface.bounds.y - DEFAULT.bodyHeight * 0.5
+        y: surface.bounds.y - bodyHeight * 0.5
     });
 }
 
@@ -273,8 +278,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             position: this.bodyPosition,
             collider: new PolygonCollider({
                 vertices: bossBodyPolygonVertices(definition.arena.boss.visualPresetId, {
-                    width: DEFAULT.bodyWidth,
-                    height: DEFAULT.bodyHeight
+                    width: this.config.bodyWidth,
+                    height: this.config.bodyHeight
                 })
             }),
             canGroundActors: false
@@ -293,6 +298,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
     #configuration() {
         const parameters = this.definition.arena.mechanics?.[0]?.parameters ?? {};
         const surfaces = this.definition.arena.surfaces ?? [];
+        const bodyWidth = positive(this.definition.arena.boss?.collider?.width, DEFAULT.bodyWidth);
+        const bodyHeight = positive(this.definition.arena.boss?.collider?.height, DEFAULT.bodyHeight);
         const mainSurface = surfaces.find(({ kind }) => kind === CONTINUITY_WARDEN_SURFACE_KIND.MAIN);
         const mainBounds = bounds(mainSurface?.bounds, { x: 1000, y: -1100, width: 3120, height: 115 });
         const combatBounds = bounds(this.definition.arena.phaseZones?.[0]?.bounds, {
@@ -303,14 +310,16 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         });
         const ledgeTargets = surfaces
             .filter(({ kind }) => kind === CONTINUITY_WARDEN_SURFACE_KIND.LEDGE)
-            .map(landingPosition)
+            .map((surface) => landingPosition(surface, bodyHeight))
             .sort((left, right) => left.x - right.x);
-        const halfBodyWidth = DEFAULT.bodyWidth * 0.5;
+        const halfBodyWidth = bodyWidth * 0.5;
         const guardInset = positive(parameters.guardEdgeInset, 200);
         return freezeComposite({
             mainBounds,
             combatBounds,
-            groundCenterY: mainBounds.y - DEFAULT.bodyHeight * 0.5,
+            bodyWidth,
+            bodyHeight,
+            groundCenterY: mainBounds.y - bodyHeight * 0.5,
             combatMinX: mainBounds.x + halfBodyWidth,
             combatMaxX: mainBounds.x + mainBounds.width - halfBodyWidth,
             guardMinX: mainBounds.x + guardInset,
@@ -461,32 +470,23 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         );
     }
 
-    #chooseNearest(players) {
-        return players.reduce(
-            (nearest, player) =>
-                !nearest ||
-                compositeDistance(player.position, this.bodyPosition) <
-                    compositeDistance(nearest.position, this.bodyPosition)
-                    ? player
-                    : nearest,
-            null
-        );
-    }
-
     #updateTarget(context) {
         const players = this.#combatPlayers(context);
-        if (this.state === CONTINUITY_WARDEN_STATE.CHARGE) {
+        if (this.state !== CONTINUITY_WARDEN_STATE.NEUTRAL || context.canSelectTarget === false) {
             return players.find(({ id }) => id === this.targetPlayerId) ?? null;
         }
-        const target = this.#chooseNearest(players);
-        if (!target) return null;
+        const target = selectNearestPositionTarget(this.bodyPosition, players);
+        if (!target) {
+            this.targetPlayerId = null;
+            return null;
+        }
         this.targetPlayerId = target.id;
         this.facing = target.position.x < this.bodyPosition.x ? -1 : 1;
         return target;
     }
 
     #bodyFoot(position = this.bodyPosition) {
-        return { x: position.x, y: position.y + DEFAULT.bodyHeight * 0.5 };
+        return { x: position.x, y: position.y + this.config.bodyHeight * 0.5 };
     }
 
     #targetSupport(target) {
@@ -511,10 +511,10 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
     }
 
     #supportPosition(support, targetX) {
-        const halfWidth = DEFAULT.bodyWidth * 0.5;
+        const halfWidth = this.config.bodyWidth * 0.5;
         return {
             x: Math.max(support.minX + halfWidth, Math.min(support.maxX - halfWidth, targetX)),
-            y: support.topY - DEFAULT.bodyHeight * 0.5
+            y: support.topY - this.config.bodyHeight * 0.5
         };
     }
 
@@ -631,7 +631,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         const support = spatial.current;
         const centerX = (support.minX + support.maxX) * 0.5;
         const direction = (target?.position.x ?? this.bodyPosition.x) < centerX ? -1 : 1;
-        const halfWidth = DEFAULT.bodyWidth * 0.5;
+        const halfWidth = this.config.bodyWidth * 0.5;
         const edgeX = direction < 0 ? support.minX + halfWidth : support.maxX - halfWidth;
         const dropX = edgeX + direction * (halfWidth + 2);
         const ground = this.#mainSupport();
@@ -934,9 +934,12 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
 
     #fireMissileSalvo(context) {
         const target = this.#combatPlayers(context).find(({ id }) => id === this.targetPlayerId);
-        if (!target) return false;
+        if (!target) {
+            if (context.canSelectTarget === false) this.missileFiredThisJump = true;
+            return false;
+        }
         const origin = compositeWorldPoint(
-            { x: this.bodyPosition.x, y: this.bodyPosition.y - DEFAULT.bodyHeight * 0.2 },
+            { x: this.bodyPosition.x, y: this.bodyPosition.y - this.config.bodyHeight * 0.2 },
             context.worldOffset ?? { x: 0, y: 0 }
         );
         const targetPosition = compositeWorldPoint(target.position, context.worldOffset ?? { x: 0, y: 0 });
@@ -1100,7 +1103,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
 
     #comboTargetInRange(context) {
         const target = this.#combatPlayers(context).find(({ id }) => id === this.targetPlayerId);
-        if (!target) return false;
+        if (!target) return context.canSelectTarget === false;
         return compositeDistance(target.position, this.bodyPosition) <= this.config.comboRange;
     }
 
@@ -1455,30 +1458,32 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             phaseMaxHealth: this.maximumHealth(),
             weakpointExposed: false,
             normalDamageMultiplier: 1,
-            weakpointDamageRatio: 0
+            weakpointDamageRatio: 0,
+            blocksFrontImpact: FRONT_BLOCKING_STATE[this.state] === true,
+            direction: this.facing
         });
-        return Object.freeze({ ...snapshot, collider: this.body.collider });
+        return Object.freeze({ ...snapshot, collider: this.body.collider.snapshot() });
     }
 
     #bodyHazardBounds() {
         return {
-            x: this.bodyPosition.x - DEFAULT.bodyWidth * 0.5,
-            y: this.bodyPosition.y - DEFAULT.bodyHeight * 0.5,
-            width: DEFAULT.bodyWidth,
-            height: DEFAULT.bodyHeight
+            x: this.bodyPosition.x - this.config.bodyWidth * 0.5,
+            y: this.bodyPosition.y - this.config.bodyHeight * 0.5,
+            width: this.config.bodyWidth,
+            height: this.config.bodyHeight
         };
     }
 
     #motionPathHazardBounds() {
-        const halfWidth = DEFAULT.bodyWidth * 0.5;
-        const halfHeight = DEFAULT.bodyHeight * 0.5;
+        const halfWidth = this.config.bodyWidth * 0.5;
+        const halfHeight = this.config.bodyHeight * 0.5;
         const minX = Math.min(this.motionStart.x, this.motionTarget.x) - halfWidth;
         const minY = Math.min(this.motionStart.y, this.motionTarget.y) - halfHeight;
         return {
             x: minX,
             y: minY,
-            width: Math.abs(this.motionTarget.x - this.motionStart.x) + DEFAULT.bodyWidth,
-            height: Math.abs(this.motionTarget.y - this.motionStart.y) + DEFAULT.bodyHeight
+            width: Math.abs(this.motionTarget.x - this.motionStart.x) + this.config.bodyWidth,
+            height: Math.abs(this.motionTarget.y - this.motionStart.y) + this.config.bodyHeight
         };
     }
 
@@ -1646,7 +1651,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 kind: OBJECT_KIND.WARDEN,
                 variant: this.definition.arena.boss.visualPresetId,
                 position: compositeWorldPoint(this.bodyPosition, worldOffset),
-                size: { width: DEFAULT.bodyWidth, height: DEFAULT.bodyHeight },
+                size: { width: this.config.bodyWidth, height: this.config.bodyHeight },
                 state: this.state,
                 defeatStage: victoryStage,
                 actionState: this.actionPhase,

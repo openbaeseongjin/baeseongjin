@@ -1,21 +1,82 @@
 import { spellTargetPolicy } from "./SpellTargetPolicy.js";
+import {
+    combatTargetBoundingRadius,
+    combatTargetColliderSnapshot,
+    combatTargetOverlapsCircle,
+    combatTargetOverlapsSweptCircle
+} from "../combat/CombatTargetGeometry.js";
+import { colliderSnapshotWorldVertices } from "../physics/colliders/Collider.js";
+import { closestPointOnPolygon, pointInPolygon } from "../world/PolygonGeometry.js";
 import { directionBetween } from "./SpellRuntimeSupport.js";
 import { SPELL_KEY, SPELL_SOURCE_KIND } from "./SpellRuntimeDefinition.js";
 
-function targetRadius(target) {
-    return target.radius ?? target.collider?.radius ?? 0;
+const GEOMETRY_EPSILON = 0.0000001;
+
+function pointInsideCone(area, point) {
+    const dx = point.x - area.position.x;
+    const dy = point.y - area.position.y;
+    const distance = Math.hypot(dx, dy);
+    if (distance > area.range || distance <= GEOMETRY_EPSILON) return distance <= GEOMETRY_EPSILON;
+    const projection = dx * area.direction.x + dy * area.direction.y;
+    return projection / distance >= Math.cos((area.halfAngleDegrees * Math.PI) / 180);
+}
+
+function segmentsIntersect(startA, endA, startB, endB) {
+    const cross = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    const aStart = cross(startA, endA, startB);
+    const aEnd = cross(startA, endA, endB);
+    const bStart = cross(startB, endB, startA);
+    const bEnd = cross(startB, endB, endA);
+    const onSegment = (start, point, end) =>
+        point.x >= Math.min(start.x, end.x) - GEOMETRY_EPSILON &&
+        point.x <= Math.max(start.x, end.x) + GEOMETRY_EPSILON &&
+        point.y >= Math.min(start.y, end.y) - GEOMETRY_EPSILON &&
+        point.y <= Math.max(start.y, end.y) + GEOMETRY_EPSILON;
+    if (Math.abs(aStart) <= GEOMETRY_EPSILON && onSegment(startA, startB, endA)) return true;
+    if (Math.abs(aEnd) <= GEOMETRY_EPSILON && onSegment(startA, endB, endA)) return true;
+    if (Math.abs(bStart) <= GEOMETRY_EPSILON && onSegment(startB, startA, endB)) return true;
+    if (Math.abs(bEnd) <= GEOMETRY_EPSILON && onSegment(startB, endA, endB)) return true;
+    return Math.sign(aStart) !== Math.sign(aEnd) && Math.sign(bStart) !== Math.sign(bEnd);
+}
+
+function coneOverlapsPolygon(area, target, snapshot) {
+    const vertices = colliderSnapshotWorldVertices(snapshot, target.position);
+    if (pointInPolygon(area.position, vertices) || vertices.some((vertex) => pointInsideCone(area, vertex)))
+        return true;
+    if (pointInsideCone(area, closestPointOnPolygon(area.position, vertices))) return true;
+    const heading = Math.atan2(area.direction.y, area.direction.x);
+    const halfAngle = (area.halfAngleDegrees * Math.PI) / 180;
+    const boundaryEnds = [heading - halfAngle, heading + halfAngle].map((angle) => ({
+        x: area.position.x + Math.cos(angle) * area.range,
+        y: area.position.y + Math.sin(angle) * area.range
+    }));
+    return vertices.some((start, index) => {
+        const end = vertices[(index + 1) % vertices.length];
+        return boundaryEnds.some((boundaryEnd) => segmentsIntersect(area.position, boundaryEnd, start, end));
+    });
 }
 
 export function spellAreaContainsTarget(area, target) {
     const dx = target.position.x - area.position.x;
     const dy = target.position.y - area.position.y;
-    const radius = targetRadius(target);
-    if (area.shape === "circle") return Math.hypot(dx, dy) <= area.radius + radius;
+    const radius = combatTargetBoundingRadius(target);
+    if (area.shape === "circle") return combatTargetOverlapsCircle(target, area.position, area.radius);
+    if (area.shape === "line") {
+        return combatTargetOverlapsSweptCircle(
+            target,
+            area.position,
+            {
+                x: area.position.x + area.direction.x * area.range,
+                y: area.position.y + area.direction.y * area.range
+            },
+            area.radius
+        );
+    }
     const projection = dx * area.direction.x + dy * area.direction.y;
     if (projection < -radius || projection > area.range + radius) return false;
-    const perpendicular = Math.abs(dx * area.direction.y - dy * area.direction.x);
-    if (area.shape === "line") return perpendicular <= area.radius + radius;
     if (area.shape === "cone") {
+        const snapshot = combatTargetColliderSnapshot(target);
+        if (snapshot.type === "polygon") return coneOverlapsPolygon(area, target, snapshot);
         const distance = Math.hypot(dx, dy);
         if (distance > area.range + radius) return false;
         if (distance <= radius) return true;

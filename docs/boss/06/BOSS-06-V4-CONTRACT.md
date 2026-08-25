@@ -4,9 +4,9 @@
 2. AS IS: Ledge·Recovery·Anchor 역할이 섞인다. → TO BE: 주 바닥 안쪽의 단방향 플랫폼 3개와 Base Hook Reach 400px 이내 U1~U10만 전투 이동 구조로 사용한다.
 3. AS IS: Runtime 조건문이 이동과 공격을 직접 전이한다. → TO BE: 대기·걷기·점프·내려가기·낙하·착지·공격·패배를 구체 StateDefinition 카탈로그로 소유한다.
 4. 플랫폼 점유는 전용 이벤트나 저장 boolean 없이 매 tick 보스 발 좌표와 canonical surface bounds로 계산한다.
-5. 이동 lane은 좌표 predicate가 안전한 상태만 남기고, 공격 lane은 체력·지지면·쿨다운 조건을 통과한 후보만 선택한다.
+5. 이동 lane은 좌표 predicate가 안전한 상태만 남긴다. Neutral은 거리·ID 순 최근접 active Player를 선택하고 공격 진입 뒤 target/facing을 고정한다.
 6. 공격 선택은 `worldSeed + attempt + selectionSequence`의 결정적 난수이며 선택 패턴은 0.25, 나머지는 선택마다 0.25씩 1.0까지 회복한다.
 7. `대시→충격봉`, `보안 빔→돌진`은 강제 pending 없이 다음 선택 한 번에만 후속 패턴 가중치를 2배로 한다.
 8. 보스는 평상시 플레이어를 걷기·일반 점프·플랫폼 끝 낙하로 추적하고, 지상 돌진은 주 바닥 착지 뒤에만 시작해 몸체 폭으로 계산한 끝점에서 멈춘다.
-9. 기존 근접·가드·카운터·대시·점프미사일·소환·LOW/HIGH 보안 빔과 승리 후 220px Bridge·Boarding 계약은 유지한다.
-10. Boss snapshot v2는 상태·선택 sequence·가중치·진행 중 motion만 보존하며 지지면은 복원 직후 좌표로 다시 계산한다.
+9. 120×150 Warden Polygon 하나를 본체 물리·ImpactTarget·기본탄·Spell·멀티 client prediction이 공유하며 정면 Guard/Counter만 피해를 막는다.
+10. 기존 공격·220px Bridge·Boarding을 유지하고 Boss snapshot v2는 상태·선택 sequence·가중치·motion만 보존하며 지지면은 좌표로 다시 계산한다.

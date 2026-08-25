@@ -5,6 +5,8 @@ export const SPELL_EVENT_TYPE = Object.freeze({
 
 export const SPELL_IMPACT_RESOLUTION = Object.freeze({
     SHIELD_BLOCKED: "shield-blocked",
+    BOSS_DEFEATED: "boss-defeated",
+    BOSS_HIT: "boss-hit",
     ENEMY_DEFEATED: "enemy-defeated",
     ENEMY_HIT: "enemy-hit"
 });

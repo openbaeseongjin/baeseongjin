@@ -1,18 +1,14 @@
-import { distancePointToSegment } from "../combat/CombatSystems.js";
 import { IMPACT_TARGET_KIND } from "../combat/ImpactTarget.js";
 import { SPELL_KEY, SPELL_SOURCE_KIND } from "./SpellRuntimeDefinition.js";
 import { spellTargetPolicy } from "./SpellTargetPolicy.js";
 import { SpellProjectileState } from "./SpellProjectileState.js";
 import { spellAreaContainsTarget } from "./SpellAreaState.js";
+import { combatTargetOverlapsSweptCircle } from "../combat/CombatTargetGeometry.js";
 
 export const INCOMING_SPELL_IMPACT_SPEC = Object.freeze({
     initialSweepSeconds: 0.075,
     resolvedImpactLimit: 256
 });
-
-function targetRadius(target) {
-    return target.radius ?? target.collider?.radius ?? 0;
-}
 
 function sweepStart(projectile, previous, spec) {
     if (previous) return previous.position;
@@ -108,8 +104,12 @@ export class IncomingSpellImpactDetector {
                 const start = sweepStart(projectile, previous, this.spec);
                 const aura = projectile.auraRadius > 0;
                 if (
-                    distancePointToSegment(target.position, start, projectile.position) >
-                    targetRadius(target) + (aura ? projectile.auraRadius : projectile.radius)
+                    !combatTargetOverlapsSweptCircle(
+                        target,
+                        start,
+                        projectile.position,
+                        aura ? projectile.auraRadius : projectile.radius
+                    )
                 ) {
                     continue;
                 }
@@ -152,7 +152,6 @@ export class IncomingSpellImpactDetector {
                     surfaces,
                     collisionBroadPhase: null,
                     dt: this.spec.initialSweepSeconds,
-                    distancePointToSegment,
                     emitImpact: (details) => {
                         if (details.target.id !== target.id) return;
                         this.#rememberResolved(details.eventId);

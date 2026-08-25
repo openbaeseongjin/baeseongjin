@@ -21,7 +21,7 @@ export class HomingMissileRenderer {
         const projectiles = this.selectProjectiles(scene);
         let drawn = 0;
         for (const projectile of projectiles) {
-            if (!isVisible(viewport, circleBounds(projectile.position, projectile.radius + 30))) continue;
+            if (!isVisible(viewport, circleBounds(projectile.position, projectile.radius + 18))) continue;
             drawn += 1;
             const angle = Math.atan2(projectile.velocity.y, projectile.velocity.x);
             const length = Math.max(24, projectile.radius * 1.4);
@@ -33,8 +33,8 @@ export class HomingMissileRenderer {
             context.lineWidth = Math.max(3, height * 0.32);
             context.lineCap = "round";
             context.beginPath();
-            context.moveTo(-length * 1.55, 0);
-            context.lineTo(-length * 0.45, 0);
+            context.moveTo(-length * 1.05, 0);
+            context.lineTo(-length * 0.62, 0);
             context.stroke();
             context.lineCap = "butt";
             context.fillStyle = this.palette.body;

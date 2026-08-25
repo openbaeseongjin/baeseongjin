@@ -324,6 +324,7 @@ export class GameApp {
                 dt,
                 {
                     enemies: state.enemies,
+                    bossStage: state.bossStage ?? state.bossRuntime ?? null,
                     localPlayer: owner
                 },
                 state.tick

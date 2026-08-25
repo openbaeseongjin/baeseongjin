@@ -21,6 +21,7 @@ import {
 import { withProjectileRenderSnapshot } from "./ProjectileRenderSnapshot.js";
 
 export const PROJECTILE_MOTION_CAPABILITY = PROJECTILE_MOTION.CAPABILITY;
+const MAX_CLIENT_COLLISION_SEGMENTS = 2048;
 
 function resolveHomingTurnRate(options) {
     const turnRateRadiansPerSecond =
@@ -45,6 +46,7 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
     #renderCollection;
     #targetStateCollection;
     #usesOwnerPredictionId;
+    #clientCollisionSegments;
 
     constructor({
         id,
@@ -89,6 +91,7 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
         this.#collisionRejectionPolicy = collisionRejectionPolicy;
         this.#usesOwnerPredictionId = usesOwnerPredictionId;
         this.#clientCollisionState = PROJECTILE_INITIAL_COLLISION_STATE[Boolean(predictCollision)];
+        this.#clientCollisionSegments = [];
     }
 
     get renderCollection() {
@@ -123,12 +126,34 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
         return this.#clientCollisionState !== PROJECTILE_COLLISION_STATE.DISABLED;
     }
 
-    observeClientCollision(isOverlapping) {
+    observeClientCollision(isOverlapping, isCurrentlyOverlapping = isOverlapping) {
         if (this.#clientCollisionState === PROJECTILE_COLLISION_STATE.WAITING_SEPARATION) {
-            if (!isOverlapping) this.#clientCollisionState = PROJECTILE_COLLISION_STATE.READY;
+            if (!isCurrentlyOverlapping) this.#clientCollisionState = PROJECTILE_COLLISION_STATE.READY;
             return false;
         }
         return this.#clientCollisionState === PROJECTILE_COLLISION_STATE.READY && isOverlapping;
+    }
+
+    recordClientCollisionSegment(start, end) {
+        if (!this.isClientCollisionPredictionEnabled() || !this.isClientVisible()) return;
+        this.#clientCollisionSegments.push(
+            Object.freeze({
+                start: Object.freeze({ x: start.x, y: start.y }),
+                end: Object.freeze({ x: end.x, y: end.y })
+            })
+        );
+        if (this.#clientCollisionSegments.length > MAX_CLIENT_COLLISION_SEGMENTS) {
+            this.#clientCollisionSegments.splice(
+                0,
+                this.#clientCollisionSegments.length - MAX_CLIENT_COLLISION_SEGMENTS
+            );
+        }
+    }
+
+    consumeClientCollisionSegments() {
+        const segments = Object.freeze(this.#clientCollisionSegments);
+        this.#clientCollisionSegments = [];
+        return segments;
     }
 
     beginClientCollision() {

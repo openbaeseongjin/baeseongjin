@@ -234,6 +234,83 @@ export function colliderSnapshotOverlapsCircle(snapshot, center, circlePosition,
     );
 }
 
+function squaredDistancePointToSegment(point, start, end) {
+    const segmentX = end.x - start.x;
+    const segmentY = end.y - start.y;
+    const lengthSquared = segmentX * segmentX + segmentY * segmentY;
+    if (lengthSquared <= COLLIDER_EPSILON) {
+        const dx = point.x - start.x;
+        const dy = point.y - start.y;
+        return dx * dx + dy * dy;
+    }
+    const projection = Math.max(
+        0,
+        Math.min(1, ((point.x - start.x) * segmentX + (point.y - start.y) * segmentY) / lengthSquared)
+    );
+    const closestX = start.x + segmentX * projection;
+    const closestY = start.y + segmentY * projection;
+    const dx = point.x - closestX;
+    const dy = point.y - closestY;
+    return dx * dx + dy * dy;
+}
+
+function segmentsIntersect(startA, endA, startB, endB) {
+    const aStart = cross(startA, endA, startB);
+    const aEnd = cross(startA, endA, endB);
+    const bStart = cross(startB, endB, startA);
+    const bEnd = cross(startB, endB, endA);
+    const onSegment = (start, point, end) =>
+        point.x >= Math.min(start.x, end.x) - COLLIDER_EPSILON &&
+        point.x <= Math.max(start.x, end.x) + COLLIDER_EPSILON &&
+        point.y >= Math.min(start.y, end.y) - COLLIDER_EPSILON &&
+        point.y <= Math.max(start.y, end.y) + COLLIDER_EPSILON;
+    if (Math.abs(aStart) <= COLLIDER_EPSILON && onSegment(startA, startB, endA)) return true;
+    if (Math.abs(aEnd) <= COLLIDER_EPSILON && onSegment(startA, endB, endA)) return true;
+    if (Math.abs(bStart) <= COLLIDER_EPSILON && onSegment(startB, startA, endB)) return true;
+    if (Math.abs(bEnd) <= COLLIDER_EPSILON && onSegment(startB, endA, endB)) return true;
+    return Math.sign(aStart) !== Math.sign(aEnd) && Math.sign(bStart) !== Math.sign(bEnd);
+}
+
+function squaredDistanceBetweenSegments(startA, endA, startB, endB) {
+    if (segmentsIntersect(startA, endA, startB, endB)) return 0;
+    return Math.min(
+        squaredDistancePointToSegment(startA, startB, endB),
+        squaredDistancePointToSegment(endA, startB, endB),
+        squaredDistancePointToSegment(startB, startA, endA),
+        squaredDistancePointToSegment(endB, startA, endA)
+    );
+}
+
+export function colliderSnapshotOverlapsSweptCircle(snapshot, center, start, end, circleRadius) {
+    assertColliderSnapshot(snapshot);
+    finitePoint(center, "swept collider center");
+    finitePoint(start, "swept circle start");
+    finitePoint(end, "swept circle end");
+    if (!Number.isFinite(circleRadius) || circleRadius <= 0) {
+        throw new Error("Swept collider overlap requires a positive circleRadius");
+    }
+    if (snapshot.type === "circle") {
+        const radius = snapshot.radius + circleRadius;
+        return squaredDistancePointToSegment(center, start, end) <= radius * radius + COLLIDER_EPSILON;
+    }
+    if (
+        colliderSnapshotOverlapsCircle(snapshot, center, start, circleRadius) ||
+        colliderSnapshotOverlapsCircle(snapshot, center, end, circleRadius)
+    ) {
+        return true;
+    }
+    const vertices = colliderSnapshotWorldVertices(snapshot, center);
+    const radiusSquared = circleRadius * circleRadius;
+    for (let index = 0; index < vertices.length; index += 1) {
+        const edgeStart = vertices[index];
+        const edgeEnd = vertices[(index + 1) % vertices.length];
+        if (squaredDistanceBetweenSegments(start, end, edgeStart, edgeEnd) <= radiusSquared + COLLIDER_EPSILON) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function colliderSnapshotsOverlap(snapshotA, centerA, snapshotB, centerB) {
     return resolveColliderSnapshotContact(snapshotA, centerA, snapshotB, centerB) !== null;
 }

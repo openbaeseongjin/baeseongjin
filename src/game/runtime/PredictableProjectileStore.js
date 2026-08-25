@@ -5,6 +5,15 @@ import { SimulationDispatcher } from "../simulation/SimulationDispatcher.js";
 const FIXED_DT = 1 / 120;
 const simulationDispatcher = new SimulationDispatcher();
 
+function projectileSimulationState(state) {
+    if (Array.isArray(state?.combatTargets)) return state;
+    const bossStage = state?.bossStage ?? state?.bossRuntime ?? null;
+    return Object.freeze({
+        ...state,
+        combatTargets: Object.freeze([...(state?.enemies ?? []), ...(bossStage?.impactTargets ?? [])])
+    });
+}
+
 function createReplicatedProjectile({
     objectType,
     motionKind,
@@ -81,6 +90,7 @@ export class PredictableProjectileStore {
 
     apply(events, serverTick, state) {
         const feedbackEvents = [];
+        const simulationState = projectileSimulationState(state);
         for (const event of events) {
             if (event.protocolVersion !== 1) {
                 feedbackEvents.push(event);
@@ -138,7 +148,9 @@ export class PredictableProjectileStore {
             });
             if (!predicted) {
                 const delayedTicks = Math.max(0, serverTick - event.tick);
-                for (let tick = 0; tick < delayedTicks; tick += 1) advanceProjectile(projectile, this.fixedDt, state);
+                for (let tick = 0; tick < delayedTicks; tick += 1) {
+                    advanceProjectile(projectile, this.fixedDt, simulationState);
+                }
             }
             this.objects.set(projectile.id, projectile);
         }
@@ -182,11 +194,12 @@ export class PredictableProjectileStore {
     update(dt, state, clientTick = 0) {
         const resolutions = [];
         const projectiles = [...this.objects.values()];
-        for (const projectile of projectiles) advanceProjectile(projectile, dt, state);
+        const simulationState = projectileSimulationState(state);
+        for (const projectile of projectiles) advanceProjectile(projectile, dt, simulationState);
         const outcomes = simulationDispatcher.dispatch({
             objects: projectiles,
             capabilityId: CLIENT_PROJECTILE_COLLISION_CAPABILITY,
-            context: { state, clientTick, impactBudget: createImpactBudget() }
+            context: { state: simulationState, clientTick, impactBudget: createImpactBudget() }
         });
         if (outcomes.length !== projectiles.length) {
             throw new Error("every replicated projectile must expose client collision capability");

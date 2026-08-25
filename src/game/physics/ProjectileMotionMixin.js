@@ -24,10 +24,12 @@ export const withProjectileLifetime = (Base) =>
         }
 
         advanceProjectileMotion({ dt, ...context }) {
+            const start = { x: this.position.x, y: this.position.y };
             const velocity = this.projectileVelocity({ dt, ...context });
             const currentVelocity = this.physicsStepVelocity();
             this.applyImpulse({ x: velocity.x - currentVelocity.x, y: velocity.y - currentVelocity.y });
             this.integratePhysics(dt);
+            this.recordClientCollisionSegment?.(start, this.position);
             this.ageSeconds += dt;
         }
     };
