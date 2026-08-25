@@ -1,15 +1,18 @@
+import { CONTINUITY_WARDEN_OBJECT_KIND } from "../boss/ContinuityWardenDefinition.js";
+import { LOWER_SECTOR_COMMANDER_OBJECT_KIND } from "../boss/LowerSectorCommanderDefinition.js";
+
 const BOSS_CAMERA_FOCUS_WEIGHT = 0.3;
-const BOSS_VICTORY_CAMERA_FOCUS_WEIGHT = 0.85;
+const BOSS_VICTORY_CAMERA_FOCUS_WEIGHT = 1;
 
 export const BOSS_CAMERA_ZOOM_RATIO = 0.55;
 
 const BOSS_CAMERA_FOCUS_STATUS = Object.freeze({ active: true, completed: true });
 const BOSS_CAMERA_FOCUS_KIND = Object.freeze({
     [LOWER_SECTOR_COMMANDER_OBJECT_KIND.BODY]: true,
-    "boss-continuity-warden": true,
-    "boss-victory-camera": true
+    [CONTINUITY_WARDEN_OBJECT_KIND.WARDEN]: true,
+    [CONTINUITY_WARDEN_OBJECT_KIND.CAMERA]: true
 });
-const BOSS_CAMERA_VICTORY_KIND = "boss-victory-camera";
+const BOSS_CAMERA_VICTORY_KIND = CONTINUITY_WARDEN_OBJECT_KIND.CAMERA;
 
 function insideBounds(position, bounds) {
     return Boolean(
@@ -81,4 +84,8 @@ export function bossCameraFocusPlayer(player, bossStage) {
         }
     };
 }
-import { LOWER_SECTOR_COMMANDER_OBJECT_KIND } from "../boss/LowerSectorCommanderDefinition.js";
+
+export function bossCameraVisibilityTarget(player, bossStage, focusPlayer) {
+    const focusObject = focusObjectForPlayer(player, bossStage);
+    return focusObject?.kind === BOSS_CAMERA_VICTORY_KIND ? focusPlayer : player;
+}

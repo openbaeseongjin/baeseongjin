@@ -3,11 +3,14 @@ import { bossPolygonObjectRenderer } from "./BossPolygonObjectRenderers.js";
 import { ContinuityWardenAnimationController } from "./ContinuityWardenAnimationController.js";
 import {
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
+    CONTINUITY_WARDEN_OBJECT_KIND,
+    CONTINUITY_WARDEN_SHUTTLE_SIZE,
+    CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE
 } from "../../game/boss/ContinuityWardenDefinition.js";
 import { resolveContinuityWardenPose } from "./ContinuityWardenPoseResolver.js";
 
-const OBJECT_KIND = Object.freeze({ WARDEN: "boss-continuity-warden" });
+const OBJECT_KIND = Object.freeze({ WARDEN: CONTINUITY_WARDEN_OBJECT_KIND.WARDEN });
 const MOTION_STATE = Object.freeze({
     "ground-thruster-dash": true,
     "diagonal-thruster-dash": true,
@@ -137,10 +140,41 @@ class ContinuityWardenSpriteRenderer {
     }
 }
 
+class MaintenanceShuttleSpriteRenderer {
+    constructor({ assets }) {
+        this.assets = assets;
+        this.fallback = bossPolygonObjectRenderer(CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE);
+    }
+
+    draw(context, object) {
+        if (object.state === CONTINUITY_WARDEN_SHUTTLE_STATE.HIDDEN) return;
+        const image = this.assets?.imageFor(CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE);
+        if (!image) {
+            this.fallback.draw(context, object);
+            return;
+        }
+        const width = Math.max(1, object.size?.width ?? CONTINUITY_WARDEN_SHUTTLE_SIZE.width);
+        const height = Math.max(1, object.size?.height ?? CONTINUITY_WARDEN_SHUTTLE_SIZE.height);
+        context.save();
+        context.imageSmoothingEnabled = false;
+        context.drawImage(
+            image,
+            Math.round(object.position.x - width * 0.5),
+            Math.round(object.position.y - height * 0.5),
+            width,
+            height
+        );
+        context.restore();
+    }
+}
+
 export class ContinuityWardenSpriteObjectRendererCatalog {
-    constructor({ assets, definition }) {
+    constructor({ assets, definition, objectSpriteAssets = null }) {
         this.renderers = Object.freeze({
-            [OBJECT_KIND.WARDEN]: new ContinuityWardenSpriteRenderer({ assets, definition })
+            [OBJECT_KIND.WARDEN]: new ContinuityWardenSpriteRenderer({ assets, definition }),
+            [CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE]: new MaintenanceShuttleSpriteRenderer({
+                assets: objectSpriteAssets
+            })
         });
     }
 

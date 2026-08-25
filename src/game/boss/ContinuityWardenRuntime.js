@@ -30,6 +30,8 @@ import {
     CONTINUITY_WARDEN_PATTERN as PATTERN,
     CONTINUITY_WARDEN_PROJECTILE_PRESET_ID,
     CONTINUITY_WARDEN_REACTION_STATE,
+    CONTINUITY_WARDEN_SHUTTLE_SIZE,
+    CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE,
     CONTINUITY_WARDEN_SUMMON_ENEMY_TYPES,
     CONTINUITY_WARDEN_SURFACE_KIND
@@ -1729,8 +1731,10 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 id: CONTINUITY_WARDEN_ID.SHUTTLE,
                 kind: OBJECT_KIND.SHUTTLE,
                 position: compositeWorldPoint(this.config.shuttlePosition, worldOffset),
-                size: { width: 500, height: 390 },
-                state: shuttleRevealed ? "boarding" : "hidden",
+                size: CONTINUITY_WARDEN_SHUTTLE_SIZE,
+                state: shuttleRevealed
+                    ? CONTINUITY_WARDEN_SHUTTLE_STATE.BOARDING
+                    : CONTINUITY_WARDEN_SHUTTLE_STATE.HIDDEN,
                 active: shuttleRevealed
             }
         ];

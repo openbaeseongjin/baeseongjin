@@ -28,6 +28,7 @@ import { FinalEscapeCinematic } from "./presentation/FinalEscapeCinematic.js";
 import {
     BOSS_CAMERA_ZOOM_RATIO,
     bossCameraFocusPlayer,
+    bossCameraVisibilityTarget,
     localBossStageSnapshot
 } from "./presentation/BossStageLocalView.js";
 import { ropeAnchorState } from "./rope/RopeAttachment.js";
@@ -582,11 +583,12 @@ export class MultiplayerGameApp {
 
     updateCamera(dt, player, world, bossStage = null) {
         const localBossStage = localBossStageSnapshot(bossStage, player);
+        const focusPlayer = bossCameraFocusPlayer(player, localBossStage);
         return advanceAuthoredCamera({
             camera: this.camera,
             world,
-            player: bossCameraFocusPlayer(player, localBossStage),
-            visibilityTarget: player,
+            player: focusPlayer,
+            visibilityTarget: bossCameraVisibilityTarget(player, localBossStage, focusPlayer),
             mobileView: this.mobileView,
             defaultZoom:
                 localBossStage?.status === "active"

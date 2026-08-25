@@ -82,6 +82,7 @@ Boss06는 이를 우선 재사용하고, 별도의 Rope AI나 새 범용 hazard 
 - 승인된 Phase1 Warden pixel sprite를 유지하고, 전용 locomotion atlas가 없는 V4 `walk/jump/descend/fall/landing`은 `combat-idle` body의 renderer-local pose fallback으로 표현한다. 소환 명령은 `security-command` clip을 재사용한다.
 - `boss-06.json`의 3200px Main·단방향 Ledge 3개·U1~U10·Gate·220px Bridge·Boarding Deck을 authored geometry로 실행한다. 모든 solid surface는 일반 부착 가능하다.
 - 승리 뒤 Warden은 기절하고 Gate light/open → Threshold Bridge → Shuttle reveal → Player별 Boarding → 모든 active Player ready → `beginCompletion()` 순서로 진행한다. 첫 Player가 동료를 순간이동시키지 않는다.
+- Shuttle reveal은 `assets/runtime/objects/boss-06-maintenance-shuttle/maintenance-shuttle-boarding.png`의 `500×390` center-anchor 픽셀 sprite를 사용한다. 승리 카메라는 좁은 모바일 화면에서도 셔틀이 화면 밖에 남지 않도록 reveal 동안 셔틀 중심을 목표로 삼는다. asset 준비 전·실패 시 기존 Canvas 셔틀로 복구하며 위치·Boarding 판정·승리 타임라인은 바꾸지 않는다.
 - Browser Gameplay View와 실제 1~4인·멀티 수렴은 구현 상태와 분리해 검증한다.
 
 ## V2 기록
