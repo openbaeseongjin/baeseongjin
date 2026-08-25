@@ -1,6 +1,7 @@
 import { LOWER_SECTOR_COMMANDER_STATE } from "../../game/boss/LowerSectorCommanderDefinition.js";
 
 const RECOVERY_CLIP_BY_STATE = Object.freeze({
+    [LOWER_SECTOR_COMMANDER_STATE.JUMP]: "jump-landing",
     [LOWER_SECTOR_COMMANDER_STATE.GRAB]: "hammer-recovery",
     [LOWER_SECTOR_COMMANDER_STATE.HAMMER]: "hammer-recovery",
     [LOWER_SECTOR_COMMANDER_STATE.CHARGE]: "charge-recovery"

@@ -2,12 +2,13 @@
 
 > 상태: **LOCAL RUNTIME INTEGRATION / sprite profile 기본 / Polygon fallback**
 
-Boss03 본체 8개 모션과 그랩 전용 훅·사슬·장력 표현을 코드 소유 불변 clip으로 제공한다. Boss 전용 공개 manifest·validator가 아직 없으므로 player 또는 일반 몹 manifest를 재사용하지 않으며, 로드 실패와 미지원 상태는 기존 Boss Polygon 표현으로 복구한다.
+Boss03 본체 9개 모션과 그랩 전용 훅·사슬·장력 표현을 코드 소유 불변 clip으로 제공한다. Boss 전용 공개 manifest·validator가 아직 없으므로 player 또는 일반 몹 manifest를 재사용하지 않으며, 로드 실패와 미지원 상태는 기존 Boss Polygon 표현으로 복구한다.
 
 | 파일 | 셀 | 프레임 | 역할 |
 | --- | ---: | ---: | --- |
 | `idle.png` | `256×256` | 4 | 중립 대기 |
 | `walk.png` | `256×256` | 8 | 이동 거리 144px당 한 주기의 중량 보행 |
+| `jump.png` | `256×256` | 6 | 이륙·상승·정점·낙하·착지 |
 | `grab-lock.png` | `256×256` | 4 | 대상 고정 예고 |
 | `grab-pull.png` | `256×256` | 6 | 사출 반동·구속 전환 |
 | `hammer-slam.png` | `256×256` | 8 | 예고·타격·회복 |
@@ -26,10 +27,11 @@ Boss03 본체 8개 모션과 그랩 전용 훅·사슬·장력 표현을 코드 
 
 - 원본 도구: Codex 내장 ImageGen.
 - 본체 source: `assets/artwork/characters/boss03-lower-sector-commander/source/motion-authoring-v1/`.
+- 점프 source: `assets/artwork/characters/boss03-lower-sector-commander/source/motion-authoring-v2-jump/`.
 - VFX source: `assets/artwork/effects/boss03-chain-hook-pull/source/`.
 - 결정적 변환: `normalize_runtime_assets.py`가 frame 분리, 제한 palette 재매핑, alpha `0/255`, nearest-neighbor 확대와 공통 anchor 정렬을 수행한다.
 - 검토본: 각 authoring 폴더의 `preview/runtime-v1/`에 있다.
 
 ## 비소유 범위
 
-이 package와 clip 시간은 collider, hitbox, 사거리, 피해량, 강제 이동, 물리와 네트워크 결과를 정의하지 않는다. `jump` 전용 생성 clip은 없으므로 현재는 명시적으로 idle 마지막 frame을 사용한다. 조준선·대상 경고 원·해머 충격 파편은 기존 gameplay 표현을 유지한다.
+이 package와 clip 시간은 collider, hitbox, 사거리, 피해량, 강제 이동, 물리와 네트워크 결과를 정의하지 않는다. `jump`의 앞 5개 frame은 기본 0.95초 체공에, 마지막 frame은 0.3초 착지 전환에 맞춘 표현이며 gameplay 점프 궤적을 바꾸지 않는다. 조준선·대상 경고 원·해머 충격 파편은 기존 gameplay 표현을 유지한다.

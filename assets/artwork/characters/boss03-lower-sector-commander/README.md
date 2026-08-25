@@ -32,6 +32,7 @@
 | Player 스타일 대기 후보 | [`source/boss03-idle-player-style-authoring-v2.png`](./source/boss03-idle-player-style-authoring-v2.png) | `1024×1536px` RGBA · 모션 스타일 탐색 source |
 | Player 스타일 대기 선택본 | [`source/boss03-idle-player-style-selected-v1.png`](./source/boss03-idle-player-style-selected-v1.png) | `1024×1536px` · 사용자 선택 모션 외형 기준 |
 | 모션 저작 v1 | [`source/motion-authoring-v1/README.md`](./source/motion-authoring-v1/README.md) | 8개 클립·47개 생성 프레임·결정적 Runtime 정규화 |
+| 점프 모션 v2 | [`source/motion-authoring-v2-jump/README.md`](./source/motion-authoring-v2-jump/README.md) | `jump` 6프레임·투명 atlas·대표 apex·Runtime 연결 |
 
 ## 승인 외형
 
@@ -70,6 +71,7 @@
 - `walk` 8프레임은 이동 거리 `144px`마다 한 주기를 재생한다. collider·이동 속도·AI와 분리된 표현 주기다.
 - 공격 clip은 gameplay `direction`과 원본 방향을 비교해 그랩·해머·돌진이 판정 방향을 바라보게 한다.
 - 사출 훅·반복 사슬·당김 장력은 [`assets/artwork/effects/boss03-chain-hook-pull/`](../../effects/boss03-chain-hook-pull/)에서 분리 저작한다.
+- `jump`는 별도 v2 source와 6프레임 atlas를 사용한다. 이륙 준비·상승·정점·낙하는 gameplay `jump` 상태 동안 재생하고 착지 frame은 `neutral` 전환 표현으로 분리한다.
 
 ## 사용 경계
 
