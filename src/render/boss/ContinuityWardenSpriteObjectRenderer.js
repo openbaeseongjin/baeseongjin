@@ -8,6 +8,7 @@ import {
     CONTINUITY_WARDEN_OBJECT_KIND,
     CONTINUITY_WARDEN_SECURITY_STAR_SIZE,
     CONTINUITY_WARDEN_SECURITY_STAR_STATE,
+    CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE
@@ -272,8 +273,8 @@ class MaintenanceShuttleSpriteRenderer {
         context.imageSmoothingEnabled = false;
         context.drawImage(
             image,
-            Math.round(object.position.x - width * CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR.x),
-            Math.round(object.position.y - height * CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR.y),
+            Math.round(object.position.x - width * CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR.x),
+            Math.round(object.position.y - height * CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR.y),
             width,
             height
         );

@@ -35,6 +35,7 @@ import {
     CONTINUITY_WARDEN_REACTION_STATE,
     CONTINUITY_WARDEN_SECURITY_STAR_SIZE,
     CONTINUITY_WARDEN_SECURITY_STAR_STATE,
+    CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE,
@@ -183,6 +184,13 @@ function bounds(value, fallback) {
         positive(value.height, 0)
         ? { x: value.x, y: value.y, width: value.width, height: value.height }
         : { ...fallback };
+}
+
+function anchoredVisualCenter(position, size, anchor) {
+    return {
+        x: position.x + size.width * (0.5 - anchor.x),
+        y: position.y + size.height * (0.5 - anchor.y)
+    };
 }
 
 function securityStarState(wardenState, actionPhase) {
@@ -349,6 +357,13 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             .map((surface) => landingPosition(surface, bodyHeight))
             .sort((left, right) => left.x - right.x);
         const gateBounds = bounds(parameters.gateBounds, { x: 4360, y: -1750, width: 480, height: 760 });
+        const departureSurface = surfaces.find(({ kind }) => kind === CONTINUITY_WARDEN_SURFACE_KIND.DEPARTURE);
+        const departureBounds = bounds(departureSurface?.bounds, {
+            x: gateBounds.x,
+            y: gateBounds.y + gateBounds.height,
+            width: CONTINUITY_WARDEN_GATE_SIZE.width,
+            height: 135
+        });
         const boardingBounds = bounds(parameters.boardingBounds, { x: 4920, y: -1220, width: 360, height: 235 });
         const halfBodyWidth = bodyWidth * 0.5;
         const guardInset = positive(parameters.guardEdgeInset, 200);
@@ -366,6 +381,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             lowBeamBounds: bounds(parameters.lowBeamBounds, { x: 980, y: -1200, width: 3160, height: 130 }),
             highBeamBounds: bounds(parameters.highBeamBounds, { x: 980, y: -1485, width: 3160, height: 270 }),
             gateBounds,
+            departureBounds,
             bridgeBounds: bounds(parameters.bridgeBounds, { x: 4120, y: -1115, width: 240, height: 130 }),
             boardingBounds,
             shuttlePosition: point(parameters.shuttlePosition, {
@@ -1767,8 +1783,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 kind: OBJECT_KIND.GATE,
                 position: compositeWorldPoint(
                     {
-                        x: this.config.gateBounds.x + this.config.gateBounds.width * 0.5,
-                        y: this.config.gateBounds.y + this.config.gateBounds.height
+                        x: this.config.departureBounds.x + CONTINUITY_WARDEN_GATE_SIZE.width * 0.5,
+                        y: this.config.departureBounds.y
                     },
                     worldOffset
                 ),
@@ -1888,10 +1904,11 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 id: CONTINUITY_WARDEN_ID.VICTORY_CAMERA,
                 kind: OBJECT_KIND.CAMERA,
                 position: compositeWorldPoint(
-                    {
-                        x: this.config.shuttlePosition.x,
-                        y: this.config.shuttlePosition.y - CONTINUITY_WARDEN_SHUTTLE_SIZE.height * 0.5
-                    },
+                    anchoredVisualCenter(
+                        this.config.shuttlePosition,
+                        CONTINUITY_WARDEN_SHUTTLE_SIZE,
+                        CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR
+                    ),
                     worldOffset
                 ),
                 size: { width: 1, height: 1 },
