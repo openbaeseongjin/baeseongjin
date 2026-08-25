@@ -3,6 +3,7 @@ import { createAugmentImpactReceipt } from "../network/AugmentImpactClaim.js";
 import { createCheckpointClaimReceipt } from "../network/CheckpointClaim.js";
 import { MULTIPLAYER_ERROR_CODE, MULTIPLAYER_MESSAGE_TYPE } from "../network/MultiplayerMessageDefinition.js";
 import { MULTIPLAYER_TIMING } from "../network/MultiplayerTiming.js";
+import { deserializePartyChatMessage } from "../network/PartyChatMessage.js";
 import { createOwnerMotionReceipt } from "../network/OwnerMotionState.js";
 import {
     createPlayerImpactReceipt,
@@ -100,6 +101,8 @@ const SERVER_MESSAGE_HANDLER = Object.freeze({
         c.authority.recordCheckpointClaimReceipt(createCheckpointClaimReceipt(m.payload)),
     [MULTIPLAYER_MESSAGE_TYPE.SUMMIT_CLAIM_RECEIPT]: (m, c) =>
         c.authority.recordSummitClaimReceipt(createSummitClaimReceipt(m.payload)),
+    [MULTIPLAYER_MESSAGE_TYPE.PARTY_CHAT_MESSAGE]: (m, c) =>
+        c.authority.partyChatMessages.push(deserializePartyChatMessage(m.payload)),
     [MULTIPLAYER_MESSAGE_TYPE.PLAYER_LEFT]: () => {}
 });
 

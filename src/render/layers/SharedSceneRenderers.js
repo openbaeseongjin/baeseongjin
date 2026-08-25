@@ -5,7 +5,7 @@ import { windBladePhase } from "../../game/world/WorldForceField.js";
 import { isSurfaceEnabledForProgress } from "../../game/world/WorldGateGeometry.js";
 import { authoredRegionForPosition } from "../../game/world/AuthoredLandmarkResolver.js";
 import { resolveAccessModuleTargets } from "../ScreenEdgeGuide.js";
-import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
+import { boundsForVertices, isVisible } from "../RenderViewport.js";
 import {
     DEFAULT_WORLD_OBJECT_MOCK_CATALOG,
     WORLD_OBJECT_SPRITE_STATE,
@@ -334,12 +334,21 @@ export class HardpointJammerSurfaceRenderer {
 
 export class AccessModuleSignalRenderer {
     draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
+        if (scene.hudVisible === false) return;
         const targets = resolveAccessModuleTargets({
             world: scene.world,
             worldProgress: scene.worldProgress,
             playerPosition: scene.player?.position
         });
-        const visible = targets.filter(({ module }) => isVisible(viewport, circleBounds(module.position, 48)));
+        const visible = targets.filter(({ module }) => {
+            const bounds = viewport.visibleWorldBounds;
+            return (
+                module.position.x >= bounds.minX &&
+                module.position.x <= bounds.maxX &&
+                module.position.y >= bounds.minY &&
+                module.position.y <= bounds.maxY
+            );
+        });
         for (const { module, scale } of visible) {
             const pulse = 0.5 + Math.sin(presentationTimeSeconds * 7) * 0.15;
             context.save();

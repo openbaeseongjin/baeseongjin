@@ -14,7 +14,8 @@ import { ACTOR_STATUS_COLORS, resolveHealthStatus } from "./ActorStatusPresentat
 import { spellDefinition } from "../game/spells/SpellCatalog.js";
 import { SPELL_COMMAND_LABEL, SPELL_SLOT_LABEL, SPELL_SLOT_ORDER } from "../game/spells/SpellDefinition.js";
 import { POINTER_SPELL_TOKEN } from "../core/input/PointerSpellCommandBuffer.js";
-import { layoutAccessEdgeGuides, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
+import { graphemes } from "../core/text/GraphemeText.js";
+import { layoutScreenEdgePresentations, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
 import { CLIENT_STATUS_TYPE } from "../game/combat/ClientStatusFeedbackDefinition.js";
 import { ROPE_IMPACT_EVENT_TYPE, ROPE_IMPACT_REJECTION_REASON } from "../game/combat/RopeImpactAttack.js";
@@ -117,6 +118,125 @@ export class CanvasRenderer {
         return { x: (pointer.x - rect.left) / zoom + camera.x, y: (pointer.y - rect.top) / zoom + camera.y };
     }
 
+    messageSpeaker(presentation, scene) {
+        if (!presentation) return null;
+        return (
+            [scene.player, ...(scene.otherPlayers ?? [])].find((player) => player?.id === presentation.speakerId) ??
+            (presentation.audience === "local-player" ? scene.player : null)
+        );
+    }
+
+    wrapTextLines(text, maxWidth) {
+        const lines = [];
+        let line = "";
+        for (const character of graphemes(text)) {
+            if (line.length === 0 || this.context.measureText(line + character).width <= maxWidth) {
+                line += character;
+                continue;
+            }
+            lines.push(line);
+            line = character;
+        }
+        if (line || lines.length === 0) lines.push(line);
+        return Object.freeze(lines);
+    }
+
+    playerMessageBubbleLayout(presentation, scene) {
+        if (!presentation) return null;
+        const compactView = scene.mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
+        const fontSize = compactView ? 12 : 13;
+        const horizontalPadding = compactView ? 12 : 14;
+        const verticalPadding = compactView ? 9 : 10;
+        const lineHeight = compactView ? 16 : 18;
+        const maximumWidth = Math.max(40, Math.min(compactView ? 250 : 320, this.cssWidth - 24));
+        this.context.font = `700 ${fontSize}px system-ui, sans-serif`;
+        const lines = this.wrapTextLines(presentation.text, maximumWidth - horizontalPadding * 2);
+        const measuredWidth = Math.max(...lines.map((line) => this.context.measureText(line).width));
+        return Object.freeze({
+            compactView,
+            fontSize,
+            horizontalPadding,
+            verticalPadding,
+            lineHeight,
+            lines,
+            width: Math.min(maximumWidth, Math.max(88, measuredWidth + horizontalPadding * 2)),
+            height: lines.length * lineHeight + verticalPadding * 2
+        });
+    }
+
+    screenEdgeAvoidanceBounds(scene) {
+        if (scene.hudVisible === false) return Object.freeze([]);
+        const compactView = scene.mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
+        const statusWidth = compactView ? Math.min(240, this.cssWidth - 36) : 360;
+        const statusY = compactView && scene.bossStagePresentation?.hud ? 94 : 54;
+        const statusHeight = compactView ? 66 : 82;
+        const bounds = [
+            Object.freeze({ minX: 18, minY: statusY, maxX: 18 + statusWidth, maxY: statusY + statusHeight })
+        ];
+        const accessTargets = resolveAccessModuleTargets({
+            world: scene.world,
+            worldProgress: scene.worldProgress,
+            playerPosition: scene.player?.position
+        });
+        if (accessTargets.length > 0) {
+            const accessWidth = compactView ? Math.min(240, this.cssWidth - 36) : 300;
+            const accessY = compactView ? 156 : 178;
+            bounds.push(Object.freeze({ minX: 18, minY: accessY, maxX: 18 + accessWidth, maxY: accessY + 34 }));
+        }
+        return Object.freeze(bounds);
+    }
+
+    createScreenEdgeLayout(scene) {
+        const presentation = scene.playerMessagePresentation;
+        const speaker = this.messageSpeaker(presentation, scene);
+        const playerMessageBubble = this.playerMessageBubbleLayout(presentation, scene);
+        const accessTarget =
+            scene.hudVisible === false
+                ? null
+                : resolveAccessModuleTargets({
+                      world: scene.world,
+                      worldProgress: scene.worldProgress,
+                      playerPosition: scene.player?.position
+                  })[0];
+        const candidates = [];
+        if (speaker?.position && playerMessageBubble) {
+            candidates.push(
+                Object.freeze({
+                    id: presentation.messageId,
+                    target: speaker.position,
+                    priority: 100,
+                    size: Object.freeze({
+                        width: playerMessageBubble.width,
+                        height: playerMessageBubble.height + 12
+                    })
+                })
+            );
+        }
+        if (accessTarget) {
+            candidates.push(
+                Object.freeze({
+                    id: accessTarget.module.id,
+                    target: accessTarget.module.position,
+                    priority: 10,
+                    size: Object.freeze({ width: 36, height: 30 })
+                })
+            );
+        }
+        const placements = layoutScreenEdgePresentations({
+            presentations: candidates,
+            camera: scene.camera,
+            viewportWidth: this.cssWidth,
+            viewportHeight: this.cssHeight,
+            insets: { left: 12, right: 12, top: 54, bottom: scene.mobileView ? 116 : 92 },
+            avoidanceBounds: this.screenEdgeAvoidanceBounds(scene)
+        });
+        return Object.freeze({
+            playerMessage: placements.find(({ id }) => id === presentation?.messageId) ?? null,
+            playerMessageBubble,
+            accessGuide: placements.find(({ id }) => id === accessTarget?.module.id) ?? null
+        });
+    }
+
     draw(scene) {
         const metricsEnabled = scene.metricsVisible === true;
         const startedAtMs = metricsEnabled ? this.performanceNow() : null;
@@ -131,6 +251,7 @@ export class CanvasRenderer {
         const mobileControlLayout = scene.mobileControls?.visible
             ? getMobileControlLayout(this.cssWidth, this.cssHeight)
             : null;
+        const screenEdgeLayout = this.createScreenEdgeLayout(scene);
         this.sceneRenderer.draw({
             context: this.context,
             scene,
@@ -142,7 +263,7 @@ export class CanvasRenderer {
         this.drawDirectionCharacter(scene.directionCharacterPresentation, scene);
         if (scene.hudVisible !== false) {
             if (!bossHudBlocked(scene)) this.drawBossHud(scene.bossStagePresentation?.hud, scene);
-            this.drawAccessGuide(scene);
+            this.drawAccessGuide(screenEdgeLayout.accessGuide);
             this.drawLocalStatusHud(scene);
             if (!mobileControlLayout) this.drawSpellHotbar(scene);
             this.drawAccessHud(scene);
@@ -151,7 +272,12 @@ export class CanvasRenderer {
         this.drawRewardSelectionOverlay(scene.augmentReward);
         this.drawMobileControls(scene.mobileControls, mobileControlLayout);
         this.drawStoryPresentation(scene.storyPresentation);
-        this.drawPlayerMessagePresentation(scene.playerMessagePresentation, scene);
+        this.drawPlayerMessagePresentation(
+            scene.playerMessagePresentation,
+            scene,
+            screenEdgeLayout.playerMessage,
+            screenEdgeLayout.playerMessageBubble
+        );
         this.drawStatusFeedback(scene.eventFlash);
         this.drawRopeCutFeedback(scene.eventFlash, scene.ropeDisabledRemaining);
         this.drawRunEndOverlay(scene);
@@ -640,29 +766,26 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawPlayerMessagePresentation(presentation, scene) {
+    drawPlayerMessagePresentation(presentation, scene, edgePlacement = null, bubbleLayout = null) {
         if (!presentation) return;
-        const speaker =
-            [scene.player, ...(scene.otherPlayers ?? [])].find((player) => player?.id === presentation.speakerId) ??
-            (presentation.audience === "local-player" ? scene.player : null);
+        const speaker = this.messageSpeaker(presentation, scene);
         if (!speaker?.position || !scene.camera) return;
         const ctx = this.context;
         const margin = 12;
-        const compactView = scene.mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
         const screen = projectWorldToScreen(speaker.position, scene.camera);
-        const fontSize = compactView ? 12 : 13;
-        const horizontalPadding = compactView ? 12 : 14;
-        const height = compactView ? 34 : 38;
+        const layout = bubbleLayout ?? this.playerMessageBubbleLayout(presentation, scene);
+        if (!layout) return;
+        const { compactView, fontSize, horizontalPadding, verticalPadding, lineHeight, width, height } = layout;
         ctx.save();
         ctx.font = `700 ${fontSize}px system-ui, sans-serif`;
-        const width = Math.min(
-            compactView ? 230 : 280,
-            Math.max(88, ctx.measureText(presentation.text).width + horizontalPadding * 2)
-        );
         const radius = speaker.collider?.radius ?? 18;
         const overheadOffset = (radius + (compactView ? 44 : 50)) * (scene.camera.zoom ?? 1);
-        const x = Math.max(margin, Math.min(this.cssWidth - margin - width, screen.x - width * 0.5));
-        const y = Math.max(54, Math.min(this.cssHeight - margin - height - 10, screen.y - overheadOffset - height));
+        const x = edgePlacement
+            ? edgePlacement.x - width * 0.5
+            : Math.max(margin, Math.min(this.cssWidth - margin - width, screen.x - width * 0.5));
+        const y = edgePlacement
+            ? edgePlacement.y - height * 0.5
+            : Math.max(54, Math.min(this.cssHeight - margin - height - 10, screen.y - overheadOffset - height));
         const fadeIn = Math.min(1, presentation.age / 0.1);
         const fadeOut = Math.min(1, (presentation.durationSeconds - presentation.age) / 0.16);
         const partyMessage = presentation.channel === "party-chat";
@@ -672,24 +795,58 @@ export class CanvasRenderer {
         ctx.strokeStyle = partyMessage ? "rgba(192, 132, 252, 0.82)" : "rgba(251, 191, 36, 0.82)";
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y, width, height);
-        const tailX = Math.max(x + 10, Math.min(x + width - 10, screen.x));
+        if (edgePlacement) {
+            this.drawPlayerMessageDirectionTail({
+                centerX: x + width * 0.5,
+                centerY: y + height * 0.5,
+                width,
+                height,
+                angle: edgePlacement.angle
+            });
+        } else {
+            const tailX = Math.max(x + 10, Math.min(x + width - 10, screen.x));
+            ctx.beginPath();
+            ctx.moveTo(tailX - 7, y + height);
+            ctx.lineTo(tailX, y + height + 9);
+            ctx.lineTo(tailX + 7, y + height);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = `700 ${fontSize}px system-ui, sans-serif`;
+        const visibleLines = this.wrapTextLines(
+            presentation.visibleText ?? presentation.text,
+            width - horizontalPadding * 2
+        );
+        visibleLines.forEach((line, index) =>
+            ctx.fillText(line, x + width * 0.5, y + verticalPadding + lineHeight * (index + 0.5))
+        );
+        ctx.restore();
+    }
+
+    drawPlayerMessageDirectionTail({ centerX, centerY, width, height, angle }) {
+        const ctx = this.context;
+        const directionX = Math.cos(angle);
+        const directionY = Math.sin(angle);
+        const horizontalScale =
+            Math.abs(directionX) < 1e-9 ? Number.POSITIVE_INFINITY : (width * 0.5) / Math.abs(directionX);
+        const verticalScale =
+            Math.abs(directionY) < 1e-9 ? Number.POSITIVE_INFINITY : (height * 0.5) / Math.abs(directionY);
+        const edgeScale = Math.min(horizontalScale, verticalScale);
+        const edgeX = centerX + directionX * edgeScale;
+        const edgeY = centerY + directionY * edgeScale;
+        const perpendicularX = -directionY;
+        const perpendicularY = directionX;
         ctx.beginPath();
-        ctx.moveTo(tailX - 7, y + height);
-        ctx.lineTo(tailX, y + height + 9);
-        ctx.lineTo(tailX + 7, y + height);
+        ctx.moveTo(edgeX + perpendicularX * 7, edgeY + perpendicularY * 7);
+        ctx.lineTo(edgeX + directionX * 10, edgeY + directionY * 10);
+        ctx.lineTo(edgeX - perpendicularX * 7, edgeY - perpendicularY * 7);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#f8fafc";
-        ctx.font = `700 ${fontSize}px system-ui, sans-serif`;
-        ctx.fillText(
-            presentation.visibleText ?? presentation.text,
-            x + width * 0.5,
-            y + (compactView ? 22 : 25),
-            width - horizontalPadding * 2
-        );
-        ctx.restore();
     }
 
     drawStatusFeedback(eventFlash) {
@@ -979,38 +1136,25 @@ export class CanvasRenderer {
         ctx.restore();
     }
 
-    drawAccessGuide({ world, worldProgress, player, camera, mobileView = false }) {
-        if (!world?.accessModules?.length || !camera || !player?.position) return;
-        const targets = resolveAccessModuleTargets({ world, worldProgress, playerPosition: player.position });
-        const compactView = mobileView || (this.cssWidth <= 900 && this.cssHeight <= 500);
+    drawAccessGuide(guide) {
+        if (!guide) return;
         const ctx = this.context;
-        const guides = layoutAccessEdgeGuides({
-            targets,
-            camera,
-            viewportWidth: this.cssWidth,
-            viewportHeight: this.cssHeight,
-            insets: { left: 30, right: 30, top: 54, bottom: mobileView ? 116 : 30 },
-            compactView
-        });
-        for (const guide of guides) {
-            const pulse = 0.9 + Math.sin(this.now() * 7) * 0.1;
-            ctx.save();
-            ctx.translate(guide.x, guide.y);
-            ctx.rotate(guide.angle);
-            ctx.scale(guide.scale, guide.scale);
-            ctx.globalAlpha = pulse;
-            ctx.fillStyle = "#fbbf24";
-            ctx.strokeStyle = "#fff7d6";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(16, 0);
-            ctx.lineTo(-10, -12);
-            ctx.lineTo(-3, 0);
-            ctx.lineTo(-10, 12);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
-        }
+        const pulse = 0.9 + Math.sin(this.now() * 7) * 0.1;
+        ctx.save();
+        ctx.translate(guide.x, guide.y);
+        ctx.rotate(guide.angle);
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = "#fbbf24";
+        ctx.strokeStyle = "#fff7d6";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(16, 0);
+        ctx.lineTo(-10, -12);
+        ctx.lineTo(-3, 0);
+        ctx.lineTo(-10, 12);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
     }
 }

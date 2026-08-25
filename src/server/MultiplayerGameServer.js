@@ -11,6 +11,11 @@ import {
 } from "../game/network/WorldSnapshotEnvelope.js";
 import { routeClientMessage } from "./ClientMessageRouter.js";
 import { MULTIPLAYER_ERROR_CODE, MULTIPLAYER_MESSAGE_TYPE } from "../game/network/MultiplayerMessageDefinition.js";
+import {
+    createPartyChatMessage,
+    deserializePartyChatSubmission,
+    serializePartyChatMessage
+} from "../game/network/PartyChatMessage.js";
 
 const CHANNEL_PATTERN = /^\d{4}$/;
 const DEFAULT_MAX_UNACKNOWLEDGED_SNAPSHOTS = 4;
@@ -303,6 +308,16 @@ export class MultiplayerGameServer {
             this.sendSnapshot(socket, delivery, pending);
         }
         return true;
+    }
+
+    relayPartyChat(room, playerId, serializedSubmission) {
+        const submission = deserializePartyChatSubmission(serializedSubmission);
+        const partyChatMessage = createPartyChatMessage({ speakerId: playerId, ...submission });
+        this.broadcast(room, {
+            type: MULTIPLAYER_MESSAGE_TYPE.PARTY_CHAT_MESSAGE,
+            payload: serializePartyChatMessage(partyChatMessage)
+        });
+        return partyChatMessage;
     }
 
     broadcast(room, message, { exclude = null } = {}) {

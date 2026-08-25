@@ -36,7 +36,7 @@
 - 시작 화면·설정의 통합 Help는 PC 좌·우 클릭 마법 커맨드, 모바일 Rope 기본 선택과 `슬롯 선택 → 월드 터치 1회 시전`, 네 슬롯 쿨다운, 몹 처치 경험치와 자동 장착 증강을 현재 Runtime과 동일하게 설명한다.
 - 2인 권위 서버의 명령 receipt, 20Hz 스냅샷, 자기 예측과 동료 보간
 - 1인·2인 멀티 공통 Enemy stable-ID in-place prediction restore, indexed history sampling과 fixed-step 단일 remote sample
-- 1-1/1-2 local Player Bark data catalog·queue·causal dedupe·speaker 머리 위 타이핑 말풍선과 future party-chat audience 확장 seam
+- 1-1/1-2 local Player Bark와 인증 Party Chat이 공용 queue·causal dedupe·speaker 머리 위/화면 경계 타이핑 말풍선을 사용
 - 0.45.0 Stage Direction v1 schema·compiler·coverage/review release gate·timeline runtime·authority adapter와 1-1/1-2 Camera/Story/Bark/Audio/Lighting/비언어 migration
 - 0.46.0 전투 밸런스: 낙하 피해 50% 완화, 로프 몸체 충돌 `1000px/s → 100 피해` 속력 비례화, 감전 로프 100 DPS와 속력 기반 충돌 폭발의 augment-impact v2 검증
 - 충돌 broad phase Quadtree와 Player별 world-space 관심 영역: 정적 surface는 전역 index에 유지하고, 멀티는 모든 active Player 영역의 합집합을 사용하며, 화면 밖 Enemy는 전체 시뮬레이션을 동결한다. active Player 주변에서는 swept collider bounds로 surface·actor 후보만 narrow phase에 전달한다.

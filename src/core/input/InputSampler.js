@@ -18,15 +18,20 @@ export class InputSampler {
         this.interactSequence = 0;
         this.touchActive = false;
         this.attached = false;
+        this.suspended = false;
         this.onKeyDown = (event) => {
+            if (this.suspended) return;
             const alreadyHeld = this.keys.has(event.code);
             if (movementKeys.has(event.code)) this.keys.add(event.code);
             if (!alreadyHeld && (event.code === "KeyW" || event.code === "ArrowUp")) {
                 this.interactSequence += 1;
             }
         };
-        this.onKeyUp = (event) => this.keys.delete(event.code);
+        this.onKeyUp = (event) => {
+            if (!this.suspended) this.keys.delete(event.code);
+        };
         this.onPointerMove = (event) => {
+            if (this.suspended) return;
             if (event.pointerType === "touch") {
                 this.updateTouchPointer(event);
                 return;
@@ -35,6 +40,7 @@ export class InputSampler {
             this.pointer.y = event.clientY;
         };
         this.onPointerDown = (event) => {
+            if (this.suspended) return;
             if (event.pointerType !== "touch") {
                 const nowSeconds = (event.timeStamp ?? globalThis.performance?.now?.() ?? 0) / 1000;
                 if (event.button === 2) {
@@ -83,13 +89,17 @@ export class InputSampler {
             }
         };
         this.onPointerUp = (event) => {
+            if (this.suspended) return;
             if (event.pointerType !== "touch" && event.button === 2) {
                 return;
             }
             this.releasePointer(event.pointerId, event.pointerType, "pointerup");
         };
-        this.onPointerCancel = (event) => this.releasePointer(event.pointerId, event.pointerType, "pointercancel");
+        this.onPointerCancel = (event) => {
+            if (!this.suspended) this.releasePointer(event.pointerId, event.pointerType, "pointercancel");
+        };
         this.onPointerLeave = (event) => {
+            if (this.suspended) return;
             if (event.pointerType !== "touch" && event.relatedTarget === null) {
                 this.releasePointer(event.pointerId, event.pointerType, "pointer-leave");
             }
@@ -164,6 +174,14 @@ export class InputSampler {
         this.onRopeRelease(this.snapshot(), reason);
     }
 
+    setSuspended(suspended, reason = "input-suspended") {
+        const next = Boolean(suspended);
+        if (this.suspended === next) return false;
+        if (next) this.clearTransientInput(reason);
+        this.suspended = next;
+        return true;
+    }
+
     attach() {
         if (this.attached || !this.target?.addEventListener || !this.surface?.addEventListener) return;
         this.target.addEventListener("keydown", this.onKeyDown);
@@ -192,6 +210,7 @@ export class InputSampler {
         this.surface.removeEventListener("pointerleave", this.onPointerLeave);
         this.surface.removeEventListener("contextmenu", this.onContextMenu);
         this.clearTransientInput();
+        this.suspended = false;
         this.attached = false;
     }
 
