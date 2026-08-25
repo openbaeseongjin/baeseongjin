@@ -26,6 +26,13 @@ export const CONTINUITY_WARDEN_ACTION_PHASE = Object.freeze({
     RECOVERY: "recovery"
 });
 
+export const CONTINUITY_WARDEN_SECURITY_STAR_STATE = Object.freeze({
+    IDLE: "idle",
+    TELEGRAPH: "telegraph",
+    ACTIVE: "active",
+    ENDING: "ending"
+});
+
 export const CONTINUITY_WARDEN_HUD_LABEL = Object.freeze({
     SECURITY_WARNING: "WARNING"
 });
@@ -84,14 +91,13 @@ export const CONTINUITY_WARDEN_HAZARD_KIND = Object.freeze({
 
 export const CONTINUITY_WARDEN_OBJECT_KIND = Object.freeze({
     WARDEN: "boss-continuity-warden",
-    EMITTER: "boss-security-emitter",
+    SECURITY_STAR: "boss-security-star",
     HAZARD: "boss-warden-hazard",
     BEAM: "boss-security-beam",
     GATE: "boss-departure-gate",
     BRIDGE: "boss-threshold-bridge",
     SHUTTLE: "boss-maintenance-shuttle",
-    CAMERA: "boss-victory-camera",
-    PAD_SURFACE: "boss-pad-surface"
+    CAMERA: "boss-victory-camera"
 });
 
 export const CONTINUITY_WARDEN_GATE_STATE = Object.freeze({
@@ -108,13 +114,14 @@ export const CONTINUITY_WARDEN_SHUTTLE_STATE = Object.freeze({
 });
 
 export const CONTINUITY_WARDEN_SHUTTLE_SIZE = Object.freeze({ width: 500, height: 390 });
+export const CONTINUITY_WARDEN_SECURITY_STAR_SIZE = Object.freeze({ width: 64, height: 64 });
 export const CONTINUITY_WARDEN_BOTTOM_CENTER_ANCHOR = Object.freeze({ x: 0.5, y: 1 });
 
 export const CONTINUITY_WARDEN_ID = Object.freeze({
     BODY: "boss-06:continuity-warden:body",
     MISSILE_OWNER: "boss-06:continuity-warden:missile-rack",
-    EMITTER_LEFT: "boss-06:emitter-left",
-    EMITTER_RIGHT: "boss-06:emitter-right",
+    SECURITY_STAR_LEFT: "boss-06:security-star-left",
+    SECURITY_STAR_RIGHT: "boss-06:security-star-right",
     DEPARTURE_GATE: "boss-06:departure-gate",
     THRESHOLD_BRIDGE: "boss-06:threshold-bridge",
     SHUTTLE: "boss-06:maintenance-shuttle",
@@ -122,8 +129,7 @@ export const CONTINUITY_WARDEN_ID = Object.freeze({
     SECURITY_WARNING: (index) => `boss-06:security-beam-warning:${index}`,
     SECURITY_BEAM: "boss-06:security-beam",
     VICTORY_CAMERA: "boss-06:victory-camera",
-    MISSILE: (attempt, sequence, index) => `boss-06:missile:${attempt}:${sequence}:${index}`,
-    PRESENTATION_SURFACE: (surfaceId) => `${surfaceId}:presentation`
+    MISSILE: (attempt, sequence, index) => `boss-06:missile:${attempt}:${sequence}:${index}`
 });
 
 export const CONTINUITY_WARDEN_SURFACE_KIND = Object.freeze({

@@ -38,6 +38,7 @@
 - Runtime package: `assets/runtime/environments/boss-06-continuity-warden-arena/`
 - 원본 PNG를 변형 없이 runtime atlas로 복사하고 rectangle frame으로 `900×120` 장갑 panel과 `900×8` 상단 cap을 선택한다.
 - `bossStageId: boss-06` 표면만 전용 terrain definition을 선택하며 일반 Sector 06 package는 유지한다.
+- Boss Runtime의 과거 `boss-pad-surface` 중복 presentation은 제거하고 collision World surface 하나가 이 terrain skin을 그리는 단일 권위가 된다.
 - Collision polygon, one-way edge chain, surface kind, grappleable, Rope, Physics, Camera, Boss FSM, Map Editor geometry와 Network authority는 변경하지 않는다.
 - 일반 `sector-06-rooftop-evacuation` package를 교체하지 않는다.
 

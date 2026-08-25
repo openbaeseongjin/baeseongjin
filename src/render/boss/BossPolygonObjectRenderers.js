@@ -4,6 +4,7 @@ import {
     CONTINUITY_WARDEN_GATE_STATE,
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
     CONTINUITY_WARDEN_OBJECT_KIND,
+    CONTINUITY_WARDEN_SECURITY_STAR_STATE,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE
@@ -105,14 +106,13 @@ const WARDEN_BEAM_RANGE_IMAGE = Object.freeze({
 const KIND = Object.freeze({
     GRAPPLE_ANCHOR: "grapple-anchor",
     CONTINUITY_WARDEN: CONTINUITY_WARDEN_OBJECT_KIND.WARDEN,
-    SECURITY_EMITTER: CONTINUITY_WARDEN_OBJECT_KIND.EMITTER,
+    SECURITY_STAR: CONTINUITY_WARDEN_OBJECT_KIND.SECURITY_STAR,
     WARDEN_HAZARD: CONTINUITY_WARDEN_OBJECT_KIND.HAZARD,
     SECURITY_BEAM: CONTINUITY_WARDEN_OBJECT_KIND.BEAM,
     DEPARTURE_GATE: CONTINUITY_WARDEN_OBJECT_KIND.GATE,
     THRESHOLD_BRIDGE: CONTINUITY_WARDEN_OBJECT_KIND.BRIDGE,
     MAINTENANCE_SHUTTLE: CONTINUITY_WARDEN_OBJECT_KIND.SHUTTLE,
-    VICTORY_CAMERA: CONTINUITY_WARDEN_OBJECT_KIND.CAMERA,
-    PAD_SURFACE: CONTINUITY_WARDEN_OBJECT_KIND.PAD_SURFACE
+    VICTORY_CAMERA: CONTINUITY_WARDEN_OBJECT_KIND.CAMERA
 });
 const WARDEN_THRUSTER_STATE = Object.freeze({
     [CONTINUITY_WARDEN_STATE.GROUND_DASH]: true,
@@ -418,19 +418,28 @@ class CommanderArenaSurfaceRenderer extends BossPolygonObjectRenderer {
     }
 }
 
-class SecurityEmitterRenderer extends BossPolygonObjectRenderer {
+const SECURITY_STAR_FALLBACK_STYLE = Object.freeze({
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.IDLE]: Object.freeze({ color: "#d6c895", core: 4, ray: 12 }),
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.TELEGRAPH]: Object.freeze({ color: "#f59e0b", core: 6, ray: 20 }),
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.ACTIVE]: Object.freeze({ color: "#ef4444", core: 8, ray: 26 }),
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.ENDING]: Object.freeze({ color: "#d9aa3e", core: 5, ray: 16 })
+});
+
+class SecurityStarRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
-        const { width, height } = size(object, 95, 650);
-        context.fillStyle = "#1e313a";
-        context.strokeStyle = object.state === "active" ? COLOR.HAZARD : "#6f8791";
-        context.lineWidth = object.state === "active" ? 6 : 4;
-        context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
-        context.fillStyle = object.state === "active" ? "#ff7580" : "#475569";
-        for (const y of [-height * 0.28, height * 0.28]) {
-            context.beginPath();
-            context.arc(0, y, width * 0.23, 0, Math.PI * 2);
-            context.fill();
+        const style =
+            SECURITY_STAR_FALLBACK_STYLE[object.state] ??
+            SECURITY_STAR_FALLBACK_STYLE[CONTINUITY_WARDEN_SECURITY_STAR_STATE.IDLE];
+        context.imageSmoothingEnabled = false;
+        context.globalCompositeOperation = "lighter";
+        pixelBlock(context, 0, 0, style.ray * 2, 3, style.color);
+        pixelBlock(context, 0, 0, 3, style.ray * 2, style.color);
+        pixelBlock(context, 0, 0, style.core, style.core, "#fff7d6");
+        const diagonal = Math.round(style.ray * 0.55);
+        for (const xSign of [-1, 1]) {
+            for (const ySign of [-1, 1]) {
+                pixelBlock(context, xSign * diagonal, ySign * diagonal, 3, 3, style.color);
+            }
         }
     }
 }
@@ -575,32 +584,6 @@ class MaintenanceShuttleRenderer extends BossPolygonObjectRenderer {
     }
 }
 
-const PAD_SURFACE_STYLE = Object.freeze({
-    "main-security-runway": Object.freeze({ fill: "#263a44", stroke: "#9aafb9" }),
-    "raised-ledge": Object.freeze({ fill: "#2b424b", stroke: "#9eb1ba" }),
-    "recovery-deck": Object.freeze({ fill: "#244d3a", stroke: "#78dda4" }),
-    "departure-deck": Object.freeze({ fill: "#1f343d", stroke: "#748d98" })
-});
-
-class PadSurfaceRenderer extends BossPolygonObjectRenderer {
-    drawShape(context, object) {
-        const { width, height } = size(object, 300, 80);
-        const style = PAD_SURFACE_STYLE[object.variant] ?? PAD_SURFACE_STYLE["main-security-runway"];
-        context.fillStyle = style.fill;
-        context.strokeStyle = style.stroke;
-        context.lineWidth = object.variant === "recovery-deck" ? 5 : 4;
-        context.fillRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeRect(-width * 0.5, -height * 0.5, width, height);
-        context.strokeStyle = "rgba(148, 163, 184, 0.36)";
-        for (let x = -width * 0.42; x < width * 0.42; x += 72) {
-            context.beginPath();
-            context.moveTo(x, -height * 0.42);
-            context.lineTo(x + 30, height * 0.42);
-            context.stroke();
-        }
-    }
-}
-
 class InvisibleRenderer extends BossPolygonObjectRenderer {
     drawShape() {}
 }
@@ -710,14 +693,13 @@ const RENDERER_BY_KIND = Object.freeze({
     [LOWER_SECTOR_COMMANDER_OBJECT_KIND.ARENA_SURFACE]: new CommanderArenaSurfaceRenderer(),
     [KIND.GRAPPLE_ANCHOR]: new GrappleAnchorRenderer(),
     [KIND.CONTINUITY_WARDEN]: new ContinuityWardenRenderer(),
-    [KIND.SECURITY_EMITTER]: new SecurityEmitterRenderer(),
+    [KIND.SECURITY_STAR]: new SecurityStarRenderer(),
     [KIND.WARDEN_HAZARD]: new ZoneRenderer(),
     [KIND.SECURITY_BEAM]: new SecurityBeamRenderer(),
     [KIND.DEPARTURE_GATE]: new DepartureGateRenderer(),
     [KIND.THRESHOLD_BRIDGE]: new ThresholdBridgeRenderer(),
     [KIND.MAINTENANCE_SHUTTLE]: new MaintenanceShuttleRenderer(),
-    [KIND.VICTORY_CAMERA]: new InvisibleRenderer(),
-    [KIND.PAD_SURFACE]: new PadSurfaceRenderer()
+    [KIND.VICTORY_CAMERA]: new InvisibleRenderer()
 });
 
 export function bossPolygonObjectRenderer(kind) {

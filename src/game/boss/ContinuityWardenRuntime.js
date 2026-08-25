@@ -33,6 +33,8 @@ import {
     CONTINUITY_WARDEN_PATTERN as PATTERN,
     CONTINUITY_WARDEN_PROJECTILE_PRESET_ID,
     CONTINUITY_WARDEN_REACTION_STATE,
+    CONTINUITY_WARDEN_SECURITY_STAR_SIZE,
+    CONTINUITY_WARDEN_SECURITY_STAR_STATE,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE,
@@ -88,10 +90,16 @@ const CAMERA_PRIORITY = Object.freeze({ BODY: 1, HAZARD: 5 });
 const HUD_WARNING_BY_STATE = Object.freeze({
     [CONTINUITY_WARDEN_STATE.SECURITY_COMMAND]: CONTINUITY_WARDEN_HUD_LABEL.SECURITY_WARNING
 });
-const PRESENTED_PAD_SURFACE_KIND = Object.freeze({
-    [CONTINUITY_WARDEN_SURFACE_KIND.MAIN]: true,
-    [CONTINUITY_WARDEN_SURFACE_KIND.LEDGE]: true,
-    [CONTINUITY_WARDEN_SURFACE_KIND.DEPARTURE]: true
+const SECURITY_STAR_STATE_BY_WARDEN_STATE = Object.freeze({
+    [CONTINUITY_WARDEN_STATE.SECURITY_COMMAND]: CONTINUITY_WARDEN_SECURITY_STAR_STATE.TELEGRAPH
+});
+const SECURITY_STAR_STATE_BY_ACTION_PHASE = Object.freeze({
+    [ACTION_PHASE.ACTIVE]: CONTINUITY_WARDEN_SECURITY_STAR_STATE.ACTIVE,
+    [ACTION_PHASE.GAP]: CONTINUITY_WARDEN_SECURITY_STAR_STATE.ENDING
+});
+const SECURITY_STAR_PROGRESS_DURATION = Object.freeze({
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.TELEGRAPH]: ({ securityTelegraphSeconds }) => securityTelegraphSeconds,
+    [CONTINUITY_WARDEN_SECURITY_STAR_STATE.ENDING]: ({ beamGapSeconds }) => beamGapSeconds
 });
 const OPENING_DIALOGUE = Object.freeze([
     Object.freeze({
@@ -145,7 +153,7 @@ const DEFAULT = Object.freeze({
     trackingStopDistance: 220,
     locomotionLandingSeconds: 0.15,
     damagedReactionSeconds: 0.1,
-    emitterSize: Object.freeze({ width: 72, height: 96 })
+    securityStarSize: CONTINUITY_WARDEN_SECURITY_STAR_SIZE
 });
 const STABLE_LOCOMOTION_STATE = Object.freeze({
     [CONTINUITY_WARDEN_LOCOMOTION_STATE.GROUNDED]: true,
@@ -175,6 +183,20 @@ function bounds(value, fallback) {
         positive(value.height, 0)
         ? { x: value.x, y: value.y, width: value.width, height: value.height }
         : { ...fallback };
+}
+
+function securityStarState(wardenState, actionPhase) {
+    if (wardenState === CONTINUITY_WARDEN_STATE.SECURITY_ACTIVE) {
+        return SECURITY_STAR_STATE_BY_ACTION_PHASE[actionPhase] ?? CONTINUITY_WARDEN_SECURITY_STAR_STATE.ENDING;
+    }
+    return SECURITY_STAR_STATE_BY_WARDEN_STATE[wardenState] ?? CONTINUITY_WARDEN_SECURITY_STAR_STATE.IDLE;
+}
+
+function securityStarAnimationProgress(state, timer, config) {
+    const durationResolver = SECURITY_STAR_PROGRESS_DURATION[state];
+    if (!durationResolver) return 0;
+    const duration = durationResolver(config);
+    return Math.max(0, Math.min(1, 1 - timer / duration));
 }
 
 function gatePresentationState({ open, lit }) {
@@ -412,12 +434,12 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 ]
             }),
             emitterLeft: point(parameters.emitterLeft, {
-                x: mainBounds.x + DEFAULT.emitterSize.width * 0.5,
-                y: mainBounds.y - DEFAULT.emitterSize.height * 0.5
+                x: mainBounds.x + DEFAULT.securityStarSize.width * 0.5,
+                y: mainBounds.y - DEFAULT.securityStarSize.height * 0.5
             }),
             emitterRight: point(parameters.emitterRight, {
-                x: mainBounds.x + mainBounds.width - DEFAULT.emitterSize.width * 0.5,
-                y: mainBounds.y - DEFAULT.emitterSize.height * 0.5
+                x: mainBounds.x + mainBounds.width - DEFAULT.securityStarSize.width * 0.5,
+                y: mainBounds.y - DEFAULT.securityStarSize.height * 0.5
             })
         });
     }
@@ -1672,6 +1694,47 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         const shuttleRevealed = completed && (victoryStage === "shuttle-reveal" || victoryStage === "player-control");
         const beamBand =
             this.state === CONTINUITY_WARDEN_STATE.SECURITY_ACTIVE ? this.securitySequence[this.securityIndex] : null;
+        const starState = securityStarState(this.state, this.actionPhase);
+        const starBand = this.state === CONTINUITY_WARDEN_STATE.SECURITY_COMMAND ? this.securitySequence[0] : beamBand;
+        const starBeamBounds =
+            starBand === SECURITY_BAND.HIGH
+                ? this.config.highBeamBounds
+                : starBand === SECURITY_BAND.LOW
+                  ? this.config.lowBeamBounds
+                  : null;
+        const starY = starBeamBounds ? starBeamBounds.y + starBeamBounds.height * 0.5 : this.config.emitterLeft.y;
+        const starProgress = securityStarAnimationProgress(starState, this.timer, this.config);
+        const securityStars = [
+            {
+                id: CONTINUITY_WARDEN_ID.SECURITY_STAR_LEFT,
+                kind: OBJECT_KIND.SECURITY_STAR,
+                variant: "left",
+                position: compositeWorldPoint(
+                    { x: starBeamBounds?.x ?? this.config.emitterLeft.x, y: starY },
+                    worldOffset
+                ),
+                size: DEFAULT.securityStarSize,
+                state: starState,
+                animationProgress: starProgress,
+                active: true
+            },
+            {
+                id: CONTINUITY_WARDEN_ID.SECURITY_STAR_RIGHT,
+                kind: OBJECT_KIND.SECURITY_STAR,
+                variant: "right",
+                position: compositeWorldPoint(
+                    {
+                        x: starBeamBounds ? starBeamBounds.x + starBeamBounds.width : this.config.emitterRight.x,
+                        y: starY
+                    },
+                    worldOffset
+                ),
+                size: DEFAULT.securityStarSize,
+                state: starState,
+                animationProgress: starProgress,
+                active: true
+            }
+        ];
         const objects = [
             {
                 id: TARGET_ID,
@@ -1698,24 +1761,6 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 active: true,
                 targetPlayerId: this.targetPlayerId,
                 cameraPriority: CAMERA_PRIORITY.BODY
-            },
-            {
-                id: CONTINUITY_WARDEN_ID.EMITTER_LEFT,
-                kind: OBJECT_KIND.EMITTER,
-                variant: "left",
-                position: compositeWorldPoint(this.config.emitterLeft, worldOffset),
-                size: DEFAULT.emitterSize,
-                state: beamBand ? "active" : "idle",
-                active: true
-            },
-            {
-                id: CONTINUITY_WARDEN_ID.EMITTER_RIGHT,
-                kind: OBJECT_KIND.EMITTER,
-                variant: "right",
-                position: compositeWorldPoint(this.config.emitterRight, worldOffset),
-                size: DEFAULT.emitterSize,
-                state: beamBand ? "active" : "idle",
-                active: true
             },
             {
                 id: CONTINUITY_WARDEN_ID.DEPARTURE_GATE,
@@ -1855,26 +1900,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                 active: true
             });
         }
-        const padSurfaceObjects = [];
-        for (const surface of this.definition.arena.surfaces) {
-            if (PRESENTED_PAD_SURFACE_KIND[surface.kind] !== true) continue;
-            padSurfaceObjects.push({
-                id: CONTINUITY_WARDEN_ID.PRESENTATION_SURFACE(surface.id),
-                kind: OBJECT_KIND.PAD_SURFACE,
-                variant: surface.kind,
-                position: compositeWorldPoint(
-                    {
-                        x: surface.bounds.x + surface.bounds.width * 0.5,
-                        y: surface.bounds.y + surface.bounds.height * 0.5
-                    },
-                    worldOffset
-                ),
-                size: { width: surface.bounds.width, height: surface.bounds.height },
-                state: "active",
-                active: true
-            });
-        }
-        return Object.freeze([...padSurfaceObjects, ...objects].map((object) => freezeComposite(object)));
+        return Object.freeze([...objects, ...securityStars].map((object) => freezeComposite(object)));
     }
 
     snapshot() {
