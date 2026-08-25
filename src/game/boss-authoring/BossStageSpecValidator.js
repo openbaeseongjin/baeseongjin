@@ -67,10 +67,11 @@ const LOWER_SECTOR_COMMANDER_POSITIVE_PARAMETERS = Object.freeze([
     "grabLeadSeconds",
     "grabTimeoutSeconds",
     "grabDamage",
-    "grabHoldSeconds",
-    "grabPullSeconds",
     "grabHammerDamage",
     "grabCooldownSeconds",
+    "jumpGravity",
+    "jumpDurationSeconds",
+    "jumpRecoverySeconds",
     "captureCliffMargin",
     "captureFrontGap",
     "hammerRange",
@@ -87,11 +88,12 @@ const LOWER_SECTOR_COMMANDER_POSITIVE_PARAMETERS = Object.freeze([
 ]);
 const LOWER_SECTOR_COMMANDER_ARENA = Object.freeze({
     MAIN_KIND: "commander-main-runway",
-    CROSSBEAM_KIND: "commander-crossbeam",
+    LEDGE_KIND: "commander-raised-ledge",
     WIDTH: 3200,
     HEIGHT: 1200,
     MAIN_WIDTH: 2800,
-    CROSSBEAM_COUNT: 3,
+    LEDGE_COUNT: 3,
+    ANCHOR_COUNT: 9,
     BODY_WIDTH: 128,
     BODY_HEIGHT: 192
 });
@@ -424,7 +426,7 @@ function validateLowerSectorCommanderArena(spec, issues, file) {
     const bounds = spec.arena?.bounds;
     const surfaces = spec.arena?.surfaces ?? [];
     const mains = surfaces.filter(({ kind }) => kind === LOWER_SECTOR_COMMANDER_ARENA.MAIN_KIND);
-    const crossbeams = surfaces.filter(({ kind }) => kind === LOWER_SECTOR_COMMANDER_ARENA.CROSSBEAM_KIND);
+    const ledges = surfaces.filter(({ kind }) => kind === LOWER_SECTOR_COMMANDER_ARENA.LEDGE_KIND);
     if (
         bounds?.width !== LOWER_SECTOR_COMMANDER_ARENA.WIDTH ||
         bounds?.height !== LOWER_SECTOR_COMMANDER_ARENA.HEIGHT
@@ -434,8 +436,39 @@ function validateLowerSectorCommanderArena(spec, issues, file) {
     if (mains.length !== 1 || mains[0]?.bounds.width !== LOWER_SECTOR_COMMANDER_ARENA.MAIN_WIDTH) {
         issue(issues, file, "lower-sector-commander-main-floor-invalid");
     }
-    if (crossbeams.length !== LOWER_SECTOR_COMMANDER_ARENA.CROSSBEAM_COUNT) {
-        issue(issues, file, "lower-sector-commander-crossbeam-count-invalid");
+    if (ledges.length !== LOWER_SECTOR_COMMANDER_ARENA.LEDGE_COUNT || ledges.some(({ oneWay }) => oneWay !== true)) {
+        issue(issues, file, "lower-sector-commander-ledge-layout-invalid");
+    }
+    const main = mains[0];
+    if (
+        main &&
+        ledges.some(
+            ({ bounds }) =>
+                bounds.x < main.bounds.x ||
+                bounds.x + bounds.width > main.bounds.x + main.bounds.width ||
+                main.bounds.y - bounds.y < LOWER_SECTOR_COMMANDER_ARENA.BODY_HEIGHT
+        )
+    ) {
+        issue(issues, file, "lower-sector-commander-ledge-support-invalid");
+    }
+    if ((spec.arena.anchors ?? []).length !== LOWER_SECTOR_COMMANDER_ARENA.ANCHOR_COUNT) {
+        issue(issues, file, "lower-sector-commander-anchor-count-invalid");
+    }
+    const anchors = spec.arena.anchors ?? [];
+    if (anchors.some(({ role }) => role !== BOSS_ANCHOR_ROLE.SWING_ATTACK)) {
+        issue(issues, file, "lower-sector-commander-anchor-role-invalid");
+    }
+    const routeEdges = spec.arena.routeEdges ?? [];
+    const routeByFrom = Object.fromEntries(routeEdges.map((edge) => [edge.from, edge]));
+    if (
+        routeEdges.length !== Math.max(0, anchors.length - 1) ||
+        Object.keys(routeByFrom).length !== routeEdges.length ||
+        anchors.slice(0, -1).some((anchor, index) => routeByFrom[anchor.id]?.to !== anchors[index + 1]?.id)
+    ) {
+        issue(issues, file, "lower-sector-commander-anchor-route-invalid");
+    }
+    if ((spec.arena.recoveryPoints ?? []).length !== 0) {
+        issue(issues, file, "lower-sector-commander-recovery-forbidden");
     }
     const collider = spec.boss?.collider;
     const position = spec.boss?.position;

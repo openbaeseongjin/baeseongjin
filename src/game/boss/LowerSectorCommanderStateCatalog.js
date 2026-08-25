@@ -7,6 +7,18 @@ class CommanderAttackState extends BossStateDefinition {
     }
 }
 
+class JumpState extends BossStateDefinition {
+    constructor() {
+        super({
+            id: STATE.JUMP,
+            lane: BOSS_STATE_LANE.LOCOMOTION,
+            canEnter: ({ runtime, target }) => runtime.canJump(target),
+            enter: ({ runtime, target }) => runtime.beginJump(target),
+            advance: ({ runtime, dt }) => runtime.advanceJump(dt)
+        });
+    }
+}
+
 class GrabState extends CommanderAttackState {
     constructor() {
         super({
@@ -41,5 +53,5 @@ class ChargeState extends CommanderAttackState {
 }
 
 export function createLowerSectorCommanderStateCatalog() {
-    return defineBossStateCatalog([new GrabState(), new HammerState(), new ChargeState()]);
+    return defineBossStateCatalog([new JumpState(), new GrabState(), new HammerState(), new ChargeState()]);
 }

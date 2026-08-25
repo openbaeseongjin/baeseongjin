@@ -31,6 +31,8 @@ reviewed-upstream: 2fddc3eab8664a60e17e619946cf9b4ad61cbf5e
 
 ## 최근 반영된 시나리오 변화
 
+- Boss03 Arena는 기존 천장 Crossbeam 3개를 주 바닥 안쪽의 단방향 Ledge 3개로 바꾸고, 400px Base Reach 안에서 이어지는 `swing-attack` Anchor 9개를 추가했다. Commander는 공용 authored support query와 Physics 점프 컴포넌트로 Player의 지지면을 추적한다. 그랩은 보스 중심 800px를 시전·실제 포획·예고 이탈 취소에 함께 사용하고, 성공 뒤 해머 연계는 0.5초이며 지면 충격 파티클을 표시한다. 일반 Stage와 `3-8→Boss03→4-1` 경계는 변경하지 않았다.
+
 - Boss06 후속 combat geometry는 스프라이트 불투명 body 폭에 맞춘 120×150 Polygon 하나를 본체 물리·기본탄·Spell·멀티 client prediction에 공유한다. 기본탄의 plain position 예외와 Polygon 반경 0 해석을 제거하고, 유도미사일은 지연 catch-up을 포함한 공용 swept projectile contact로 피해·소비한다. Neutral에서 거리·ID 순 최근접 Player를 선택하고 공격 시작 뒤 target/facing을 고정한다. Arena·Anchor·플랫폼·공격 roster와 Boarding은 변경하지 않았다.
 
 - 48개 Stage 출구를 Entry·Exit·Exit Panel 각 1개와 W interact objective 각 1개로 정규화했다. 출구를 이중으로 막던 도달 objective와 4-8의 별도 자동 quorum 장벽을 제거하고, Sector Key/Access가 부족한 경우에만 `수집 n / 필요 m` 상단 경고를 표시한다. 2-5의 서사용 Upper Transit 잠금 구조물은 일반 Gate 정체성에서 분리했다.

@@ -1,4 +1,4 @@
-import { createImpactDamage } from "./ImpactTarget.js";
+import { IMPACT_TARGET_KIND, createImpactDamage } from "./ImpactTarget.js";
 import { combatTargetBlocksImpactFrom } from "./CombatTargetGeometry.js";
 import { ROPE_IMPACT_STATE_REASON } from "./RopeImpactState.js";
 
@@ -113,6 +113,7 @@ export class RopeImpactAttack {
                         reason,
                         sourcePlayerId: owner.id,
                         targetId: target.id,
+                        targetKind: target.impactTargetKind ?? IMPACT_TARGET_KIND.ENEMY,
                         position: Object.freeze({ x: target.position.x, y: target.position.y }),
                         impactPosition: contact.position,
                         velocity: contact.velocity,

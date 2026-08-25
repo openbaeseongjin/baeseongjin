@@ -19,27 +19,103 @@
         "grappleable": true
       },
       {
-        "id": "boss-03:crossbeam-left",
-        "kind": "commander-crossbeam",
-        "bounds": { "x": 680, "y": -1200, "width": 240, "height": 680 },
+        "id": "boss-03:ledge-left",
+        "kind": "commander-raised-ledge",
+        "bounds": { "x": 520, "y": -400, "width": 600, "height": 48 },
+        "grappleable": true,
+        "oneWay": true
+      },
+      {
+        "id": "boss-03:ledge-center",
+        "kind": "commander-raised-ledge",
+        "bounds": { "x": 1240, "y": -520, "width": 720, "height": 48 },
+        "grappleable": true,
+        "oneWay": true
+      },
+      {
+        "id": "boss-03:ledge-right",
+        "kind": "commander-raised-ledge",
+        "bounds": { "x": 2080, "y": -400, "width": 600, "height": 48 },
+        "grappleable": true,
+        "oneWay": true
+      },
+      {
+        "id": "boss-03:surface:a1",
+        "kind": "grapple-target",
+        "bounds": { "x": 388, "y": -372, "width": 24, "height": 24 },
         "grappleable": true
       },
       {
-        "id": "boss-03:crossbeam-center",
-        "kind": "commander-crossbeam",
-        "bounds": { "x": 1480, "y": -1200, "width": 240, "height": 680 },
+        "id": "boss-03:surface:a2",
+        "kind": "grapple-target",
+        "bounds": { "x": 688, "y": -482, "width": 24, "height": 24 },
         "grappleable": true
       },
       {
-        "id": "boss-03:crossbeam-right",
-        "kind": "commander-crossbeam",
-        "bounds": { "x": 2280, "y": -1200, "width": 240, "height": 680 },
+        "id": "boss-03:surface:a3",
+        "kind": "grapple-target",
+        "bounds": { "x": 988, "y": -592, "width": 24, "height": 24 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:surface:a4",
+        "kind": "grapple-target",
+        "bounds": { "x": 1288, "y": -702, "width": 24, "height": 24 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:surface:a5",
+        "kind": "grapple-target",
+        "bounds": { "x": 1588, "y": -772, "width": 24, "height": 24 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:surface:a6",
+        "kind": "grapple-target",
+        "bounds": { "x": 1888, "y": -702, "width": 24, "height": 24 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:surface:a7",
+        "kind": "grapple-target",
+        "bounds": { "x": 2188, "y": -592, "width": 24, "height": 24 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:surface:a8",
+        "kind": "grapple-target",
+        "bounds": { "x": 2488, "y": -482, "width": 24, "height": 24 },
+        "grappleable": true
+      },
+      {
+        "id": "boss-03:surface:a9",
+        "kind": "grapple-target",
+        "bounds": { "x": 2788, "y": -372, "width": 24, "height": 24 },
         "grappleable": true
       }
     ],
-    "anchors": [],
+    "anchors": [
+      { "id": "boss-03:anchor:a1", "role": "swing-attack", "surfaceId": "boss-03:surface:a1", "x": 400, "y": -360 },
+      { "id": "boss-03:anchor:a2", "role": "swing-attack", "surfaceId": "boss-03:surface:a2", "x": 700, "y": -470 },
+      { "id": "boss-03:anchor:a3", "role": "swing-attack", "surfaceId": "boss-03:surface:a3", "x": 1000, "y": -580 },
+      { "id": "boss-03:anchor:a4", "role": "swing-attack", "surfaceId": "boss-03:surface:a4", "x": 1300, "y": -690 },
+      { "id": "boss-03:anchor:a5", "role": "swing-attack", "surfaceId": "boss-03:surface:a5", "x": 1600, "y": -760 },
+      { "id": "boss-03:anchor:a6", "role": "swing-attack", "surfaceId": "boss-03:surface:a6", "x": 1900, "y": -690 },
+      { "id": "boss-03:anchor:a7", "role": "swing-attack", "surfaceId": "boss-03:surface:a7", "x": 2200, "y": -580 },
+      { "id": "boss-03:anchor:a8", "role": "swing-attack", "surfaceId": "boss-03:surface:a8", "x": 2500, "y": -470 },
+      { "id": "boss-03:anchor:a9", "role": "swing-attack", "surfaceId": "boss-03:surface:a9", "x": 2800, "y": -360 }
+    ],
     "recoveryPoints": [],
-    "routeEdges": [],
+    "routeEdges": [
+      { "id": "boss-03:route:01", "from": "boss-03:anchor:a1", "to": "boss-03:anchor:a2" },
+      { "id": "boss-03:route:02", "from": "boss-03:anchor:a2", "to": "boss-03:anchor:a3" },
+      { "id": "boss-03:route:03", "from": "boss-03:anchor:a3", "to": "boss-03:anchor:a4" },
+      { "id": "boss-03:route:04", "from": "boss-03:anchor:a4", "to": "boss-03:anchor:a5" },
+      { "id": "boss-03:route:05", "from": "boss-03:anchor:a5", "to": "boss-03:anchor:a6" },
+      { "id": "boss-03:route:06", "from": "boss-03:anchor:a6", "to": "boss-03:anchor:a7" },
+      { "id": "boss-03:route:07", "from": "boss-03:anchor:a7", "to": "boss-03:anchor:a8" },
+      { "id": "boss-03:route:08", "from": "boss-03:anchor:a8", "to": "boss-03:anchor:a9" }
+    ],
     "phaseZones": [
       {
         "id": "boss-03:zone:commander-floor",
@@ -79,15 +155,16 @@
         "walkSpeeds": [180, 220, 260],
         "intensityHealthRatios": [0.7, 0.35],
         "recoverySeconds": [1, 0.8, 0.6],
-        "grabRange": 450,
+        "grabRange": 800,
         "grabTelegraphSeconds": 1.5,
         "grabLeadSeconds": 0.25,
         "grabTimeoutSeconds": 0.5,
         "grabDamage": 20,
-        "grabHoldSeconds": 2,
-        "grabPullSeconds": 0.35,
         "grabHammerDamage": 40,
         "grabCooldownSeconds": 15,
+        "jumpGravity": 1500,
+        "jumpDurationSeconds": 0.95,
+        "jumpRecoverySeconds": 0.3,
         "captureCliffMargin": 120,
         "captureFrontGap": 50,
         "hammerRange": 260,

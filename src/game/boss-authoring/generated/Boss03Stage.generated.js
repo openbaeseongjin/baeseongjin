@@ -2,7 +2,71 @@ import { freezeBossStageValue } from "../BossStageSpec.js";
 
 export const BOSS_03_STAGE_SPEC = freezeBossStageValue({
     arena: {
-        anchors: [],
+        anchors: [
+            {
+                id: "boss-03:anchor:a1",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a1",
+                x: 400,
+                y: -360
+            },
+            {
+                id: "boss-03:anchor:a2",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a2",
+                x: 700,
+                y: -470
+            },
+            {
+                id: "boss-03:anchor:a3",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a3",
+                x: 1000,
+                y: -580
+            },
+            {
+                id: "boss-03:anchor:a4",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a4",
+                x: 1300,
+                y: -690
+            },
+            {
+                id: "boss-03:anchor:a5",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a5",
+                x: 1600,
+                y: -760
+            },
+            {
+                id: "boss-03:anchor:a6",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a6",
+                x: 1900,
+                y: -690
+            },
+            {
+                id: "boss-03:anchor:a7",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a7",
+                x: 2200,
+                y: -580
+            },
+            {
+                id: "boss-03:anchor:a8",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a8",
+                x: 2500,
+                y: -470
+            },
+            {
+                id: "boss-03:anchor:a9",
+                role: "swing-attack",
+                surfaceId: "boss-03:surface:a9",
+                x: 2800,
+                y: -360
+            }
+        ],
         baseHookReach: 400,
         bounds: {
             height: 1200,
@@ -33,7 +97,48 @@ export const BOSS_03_STAGE_SPEC = freezeBossStageValue({
             }
         ],
         recoveryPoints: [],
-        routeEdges: [],
+        routeEdges: [
+            {
+                from: "boss-03:anchor:a1",
+                id: "boss-03:route:01",
+                to: "boss-03:anchor:a2"
+            },
+            {
+                from: "boss-03:anchor:a2",
+                id: "boss-03:route:02",
+                to: "boss-03:anchor:a3"
+            },
+            {
+                from: "boss-03:anchor:a3",
+                id: "boss-03:route:03",
+                to: "boss-03:anchor:a4"
+            },
+            {
+                from: "boss-03:anchor:a4",
+                id: "boss-03:route:04",
+                to: "boss-03:anchor:a5"
+            },
+            {
+                from: "boss-03:anchor:a5",
+                id: "boss-03:route:05",
+                to: "boss-03:anchor:a6"
+            },
+            {
+                from: "boss-03:anchor:a6",
+                id: "boss-03:route:06",
+                to: "boss-03:anchor:a7"
+            },
+            {
+                from: "boss-03:anchor:a7",
+                id: "boss-03:route:07",
+                to: "boss-03:anchor:a8"
+            },
+            {
+                from: "boss-03:anchor:a8",
+                id: "boss-03:route:08",
+                to: "boss-03:anchor:a9"
+            }
+        ],
         surfaces: [
             {
                 bounds: {
@@ -48,36 +153,138 @@ export const BOSS_03_STAGE_SPEC = freezeBossStageValue({
             },
             {
                 bounds: {
-                    height: 680,
-                    width: 240,
-                    x: 680,
-                    y: -1200
+                    height: 48,
+                    width: 600,
+                    x: 520,
+                    y: -400
                 },
                 grappleable: true,
-                id: "boss-03:crossbeam-left",
-                kind: "commander-crossbeam"
+                id: "boss-03:ledge-left",
+                kind: "commander-raised-ledge",
+                oneWay: true
             },
             {
                 bounds: {
-                    height: 680,
-                    width: 240,
-                    x: 1480,
-                    y: -1200
+                    height: 48,
+                    width: 720,
+                    x: 1240,
+                    y: -520
                 },
                 grappleable: true,
-                id: "boss-03:crossbeam-center",
-                kind: "commander-crossbeam"
+                id: "boss-03:ledge-center",
+                kind: "commander-raised-ledge",
+                oneWay: true
             },
             {
                 bounds: {
-                    height: 680,
-                    width: 240,
-                    x: 2280,
-                    y: -1200
+                    height: 48,
+                    width: 600,
+                    x: 2080,
+                    y: -400
                 },
                 grappleable: true,
-                id: "boss-03:crossbeam-right",
-                kind: "commander-crossbeam"
+                id: "boss-03:ledge-right",
+                kind: "commander-raised-ledge",
+                oneWay: true
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 388,
+                    y: -372
+                },
+                grappleable: true,
+                id: "boss-03:surface:a1",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 688,
+                    y: -482
+                },
+                grappleable: true,
+                id: "boss-03:surface:a2",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 988,
+                    y: -592
+                },
+                grappleable: true,
+                id: "boss-03:surface:a3",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 1288,
+                    y: -702
+                },
+                grappleable: true,
+                id: "boss-03:surface:a4",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 1588,
+                    y: -772
+                },
+                grappleable: true,
+                id: "boss-03:surface:a5",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 1888,
+                    y: -702
+                },
+                grappleable: true,
+                id: "boss-03:surface:a6",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 2188,
+                    y: -592
+                },
+                grappleable: true,
+                id: "boss-03:surface:a7",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 2488,
+                    y: -482
+                },
+                grappleable: true,
+                id: "boss-03:surface:a8",
+                kind: "grapple-target"
+            },
+            {
+                bounds: {
+                    height: 24,
+                    width: 24,
+                    x: 2788,
+                    y: -372
+                },
+                grappleable: true,
+                id: "boss-03:surface:a9",
+                kind: "grapple-target"
             }
         ]
     },
@@ -145,10 +352,8 @@ export const BOSS_03_STAGE_SPEC = freezeBossStageValue({
                 grabCooldownSeconds: 15,
                 grabDamage: 20,
                 grabHammerDamage: 40,
-                grabHoldSeconds: 2,
                 grabLeadSeconds: 0.25,
-                grabPullSeconds: 0.35,
-                grabRange: 450,
+                grabRange: 800,
                 grabTelegraphSeconds: 1.5,
                 grabTimeoutSeconds: 0.5,
                 hammerActiveSeconds: 0.2,
@@ -157,6 +362,9 @@ export const BOSS_03_STAGE_SPEC = freezeBossStageValue({
                 hammerRange: 260,
                 hammerTelegraphSeconds: 0.8,
                 intensityHealthRatios: [0.7, 0.35],
+                jumpDurationSeconds: 0.95,
+                jumpGravity: 1500,
+                jumpRecoverySeconds: 0.3,
                 recoverySeconds: [1, 0.8, 0.6],
                 walkSpeeds: [180, 220, 260]
             },

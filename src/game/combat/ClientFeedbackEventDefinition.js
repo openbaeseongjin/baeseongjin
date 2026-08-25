@@ -4,6 +4,7 @@ import { SPELL_EVENT_TYPE, SPELL_IMPACT_RESOLUTION } from "../spells/SpellRuntim
 import { PLAYER_IMPACT_TYPE } from "../network/PlayerImpactClaim.js";
 import { ENEMY_LIFECYCLE_EVENT_TYPE } from "./EnemyImpactTombstones.js";
 import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "./PlatformCollisionDamage.js";
+import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
 
 export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PLAYER_RESPAWNED: "player-respawned",
@@ -19,6 +20,7 @@ export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PLAYER_PLATFORM_COLLISION_DAMAGED: PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.APPLIED,
     PREDICTED_PLAYER_PLATFORM_COLLISION_DAMAGED: PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.PREDICTED,
     BOSS_PLAYER_HIT: "boss-player-hit",
+    BOSS_ATTACK_STARTED: "boss-attack-started",
     ENEMY_BEHAVIOR_PLAYER_HIT: "enemy-behavior-player-hit"
 });
 
@@ -73,6 +75,7 @@ export const CLIENT_FEEDBACK_PRESET_ID = Object.freeze({
     BOSS_WARDEN_BEAM_ACTIVE: "boss-warden-beam-active",
     BOSS_WARDEN_MELEE_IMPACT: "boss-warden-melee-impact",
     BOSS_WARDEN_BEAM_IMPACT: "boss-warden-beam-impact",
+    BOSS_COMMANDER_HAMMER_GROUND_IMPACT: "boss-commander-hammer-ground-impact",
     WIND_FLOW: "wind-flow",
     SHIELD_BLOCK: "shield-block",
     ROPE_CONTACT: "rope-contact",
@@ -179,6 +182,7 @@ const BOSS_WARDEN_IMPACT_DIRECTION_BY_FAMILY = Object.freeze({
 });
 
 const AUGMENT_EFFECT_LIFETIME = Object.freeze({ DEFAULT: 0.45 });
+const BOSS_COMMANDER_GROUND_IMPACT_DIRECTION = Object.freeze({ x: 0, y: -1 });
 
 export class ClientFeedbackEventDefinition {
     constructor({ predicate, present }) {
@@ -365,6 +369,19 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
                 presetId: bossWardenImpactPreset(event),
                 position: event.position,
                 direction: bossWardenImpactDirection(event)
+            })
+    }),
+    BOSS_COMMANDER_HAMMER_GROUND_PARTICLE: new ClientFeedbackEventDefinition({
+        predicate: (event) =>
+            event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.BOSS_ATTACK_STARTED &&
+            event.kind === LOWER_SECTOR_COMMANDER_HAZARD.HAMMER &&
+            Number.isFinite(event.impactPosition?.x) &&
+            Number.isFinite(event.impactPosition?.y),
+        present: (event, context) =>
+            context.appendParticle(event, {
+                presetId: CLIENT_FEEDBACK_PRESET_ID.BOSS_COMMANDER_HAMMER_GROUND_IMPACT,
+                position: event.impactPosition,
+                direction: BOSS_COMMANDER_GROUND_IMPACT_DIRECTION
             })
     }),
     ARTILLERY_HIT_PARTICLE: new ClientFeedbackEventDefinition({

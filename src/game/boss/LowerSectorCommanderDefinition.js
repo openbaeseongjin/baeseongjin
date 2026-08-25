@@ -3,10 +3,17 @@ import { CaptureDefinition } from "../interactions/CaptureDefinition.js";
 export const LOWER_SECTOR_COMMANDER_STATE = Object.freeze({
     NEUTRAL: "neutral",
     WALK: "walk",
+    JUMP: "jump",
     GRAB: "chain-hook-grab",
     HAMMER: "hammer-slam",
     CHARGE: "body-charge",
     DEFEATED: "defeated"
+});
+
+export const LOWER_SECTOR_COMMANDER_SURFACE_KIND = Object.freeze({
+    MAIN: "commander-main-runway",
+    LEDGE: "commander-raised-ledge",
+    ANCHOR: "grapple-target"
 });
 
 export const LOWER_SECTOR_COMMANDER_ACTION_PHASE = Object.freeze({
@@ -41,7 +48,16 @@ export const LOWER_SECTOR_COMMANDER_ID = Object.freeze({
 export const LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITION = new CaptureDefinition({
     id: LOWER_SECTOR_COMMANDER_ID.CAPTURE_DEFINITION,
     pullSeconds: 0.35,
-    holdSeconds: 2
+    holdSeconds: 0.5
+});
+
+export const LOWER_SECTOR_COMMANDER_GRAB_STAGE = Object.freeze({
+    IDLE: "idle",
+    LEAD: "lead",
+    TELEGRAPH: "telegraph",
+    SEARCH: "search",
+    CAPTURED: "captured",
+    HAMMER: "hammer"
 });
 
 export const LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITIONS = Object.freeze({

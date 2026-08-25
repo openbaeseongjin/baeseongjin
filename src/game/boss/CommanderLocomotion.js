@@ -8,7 +8,7 @@ export class CommanderLocomotion {
         this.distance = 0;
     }
 
-    advanceToward(targetX, dt, maxSpeed, stopDistance = 0) {
+    advanceToward(targetX, dt, maxSpeed, stopDistance = 0, floorBounds = this.floorBounds) {
         const delta = targetX - this.body.position.x;
         const desiredVelocity = Math.abs(delta) <= stopDistance ? 0 : Math.sign(delta) * maxSpeed;
         const rate =
@@ -20,8 +20,8 @@ export class CommanderLocomotion {
         const previousX = this.body.position.x;
         this.body.integratePhysics(dt);
         const halfWidth = this.bodyWidth * 0.5;
-        const minimumX = this.floorBounds.x + halfWidth;
-        const maximumX = this.floorBounds.x + this.floorBounds.width - halfWidth;
+        const minimumX = floorBounds.x + halfWidth;
+        const maximumX = floorBounds.x + floorBounds.width - halfWidth;
         if (this.body.position.x < minimumX || this.body.position.x > maximumX) {
             this.body.setPhysicsPosition({
                 x: Math.max(minimumX, Math.min(maximumX, this.body.position.x)),
@@ -33,13 +33,15 @@ export class CommanderLocomotion {
         return this.snapshot();
     }
 
-    moveAtVelocity(velocityX, dt) {
+    moveAtVelocity(velocityX, dt, floorBounds = this.floorBounds) {
         const desiredDelta = velocityX - this.body.velocity.x;
         this.body.applyImpulse({ x: desiredDelta, y: 0 });
         return this.advanceToward(
-            this.body.position.x + Math.sign(velocityX) * this.floorBounds.width,
+            this.body.position.x + Math.sign(velocityX) * floorBounds.width,
             dt,
-            Math.abs(velocityX)
+            Math.abs(velocityX),
+            0,
+            floorBounds
         );
     }
 

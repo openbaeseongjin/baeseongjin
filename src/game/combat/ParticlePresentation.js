@@ -159,6 +159,21 @@ const PARTICLE_PRESET_DEFINITIONS = {
         glow: 0.3,
         blend: "additive"
     },
+    "boss-commander-hammer-ground-impact": {
+        emission: "burst",
+        motion: "ballistic",
+        shape: "shard",
+        palette: ["#fff7ed", "#d6c29a", "#8b7355", "#475569"],
+        count: 18,
+        size: 6,
+        speed: 260,
+        spread: 1.35,
+        lifetime: 0.52,
+        gravity: 420,
+        drag: 2.8,
+        glow: 0.18,
+        blend: "additive"
+    },
     "boss-warden-beam-impact": {
         emission: "burst",
         motion: "directional",
