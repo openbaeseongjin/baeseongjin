@@ -24,6 +24,7 @@ import { SectorProgressState } from "../src/game/world/SectorProgressState.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "../src/game/world/sectors/SectorDefinition.js";
 import { collisionSurfacesForSectorProgress } from "../src/game/world/WorldGateGeometry.js";
 import { STAGE_TRANSITION_LAYOUT } from "../src/game/world/StageTransitionLayout.js";
+import { worldFallRecoveryY } from "../src/game/world/WorldFallBoundary.js";
 
 const projectRoot = resolve(process.cwd());
 const editorCatalogPath = "docs/bsh/scenario/AREA-EDITOR-CATALOG.json";
@@ -773,13 +774,22 @@ function validateGateSeparatedStagePlacement(world, source, target, transition, 
             });
         }
     }
+}
 
-    const fallRecoveryY = targetBottomY + STAGE_TRANSITION_LAYOUT.fallRecoveryMargin;
-    if (fallRecoveryY >= source.bounds.y - STAGE_BOUNDARY_EPSILON) {
-        issue(issues, "stage-transition-fall-recovery-gap", {
-            stageTransitionId: transition.id,
-            fallRecoveryY,
-            lowerStageTopY: source.bounds.y
+function validateWorldFallBoundary(world, issues) {
+    const authoredBottomY = Math.max(...world.landmarks.map(({ bounds }) => bounds.y + bounds.height));
+    if (Math.abs(world.bottomY - authoredBottomY) > STAGE_BOUNDARY_EPSILON) {
+        issue(issues, "world-bottom-mismatch", {
+            expected: authoredBottomY,
+            actual: world.bottomY
+        });
+        return;
+    }
+    const recoveryY = worldFallRecoveryY(world.bottomY);
+    if (recoveryY <= authoredBottomY + STAGE_BOUNDARY_EPSILON) {
+        issue(issues, "world-fall-recovery-boundary", {
+            authoredBottomY,
+            recoveryY
         });
     }
 }
@@ -1056,6 +1066,7 @@ function validateRuntimeStages({ runtimeEntries, world, issues }) {
         );
     }
     validateStageTransitions(world, indexBy(world.landmarks, "id", issues, "runtime-landmark-id-duplicate"), issues);
+    validateWorldFallBoundary(world, issues);
     return Object.freeze(reports);
 }
 

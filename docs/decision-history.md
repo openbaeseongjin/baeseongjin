@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-25 — Gate 분리 배치와 낙사 경계를 분리한다
+
+- 맥락: Gate 사이를 2160px로 분리한 변경이 현재 checkpoint Stage 하단을 낙사 경계로도 사용해 여러 Stage를 지나는 낙하를 중간에서 복구했다.
+- 결정: Stage 배치와 개별 Player Gate 이동은 유지하되, 일반 낙사는 전체 authored world `bottomY + recoveryMargin` 아래에서만 판정하고 복구 위치만 최근 직접 접촉 checkpoint를 사용한다.
+- 영향: `WorldFallBoundary`가 단일 전역 임계값을 소유하고 client·server는 `GameSimulation.fallRecoveryY()`를 공유한다. production parity는 Stage별 낙사 여유 대신 world bottom 일치를 검증한다.
+- 대체: 0.74.0 결정 중 현재 `respawnAnchorId` Stage 하단 공백을 낙사 경계로 사용한 부분만 대체한다. 동일 X·2160px Gate 분리 배치는 유지한다.
+- 검증 상태: 현재 계약은 `docs/development-rules.md`, `docs/architecture.md`, `docs/map-editor.md`, `docs/multiplayer-synchronization.md`와 production map parity가 소유한다.
+
 ## [L1] 2026-08-25 — 맞닿은 Stage seam을 화면 밖 Gate 전환으로 대체한다
 
 - 맥락: Bounds를 맞닿게 쌓으면 Stage별 Exit·Entry 내부 좌표 때문에 47개 전환 거리가 64~1268px, 수평 이동이 0~4512px로 달라지고 다음 Stage가 출구 화면에 노출됐다.

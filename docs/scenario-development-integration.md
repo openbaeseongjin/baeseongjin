@@ -35,7 +35,7 @@ reviewed-upstream: 590f3d852d5d71149d4f9efdebd26dbefa117c87
 
 - Map Editor에서 마지막으로 저장·적용한 37개 일반 Stage의 canonical 지형·Anchor·회수·경로·월드 오브젝트 배치를 generated Stage 모듈과 함께 갱신했다. 삭제한 surface·Anchor·route point는 canonical 원본과 Runtime에서 함께 제거했고, 48개 canonical Stage와 54개 생성물의 일치 검증을 통과했다. 실제 전체 traversal 체감은 별도 검증 범위다.
 
-- 0.74.0은 gap-0 Stage seam을 Gate 분리 배치로 대체했다. 47개 target Entry는 source Exit와 동일 X·2160px 위에 있으며 production parity가 portal endpoint·desktop/mobile 화면 밖·Bounds 비중첩·현재 Stage 하단+780px 낙사 복구 여유를 함께 검사한다. Stage-local canonical geometry와 Boss03·06 전투 계약은 유지하고 Boss Arena는 source Gate 기준 오른쪽 격리를 사용한다.
+- 0.74.1은 Gate 분리 배치와 낙사 경계를 분리했다. 47개 target Entry의 동일 X·2160px 화면 밖 배치와 Bounds 비중첩은 유지하되, Stage 사이 공백은 낙사 경계로 사용하지 않고 전체 authored world `bottomY + 780px` 아래에서만 복구한다. Stage-local canonical geometry와 Boss03·06 전투 계약은 유지하고 Boss Arena는 source Gate 기준 오른쪽 격리를 사용한다.
 
 - Boss03 Arena는 기존 천장 Crossbeam 3개를 주 바닥 안쪽의 단방향 Ledge 3개로 바꾸고, 400px Base Reach 안에서 이어지는 `swing-attack` Anchor 9개를 추가했다. Commander는 공용 authored support query와 Physics 점프 컴포넌트로 Player의 지지면을 추적한다. 그랩은 보스 중심 800px를 시전·실제 포획·예고 이탈 취소에 함께 사용하고, 성공 뒤 해머 연계는 0.5초이며 지면 충격 파티클을 표시한다. Map Editor는 같은 Arena 좌표의 전용 `MAP-PREVIEW.html`을 catalog로 연결해 `시나리오 비교`를 제공한다. 일반 Stage와 `3-8→Boss03→4-1` 경계는 변경하지 않았다.
 

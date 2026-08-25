@@ -59,7 +59,7 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - 해커톤 운영에서는 맵 에디터를 한 번에 한 명만 사용한다. 다중 사용자 mutex와 서버 crash까지 견디는 완전한 다중 파일 원자 저장은 후속 범위다.
 - generated output은 수기 편집하지 않는다. 특수 동작은 Stable ID를 수기 Behavior Registry에서 해석한다.
 - Boss Stage Apply도 진행 중 전투를 hot reload하지 않는다. 저장된 Spec은 다음 Boss Stage 시작 또는 새 게임에서만 읽으며, 참가자 수와 scaled Phase HP는 최초 Boss Stage 시작에서 고정한다.
-- Gameplay View는 선택 Stage의 검증된 memory draft를 Area override로 주입해 production world를 만들고 canonical `stageId`에 해당하는 authored landmark에서 시작한다. 인접 Stage는 source Exit와 target Entry가 동일 X·2160px 간격을 가지며 공백에 geometry를 보충하지 않는다. Player는 Gate portal로만 위쪽 Stage에 들어가고 낙사는 현재 Stage 세이브 지점 아래 공백에서 복구한다.
+- Gameplay View는 선택 Stage의 검증된 memory draft를 Area override로 주입해 production world를 만들고 canonical `stageId`에 해당하는 authored landmark에서 시작한다. 인접 Stage는 source Exit와 target Entry가 동일 X·2160px 간격을 가지며 공백에 geometry를 보충하지 않는다. Player는 Gate portal로만 위쪽 Stage에 들어가며 Stage 사이 공백은 낙사 경계가 아니다. 낙사는 전체 authored world의 `bottomY + recoveryMargin` 아래에서만 복구한다.
 - Gameplay View는 에디터 전용 polygon renderer가 아니라 `GameRendererFactory`의 실제 게임 renderer를 사용한다. `renderable: false` 디자인 기준 surface는 Editor 캔버스에는 보이지만 Gameplay에서는 collision·Rope·terrain에서 제외되며 상태 줄은 Stage 전체 surface 수와 실제 표시 수를 나눠 보여 준다.
 - Gameplay View의 `저사양 비행 테스트` 패널은 Rope 입력을 끄고 WASD·방향키로 production world의 선택 Stage Bounds 안을 비행한다. 일반 Area와 Boss Preview 모두에서 제공하며, 이 상태는 Gameplay View 인스턴스만 소유하고 일반 게임·멀티플레이·맵 source에는 포함하지 않는다.
 - Boss Preview의 `약점 타격`은 현재 노출된 약점에만 Preview 전용 normal Boss impact를 넣는다. Phase 번호·상태를 강제하지 않으며 실제 약점 판정·피해·전환을 사용한다.
@@ -67,7 +67,7 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - 기존 `AREA-SPEC-REV*-DESIGN.json`과 `MAP-PREVIEW.html`은 읽기 전용 기획 근거일 뿐 Editor Apply·generated catalog·Runtime fallback 입력이 아니다.
 - `MAP-PREVIEW.html`은 시나리오의 지도 구성 비교 근거다. 비교 패널은 이 파일을 읽기 전용으로 표시할 뿐, v2 AREA-SPEC·generated JS·Runtime Catalog의 단일 권위를 대체하거나 저장 적용·미리보기·멀티플레이에 영향을 주지 않는다.
 - 시나리오 입력은 `x/y`, `x/topY`, `cx/topY` 좌표 형식을 같은 지형 표면으로 정규화한다. 위치·크기가 없는 건축 설명은 임의 collision이나 좌표를 발명하지 않고 non-Runtime `AREA-SPEC-REV*-DESIGN.json` 기획 근거에만 남긴다. 그 Stage에 새 지형이 필요하면 canonical v2 Draft에서 명시적으로 추가해 저작한다.
-- `generateAreaCatalogs.mjs --check`는 Sector 01~06의 generated module·catalog output byte 최신성을 확인한다. `validateProductionMapParity.mjs`는 48개 Stage의 authored/derived/hidden/progress-gated surface와 mismatch ID, 47개 Gate→Entry 동일 X·2160px 상향·desktop/mobile 화면 밖 배치·Stage별 낙사 임계 여유, content-boundary·Access/Jammer/proof 소유권, 중복·퇴화 geometry와 금지 provenance 재도입을 확인한다. Stage 내부 결함은 canonical `AREA-SPEC.v2.json`, Stage 사이 배치 결함은 `StageTransitionLayout`과 production compiler에서 수정한다.
+- `generateAreaCatalogs.mjs --check`는 Sector 01~06의 generated module·catalog output byte 최신성을 확인한다. `validateProductionMapParity.mjs`는 48개 Stage의 authored/derived/hidden/progress-gated surface와 mismatch ID, 47개 Gate→Entry 동일 X·2160px 상향·desktop/mobile 화면 밖 배치, 전체 authored world bottom과 낙사 경계, content-boundary·Access/Jammer/proof 소유권, 중복·퇴화 geometry와 금지 provenance 재도입을 확인한다. Stage 내부 결함은 canonical `AREA-SPEC.v2.json`, Stage 사이 배치 결함은 `StageTransitionLayout`과 production compiler, 전체 낙사 경계 결함은 `WorldFallBoundary`에서 수정한다.
 
 ## 실제 게임 반영 흐름
 

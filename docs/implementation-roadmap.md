@@ -45,7 +45,7 @@
 - [0.65.0 / #936] Boss06은 표현 경고와 실제 hazard geometry, ID 순서의 wipe·승리 복귀, local Player 우선 camera, 검증된 participant restore와 단일 authority Boss DTO 계약을 사용한다.
 - [V4 candidate] Boss06은 3200px Main·단방향 Ledge 3개·U1~~U10의 open-edge Arena, 좌표 기반 전체 locomotion 상태 카탈로그, 사용 이력 회복형 결정적 가중 공격 풀, 정점 5발 fan 유도미사일과 `2마리 / 15초 / live 6 skip` 공격형 몹 소환을 사용한다. Browser Gameplay View와 실제 1~~4인 full combat은 완료 전 검증 게이트다.
 - Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Gameplay View와 production Runtime은 authored bounds·surface·world object만 사용하며 Runtime 자동 geometry는 0개다. Entry·Save 표현, Exit portal 복합 객체, Story display, Enemy·Wind·Boss, Route·activation, 메모리 초안과 read-only 보호를 지원한다.
-- `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, 47개 동일 X·2160px 화면 밖 Gate→Entry 배치와 Stage별 낙사 복구, Access/Jammer/proof 권위를 검증한다.
+- `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, 47개 동일 X·2160px 화면 밖 Gate→Entry 배치, 전체 authored world bottom 낙사 경계, Access/Jammer/proof 권위를 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
 - 생성·해결 이벤트만 공유하고 클라이언트에서 재생하는 플레이어·적 투사체
 - 네트워크 설정을 변경하지 않는 Cloudflare Quick Tunnel 임시 공유 명령
@@ -70,7 +70,7 @@
 4. [0.67.0 전환] authored `augment-node` 획득과 출구 선행조건을 제거하고, 서버가 확정한 마지막 양수 Player 피해 귀속 XP로 개인 레벨업 선택을 연다.
 5. **Sector Access 3-of-3 · 0.43.2 / portal 정렬 0.60.0:** Sector 01·02·03의 기존 Carrier와 공용 Module 진행은 유지한다. outgoing route가 잠긴 동안 authored Gate portal만 사용할 수 없으며 자동 transit barrier collision·visual은 생성하지 않는다. 수집 진행과 Player별 checkpoint는 보존한다.
 6. **Sector 01~06 combat density · 0.68.0:** `1-1·1-2`를 제외한 Stage를 Sector별 최소 `3 → 3 → 4 → 4 → 5 → 5` slot로 늘려 총 189개를 사용한다. 기존 selector와 Stage-local activation을 유지하고 runtime director·동적 생성 좌표는 추가하지 않는다.
-7. **Stage 공간 권위 · 0.74.0:** AS IS → Exit·Entry 내부 좌표에 따라 전환 거리가 64~~1268px, 수평 이동이 0~~4512px로 달랐다. TO BE → target Entry는 source Exit와 같은 X·2160px 위의 화면 밖에 있고 Gate만 Player 한 명을 전진시킨다. 내부 surface·object는 Editor source가 계속 소유하며 낙사는 현재 Player의 `respawnAnchorId` Stage 하단 공백에서 복구한다.
+7. **Stage 공간 권위 · 0.74.1:** AS IS → Gate 분리 배치가 현재 checkpoint Stage 하단을 낙사 경계로도 사용해 여러 Stage 낙하를 중간에서 끊었다. TO BE → target Entry의 동일 X·2160px 화면 밖 배치와 개별 Player Gate 이동은 유지하되, 낙사는 전체 authored world `bottomY + recoveryMargin`에서만 판정하고 복구 위치만 최근 checkpoint를 사용한다.
 
 ### 제출 전 시나리오 구현 트랙
 
