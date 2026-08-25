@@ -31,6 +31,8 @@ reviewed-upstream: 590f3d852d5d71149d4f9efdebd26dbefa117c87
 
 ## 최근 반영된 시나리오 변화
 
+- Boss03·06은 공용 Enemy 소환 계약의 `2마리 / 15초 / live 6 skip`과 결정적 공격형 pool을 사용한다. Boss06 유도미사일은 서로 다른 projectile ID의 동시 swept contact를 각 객체별로 소비해 지연 catch-up에서도 Player 피격을 누락하지 않는다. 두 Boss의 Arena·일반 Stage geometry·전환 경계는 변경하지 않았다.
+
 - Boss06 승리 표현은 Departure Gate의 locked/light/open와 0.3초 opening motion을 Runtime sprite로 연결하고, Gate·Shuttle의 bottom-center를 Departure Deck top에 맞췄다. Gate collision·Bridge·Boarding zone·승리 타임라인·멀티 권한은 변경하지 않았다.
 
 - Map Editor에서 마지막으로 저장·적용한 37개 일반 Stage의 canonical 지형·Anchor·회수·경로·월드 오브젝트 배치를 generated Stage 모듈과 함께 갱신했다. 삭제한 surface·Anchor·route point는 canonical 원본과 Runtime에서 함께 제거했고, 48개 canonical Stage와 54개 생성물의 일치 검증을 통과했다. 실제 전체 traversal 체감은 별도 검증 범위다.

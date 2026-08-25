@@ -44,6 +44,7 @@
 - [0.62.0 / #934] 움직이는 Boss Polygon Rope는 손→조준 ray의 앞면 교점, body-local anchor, 선속도+회전 접선속도 joint와 owner/server/remote 동일 transform 복원을 사용한다. Boss06의 정적 Main/Ledge/Gate는 collision platform으로서 Ropeable이며, Warden body는 플랫폼이 아닌 actor라 부착 대상이 아니다.
 - [0.65.0 / #936] Boss06은 표현 경고와 실제 hazard geometry, ID 순서의 wipe·승리 복귀, local Player 우선 camera, 검증된 participant restore와 단일 authority Boss DTO 계약을 사용한다.
 - [V4 candidate] Boss06은 3200px Main·단방향 Ledge 3개·U1~~U10의 open-edge Arena, 좌표 기반 전체 locomotion 상태 카탈로그, 사용 이력 회복형 결정적 가중 공격 풀, 정점 5발 fan 유도미사일과 `2마리 / 15초 / live 6 skip` 공격형 몹 소환을 사용한다. Browser Gameplay View와 실제 1~~4인 full combat은 완료 전 검증 게이트다.
+- Boss03·06은 공용 소환 컴포넌트의 `2마리 / 15초 / live 6 skip` 공격형 몹 패턴을 사용하며 서버만 해당 Boss ID의 소환몹을 생성·정리한다. Boss06 유도미사일 fan의 서로 다른 projectile contact는 각 객체별로 소비해 같은 frame과 지연 catch-up에서도 피격을 누락하지 않는다.
 - Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Gameplay View와 production Runtime은 authored bounds·surface·world object만 사용하며 Runtime 자동 geometry는 0개다. Entry·Save 표현, Exit portal 복합 객체, Story display, Enemy·Wind·Boss, Route·activation, 메모리 초안과 read-only 보호를 지원한다.
 - `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, 47개 동일 X·2160px 화면 밖 Gate→Entry 배치, 전체 authored world bottom 낙사 경계, Access/Jammer/proof 권위를 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션

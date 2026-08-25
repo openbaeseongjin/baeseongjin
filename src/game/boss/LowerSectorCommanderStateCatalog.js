@@ -52,6 +52,23 @@ class ChargeState extends CommanderAttackState {
     }
 }
 
+class SummonState extends CommanderAttackState {
+    constructor() {
+        super({
+            id: STATE.SUMMON,
+            canEnter: ({ runtime, target, context }) => runtime.canSummon(target, context),
+            enter: ({ runtime, target }) => runtime.beginSummon(target),
+            advance: ({ runtime, dt, target, context }) => runtime.advanceSummon(dt, target, context)
+        });
+    }
+}
+
 export function createLowerSectorCommanderStateCatalog() {
-    return defineBossStateCatalog([new JumpState(), new GrabState(), new HammerState(), new ChargeState()]);
+    return defineBossStateCatalog([
+        new JumpState(),
+        new GrabState(),
+        new HammerState(),
+        new ChargeState(),
+        new SummonState()
+    ]);
 }

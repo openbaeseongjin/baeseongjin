@@ -1,7 +1,3 @@
-import { ENEMY_TYPE } from "../EnemyType.js";
-
-const SUMMONED_ENEMY_PREFIX = "boss-06:summoned-enemy:";
-
 export const CONTINUITY_WARDEN_STATE = Object.freeze({
     NEUTRAL: "neutral",
     BATON_1: "baton-1",
@@ -69,8 +65,7 @@ export const CONTINUITY_WARDEN_HAZARD = Object.freeze({
 });
 
 export const CONTINUITY_WARDEN_EVENT = Object.freeze({
-    MISSILE_FIRED: "boss-missile-fired",
-    ENEMY_SUMMONED: "boss-enemy-summoned"
+    MISSILE_FIRED: "boss-missile-fired"
 });
 
 export const CONTINUITY_WARDEN_HAZARD_KIND = Object.freeze({
@@ -128,10 +123,6 @@ export const CONTINUITY_WARDEN_ID = Object.freeze({
     SECURITY_BEAM: "boss-06:security-beam",
     VICTORY_CAMERA: "boss-06:victory-camera",
     MISSILE: (attempt, sequence, index) => `boss-06:missile:${attempt}:${sequence}:${index}`,
-    SUMMON_WARNING: (index) => `boss-06:summon-warning:${index}`,
-    SUMMONED_ENEMY_PREFIX,
-    SUMMONED_ENEMY: (attempt, sequence, index) => `${SUMMONED_ENEMY_PREFIX}${attempt}:${sequence}:${index}`,
-    isSummonedEnemy: (id) => typeof id === "string" && id.startsWith(SUMMONED_ENEMY_PREFIX),
     PRESENTATION_SURFACE: (surfaceId) => `${surfaceId}:presentation`
 });
 
@@ -143,10 +134,3 @@ export const CONTINUITY_WARDEN_SURFACE_KIND = Object.freeze({
 });
 
 export const CONTINUITY_WARDEN_PROJECTILE_PRESET_ID = "boss-homing-missile";
-
-export const CONTINUITY_WARDEN_SUMMON_ENEMY_TYPES = Object.freeze([
-    ENEMY_TYPE.PATROL_DRONE_T1,
-    ENEMY_TYPE.PURSUIT_DRONE_T1,
-    ENEMY_TYPE.SHIELD_DRONE_T1,
-    ENEMY_TYPE.ARTILLERY_DRONE_T1
-]);

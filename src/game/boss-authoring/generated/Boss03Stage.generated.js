@@ -365,7 +365,21 @@ export const BOSS_03_STAGE_SPEC = freezeBossStageValue({
                 jumpDurationSeconds: 0.95,
                 jumpGravity: 1500,
                 jumpRecoverySeconds: 0.3,
+                minionSummonCooldownSeconds: 15,
+                minionSummonCount: 2,
+                minionSummonRecoverySeconds: 0.9,
+                minionSummonSkipAliveCount: 6,
+                minionSummonTelegraphSeconds: 1,
+                minionSummonWarningSize: 110,
                 recoverySeconds: [1, 0.8, 0.6],
+                summonLeft: {
+                    x: 800,
+                    y: -200
+                },
+                summonRight: {
+                    x: 2400,
+                    y: -200
+                },
                 walkSpeeds: [180, 220, 260]
             },
             position: {

@@ -97,6 +97,20 @@ const LOWER_SECTOR_COMMANDER_ARENA = Object.freeze({
     BODY_WIDTH: 128,
     BODY_HEIGHT: 192
 });
+const BOSS_ENEMY_SUMMON_MECHANIC = Object.freeze({
+    [BOSS_MECHANIC_TYPE.CONTINUITY_WARDEN]: true,
+    [BOSS_MECHANIC_TYPE.LOWER_SECTOR_COMMANDER]: true
+});
+const BOSS_ENEMY_SUMMON_PARAMETER_KEYS = Object.freeze([
+    "minionSummonCount",
+    "minionSummonSkipAliveCount",
+    "minionSummonCooldownSeconds",
+    "minionSummonTelegraphSeconds",
+    "minionSummonRecoverySeconds",
+    "minionSummonWarningSize",
+    "summonLeft",
+    "summonRight"
+]);
 
 function issue(issues, file, code, details = {}) {
     issues.push({ file, code, ...details });
@@ -370,28 +384,6 @@ function validateMechanics(spec, issues, file) {
             ) {
                 issue(issues, file, "continuity-warden-missile-fan-invalid", { id: mechanic.id });
             }
-            const summonConfigured = [
-                "minionSummonCount",
-                "minionSummonSkipAliveCount",
-                "minionSummonCooldownSeconds",
-                "summonLeft",
-                "summonRight"
-            ].some((key) => mechanic.parameters[key] !== undefined);
-            if (
-                summonConfigured &&
-                (!Number.isSafeInteger(mechanic.parameters.minionSummonCount) ||
-                    mechanic.parameters.minionSummonCount !== 2 ||
-                    !Number.isSafeInteger(mechanic.parameters.minionSummonSkipAliveCount) ||
-                    mechanic.parameters.minionSummonSkipAliveCount !== 6 ||
-                    !positive(mechanic.parameters.minionSummonCooldownSeconds) ||
-                    mechanic.parameters.minionSummonCooldownSeconds < 15 ||
-                    !finitePoint(mechanic.parameters.summonLeft) ||
-                    !finitePoint(mechanic.parameters.summonRight) ||
-                    !pointInside(spec.arena.bounds, mechanic.parameters.summonLeft) ||
-                    !pointInside(spec.arena.bounds, mechanic.parameters.summonRight))
-            ) {
-                issue(issues, file, "continuity-warden-summon-parameters-invalid", { id: mechanic.id });
-            }
         }
         if (mechanic.type === BOSS_MECHANIC_TYPE.LOWER_SECTOR_COMMANDER && isObject(mechanic.parameters)) {
             for (const key of LOWER_SECTOR_COMMANDER_POSITIVE_PARAMETERS) {
@@ -416,6 +408,25 @@ function validateMechanics(spec, issues, file) {
             if (!Array.isArray(recoveries) || recoveries.length !== 3 || !recoveries.every(positive)) {
                 issue(issues, file, "lower-sector-commander-recovery-invalid", { id: mechanic.id });
             }
+        }
+        const summonConfigured =
+            BOSS_ENEMY_SUMMON_MECHANIC[mechanic.type] === true &&
+            isObject(mechanic.parameters) &&
+            BOSS_ENEMY_SUMMON_PARAMETER_KEYS.some((key) => mechanic.parameters[key] !== undefined);
+        if (
+            summonConfigured &&
+            (mechanic.parameters.minionSummonCount !== 2 ||
+                mechanic.parameters.minionSummonSkipAliveCount !== 6 ||
+                mechanic.parameters.minionSummonCooldownSeconds !== 15 ||
+                !positive(mechanic.parameters.minionSummonTelegraphSeconds) ||
+                !positive(mechanic.parameters.minionSummonRecoverySeconds) ||
+                !positive(mechanic.parameters.minionSummonWarningSize) ||
+                !finitePoint(mechanic.parameters.summonLeft) ||
+                !finitePoint(mechanic.parameters.summonRight) ||
+                !pointInside(spec.arena.bounds, mechanic.parameters.summonLeft) ||
+                !pointInside(spec.arena.bounds, mechanic.parameters.summonRight))
+        ) {
+            issue(issues, file, "boss-enemy-summon-parameters-invalid", { id: mechanic.id });
         }
     }
     return ids;

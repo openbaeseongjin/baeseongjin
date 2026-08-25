@@ -78,7 +78,7 @@ Boss06는 이를 우선 재사용하고, 별도의 Rope AI나 새 범용 hazard 
 - `6-8` content boundary 뒤 regular `6-9` 없이 terminal `boss-06`을 삽입한다.
 - Warden body ImpactTarget 하나와 sprite 불투명 body 폭에 맞춘 120×150 Polygon 하나를 물리·기본탄·Spell·멀티 client prediction이 공유한다. Guard/Counter, Baton·Dash·Charge·LOW/HIGH Security와 점프 상태는 `ContinuityWardenRuntime`이 소유한다.
 - 점프 물리는 공용 Physics mixin 기반 Has-A 컴포넌트, 5발 유도탄은 `enemy + homing` projectile 조합과 서버 spawn/resolve 사건을 사용한다.
-- 소환 요청은 Boss Runtime이 만들고 서버 `GameSimulation`만 동적 Enemy를 등록한다. Patrol·Pursuit·Shield·Artillery를 결정적 순서로 고르며 wipe·승리 때 소환몹과 잔탄을 제거한다.
+- Boss03·06은 공용 `BossEnemySummonPattern`을 조합해 2마리·15초 cooldown·live 6 skip과 결정적 Patrol·Pursuit·Shield·Artillery 순서를 공유한다. 서버 `GameSimulation`만 동적 Enemy를 등록하며 attempt reset·승리 때 해당 Boss 소환몹과 잔탄을 제거한다.
 - 승인된 Phase1 Warden pixel sprite를 유지하고, 전용 locomotion atlas가 없는 V4 `walk/jump/descend/fall/landing`은 `combat-idle` body의 renderer-local pose fallback으로 표현한다. 소환 명령은 `security-command` clip을 재사용한다.
 - `boss-06.json`의 3200px Main·단방향 Ledge 3개·U1~U10·Gate·220px Bridge·Boarding Deck을 authored geometry로 실행한다. 모든 solid surface는 일반 부착 가능하다.
 - 승리 뒤 Warden은 기절하고 Gate light/open → Threshold Bridge → Shuttle reveal → Player별 Boarding → 모든 active Player ready → `beginCompletion()` 순서로 진행한다. 첫 Player가 동료를 순간이동시키지 않는다.
