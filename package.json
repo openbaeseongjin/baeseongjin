@@ -22,6 +22,7 @@
         "validate:enemy-sprite-assets": "node scripts/validateEnemySpriteAssets.mjs",
         "validate:environment-assets": "node scripts/validateEnvironmentAssets.mjs",
         "validate:audio-assets": "node scripts/validateAudioAssets.mjs",
+        "validate:augment-icons": "node scripts/validateAugmentIconAssets.mjs",
         "validate:direction-specs": "node scripts/validateDirectionSpecs.mjs",
         "format": "prettier --write \"src/**/*.js\" \"scripts/**/*.mjs\" \"tools/**/*.{js,html,css}\" \"*.html\"",
         "format:check": "prettier --check \"src/**/*.js\" \"scripts/**/*.mjs\" \"tools/**/*.{js,html,css}\" \"*.html\""

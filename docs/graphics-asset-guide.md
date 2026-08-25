@@ -102,5 +102,6 @@ category는 아래 이름을 사용한다.
 | 플레이어 | `assets/runtime/characters/player-main/` | [`sprite-asset-format.md`](./sprite-asset-format.md), `npm run validate:sprite-assets -- assets/runtime/characters/player-main` |
 | 일반 몹 | `assets/runtime/characters/<enemy-package-id>/` | [`enemy-sprite-asset-format.md`](./enemy-sprite-asset-format.md), `npm run validate:enemy-sprite-assets -- <directory>` |
 | 환경 | `assets/runtime/environments/<pack-id>/` | [`environment-asset-format.md`](./environment-asset-format.md), `npm run validate:environment-assets -- assets/runtime/environments/<pack-id>` |
+| 증강 아이콘 | `assets/runtime/ui/augment-icons/` | Stable ID와 같은 `32×32` 또는 `48×48` 정사각 PNG, `npm run validate:augment-icons -- assets/runtime/ui/augment-icons` |
 
-장애물, 상호작용 오브젝트, 투사체와 VFX에는 아직 전용 runtime 계약이 없다. 일반 몹은 `enemy-sprite-asset-format.md`를 사용한다. 그래픽 담당자는 runtime 연결, 충돌, 물리, 전투, 네트워크와 fallback을 수정하지 않는다.
+증강 아이콘은 [`assets/artwork/ui/augment-icons/`](../assets/artwork/ui/augment-icons/)에서 파일명을 바꾸지 않고 납품한다. 장애물, 상호작용 오브젝트, 투사체와 VFX에는 아직 전용 runtime 계약이 없다. 일반 몹은 `enemy-sprite-asset-format.md`를 사용한다. 그래픽 담당자는 runtime 연결, 충돌, 물리, 전투, 네트워크와 fallback을 수정하지 않는다.

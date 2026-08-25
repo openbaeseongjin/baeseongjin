@@ -6,6 +6,7 @@
             "bossStageId": "boss-03",
             "specType": "boss-stage",
             "authoringMode": "runtime-generated",
+            "mapReferencePath": "docs/boss/03/MAP-PREVIEW.html",
             "sourcePath": "src/game/boss-authoring/specs/boss-03.json",
             "outputPath": "src/game/boss-authoring/generated/Boss03Stage.generated.js"
         },
