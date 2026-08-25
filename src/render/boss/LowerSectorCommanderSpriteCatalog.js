@@ -15,6 +15,7 @@ const FACING = Object.freeze({ LEFT: "left", LEFT_VALUE: -1, RIGHT: "right" });
 const AUTHORED_FACING_BY_ATLAS_ID = Object.freeze({
     idle: FACING.RIGHT,
     walk: FACING.RIGHT,
+    jump: FACING.RIGHT,
     "grab-lock": FACING.LEFT,
     "grab-pull": FACING.LEFT,
     "hammer-slam": FACING.RIGHT,
@@ -26,6 +27,7 @@ const AUTHORED_FACING_BY_ATLAS_ID = Object.freeze({
 const ATLAS = Object.freeze({
     idle: Object.freeze({ file: "idle.png", frames: 4, cell: Object.freeze({ width: 256, height: 256 }) }),
     walk: Object.freeze({ file: "walk.png", frames: 8, cell: Object.freeze({ width: 256, height: 256 }) }),
+    jump: Object.freeze({ file: "jump.png", frames: 6, cell: Object.freeze({ width: 256, height: 256 }) }),
     "grab-lock": Object.freeze({
         file: "grab-lock.png",
         frames: 4,
@@ -72,6 +74,7 @@ const ATLAS = Object.freeze({
 const FRAME_DURATION_SECONDS = Object.freeze({
     idle: Object.freeze([0.32, 0.32, 0.32, 0.32]),
     walk: Object.freeze([0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12]),
+    jump: Object.freeze([0.08, 0.08, 0.22, 0.18, 0.39, 0.3]),
     "grab-lock": Object.freeze([0.2, 0.3, 0.4, 0.6]),
     "grab-pull": Object.freeze([0.12, 0.16, 0.22, 0.14, 0.18, 0.24]),
     "hammer-slam": Object.freeze([0.18, 0.18, 0.2, 0.24, 0.07, 0.07, 0.12, 0.22]),
@@ -83,6 +86,8 @@ const FRAME_DURATION_SECONDS = Object.freeze({
 });
 
 const SEGMENT = Object.freeze({
+    JUMP_ACTIVE: Object.freeze({ id: "jump-active", atlasId: "jump", offset: 0, count: 5 }),
+    JUMP_LANDING: Object.freeze({ id: "jump-landing", atlasId: "jump", offset: 5, count: 1 }),
     GRAB_LAUNCH: Object.freeze({ id: "grab-launch", atlasId: "grab-pull", offset: 0, count: 3 }),
     GRAB_HOLD: Object.freeze({ id: "grab-hold", atlasId: "grab-pull", offset: 3, count: 3 }),
     HAMMER_TELEGRAPH: Object.freeze({ id: "hammer-telegraph", atlasId: "hammer-slam", offset: 0, count: 4 }),
@@ -147,10 +152,6 @@ function segmentedClip(definition) {
     });
 }
 
-function lastFrame(animation) {
-    return animation.frames.at(-1);
-}
-
 export class LowerSectorCommanderSpriteDefinition {
     constructor() {
         this.atlases = Object.freeze(
@@ -170,6 +171,8 @@ export class LowerSectorCommanderSpriteDefinition {
         this.clips = Object.freeze({
             idle: clip("idle", { loop: true }),
             walk: clip("walk", { loop: true }),
+            "jump-active": segmentedClip(SEGMENT.JUMP_ACTIVE),
+            "jump-landing": segmentedClip(SEGMENT.JUMP_LANDING),
             "grab-lock": clip("grab-lock"),
             "grab-launch": segmentedClip(SEGMENT.GRAB_LAUNCH),
             "grab-hold": segmentedClip(SEGMENT.GRAB_HOLD),
@@ -216,7 +219,7 @@ export class LowerSectorCommanderSpriteDefinition {
             return this.clips.walk.frameAt(distancePhaseSeconds);
         }
         if (object.state === LOWER_SECTOR_COMMANDER_STATE.JUMP) {
-            return lastFrame(this.clips.idle);
+            return this.clips["jump-active"].frameAt(animation.stateElapsedSeconds);
         }
         if (object.state === LOWER_SECTOR_COMMANDER_STATE.GRAB) {
             if (
