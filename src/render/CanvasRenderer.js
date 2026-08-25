@@ -19,6 +19,7 @@ import { layoutScreenEdgePresentations, projectWorldToScreen, resolveAccessModul
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
 import { CLIENT_STATUS_TYPE } from "../game/combat/ClientStatusFeedbackDefinition.js";
 import { ROPE_IMPACT_EVENT_TYPE, ROPE_IMPACT_REJECTION_REASON } from "../game/combat/RopeImpactAttack.js";
+import { AugmentIconAssetCatalog } from "./assets/AugmentIconAssetCatalog.js";
 
 const BOSS_HUD_BLOCKING_STATUS = Object.freeze({
     "checkpoint-respawn": true,
@@ -67,7 +68,8 @@ export class CanvasRenderer {
             performanceNow = () => performance.now(),
             pixelRatio = () => globalThis.devicePixelRatio || 1,
             performancePolicy = DEFAULT_CANVAS_PERFORMANCE_POLICY,
-            cullMargin = DEFAULT_RENDER_CULL_MARGIN
+            cullMargin = DEFAULT_RENDER_CULL_MARGIN,
+            augmentIconAssets = new AugmentIconAssetCatalog()
         } = {}
     ) {
         this.canvas = canvas;
@@ -78,6 +80,7 @@ export class CanvasRenderer {
         this.pixelRatio = pixelRatio;
         this.performancePolicy = Object.freeze({ ...DEFAULT_CANVAS_PERFORMANCE_POLICY, ...performancePolicy });
         this.cullMargin = cullMargin;
+        this.augmentIconAssets = augmentIconAssets;
         this.performanceMetrics = new RenderPerformanceMetrics({ sampleSize: this.performancePolicy.sampleSize });
         this.cssWidth = 1;
         this.cssHeight = 1;
@@ -455,7 +458,7 @@ export class CanvasRenderer {
             ctx.strokeRect(x, startY, cardWidth, cardHeight);
             ctx.fillStyle = selected ? "#fde68a" : "#e2e8f0";
             ctx.font = `900 ${cardWidth < 150 ? 11 : 16}px system-ui, sans-serif`;
-            this.drawAugmentChoiceIcon(choice.id, x + cardWidth * 0.5, startY + 48, selected);
+            this.drawAugmentIcon(choice.id, x + cardWidth * 0.5, startY + 48, 32, selected);
             ctx.fillText(choice.name, x + cardWidth * 0.5, startY + 92);
             ctx.fillStyle = selected ? "#67e8f9" : "#94a3b8";
             ctx.font = `900 ${cardWidth < 150 ? 8 : 11}px ui-monospace, monospace`;
@@ -555,15 +558,30 @@ export class CanvasRenderer {
         lines.forEach((value, index) => ctx.fillText(value, x, y + index * lineHeight));
     }
 
-    drawAugmentChoiceIcon(id, x, y, selected) {
+    drawAugmentIcon(id, x, y, size, selected = false) {
+        const ctx = this.context;
+        const image = this.augmentIconAssets.imageFor(id);
+        if (image) {
+            ctx.save();
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(image, Math.round(x - size * 0.5), Math.round(y - size * 0.5), size, size);
+            ctx.restore();
+            return true;
+        }
+        this.drawAugmentIconFallback(id, x, y, selected, size / 32);
+        return false;
+    }
+
+    drawAugmentIconFallback(id, x, y, selected, scale = 1) {
         const ctx = this.context;
         ctx.save();
         ctx.translate(x, y);
+        ctx.scale(scale, scale);
         ctx.strokeStyle = selected ? "#67e8f9" : "#94a3b8";
         ctx.fillStyle = selected ? "rgba(103, 232, 249, 0.22)" : "rgba(148, 163, 184, 0.14)";
         ctx.lineWidth = 3;
         const augment = augmentById(id);
-        if (augment?.category === "spell") {
+        if (augment?.category === "spell" || spellDefinition(id)) {
             ctx.strokeRect(-18, -12, 22, 24);
             ctx.beginPath();
             ctx.moveTo(-13, -7);
@@ -616,10 +634,7 @@ export class CanvasRenderer {
         const health = resolveHealthStatus(playerHealth, playerMaxHealth);
         const region = authoredRegionForPosition(world, player?.position);
         const stage = bossStagePresentation?.stageId ?? region?.stageId ?? region?.areaId ?? region?.id ?? "-";
-        const augmentNames = selectedAugmentIds
-            .map((id) => augmentById(id)?.name)
-            .filter(Boolean)
-            .join(" · ");
+        const passiveAugmentIds = selectedAugmentIds.filter((id) => augmentById(id)?.category !== "spell");
 
         ctx.save();
         ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
@@ -645,8 +660,16 @@ export class CanvasRenderer {
 
         ctx.fillStyle = "#cbd5e1";
         ctx.font = `700 ${compactView ? 8 : 9}px system-ui, sans-serif`;
-        const augmentText = augmentNames || "없음";
-        ctx.fillText(`증강 ${augmentText}`, x + 14, augmentY, innerWidth);
+        ctx.fillText("증강", x + 14, augmentY);
+        if (passiveAugmentIds.length === 0) {
+            ctx.fillText("없음", x + 44, augmentY);
+        } else {
+            const iconSize = 16;
+            const iconGap = 4;
+            passiveAugmentIds.forEach((id, index) => {
+                this.drawAugmentIcon(id, x + 52 + index * (iconSize + iconGap), augmentY - 5, iconSize);
+            });
+        }
         ctx.restore();
     }
 
@@ -701,9 +724,13 @@ export class CanvasRenderer {
                 ctx.fillRect(x, y, cellSize, cellSize * cooldownRatio);
             }
             ctx.textAlign = "center";
-            ctx.fillStyle = definition ? "#e0f2fe" : "#64748b";
-            ctx.font = "800 10px system-ui, sans-serif";
-            ctx.fillText(definition?.spec.displayName ?? "잠김", x + cellSize * 0.5, y + 24, cellSize - 8);
+            if (definition) {
+                this.drawAugmentIcon(spellId, x + cellSize * 0.5, y + cellSize * 0.43, 32, selected);
+            } else {
+                ctx.fillStyle = "#64748b";
+                ctx.font = "800 10px system-ui, sans-serif";
+                ctx.fillText("잠김", x + cellSize * 0.5, y + 24, cellSize - 8);
+            }
             ctx.fillStyle = "#94a3b8";
             ctx.font = "800 9px ui-monospace, monospace";
             ctx.fillText(

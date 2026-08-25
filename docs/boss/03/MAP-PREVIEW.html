@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Boss03 Lower Sector Commander Arena Preview</title>
+        <style>
+            html,
+            body {
+                margin: 0;
+                background: #061019;
+                color: #dce8ec;
+                font-family: system-ui, sans-serif;
+            }
+            main {
+                padding: 18px;
+            }
+            h1 {
+                margin: 0 0 6px;
+                font-size: 20px;
+            }
+            .note {
+                margin: 0 0 14px;
+                color: #9fb4be;
+            }
+            .frame {
+                width: min(100%, 1180px);
+                border: 1px solid #36505c;
+                background: #091923;
+            }
+            svg {
+                display: block;
+                width: 100%;
+                height: auto;
+            }
+            .surface {
+                fill: #263a44;
+                stroke: #9aafb9;
+                stroke-width: 8;
+            }
+            .ledge {
+                fill: #2b424b;
+                stroke: #9eb1ba;
+                stroke-width: 6;
+            }
+            .anchor {
+                fill: #163745;
+                stroke: #67e8f9;
+                stroke-width: 5;
+            }
+            .route {
+                fill: none;
+                stroke: #67e8f9;
+                stroke-width: 5;
+                stroke-dasharray: 16 10;
+            }
+            .boss {
+                fill: #6b4b32;
+                stroke: #fbbf24;
+                stroke-width: 7;
+            }
+            .combat-zone {
+                fill: rgba(251, 113, 133, 0.08);
+                stroke: #fb7185;
+                stroke-width: 4;
+                stroke-dasharray: 18 12;
+            }
+            .entry,
+            .exit {
+                fill: #1f343d;
+                stroke-width: 6;
+            }
+            .entry {
+                stroke: #4ade80;
+            }
+            .exit {
+                stroke: #ffe998;
+            }
+            .label {
+                fill: #dce8ec;
+                font-size: 34px;
+                font-weight: 700;
+            }
+            .small {
+                fill: #a8bdc7;
+                font-size: 25px;
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <h1>Boss03 · LOWER SECTOR COMMANDER</h1>
+            <p class="note">
+                현재 좌표 권위는 canonical boss-03.json이다. 주 바닥과 단방향 Ledge 3개, 400px 연속 Anchor 9개를
+                사용하며 Commander는 Player 지지면을 추적한다.
+            </p>
+            <div class="frame">
+                <svg viewBox="0 -1200 3200 1200" role="img" aria-label="Boss03 authored arena map">
+                    <rect x="0" y="-1200" width="3200" height="1200" fill="#07151f" />
+                    <rect class="combat-zone" x="200" y="-620" width="2800" height="500" />
+                    <rect class="surface" x="200" y="-120" width="2800" height="120" />
+                    <rect class="ledge" x="520" y="-400" width="600" height="48" />
+                    <rect class="ledge" x="1240" y="-520" width="720" height="48" />
+                    <rect class="ledge" x="2080" y="-400" width="600" height="48" />
+                    <polyline
+                        class="route"
+                        points="400,-360 700,-470 1000,-580 1300,-690 1600,-760 1900,-690 2200,-580 2500,-470 2800,-360"
+                    />
+                    <g>
+                        <circle class="anchor" cx="400" cy="-360" r="16" />
+                        <circle class="anchor" cx="700" cy="-470" r="16" />
+                        <circle class="anchor" cx="1000" cy="-580" r="16" />
+                        <circle class="anchor" cx="1300" cy="-690" r="16" />
+                        <circle class="anchor" cx="1600" cy="-760" r="16" />
+                        <circle class="anchor" cx="1900" cy="-690" r="16" />
+                        <circle class="anchor" cx="2200" cy="-580" r="16" />
+                        <circle class="anchor" cx="2500" cy="-470" r="16" />
+                        <circle class="anchor" cx="2800" cy="-360" r="16" />
+                    </g>
+                    <rect class="boss" x="1536" y="-312" width="128" height="192" rx="22" />
+                    <circle class="entry" cx="320" cy="-160" r="24" />
+                    <circle class="exit" cx="2880" cy="-160" r="24" />
+                    <text class="label" x="250" y="-205">ENTRY</text>
+                    <text class="label" x="2720" y="-205">EXIT</text>
+                    <text class="label" x="1375" y="-335">COMMANDER</text>
+                    <text class="small" x="1120" y="-820">SWING-ATTACK ANCHOR ROUTE · 400px BASE REACH</text>
+                    <text class="small" x="1120" y="-45">2800px MAIN RUNWAY</text>
+                </svg>
+            </div>
+        </main>
+    </body>
+</html>
