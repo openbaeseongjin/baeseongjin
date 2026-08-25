@@ -3,20 +3,20 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: a146f73b4acc123c295c2343d7b081a43b83bfda2931d9ff8f1274f0d8db48bf
-authored-area-sha256: 92635c93c5d27c073e620ecc6aee566a0b697d19e87b600b72f2388d74238adc
-authored-sector-sha256: 9a896e7dc3ea516853888afb5245194daf7ab607644e4d0ae665b60e02837bec
+scenario-source-sha256: d019865567c39fb44e073562cf1df11157fccb6cb4aba140bd3ee989883dc2ee
+authored-area-sha256: 006b82b383ea3d7bdebd21f322c1dbb54de85af8b3fc02cfa60a9dbd42477904
+authored-sector-sha256: 6a524b3cee43af5160d8af8f499bf85a0e898ebb22925b8c844dbe1c29d1edec
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 9173cd1bb18aa4c6a3acf839bde020f193d5fbfa
+reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
 -->
 
 ## 현재 확인 체크포인트
 
-- Sector 01~06의 48개 canonical `AREA-SPEC.v2.json`은 generated Stage/catalog를 거쳐 authored Stage 48개와 개별 Player portal 47개로 compile된다. Runtime derived geometry와 scenario-only Stage는 0개다.
+- Sector 01~06의 48개 canonical `AREA-SPEC.v2.json`은 generated Stage/catalog를 거쳐 authored Stage 48개와 개별 Player portal 47개로 compile된다. 각 Stage는 Entry·Exit·Exit Panel을 하나씩 소유하고 W 상호작용만으로 출구 objective를 완료하며 도달 objective는 사용하지 않는다. Runtime derived geometry와 scenario-only Stage는 0개다.
 - Enemy slot은 1-1·1-2만 도입부 예외로 두고 1-3 이후 최소 3개를 보장한다. Sector 01~02는 최소 3개, 03~04는 최소 4개, 05~06은 최소 5개이며 exact Stage 예산은 `enemy-density-composition.md`가 소유한다.
 - 0.67.0은 기존 연속 Stage portal을 유지하고 1-4·2-3·3-5의 authored Augment Node와 선택 prerequisite만 제거했다. 증강은 마지막으로 확정한 양수 Player 피해 귀속 XP 레벨업이 소유한다.
-- Player별 Stage Save·Gate 이동과 공용 objective를 유지한다. Access 조건은 portal 사용 가능 여부만 바꾸며 barrier collision이나 영구 Stage cursor를 만들지 않는다.
+- Player별 Stage Save·Gate 이동과 공용 objective를 유지한다. Sector Key/Access만 portal 사용 가능 여부를 바꾸며 barrier collision이나 영구 Stage cursor를 만들지 않는다. 부족한 상태의 Exit Panel W 입력은 당사자 화면 상단에 현재 수집 수와 필요 수를 표시한다.
 - Sector 05 Hardpoint Jammer는 Enemy 슬롯에서 field group을 자동 파생하고 일반 Hook-reachable surface를 선택한다. active target 부착은 owner-first Rope 절단과 단일 Electrified 상태를 시작한다.
 - 아직 확인하지 못한 범위는 전체 desktop/mobile 등반, 실제 두 기기 장시간 멀티플레이와 Boss06 full combat 체감이다.
 
@@ -30,6 +30,8 @@ reviewed-upstream: 9173cd1bb18aa4c6a3acf839bde020f193d5fbfa
 | Sector 06 / 6-1~6-8 | canonical v2/generated 8개, `6-8→Boss06→Boarding→Escape`   | Boss06 full combat·1~4인 boarding        |
 
 ## 최근 반영된 시나리오 변화
+
+- 48개 Stage 출구를 Entry·Exit·Exit Panel 각 1개와 W interact objective 각 1개로 정규화했다. 출구를 이중으로 막던 도달 objective와 4-8의 별도 자동 quorum 장벽을 제거하고, Sector Key/Access가 부족한 경우에만 `수집 n / 필요 m` 상단 경고를 표시한다. 2-5의 서사용 Upper Transit 잠금 구조물은 일반 Gate 정체성에서 분리했다.
 
 - Stage의 authored geometry·objective·Enemy slot은 바꾸지 않고 증강 획득 설명을 현재 전투 계약에 맞췄다. Enemy XP는 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존하며, 이후 환경 원인 사망에도 해당 Player에게 한 번 귀속한다.
 - 48개 canonical Stage의 Enemy slot을 86개에서 189개로 늘렸다. Entry·Exit·Story·Safe 지점은 피하고 기존 route와 Stage-local activation band에 분산했으며 Swarm은 추가 pool에서 제외했다. production map parity가 1-3 이후 Sector별 최소 밀도를 검사한다.

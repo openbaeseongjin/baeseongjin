@@ -400,23 +400,7 @@ const SPEC = {
         "type": "reach"
       },
       {
-        "bounds": {
-          "height": 180,
-          "width": 420,
-          "x": -210,
-          "y": -3208
-        },
-        "id": "final-deck-reached",
-        "requiredObjectiveIds": [
-          "authority-record-reached"
-        ],
-        "type": "reach"
-      },
-      {
         "id": "exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "final-deck-reached"
-        ],
         "sourceObjectId": "sector-05-08:exit-panel",
         "type": "interact"
       }

@@ -69,6 +69,7 @@ export class SectorProgressState {
         this.unlockedRouteIds = new Set();
         this.completedBossStageIds = new Set();
         this.activeObjectiveSequences = new Map();
+        this.portalInteractionSequencesByPlayerId = new Map();
         this.reachedContentBoundaryIds = new Set();
         this.contentBoundaryId = null;
         this.#unlockSatisfiedRoutes();
@@ -264,6 +265,34 @@ export class SectorProgressState {
         });
     }
 
+    routeAccessSummary(routeId) {
+        const route = this.routesById.get(routeId);
+        if (!route) throw new Error(`unknown route: ${routeId}`);
+        const sourceSectorId = this.landmarksById.get(route.sourceLandmarkId)?.sectorId;
+        if (!sourceSectorId) throw new Error(`route source Sector missing: ${routeId}`);
+        const access = this.accessSummary(sourceSectorId);
+        const requiredCount = route.requiredAccessModuleCount ?? 0;
+        return freezeResult({
+            routeId,
+            sectorId: sourceSectorId,
+            collectedModuleIds: access.collectedModuleIds,
+            collectedCount: access.collectedModuleIds.length,
+            requiredCount,
+            ready: access.collectedModuleIds.length >= requiredCount
+        });
+    }
+
+    consumePortalInteraction(playerId, routeId, interactSequence) {
+        if (typeof playerId !== "string" || !this.routesById.has(routeId)) return false;
+        if (!Number.isSafeInteger(interactSequence) || interactSequence <= 0) return false;
+        const sequencesByRouteId = this.portalInteractionSequencesByPlayerId.get(playerId) ?? new Map();
+        const previous = sequencesByRouteId.get(routeId) ?? 0;
+        if (interactSequence <= previous) return false;
+        sequencesByRouteId.set(routeId, interactSequence);
+        this.portalInteractionSequencesByPlayerId.set(playerId, sequencesByRouteId);
+        return true;
+    }
+
     isRouteUnlocked(routeId) {
         return this.unlockedRouteIds.has(routeId);
     }
@@ -356,6 +385,7 @@ export class SectorProgressState {
                 return [sequence.objectiveId, freezeResult({ ...sequence })];
             })
         );
+        this.portalInteractionSequencesByPlayerId.clear();
         this.contentBoundaryId = null;
         if (snapshot.contentBoundaryReached === true) {
             this.contentBoundaryId = snapshot.contentBoundaryId ?? null;

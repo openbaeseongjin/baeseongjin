@@ -255,20 +255,7 @@
         "type": "interact"
       },
       {
-        "bounds": {
-          "height": 96,
-          "width": 460,
-          "x": -980,
-          "y": -2720
-        },
-        "id": "sector-04-07:final-refuge-control-reached",
-        "type": "reach"
-      },
-      {
         "id": "sector-04-07:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-04-07:final-refuge-control-reached"
-        ],
         "sourceObjectId": "sector-04-07:exit-panel",
         "type": "interact"
       }

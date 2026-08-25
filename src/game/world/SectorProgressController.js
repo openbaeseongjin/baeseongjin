@@ -19,6 +19,39 @@ function interactingPlayers(objective, world, progress, players, commandsByPlaye
     });
 }
 
+function portalInteractionAttempt(objective, world, progress, players, commandsByPlayerId) {
+    if (objective.type !== "interact") return null;
+    const object = world.objects.find(({ id }) => id === objective.sourceObjectId);
+    if (!object?.routeLockId) return null;
+    const player = activePlayers(players).find((candidate) => {
+        const command = commandsByPlayerId.get(candidate.id);
+        return (
+            command?.interact === true &&
+            candidate.physics.position.distanceTo(object.position) <= object.interactionRadius &&
+            progress.consumePortalInteraction(candidate.id, object.routeLockId, command.interactSequence)
+        );
+    });
+    return player ? Object.freeze({ object, player }) : Object.freeze({ object, player: null });
+}
+
+function portalAccessBlockedEvent(progress, attempt) {
+    const access = progress.routeAccessSummary(attempt.object.routeLockId);
+    if (access.ready) return null;
+    return Object.freeze({
+        type: "portal-access-blocked",
+        routeId: access.routeId,
+        sectorId: access.sectorId,
+        playerId: attempt.player.id,
+        collectedCount: access.collectedCount,
+        requiredCount: access.requiredCount,
+        missingCount: access.requiredCount - access.collectedCount,
+        position: Object.freeze({
+            x: attempt.player.physics.position.x,
+            y: attempt.player.physics.position.y
+        })
+    });
+}
+
 function completingPlayer(objective, world, progress, players, commandsByPlayerId) {
     if (objective.requiredObjectiveIds?.some((id) => !progress.isObjectiveComplete(id))) return null;
     if (objective.type === "reach") {
@@ -145,7 +178,15 @@ export function advanceSectorProgress({
             );
             continue;
         }
-        const player = completingPlayer(objective, world, progress, players, commandsByPlayerId);
+        const portalAttempt = portalInteractionAttempt(objective, world, progress, players, commandsByPlayerId);
+        if (portalAttempt?.object && !portalAttempt.player) continue;
+        const blockedEvent = portalAttempt?.player ? portalAccessBlockedEvent(progress, portalAttempt) : null;
+        if (blockedEvent) {
+            events.push(blockedEvent);
+            continue;
+        }
+        const player =
+            portalAttempt?.player ?? completingPlayer(objective, world, progress, players, commandsByPlayerId);
         if (!player) continue;
         if (objective.completionDelaySeconds) {
             const result = progress.startObjectiveSequence(objective.id, {

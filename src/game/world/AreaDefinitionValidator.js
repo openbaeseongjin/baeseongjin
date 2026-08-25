@@ -135,6 +135,37 @@ function validateGrappleLandmarks(area, issues) {
     }
 }
 
+function validatePortalContract(area, issues) {
+    const panels = area.objects.filter(({ gateId, kind }) => gateId === area.gate.id && kind === "gate-panel");
+    if (panels.length === 0 && area.objects.length === 0 && area.objectives.length === 0) return;
+    if (panels.length !== 1) {
+        issues.push(issue("portal-panel-count", area.id, { expected: 1, actual: panels.length }));
+        return;
+    }
+    const objectiveIds = area.gate.requiredObjectiveIds ?? [];
+    if (objectiveIds.length !== 1) {
+        issues.push(issue("portal-objective-count", area.id, { expected: 1, actual: objectiveIds.length }));
+        return;
+    }
+    const objective = area.objectives.find(({ id }) => id === objectiveIds[0]);
+    if (!objective || objective.type !== "interact" || objective.sourceObjectId !== panels[0].id) {
+        issues.push(
+            issue("portal-objective-interaction", area.id, {
+                objectiveId: objectiveIds[0],
+                panelId: panels[0].id
+            })
+        );
+    }
+    if ((objective?.requiredObjectiveIds?.length ?? 0) > 0 || (panels[0].requiredObjectiveIds?.length ?? 0) > 0) {
+        issues.push(issue("portal-objective-prerequisite", area.id, { objectiveId: objective?.id ?? null }));
+    }
+    for (const object of area.objects) {
+        if (object.kind === "gate" && object.gateId !== area.gate.id) {
+            issues.push(issue("non-portal-gate-identity", area.id, { objectId: object.id }));
+        }
+    }
+}
+
 export function validateAreaCatalog(catalog) {
     const issues = [];
     const areaIds = new Set(catalog.areas.map(({ id }) => id));
@@ -169,6 +200,7 @@ export function validateAreaCatalog(catalog) {
         validateUniqueIds(area, area.objectives, "objective", issues, globalIds);
         validateUniqueIds(area, area.windZones, "wind", issues, globalIds);
         validateGrappleLandmarks(area, issues);
+        validatePortalContract(area, issues);
         if (globalIds.has(area.gate.id)) issues.push(issue("catalog-id-duplicate", area.id, { id: area.gate.id }));
         globalIds.add(area.gate.id);
 

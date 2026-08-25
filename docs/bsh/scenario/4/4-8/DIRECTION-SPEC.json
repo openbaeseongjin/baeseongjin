@@ -19,8 +19,8 @@
     },
     {
       "beatId": "s1-quorum-accepted",
-      "purpose": "2-of-3 state-check 완료에 맞춰 Interlock 해제를 알린다.",
-      "trigger": { "type": "objective-completed", "objectiveId": "sector-04-08:quorum-read" },
+      "purpose": "2-of-3 Key가 준비된 Exit Panel W 입력에 맞춰 portal 승인을 알린다.",
+      "trigger": { "type": "objective-completed", "objectiveId": "sector-04-08:exit-panel-engaged" },
       "scope": "local-player",
       "replayPolicy": "once-per-stage-attempt",
       "dedupeToken": "4-8:s1",
@@ -44,7 +44,7 @@
     {
       "beatId": "s3-final-control",
       "purpose": "Sector04의 보호 시스템이 정상 작동 중이라는 모순으로 끝낸다.",
-      "trigger": { "type": "objective-completed", "objectiveId": "sector-04-08:final-ascent-control-reached" },
+      "trigger": { "type": "camera-zone", "zoneId": "final-ascent-control" },
       "scope": "local-player",
       "replayPolicy": "once-per-stage-attempt",
       "dedupeToken": "4-8:s3",

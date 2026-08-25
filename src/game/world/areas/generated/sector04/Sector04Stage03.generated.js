@@ -203,9 +203,6 @@ const SPEC = {
       },
       {
         "id": "sector-04-03:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-04-03:service-relay-b03"
-        ],
         "sourceObjectId": "sector-04-03:exit-panel",
         "type": "interact"
       }

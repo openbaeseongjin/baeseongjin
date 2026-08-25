@@ -16,13 +16,15 @@ import { SPELL_COMMAND_LABEL, SPELL_SLOT_LABEL, SPELL_SLOT_ORDER } from "../game
 import { POINTER_SPELL_TOKEN } from "../core/input/PointerSpellCommandBuffer.js";
 import { layoutAccessEdgeGuides, projectWorldToScreen, resolveAccessModuleTargets } from "./ScreenEdgeGuide.js";
 import { CLIENT_STATUS_FEEDBACK_SECONDS } from "../game/combat/ClientStatusFeedback.js";
+import { CLIENT_STATUS_TYPE } from "../game/combat/ClientStatusFeedbackDefinition.js";
 import { ROPE_IMPACT_EVENT_TYPE, ROPE_IMPACT_REJECTION_REASON } from "../game/combat/RopeImpactAttack.js";
 
 const BOSS_HUD_BLOCKING_STATUS = Object.freeze({
     "checkpoint-respawn": true,
     "sector-respawn": true,
     "stage-saved": true,
-    "augment-selected": true
+    "augment-selected": true,
+    [CLIENT_STATUS_TYPE.PORTAL_ACCESS_BLOCKED]: true
 });
 
 const ROPE_IMPACT_REJECTION_STATUS = Object.freeze({
@@ -715,6 +717,10 @@ export class CanvasRenderer {
             detail = "속도 ×1.25";
             color = "#fbbf24";
             augmentFeedback = true;
+        } else if (eventFlash.type === CLIENT_STATUS_TYPE.PORTAL_ACCESS_BLOCKED) {
+            title = "접근 키 부족";
+            detail = `수집 ${eventFlash.collectedCount ?? 0} / 필요 ${eventFlash.requiredCount ?? 0}`;
+            color = "#fbbf24";
         } else if (eventFlash.type === ROPE_IMPACT_EVENT_TYPE.REJECTED) {
             const rejection = ROPE_IMPACT_REJECTION_STATUS[eventFlash.reason];
             if (!rejection) return;

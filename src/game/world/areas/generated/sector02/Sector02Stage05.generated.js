@@ -50,20 +50,7 @@ const SPEC = {
     "nextAreaId": "sector-02-06",
     "objectives": [
       {
-        "bounds": {
-          "height": 96,
-          "width": 128,
-          "x": 112,
-          "y": -128
-        },
-        "id": "sector-02-05:exit-reached",
-        "type": "reach"
-      },
-      {
         "id": "sector-02-05:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-02-05:exit-reached"
-        ],
         "sourceObjectId": "sector-02-05:exit-panel",
         "type": "interact"
       }
@@ -190,15 +177,15 @@ const SPEC = {
           "transfer-authorization-pending"
         ],
         "grappleable": true,
-        "id": "sector-02-05:upper-transit-gate",
-        "kind": "gate",
+        "id": "sector-02-05:upper-transit-barrier",
+        "kind": "background-prop",
         "narrativeLock": true,
         "opensInStage": false,
         "position": {
           "x": 820,
           "y": -290
         },
-        "presentationId": "world-object:gate"
+        "presentationId": "world-object:background-prop"
       },
       {
         "coordinateAnchor": "bottom-center",
@@ -226,10 +213,7 @@ const SPEC = {
           "x": 64,
           "y": -64
         },
-        "presentationId": "world-object:gate-panel",
-        "requiredObjectiveIds": [
-          "sector-02-05:exit-reached"
-        ]
+        "presentationId": "world-object:gate-panel"
       },
       {
         "coordinateAnchor": "bottom-center",

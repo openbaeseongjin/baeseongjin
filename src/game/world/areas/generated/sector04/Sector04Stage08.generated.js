@@ -287,8 +287,7 @@ const SPEC = {
       "id": "sector-04-08:gate",
       "nextAreaId": null,
       "requiredObjectiveIds": [
-        "sector-04-08:quorum-read",
-        "sector-04-08:final-ascent-control-reached"
+        "sector-04-08:exit-panel-engaged"
       ],
       "trigger": {
         "height": 128,
@@ -302,49 +301,12 @@ const SPEC = {
     "nextAreaId": null,
     "objectives": [
       {
-        "bounds": {
-          "height": 576,
-          "width": 800,
-          "x": -1440,
-          "y": -640
-        },
-        "id": "sector-04-08:quorum-read",
-        "requiredCount": 2,
-        "sources": [
-          "sector-04:resident-security-override:a",
-          "sector-04:resident-security-override:b",
-          "sector-04:resident-security-override:c"
-        ],
-        "type": "state-check"
-      },
-      {
-        "bounds": {
-          "height": 90,
-          "width": 430,
-          "x": -820,
-          "y": -2720
-        },
-        "id": "sector-04-08:final-ascent-control-reached",
-        "requiredObjectiveIds": [
-          "sector-04-08:quorum-read"
-        ],
-        "type": "reach"
+        "id": "sector-04-08:exit-panel-engaged",
+        "sourceObjectId": "sector-04-08:exit-panel",
+        "type": "interact"
       }
     ],
     "objects": [
-      {
-        "coordinateAnchor": "center",
-        "id": "sector-04-08:quorum-panel",
-        "kind": "access-transit-lock",
-        "objectiveId": "sector-04-08:quorum-read",
-        "position": {
-          "x": -680,
-          "y": -400
-        },
-        "presentationId": "world-object:access-transit-lock",
-        "requiredAccessModuleCount": 2,
-        "requiredObjectiveIds": []
-      },
       {
         "activationSpec": {
           "anchor": "center",
@@ -474,6 +436,19 @@ const SPEC = {
           "no-rope-cut",
           "activation-band-only"
         ]
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-04-08:gate",
+        "id": "sector-04-08:exit-panel",
+        "interactionRadius": 72,
+        "kind": "gate-panel",
+        "objectiveId": "sector-04-08:exit-panel-engaged",
+        "position": {
+          "x": -650,
+          "y": -2690
+        },
+        "presentationId": "world-object:gate-panel"
       }
     ],
     "order": 8,
@@ -684,36 +659,6 @@ const SPEC = {
           {
             "x": -1070,
             "y": -365
-          }
-        ]
-      },
-      {
-        "blockedByObjectiveId": "sector-04-08:quorum-read",
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "sector-04-08:quorum-interlock-barrier",
-        "kind": "sector-transit-barrier",
-        "oneWay": false,
-        "position": {
-          "x": -650,
-          "y": -875
-        },
-        "vertices": [
-          {
-            "x": -650,
-            "y": -875
-          },
-          {
-            "x": -610,
-            "y": -875
-          },
-          {
-            "x": -610,
-            "y": -363
-          },
-          {
-            "x": -650,
-            "y": -363
           }
         ]
       },

@@ -333,7 +333,7 @@
       "purpose": "hand off route-choice lesson to Building Services Hub",
       "trigger": {
         "type": "exit-ready",
-        "objectiveId": "sector-03-04:final-deck-reached"
+        "objectiveId": "sector-03-04:exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "gameplay-repeatable",

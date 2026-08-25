@@ -204,7 +204,7 @@
       "purpose": "Seed 1-3 without starting its Security conflict.",
       "trigger": {
         "type": "objective-completed",
-        "objectiveId": "sector-01-02:final-deck-reached"
+        "objectiveId": "sector-01-02:exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "once-per-run",

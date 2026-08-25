@@ -2,9 +2,11 @@ import { ELECTRIFIED_STATUS_ID } from "../status-effects/ElectrifiedStatusEffect
 import { SPELL_ID } from "../spells/SpellDefinition.js";
 import { SPELL_EVENT_TYPE, SPELL_IMPACT_RESOLUTION } from "../spells/SpellRuntimeDefinition.js";
 import { PLAYER_IMPACT_TYPE } from "../network/PlayerImpactClaim.js";
+import { ENEMY_LIFECYCLE_EVENT_TYPE } from "./EnemyImpactTombstones.js";
 
 export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PLAYER_RESPAWNED: "player-respawned",
+    ENEMY_DEFEATED: ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED,
     RESOLVE: "resolve",
     PREDICTED_RESOLVE: "predicted-resolve",
     SPELL_CAST_STARTED: SPELL_EVENT_TYPE.CAST_STARTED,
@@ -65,6 +67,7 @@ export const CLIENT_FEEDBACK_PRESET_ID = Object.freeze({
     ENEMY_MUZZLE: "enemy-muzzle",
     ENEMY_IMPACT: "enemy-impact",
     ENEMY_DEFEAT: "enemy-defeat",
+    ENEMY_DEATH_EXPLOSION: "enemy-death-explosion",
     BOSS_WARDEN_MELEE_ACTIVE: "boss-warden-melee-active",
     BOSS_WARDEN_BEAM_ACTIVE: "boss-warden-beam-active",
     BOSS_WARDEN_MELEE_IMPACT: "boss-warden-melee-impact",
@@ -189,6 +192,14 @@ export class ClientFeedbackEventDefinition {
 
 export const CLIENT_FEEDBACK_KEY = Object.freeze({
     particle: (ownerId, causalId) => `${ownerId ?? "world"}:${causalId}`,
+    enemyDefeat: (event) =>
+        event.causalId ??
+        event.predictionId ??
+        event.parameters?.predictionId ??
+        event.eventId ??
+        event.targetId ??
+        event.enemyId ??
+        event.parameters?.targetId,
     continuous: (emitterId, sequence) => `${emitterId}:${sequence}`
 });
 
@@ -309,6 +320,17 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
                         : CLIENT_FEEDBACK_PRESET_ID.PLAYER_SHOT
             });
         }
+    }),
+    ENEMY_DEFEAT_PARTICLE: new ClientFeedbackEventDefinition({
+        predicate: (event) =>
+            event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.ENEMY_DEFEATED ||
+            (event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_RESOLVE &&
+                event.resolution === CLIENT_FEEDBACK_RESOLUTION.ENEMY_DEFEATED),
+        present: (event, context) =>
+            context.appendParticle(
+                { ...event, eventId: CLIENT_FEEDBACK_KEY.enemyDefeat(event) },
+                { presetId: CLIENT_FEEDBACK_PRESET_ID.ENEMY_DEATH_EXPLOSION }
+            )
     }),
     SHOT_ENDED_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) => EVENT_GROUP.SHOT_ENDED.includes(event.eventType),

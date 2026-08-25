@@ -105,7 +105,7 @@
       "beatId": "s4-archive-fact",
       "trigger": {
         "type": "objective-completed",
-        "objectiveId": "final-archive-deck-reached"
+        "objectiveId": "exit-panel-engaged"
       },
       "worldPause": false,
       "playerControl": "ON",

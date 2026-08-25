@@ -1,3 +1,7 @@
+export const ENEMY_LIFECYCLE_EVENT_TYPE = Object.freeze({
+    DEFEATED: "enemy-defeated"
+});
+
 function assertId(value, label) {
     if (typeof value !== "string" || value.length === 0) {
         throw new Error(`${label} must be a non-empty string`);
@@ -13,11 +17,15 @@ function assertTick(value, label) {
     return value;
 }
 
-export function createEnemyImpactTombstone({ targetId, defeatedAtTick = null, cause = "enemy-defeated" }) {
+export function createEnemyImpactTombstone({
+    targetId,
+    defeatedAtTick = null,
+    cause = ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED
+}) {
     return Object.freeze({
         targetId: assertId(targetId, "targetId"),
         defeatedAtTick: assertTick(defeatedAtTick, "defeatedAtTick"),
-        cause: typeof cause === "string" && cause.length > 0 ? cause : "enemy-defeated"
+        cause: typeof cause === "string" && cause.length > 0 ? cause : ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED
     });
 }
 

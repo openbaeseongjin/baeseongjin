@@ -445,7 +445,7 @@ ACCESS AHEAD
 Objectives:
 
 ```text
-final-deck-reached
+exit-panel-engaged
 → exit-panel-engaged
 ```
 

@@ -261,7 +261,7 @@
       "purpose": "hand off public market space to technical facade/service space without previewing active Scanner",
       "trigger": {
         "type": "exit-ready",
-        "objectiveId": "sector-03-01:final-deck-reached"
+        "objectiveId": "sector-03-01:exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "gameplay-repeatable-no-new-story",

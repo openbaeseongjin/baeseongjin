@@ -460,26 +460,15 @@
       "stableRuntimeId": "sector-03-03:exit-panel",
       "kind": "interaction",
       "properties": {
-        "objectiveId": "sector-03-03:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-03-03:final-deck-reached"
-        ]
+        "objectiveId": "sector-03-03:exit-panel-engaged"
       }
     }
   ],
   "objectives": [
     {
-      "id": "sector-03-03:final-deck-reached",
-      "type": "reach",
-      "target": "exit-deck"
-    },
-    {
       "id": "sector-03-03:exit-panel-engaged",
       "type": "interact",
-      "sourceObjectId": "sector-03-03:exit-panel",
-      "requiredObjectiveIds": [
-        "sector-03-03:final-deck-reached"
-      ]
+      "sourceObjectId": "sector-03-03:exit-panel"
     }
   ],
   "gate": {

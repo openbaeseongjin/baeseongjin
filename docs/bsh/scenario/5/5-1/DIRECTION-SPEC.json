@@ -229,7 +229,7 @@
       "purpose": "Preview 5-2 without consuming the AEGIS lesson or later story.",
       "trigger": {
         "type": "objective-completed",
-        "objectiveId": "final-deck-reached"
+        "objectiveId": "exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "once-per-run",

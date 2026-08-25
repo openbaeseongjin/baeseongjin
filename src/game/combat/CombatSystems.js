@@ -93,7 +93,8 @@ export function updatePlayerProjectiles({
                     damage: projectile.damage,
                     sourcePlayerId: projectile.ownerId,
                     targetId: target.id,
-                    projectileId: projectile.id
+                    projectileId: projectile.id,
+                    predictionId: projectile.predictionId
                 })
             );
             resolutions.push(

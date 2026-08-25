@@ -20,10 +20,7 @@ import { AUTHORED_SECTOR_CATALOG } from "../src/game/world/sectors/AuthoredSecto
 import { createAuthoredSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/AuthoredSeamlessSectorRuntime.js";
 import { SectorProgressState } from "../src/game/world/SectorProgressState.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "../src/game/world/sectors/SectorDefinition.js";
-import {
-    collisionSurfacesForSectorProgress,
-    isSurfaceEnabledForProgress
-} from "../src/game/world/WorldGateGeometry.js";
+import { collisionSurfacesForSectorProgress } from "../src/game/world/WorldGateGeometry.js";
 
 const projectRoot = resolve(process.cwd());
 const editorCatalogPath = "docs/bsh/scenario/AREA-EDITOR-CATALOG.json";
@@ -920,33 +917,13 @@ function validateContentBoundaryProgress(world, issues) {
     }
 }
 
-function validateSector04QuorumCollision(world, issues) {
+function validateSector04PortalAccessOnly(world, issues) {
     const barrier = world.surfaces.find(
         ({ stageId, blockedByObjectiveId }) => stageId === "4-8" && typeof blockedByObjectiveId === "string"
     );
     const sector = world.sectors.find(({ id }) => id === "sector-04");
-    if (!barrier || sector?.accessModuleRequirement !== 2) {
-        issue(issues, "sector-04-quorum-barrier-missing");
-        return;
-    }
-    const progress = new SectorProgressState(world);
-    for (let count = 0; count < sector.accessModuleRequirement; count += 1) {
-        const liveEnabled = isSurfaceEnabledForProgress(barrier, progress);
-        const snapshotEnabled = isSurfaceEnabledForProgress(barrier, progress.snapshot());
-        if (!liveEnabled || !snapshotEnabled || !progressSurfaceIndex(world, progress)[barrier.id]) {
-            issue(issues, "sector-04-quorum-premature-open", { count, barrierId: barrier.id });
-        }
-        progress.collectAccessModule(sector.accessModuleIds[count]);
-    }
-    const completion = progress.completeObjective(barrier.blockedByObjectiveId);
-    if (
-        !completion.changed ||
-        isSurfaceEnabledForProgress(barrier, progress) ||
-        isSurfaceEnabledForProgress(barrier, progress.snapshot()) ||
-        progressSurfaceIndex(world, progress)[barrier.id]
-    ) {
-        issue(issues, "sector-04-quorum-open-mismatch", { barrierId: barrier.id });
-    }
+    if (sector?.accessModuleRequirement !== 2) issue(issues, "sector-04-access-requirement-mismatch");
+    if (barrier) issue(issues, "sector-04-stage-barrier-unexpected", { barrierId: barrier.id });
 }
 
 function validateEditorEntityCoverage(spec, issues) {
@@ -1142,7 +1119,7 @@ export function validateProductionMapParity() {
     validateScenarioExclusion({ scenarioEntries: catalogValidation.scenarioEntries, world, issues });
     validateBossStageFlow(world, issues);
     validateContentBoundaryProgress(world, issues);
-    validateSector04QuorumCollision(world, issues);
+    validateSector04PortalAccessOnly(world, issues);
     const reports = validateRuntimeStages({ runtimeEntries: catalogValidation.runtimeEntries, world, issues });
     return Object.freeze({ valid: issues.length === 0, reports, issues: Object.freeze(issues) });
 }

@@ -57,4 +57,4 @@ Remove from 4-8 authored content:
 
 ## Post-sector boundary
 
-`4-8 완료 → 5-1` authored Gate portal을 사용한다. 2-of-3 quorum과 source objective가 route unlock을 소유하며 별도 Boss Stage는 없다. Timer transition과 corporate continuity reveal은 4-8이 소유하지 않는다.
+`4-8 완료 → 5-1` authored Gate portal을 사용한다. Exit Panel W objective와 Sector 04 Key 2-of-3만 route unlock을 소유하며, Key 부족 시 상단 수량 경고를 표시한다. Stage-local reach/state-check 장벽과 별도 Boss Stage는 없다. Timer transition과 corporate continuity reveal은 4-8이 소유하지 않는다.

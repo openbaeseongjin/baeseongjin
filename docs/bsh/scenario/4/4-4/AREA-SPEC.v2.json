@@ -288,22 +288,8 @@
     "nextAreaId": "sector-04-05",
     "objectives": [
       {
-        "bounds": {
-          "height": 128,
-          "width": 320,
-          "x": 1920,
-          "y": -1984
-        },
-        "id": "final-deck-reached",
-        "preset": "reach-deck",
-        "type": "reach"
-      },
-      {
         "id": "exit-panel-engaged",
         "preset": "exit-panel",
-        "requiredObjectiveIds": [
-          "final-deck-reached"
-        ],
         "sourceObjectId": "sector-04-04:exit-panel",
         "type": "interact"
       }

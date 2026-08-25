@@ -267,7 +267,7 @@
           "action": "pressure-zero"
         }
       ],
-      "completion": "final-deck-reached → exit-panel → physical crossing → 3-4",
+      "completion": "exit-panel-engaged → exit-panel → physical crossing → 3-4",
       "validation": "Direction reads ↗; exit is safe."
     }
   ],

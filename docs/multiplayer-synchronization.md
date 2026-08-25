@@ -163,7 +163,7 @@
 
 `GameSimulation.stepCommandBatch()`는 싱글과 소유 클라이언트 예측에서 배치 틱이 정확히 다음 시뮬레이션 틱인지 확인하고 플레이어 ID로 명령을 연결한다. 멀티 서버는 같은 월드 스케줄러를 사용하되 `advanceInputDrivenObjects: false`로 실행해 플레이어·로프 capability를 중복 호출하지 않는다. 플레이어 타이머와 무기 쿨다운, 적·투사체 같은 `SimulationDrivenObject` 단계는 계속 진행한다.
 
-`PlayerCommand.interact` boolean은 route terminal 같은 근접 문맥 상호작용 의도다. PC `W/↑`와 모바일 점프 버튼은 점프 축과 이 의도를 함께 보내며, 권위 simulation은 준비된 terminal의 반경 안에서만 objective 완료에 사용한다. 사망·부활 규칙은 여전히 동료 상호작용을 요구하지 않고 이 입력을 부활 입력으로 소비하지 않는다.
+`PlayerCommand.interact` boolean과 `interactSequence`는 route terminal·Exit Panel 같은 근접 문맥 상호작용 의도다. PC `W/↑`와 모바일 점프 버튼은 점프 축과 이 의도를 함께 보내며, 권위 simulation은 source 반경 안의 새 sequence를 한 번만 소비한다. 모든 Stage portal은 이 W 상호작용으로 열고 도달 objective를 사용하지 않는다. Sector Key/Access가 부족한 경우에만 완료를 거부하고 당사자에게 `수집 n / 필요 m` 사건을 보낸다. 사망·부활 규칙은 여전히 동료 상호작용을 요구하지 않고 이 입력을 부활 입력으로 소비하지 않는다.
 
 ## 상태 소유권
 
@@ -201,7 +201,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·authorityTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
-현재 저작 시나리오는 영구 Stage cursor나 summit claim을 사용하지 않는다. 서버와 owner prediction의 같은 `GameSimulation`은 authored Gate objective·trigger를 통과한 Player 한 명에게 `gate-portal-entered`를 만들고 다음 authored Entry로 즉시 이동한다. Player별 savepoint 충돌은 owner-first claim으로 수렴한다. 3-8·4-8·5-8은 각각 4-1·5-1·6-1 Entry로 직접 이동하고 6-8은 terminal Boss06 entry만 연다.
+현재 저작 시나리오는 영구 Stage cursor나 summit claim을 사용하지 않는다. 서버와 owner prediction의 같은 `GameSimulation`은 Exit Panel W 상호작용 뒤 열린 authored Gate trigger를 통과한 Player 한 명에게 `gate-portal-entered`를 만들고 다음 authored Entry로 즉시 이동한다. Key 부족 경고와 portal 개방은 같은 interact sequence에서 결정되며 정상 서버 echo가 owner 결과를 중복 표시하지 않는다. Player별 savepoint 충돌은 owner-first claim으로 수렴한다. 3-8·4-8·5-8은 각각 4-1·5-1·6-1 Entry로 직접 이동하고 6-8은 terminal Boss06 entry만 연다.
 
 서버는 중립 Enemy에 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존한다. 이후 환경 원인으로 죽어도 해당 Player에게 Enemy definition의 XP를 한 번 지급한다. 레벨 도달 시 서버와 owner가 같은 seed·Player ID·reward level로 offer를 계산하고, owner가 즉시 선택한 `augment-selection` claim을 서버가 공식 offer membership으로 검증한다. Node source·`augment-offer` claim·공용 objective는 없다.
 
@@ -382,7 +382,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 ## 증강 선택·피해 동기화
 
 - offer는 owner와 서버가 `runSeed + stablePlayerId + rewardLevel`로 독립 재계산하고 snapshot의 pending XP reward를 보존한다.
-- Rope·Spell의 Enemy·Boss 적중은 공격 owner가 먼저 시뮬레이션하고 서버가 확정한다. 다른 Player 피격은 피해 Player가 먼저 적용해 claim한다. 서버 Enemy는 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존하고, 이후 비Player 원인 사망에도 해당 Player XP를 한 번 귀속한다.
+- Rope·Spell의 Enemy·Boss 적중은 공격 owner가 먼저 시뮬레이션하고 서버가 확정한다. 다른 Player 피격은 피해 Player가 먼저 적용해 claim한다. 서버 Enemy는 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존하고, 이후 비Player 원인 사망에도 해당 Player XP를 한 번 귀속한다. 중앙 Enemy 제거 경계가 모든 일반 Enemy 사망에 canonical `enemy-defeated`를 한 번 공유하며, 공격 owner의 predicted 사망 폭발과 서버 echo는 같은 causal ID로 합쳐지고 동료는 canonical 사건으로 같은 폭발을 본다.
 - 피해 클라이언트의 `IncomingSpellImpactDetector`는 owner-motion v11에 복제된 원격 Spell projectile·이동 aura·단발 area의 이전·현재 형상을 검사한다. 피해·상태이상·외부 Impulse를 로컬 `GameSimulation`에 먼저 적용하고 인증된 피해 Player가 Augment impact v5 claim을 보낸다. 서버는 원인 Spell definition과 source Player loadout을 검증하며 같은 Spell 객체 ID와 대상 ID로 만든 event ID는 한 번만 확정하고 상태 pulse는 전송하지 않는다.
 - `augment-impact`는 event ID, tick, source/target/effect, 접촉 위치, 공식 damage와 선택적 movement intent만 보낸다. 서버는 source card 보유와 수치 공식을 다시 계산한다.
 - live enemy는 `blocksImpactFrom`을 먼저 호출하고, lethal event의 own knockback을 적용하지 않는다. Boss displacement 면역은 public reaction에서 처리한다.

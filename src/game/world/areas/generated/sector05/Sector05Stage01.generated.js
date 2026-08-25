@@ -444,20 +444,7 @@ const SPEC = {
     "nextAreaId": "sector-05-02",
     "objectives": [
       {
-        "bounds": {
-          "height": 180,
-          "width": 420,
-          "x": 1070,
-          "y": -2400
-        },
-        "id": "final-deck-reached",
-        "type": "reach"
-      },
-      {
         "id": "exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "final-deck-reached"
-        ],
         "sourceObjectId": "sector-05-01:exit-panel",
         "type": "interact"
       }
