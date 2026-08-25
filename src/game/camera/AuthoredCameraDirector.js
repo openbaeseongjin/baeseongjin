@@ -6,7 +6,20 @@ const HORIZONTAL_PLAYER_RATIO = 0.38;
 const VERTICAL_PLAYER_RATIO = 0.58;
 const CAMERA_BLEND_RATE = 5;
 const ZOOM_BLEND_RATE = 6;
+const PLAYER_VISIBILITY_INSET = 48;
 const STORY_DISPLAY_TRIGGER_SIZE = Object.freeze({ width: 192, height: 64 });
+
+function clampCameraAxis(cameraPosition, targetPosition, viewportSize, zoom) {
+    const inset = Math.min(PLAYER_VISIBILITY_INSET, viewportSize * 0.5);
+    const minimum = targetPosition - (viewportSize - inset) / zoom;
+    const maximum = targetPosition - inset / zoom;
+    return Math.max(minimum, Math.min(maximum, cameraPosition));
+}
+
+function clampCameraToVisibilityTarget(camera, target, cssWidth, cssHeight) {
+    camera.x = clampCameraAxis(camera.x, target.position.x, cssWidth, camera.zoom);
+    camera.y = clampCameraAxis(camera.y, target.position.y, cssHeight, camera.zoom);
+}
 
 function cameraZoneForLocalY(area, localY) {
     const zones = area.cameraZones?.filter((zone) => zone && typeof zone === "object") ?? [];
@@ -92,6 +105,7 @@ export function advanceAuthoredCamera({
     camera,
     world,
     player,
+    visibilityTarget = player,
     mobileView = false,
     defaultZoom = 1,
     cssWidth,
@@ -99,19 +113,21 @@ export function advanceAuthoredCamera({
     dt
 }) {
     const shot = resolveAuthoredCameraShot({ world, player, mobileView, defaultZoom, cssWidth, cssHeight });
-    const zoomBlend = 1 - Math.exp(-ZOOM_BLEND_RATE * dt);
-    camera.zoom += (shot.zoom - camera.zoom) * zoomBlend;
-    const targetX = player.position.x - (cssWidth / shot.zoom) * shot.horizontalPlayerRatio;
-    const targetY = player.position.y - (cssHeight / shot.zoom) * shot.verticalPlayerRatio;
     if (camera.initialized === false) {
-        camera.x = targetX;
-        camera.y = targetY;
         camera.zoom = shot.zoom;
+        camera.x = player.position.x - (cssWidth / camera.zoom) * shot.horizontalPlayerRatio;
+        camera.y = player.position.y - (cssHeight / camera.zoom) * shot.verticalPlayerRatio;
         camera.initialized = true;
+        clampCameraToVisibilityTarget(camera, visibilityTarget, cssWidth, cssHeight);
         return shot;
     }
+    const zoomBlend = 1 - Math.exp(-ZOOM_BLEND_RATE * dt);
+    camera.zoom += (shot.zoom - camera.zoom) * zoomBlend;
+    const targetX = player.position.x - (cssWidth / camera.zoom) * shot.horizontalPlayerRatio;
+    const targetY = player.position.y - (cssHeight / camera.zoom) * shot.verticalPlayerRatio;
     const cameraBlend = 1 - Math.exp(-CAMERA_BLEND_RATE * dt);
     camera.x += (targetX - camera.x) * cameraBlend;
     camera.y += (targetY - camera.y) * cameraBlend;
+    clampCameraToVisibilityTarget(camera, visibilityTarget, cssWidth, cssHeight);
     return shot;
 }

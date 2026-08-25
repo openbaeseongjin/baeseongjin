@@ -44,14 +44,14 @@ function spellCastBinding(event, context) {
 }
 
 function playerHitBinding(event, context) {
-    const isFallDamage =
-        event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_FALL_DAMAGED ||
-        event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_PLAYER_FALL_DAMAGED;
+    const isPlatformCollisionDamage =
+        event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_PLATFORM_COLLISION_DAMAGED ||
+        event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_PLAYER_PLATFORM_COLLISION_DAMAGED;
     const isDirectPlayerHit =
         event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.BOSS_PLAYER_HIT ||
         event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.ENEMY_BEHAVIOR_PLAYER_HIT;
     if (
-        !isFallDamage &&
+        !isPlatformCollisionDamage &&
         !isDirectPlayerHit &&
         ((event.eventType !== CLIENT_FEEDBACK_EVENT_TYPE.RESOLVE &&
             event.eventType !== CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_RESOLVE) ||
@@ -64,7 +64,12 @@ function playerHitBinding(event, context) {
         request: Object.freeze({
             ...context,
             emitterId: event.targetId ?? event.parameters?.targetId ?? "player",
-            causalId: eventCausalId(isFallDamage ? "fall-damage" : "player-hit", event),
+            causalId: eventCausalId(
+                isPlatformCollisionDamage
+                    ? CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE
+                    : CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT,
+                event
+            ),
             position: eventPosition(event) ?? context.listener
         })
     });

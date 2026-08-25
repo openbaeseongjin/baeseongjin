@@ -7,6 +7,10 @@ import { ROPE_AUTHORITY_EVENT_TYPE } from "../network/RopeAuthorityEvent.js";
 import { SPELL_SOURCE_KIND } from "../spells/SpellRuntimeDefinition.js";
 import { IncomingSpellImpactDetector } from "../spells/IncomingSpellImpactDetector.js";
 import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
+import {
+    PLATFORM_COLLISION_DAMAGE_EVENT_TYPE,
+    PLATFORM_COLLISION_DAMAGE_ID
+} from "../combat/PlatformCollisionDamage.js";
 
 const APPLIED_AUTHORITY_EVENT_HISTORY_LIMIT = 64;
 
@@ -626,7 +630,7 @@ export class OwnerPredictionRuntime {
         {
             projectile,
             ropeAugmentEvents = [],
-            fallImpactEvents = [],
+            platformCollisionImpactEvents = [],
             jammerImpactEvents = [],
             bossImpactEvents = [],
             ropeImpactEvents = [],
@@ -637,7 +641,7 @@ export class OwnerPredictionRuntime {
         previous
     ) {
         this.recordPredictedAugmentEvents(ropeAugmentEvents, tick);
-        this.recordPredictedFallImpacts(fallImpactEvents);
+        this.recordPredictedPlatformCollisionImpacts(platformCollisionImpactEvents);
         this.recordPredictedPlayerImpacts(jammerImpactEvents);
         this.recordPredictedBossImpacts(bossImpactEvents, tick, previous);
         this.recordPredictedRopeImpacts(ropeImpactEvents);
@@ -646,15 +650,15 @@ export class OwnerPredictionRuntime {
         this.recordPredictedProjectile(projectile, tick, previous.weaponCooldown);
     }
 
-    recordPredictedFallImpacts(events) {
+    recordPredictedPlatformCollisionImpacts(events) {
         for (const event of events) {
-            const eventKey = `fall-damage:${event.impactId}`;
+            const eventKey = PLATFORM_COLLISION_DAMAGE_ID.predictionKey(event.impactId);
             if (this.emittedPredictionTicks.has(eventKey)) continue;
             this.emittedPredictionTicks.set(eventKey, event.clientTick);
             this.predictedEvents.push(
                 Object.freeze({
                     ...event,
-                    eventType: "predicted-player-fall-damaged"
+                    eventType: PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.PREDICTED
                 })
             );
         }

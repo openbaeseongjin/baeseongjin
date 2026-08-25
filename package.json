@@ -1,6 +1,6 @@
 {
     "name": "baeseongjin-rope-roguelike",
-    "version": "0.72.1",
+    "version": "0.72.2",
     "private": true,
     "type": "module",
     "scripts": {

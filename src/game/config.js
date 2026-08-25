@@ -181,7 +181,7 @@ export function normalizeRopeTuningOverride(value) {
     return Object.keys(normalized).length === 0 ? null : Object.freeze(normalized);
 }
 
-export const FALL_DAMAGE_CONFIG = Object.freeze({
+export const PLATFORM_COLLISION_DAMAGE_CONFIG = Object.freeze({
     safeImpactSpeed: 800,
     maximumDamageImpactSpeed: 1400,
     damageScale: 0.5

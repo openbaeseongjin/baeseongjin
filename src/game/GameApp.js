@@ -397,6 +397,7 @@ export class GameApp {
             camera: this.camera,
             world,
             player: focusPlayer,
+            visibilityTarget: player,
             mobileView: this.mobileView,
             defaultZoom:
                 localBossStage?.status === "active"

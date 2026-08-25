@@ -3,6 +3,7 @@ import { SPELL_ID } from "../spells/SpellDefinition.js";
 import { SPELL_EVENT_TYPE, SPELL_IMPACT_RESOLUTION } from "../spells/SpellRuntimeDefinition.js";
 import { PLAYER_IMPACT_TYPE } from "../network/PlayerImpactClaim.js";
 import { ENEMY_LIFECYCLE_EVENT_TYPE } from "./EnemyImpactTombstones.js";
+import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "./PlatformCollisionDamage.js";
 
 export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PLAYER_RESPAWNED: "player-respawned",
@@ -15,8 +16,8 @@ export const CLIENT_FEEDBACK_EVENT_TYPE = Object.freeze({
     PREDICTED_SPAWN: "predicted-spawn",
     SPELL_PROJECTILE_ENDED: SPELL_EVENT_TYPE.PROJECTILE_ENDED,
     PREDICTED_SPELL_PROJECTILE_ENDED: "predicted-spell-projectile-ended",
-    PLAYER_FALL_DAMAGED: "player-fall-damaged",
-    PREDICTED_PLAYER_FALL_DAMAGED: "predicted-player-fall-damaged",
+    PLAYER_PLATFORM_COLLISION_DAMAGED: PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.APPLIED,
+    PREDICTED_PLAYER_PLATFORM_COLLISION_DAMAGED: PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.PREDICTED,
     BOSS_PLAYER_HIT: "boss-player-hit",
     ENEMY_BEHAVIOR_PLAYER_HIT: "enemy-behavior-player-hit"
 });
@@ -30,7 +31,7 @@ export const CLIENT_FEEDBACK_RESOLUTION = Object.freeze({
     PLAYER_HIT: PLAYER_IMPACT_TYPE.PLAYER_HIT,
     ROPE_CUT: PLAYER_IMPACT_TYPE.ROPE_CUT,
     JAMMER_SHOCK: PLAYER_IMPACT_TYPE.JAMMER_SHOCK,
-    FALL_DAMAGE: PLAYER_IMPACT_TYPE.FALL_DAMAGE,
+    PLATFORM_COLLISION_DAMAGE: PLAYER_IMPACT_TYPE.PLATFORM_COLLISION_DAMAGE,
     SHIELD_BLOCKED: SPELL_IMPACT_RESOLUTION.SHIELD_BLOCKED,
     TARGET_ALREADY_DEAD: "target-already-dead"
 });
@@ -99,9 +100,9 @@ const EVENT_GROUP = Object.freeze({
         CLIENT_FEEDBACK_EVENT_TYPE.SPELL_PROJECTILE_ENDED,
         CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_SPELL_PROJECTILE_ENDED
     ]),
-    FALL_DAMAGE: Object.freeze([
-        CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_FALL_DAMAGED,
-        CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_PLAYER_FALL_DAMAGED
+    PLATFORM_COLLISION_DAMAGE: Object.freeze([
+        CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_PLATFORM_COLLISION_DAMAGED,
+        CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_PLAYER_PLATFORM_COLLISION_DAMAGED
     ]),
     DIRECT_PLAYER_HIT: Object.freeze([
         CLIENT_FEEDBACK_EVENT_TYPE.BOSS_PLAYER_HIT,
@@ -118,7 +119,7 @@ const COMBAT_RESOLUTIONS = Object.freeze([
     CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT,
     CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT,
     CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK,
-    CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE
+    CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE
 ]);
 
 const SPELL_PRESET = Object.freeze({
@@ -145,7 +146,7 @@ const SPELL_PRESET = Object.freeze({
 const IMPACT_STATE = Object.freeze({
     [CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT]: Object.freeze({ lifetime: 0.24, strength: 9 }),
     [CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK]: Object.freeze({ lifetime: 0.24, strength: 9 }),
-    [CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE]: Object.freeze({ lifetime: 0.24, strength: 9 }),
+    [CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE]: Object.freeze({ lifetime: 0.24, strength: 9 }),
     [CLIENT_FEEDBACK_RESOLUTION.ENEMY_DEFEATED]: Object.freeze({ lifetime: 0.2, strength: 6 }),
     [CLIENT_FEEDBACK_RESOLUTION.BOSS_DEFEATED]: Object.freeze({ lifetime: 0.2, strength: 6 }),
     [CLIENT_FEEDBACK_RESOLUTION.BOSS_PHASE_COMPLETED]: Object.freeze({ lifetime: 0.16, strength: 4 }),
@@ -255,7 +256,7 @@ export function createClientFeedbackEvent(event, resolution, index = 0) {
         CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT,
         CLIENT_FEEDBACK_RESOLUTION.ROPE_CUT,
         CLIENT_FEEDBACK_RESOLUTION.JAMMER_SHOCK,
-        CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE
+        CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE
     ].includes(resolution)
         ? targetId
         : sourcePlayerId;
@@ -377,9 +378,10 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
                 bounds: event.bounds ?? null
             })
     }),
-    FALL_DAMAGE_COMBAT: new ClientFeedbackEventDefinition({
-        predicate: (event) => EVENT_GROUP.FALL_DAMAGE.includes(event.eventType),
-        present: (event, context) => context.appendCombatEvent(event, CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE)
+    PLATFORM_COLLISION_DAMAGE_COMBAT: new ClientFeedbackEventDefinition({
+        predicate: (event) => EVENT_GROUP.PLATFORM_COLLISION_DAMAGE.includes(event.eventType),
+        present: (event, context) =>
+            context.appendCombatEvent(event, CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE)
     }),
     RESOLVE_COMBAT: new ClientFeedbackEventDefinition({
         predicate: (event) =>

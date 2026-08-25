@@ -1,3 +1,8 @@
+import {
+    CLIENT_FEEDBACK_EVENT_TYPE,
+    CLIENT_FEEDBACK_RESOLUTION
+} from "../../game/combat/ClientFeedbackEventDefinition.js";
+
 function fallbackEventId(event, index) {
     return (
         event.eventId ??
@@ -26,8 +31,12 @@ export function createPlayerPresentationEvents(events = []) {
     events.forEach((event, index) => {
         if (!event) return;
         if (
-            (event.eventType === "resolve" || event.eventType === "predicted-resolve") &&
-            (event.resolution === "player-hit" || event.resolution === "fall-damage")
+            [CLIENT_FEEDBACK_EVENT_TYPE.RESOLVE, CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_RESOLVE].includes(
+                event.eventType
+            ) &&
+            [CLIENT_FEEDBACK_RESOLUTION.PLAYER_HIT, CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE].includes(
+                event.resolution
+            )
         ) {
             const playerId = event.targetId ?? event.parameters?.targetId;
             if (playerId) {
@@ -46,7 +55,10 @@ export function createPlayerPresentationEvents(events = []) {
             return;
         }
         if (
-            (event.eventType === "player-fall-damaged" || event.eventType === "predicted-player-fall-damaged") &&
+            [
+                CLIENT_FEEDBACK_EVENT_TYPE.PLAYER_PLATFORM_COLLISION_DAMAGED,
+                CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_PLAYER_PLATFORM_COLLISION_DAMAGED
+            ].includes(event.eventType) &&
             (event.targetId || event.playerId)
         ) {
             const playerId = event.targetId ?? event.playerId;

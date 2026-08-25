@@ -12,6 +12,12 @@ const PLAYER_COLLISION_ACTOR_KINDS = Object.freeze([
     PHYSICS_ACTOR_KIND.BOSS_HAZARD
 ]);
 
+function continuesSurfaceCollision(normal, previousNormals) {
+    return previousNormals.some(
+        (previous) => normal.x * previous.x + normal.y * previous.y >= PLAYER_PHYSICS.CONTINUOUS_SURFACE_NORMAL_DOT
+    );
+}
+
 export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSurfacePhysics(class {}))) {
     constructor(config, { collider = new CircleCollider({ radius: config.radius }) } = {}) {
         super();
@@ -48,7 +54,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
     }
 
     step(dt, input, surfaces, rope, collision = {}) {
-        const wasGrounded = this.isGrounded;
+        const previousSurfaceCollisionNormals = this.lastSurfaceCollisionNormals;
         const movementMultiplier = Number.isFinite(input.movementMultiplier)
             ? Math.max(PHYSICS.MINIMUM_GRAVITY_SCALE, input.movementMultiplier)
             : PHYSICS.DEFAULT_GRAVITY_SCALE;
@@ -119,14 +125,16 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
             collidedActorIds: surfaceResolution.collidedActorIds
         });
         rope.apply(this, dt);
-        const landed = !wasGrounded && this.isGrounded;
+        const startedSurfaceCollision = surfaceResolution.collisionNormals.some(
+            (normal) => !continuesSurfaceCollision(normal, previousSurfaceCollisionNormals)
+        );
         return Object.freeze({
-            landed,
+            startedSurfaceCollision,
             collidedActorIds: surfaceResolution.collidedActorIds,
-            impactSpeed: landed
-                ? Math.max(PLAYER_PHYSICS.MINIMUM_IMPACT_SPEED, impactVelocity.y)
+            impactSpeed: startedSurfaceCollision
+                ? Math.max(PLAYER_PHYSICS.MINIMUM_IMPACT_SPEED, Math.hypot(impactVelocity.x, impactVelocity.y))
                 : PLAYER_PHYSICS.MINIMUM_IMPACT_SPEED,
-            impactVelocity: landed
+            impactVelocity: startedSurfaceCollision
                 ? Object.freeze({ x: impactVelocity.x, y: impactVelocity.y })
                 : PLAYER_PHYSICS.ZERO_VECTOR,
             actorImpact: this.lastActorImpact

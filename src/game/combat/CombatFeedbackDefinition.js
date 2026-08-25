@@ -64,7 +64,7 @@ const COMBAT_FEEDBACK_BY_RESOLUTION = Object.freeze({
         showText: true,
         emphasis: false
     }),
-    [CLIENT_FEEDBACK_RESOLUTION.FALL_DAMAGE]: Object.freeze({
+    [CLIENT_FEEDBACK_RESOLUTION.PLATFORM_COLLISION_DAMAGE]: Object.freeze({
         color: "#fb7185",
         presetId: CLIENT_FEEDBACK_PRESET_ID.ENEMY_IMPACT,
         strength: 1,

@@ -6,6 +6,7 @@ import { assertGameRenderer } from "../render/SceneRenderer.js";
 import { createPlayerCommand } from "./commands/PlayerCommand.js";
 import { CAMERA_CONFIG, resolveMobileCameraZoom } from "./config.js";
 import { ClientCombatFeedback } from "./combat/ClientCombatFeedback.js";
+import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "./combat/PlatformCollisionDamage.js";
 import { createBossPresentationEvents, createBossStagePresentation } from "../render/boss/BossStagePresentation.js";
 import { bossStageSpecById } from "./boss-authoring/BossStageCatalog.js";
 import { ClientStatusFeedback } from "./combat/ClientStatusFeedback.js";
@@ -414,8 +415,10 @@ export class MultiplayerGameApp {
         for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "augment-impact")) {
             this.authority.submitAugmentImpact(event);
         }
-        for (const event of predictedEvents.filter(({ eventType }) => eventType === "predicted-player-fall-damaged")) {
-            this.authority.submitPredictedFallImpact(event);
+        for (const event of predictedEvents.filter(
+            ({ eventType }) => eventType === PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.PREDICTED
+        )) {
+            this.authority.submitPredictedPlatformCollisionImpact(event);
         }
         for (const event of predictedEvents.filter(({ parameters }) => parameters?.sourceKind === "boss-hazard")) {
             this.authority.submitPredictedBossImpact(event);
@@ -583,6 +586,7 @@ export class MultiplayerGameApp {
             camera: this.camera,
             world,
             player: bossCameraFocusPlayer(player, localBossStage),
+            visibilityTarget: player,
             mobileView: this.mobileView,
             defaultZoom:
                 localBossStage?.status === "active"

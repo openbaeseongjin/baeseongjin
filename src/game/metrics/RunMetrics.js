@@ -47,7 +47,7 @@ export class RunMetrics {
     }
 
     recordPlayerImpact(impactType, damage = 0) {
-        if ([PLAYER_IMPACT_TYPE.PLAYER_HIT, PLAYER_IMPACT_TYPE.FALL_DAMAGE].includes(impactType))
+        if ([PLAYER_IMPACT_TYPE.PLAYER_HIT, PLAYER_IMPACT_TYPE.PLATFORM_COLLISION_DAMAGE].includes(impactType))
             this.damageTaken += damage;
         if ([PLAYER_IMPACT_TYPE.ROPE_CUT, PLAYER_IMPACT_TYPE.JAMMER_SHOCK].includes(impactType)) this.ropeCuts += 1;
     }

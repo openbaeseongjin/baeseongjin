@@ -3,12 +3,13 @@ import { augmentById } from "../augments/AugmentCatalog.js";
 import { MAX_AUGMENT_SELECTIONS } from "../augments/AugmentCatalog.js";
 import { STATUS_EFFECT_ID } from "../status-effects/StatusEffectDefinition.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
+import { PLATFORM_COLLISION_DAMAGE_RESOLUTION } from "../combat/PlatformCollisionDamage.js";
 
-export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 15;
+export const PLAYER_IMPACT_CLAIM_PROTOCOL_VERSION = 16;
 export const PLAYER_IMPACT_TYPE = Object.freeze({
     ROPE_CUT: "rope-cut",
     PLAYER_HIT: "player-hit",
-    FALL_DAMAGE: "fall-damage",
+    PLATFORM_COLLISION_DAMAGE: PLATFORM_COLLISION_DAMAGE_RESOLUTION,
     JAMMER_SHOCK: "jammer-shock"
 });
 const IMPACT_TYPE_LOOKUP = Object.freeze(
