@@ -2,6 +2,7 @@ import { paintSpriteFrame } from "../../sprites/SpriteCanvasPainter.js";
 import { drawAuthoredSectorBackdrop } from "../AuthoredSectorBackdrop.js";
 import {
     AltitudeSunrise,
+    activeBossEnvironmentArea,
     authoredEnvironmentZone,
     currentAuthoredArea,
     sceneEnvironmentZone
@@ -32,7 +33,7 @@ export class PixelBackdropRenderer {
         const { cssWidth, cssHeight } = viewport;
         const camera = scene.camera;
         const playerAltitude = scene.player?.position?.y ?? 0;
-        const bossEnvironmentArea = bossStageAuthoredArea(scene);
+        const bossEnvironmentArea = activeBossEnvironmentArea(scene);
         const area = bossEnvironmentArea ?? currentAuthoredArea(scene);
         const authoredTransition = bossEnvironmentArea ? null : authoredSectorBackdropTransition(scene);
         const zone = sceneEnvironmentZone(this.definition, scene);
@@ -219,7 +220,7 @@ function authoredDefinitionForArea(definitions, area) {
 }
 
 export function authoredBackdropEnvironmentAreas(scene) {
-    const bossEnvironmentArea = bossStageAuthoredArea(scene);
+    const bossEnvironmentArea = activeBossEnvironmentArea(scene);
     if (bossEnvironmentArea) return Object.freeze([bossEnvironmentArea]);
     const transition = authoredSectorBackdropTransition(scene);
     if (transition) return Object.freeze([transition.fromArea, transition.toArea]);
@@ -258,16 +259,6 @@ function authoredSectorBackdropTransition(scene) {
 
 function authoredRegions(world) {
     return world?.landmarks?.length ? world.landmarks : (world?.areas ?? []);
-}
-
-function bossStageAuthoredArea(scene) {
-    const bossStage = scene?.bossStage;
-    if (bossStage?.status !== "active") return null;
-    const areaId = bossStage.environmentAreaId;
-    if (typeof areaId !== "string" || areaId === "") return null;
-    return authoredRegions(scene.world).find(
-        (region) => region.id === areaId || region.areaId === areaId || region.stageId === areaId
-    );
 }
 
 function endpointRegion(regions, sectorId, endpoint) {

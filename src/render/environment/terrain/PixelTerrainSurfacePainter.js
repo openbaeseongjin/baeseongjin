@@ -52,6 +52,7 @@ export class PixelTerrainSurfacePainter {
 
     drawEdgeTiles(context, entry, material, viewport, opacity = 1) {
         const frame = material.edge;
+        if (!this.assets?.isReady(frame.atlasId)) return;
         const image = this.assets.imageFor(frame.atlasId);
         context.save();
         this.tracePath(context, entry.surface.vertices);

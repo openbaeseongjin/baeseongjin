@@ -1,0 +1,173 @@
+{
+    "$schema": "../sprite-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "environment-boss-06-continuity-warden-arena",
+    "generator": {
+        "tool": "openai-imagegen-and-runtime-rectangle-frame-normalization",
+        "exportVersion": "2026-08-25-boss-06-arena-platforms-v1",
+        "sourceExport": "assets/artwork/environments/boss-06-continuity-warden-arena-platforms/export/boss-06-continuity-warden-arena-platforms-module-sheet-v1.png"
+    },
+    "atlases": {
+        "boss-06-backdrop-fixed": {
+            "image": "backdrop-fixed.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "boss-06-platform-modules": {
+            "image": "platform-modules.png",
+            "size": { "width": 1619, "height": 971 },
+            "frameSize": { "width": 1619, "height": 971 }
+        },
+        "boss-06-decoration": {
+            "image": "decoration.png",
+            "size": { "width": 96, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        }
+    },
+    "zones": [
+        {
+            "id": "waste",
+            "label": "Boss 06 Containment Runway",
+            "minAltitude": 0,
+            "palette": {
+                "skyTop": "#17366b",
+                "skyBottom": "#0d1831",
+                "silhouetteFar": "#263f6a",
+                "silhouetteMid": "#182c50",
+                "silhouetteNear": "#081424",
+                "terrainFill": "#172434",
+                "terrainEdge": "#a8b3bb",
+                "oneWayEdge": "#48c6d9",
+                "accent": "#d8a93f"
+            },
+            "backdropVariant": "boss-06-containment",
+            "terrainMaterial": "boss-06-containment-armor",
+            "decorationGroup": "boss-06-minimal"
+        },
+        {
+            "id": "industrial-maintenance",
+            "label": "Boss 06 Containment Runway",
+            "minAltitude": 1800,
+            "palette": {
+                "skyTop": "#17366b",
+                "skyBottom": "#0d1831",
+                "silhouetteFar": "#263f6a",
+                "silhouetteMid": "#182c50",
+                "silhouetteNear": "#081424",
+                "terrainFill": "#172434",
+                "terrainEdge": "#a8b3bb",
+                "oneWayEdge": "#48c6d9",
+                "accent": "#d8a93f"
+            },
+            "backdropVariant": "boss-06-containment",
+            "terrainMaterial": "boss-06-containment-armor",
+            "decorationGroup": "boss-06-minimal"
+        },
+        {
+            "id": "residential-commercial",
+            "label": "Boss 06 Containment Runway",
+            "minAltitude": 3600,
+            "palette": {
+                "skyTop": "#17366b",
+                "skyBottom": "#0d1831",
+                "silhouetteFar": "#263f6a",
+                "silhouetteMid": "#182c50",
+                "silhouetteNear": "#081424",
+                "terrainFill": "#172434",
+                "terrainEdge": "#a8b3bb",
+                "oneWayEdge": "#48c6d9",
+                "accent": "#d8a93f"
+            },
+            "backdropVariant": "boss-06-containment",
+            "terrainMaterial": "boss-06-containment-armor",
+            "decorationGroup": "boss-06-minimal"
+        },
+        {
+            "id": "corporate-security",
+            "label": "Boss 06 Containment Runway",
+            "minAltitude": 5400,
+            "palette": {
+                "skyTop": "#17366b",
+                "skyBottom": "#0d1831",
+                "silhouetteFar": "#263f6a",
+                "silhouetteMid": "#182c50",
+                "silhouetteNear": "#081424",
+                "terrainFill": "#172434",
+                "terrainEdge": "#a8b3bb",
+                "oneWayEdge": "#48c6d9",
+                "accent": "#d8a93f"
+            },
+            "backdropVariant": "boss-06-containment",
+            "terrainMaterial": "boss-06-containment-armor",
+            "decorationGroup": "boss-06-minimal"
+        },
+        {
+            "id": "landing-pad",
+            "label": "Boss 06 Containment Runway",
+            "minAltitude": 7200,
+            "palette": {
+                "skyTop": "#17366b",
+                "skyBottom": "#0d1831",
+                "silhouetteFar": "#263f6a",
+                "silhouetteMid": "#182c50",
+                "silhouetteNear": "#081424",
+                "terrainFill": "#172434",
+                "terrainEdge": "#a8b3bb",
+                "oneWayEdge": "#48c6d9",
+                "accent": "#d8a93f"
+            },
+            "backdropVariant": "boss-06-containment",
+            "terrainMaterial": "boss-06-containment-armor",
+            "decorationGroup": "boss-06-minimal"
+        }
+    ],
+    "backdrop": {
+        "layers": [
+            {
+                "id": "fixed-background",
+                "depth": 0,
+                "parallaxX": 0.012,
+                "parallaxY": 0.018,
+                "frames": [{ "atlas": "boss-06-backdrop-fixed", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            }
+        ]
+    },
+    "terrain": {
+        "materials": {
+            "boss-06-containment-armor": {
+                "fill": { "atlas": "boss-06-platform-modules", "x": 330, "y": 250, "width": 900, "height": 120 },
+                "edge": { "atlas": "boss-06-platform-modules", "x": 330, "y": 250, "width": 900, "height": 8 },
+                "oneWayColor": "#48c6d9",
+                "blockOverlay": false
+            }
+        },
+        "blockPool": {
+            "fallbackPresetId": "platform",
+            "presetByRole": {
+                "platform": "platform",
+                "safe-deck": "safe-deck",
+                "recovery": "recovery",
+                "overhang": "overhang",
+                "sealed-door": "sealed-door",
+                "cover": "cover",
+                "solid": "solid"
+            }
+        }
+    },
+    "decoration": {
+        "groups": {
+            "boss-06-minimal": {
+                "items": [
+                    {
+                        "frame": { "atlas": "boss-06-decoration", "cell": { "column": 3, "row": 0 } },
+                        "placement": { "depth": "far", "surfaceLevelOffset": 0, "avoidPlayPath": true },
+                        "size": { "width": 12, "height": 12 }
+                    }
+                ]
+            }
+        }
+    }
+}

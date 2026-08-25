@@ -103,7 +103,7 @@ class TerrainBlockRenderer {
     draw({ context, entry, material, palette, viewport, presentation }) {
         const { surface, bounds } = entry;
         this.painter.drawFill(context, surface.vertices, bounds, material, palette, viewport);
-        this.drawStructure(context, surface, bounds, palette, presentation);
+        if (material.blockOverlay) this.drawStructure(context, surface, bounds, palette, presentation);
         this.painter.drawEdgeTiles(context, entry, material, viewport, 1);
         context.strokeStyle = palette.terrainEdge;
         context.lineWidth = 3;

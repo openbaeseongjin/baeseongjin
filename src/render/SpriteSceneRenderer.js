@@ -122,6 +122,15 @@ export class SpriteSceneResourceBundle {
         return Object.keys(this.environmentDefinitionForArea(areaId).atlases);
     }
 
+    environmentAtlasIdsForBossStage(areaId, bossStageId) {
+        if (typeof bossStageId !== "string" || bossStageId === "") {
+            throw new Error("SpriteSceneResourceBundle requires a Boss Stage ID");
+        }
+        return Object.freeze([
+            ...new Set([...this.environmentAtlasIdsForArea(areaId), ...this.environmentAtlasIdsForArea(bossStageId)])
+        ]);
+    }
+
     preparePlayer() {
         return this.playerAssets.prepare();
     }
@@ -136,10 +145,8 @@ export class SpriteSceneResourceBundle {
         return this.snapshotForArea({ areaId, sectorId });
     }
 
-    async prepareBossStage({ areaId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
-        const environmentAtlasIds = Object.freeze([
-            ...new Set([...this.environmentAtlasIdsForArea(areaId), ...Object.keys(this.environmentDefinition.atlases)])
-        ]);
+    async prepareBossStage({ areaId = null, bossStageId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
+        const environmentAtlasIds = this.environmentAtlasIdsForBossStage(areaId, bossStageId);
         await Promise.all([
             this.preparePlayer(),
             this.enemySpritePackages.prepareSector(sectorId),
@@ -147,11 +154,18 @@ export class SpriteSceneResourceBundle {
             this.continuityWardenAssets.prepare(),
             this.continuityWardenObjectSpriteAssets.prepare()
         ]);
-        return this.snapshotForArea({ areaId, sectorId });
+        return Object.freeze({
+            ...this.snapshotForArea({ areaId, sectorId }),
+            environment: this.environmentAssets.statusFor(environmentAtlasIds)
+        });
     }
 
-    prepareRemaining({ areaId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
-        const currentEnvironmentAtlasIds = new Set(this.environmentAtlasIdsForArea(areaId));
+    prepareRemaining({ areaId = null, bossStageId = null, sectorId = DEFAULT_ENEMY_SPRITE_SECTOR_ID } = {}) {
+        const currentEnvironmentAtlasIds = new Set(
+            bossStageId
+                ? this.environmentAtlasIdsForBossStage(areaId, bossStageId)
+                : this.environmentAtlasIdsForArea(areaId)
+        );
         const remainingEnvironmentAtlasIds = Object.keys(this.environmentAssets.assets).filter(
             (atlasId) => !currentEnvironmentAtlasIds.has(atlasId)
         );

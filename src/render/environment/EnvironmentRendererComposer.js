@@ -7,8 +7,11 @@ import {
 import { authoredBackdropEnvironmentAreas, PixelBackdropRenderer } from "./renderers/PixelBackdropRenderer.js";
 import { PixelTerrainRenderer } from "./renderers/PixelTerrainRenderer.js";
 import { PixelDecorationRenderer } from "./renderers/PixelDecorationRenderer.js";
-import { authoredAreaEnvironmentDefinitionFor } from "./AuthoredAreaEnvironmentCatalog.js";
-import { currentAuthoredArea } from "./AltitudeZoneResolver.js";
+import {
+    authoredAreaEnvironmentDefinitionFor,
+    authoredBossStageEnvironmentDefinitionFor
+} from "./AuthoredAreaEnvironmentCatalog.js";
+import { currentEnvironmentArea } from "./AltitudeZoneResolver.js";
 
 function backdropAtlasIds(definition) {
     return definition.backdrop.layers.flatMap(({ frames }) => frames.map(({ atlasId }) => atlasId));
@@ -41,24 +44,6 @@ function componentAtlasIdsByDefinition(definition, authoredAreaEnvironmentDefini
     );
 }
 
-function authoredRegions(world) {
-    return world?.landmarks?.length ? world.landmarks : (world?.areas ?? []);
-}
-
-function currentEnvironmentArea(scene) {
-    const bossEnvironmentAreaId = scene?.bossStage?.status === "active" ? scene.bossStage.environmentAreaId : null;
-    if (typeof bossEnvironmentAreaId === "string" && bossEnvironmentAreaId) {
-        const bossArea = authoredRegions(scene.world).find(
-            (area) =>
-                area.id === bossEnvironmentAreaId ||
-                area.areaId === bossEnvironmentAreaId ||
-                area.stageId === bossEnvironmentAreaId
-        );
-        if (bossArea) return bossArea;
-    }
-    return currentAuthoredArea(scene);
-}
-
 export class EnvironmentRendererComposer {
     constructor({
         definition,
@@ -75,8 +60,18 @@ export class EnvironmentRendererComposer {
                 currentEnvironmentArea(scene),
                 definition
             );
+        const definitionForTerrainScene = (scene) =>
+            authoredBossStageEnvironmentDefinitionFor(
+                authoredAreaEnvironmentDefinitions,
+                scene.bossStage,
+                definitionForScene(scene)
+            );
+        const definitionForComponent = Object.freeze({
+            terrain: definitionForTerrainScene,
+            decoration: definitionForScene
+        });
         const atlasIdsForScene = (componentId) => (scene) =>
-            atlasIdsByDefinitionId[definitionForScene(scene).id][componentId];
+            atlasIdsByDefinitionId[definitionForComponent[componentId](scene).id][componentId];
         let cachedBackdropDefinitions = Object.freeze([]);
         let cachedBackdropAtlasIds = atlasIdsByDefinitionId[definition.id].backdrop;
         const backdropAtlasIdsForScene = (scene) => {

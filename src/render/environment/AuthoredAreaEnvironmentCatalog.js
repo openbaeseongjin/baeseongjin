@@ -14,6 +14,7 @@ const SECTOR_03_CENTRAL_EXCHANGE_SELECTION = environmentSelection("sector-03-cen
 const SECTOR_04_UPPER_RESIDENTIAL_SELECTION = environmentSelection("sector-04-upper-residential");
 const SECTOR_05_CONTINUITY_CONTROL_SELECTION = environmentSelection("sector-05-continuity-control");
 const SECTOR_06_ROOFTOP_EVACUATION_SELECTION = environmentSelection("sector-06-rooftop-evacuation");
+const BOSS_06_CONTINUITY_WARDEN_ARENA_SELECTION = environmentSelection("boss-06-continuity-warden-arena");
 
 function sectorAreaSelections(sectorNumber, selection) {
     const sectorId = String(sectorNumber).padStart(2, "0");
@@ -30,7 +31,8 @@ export const AUTHORED_AREA_ENVIRONMENT_SELECTIONS = Object.freeze(
         ...sectorAreaSelections(3, SECTOR_03_CENTRAL_EXCHANGE_SELECTION),
         ...sectorAreaSelections(4, SECTOR_04_UPPER_RESIDENTIAL_SELECTION),
         ...sectorAreaSelections(5, SECTOR_05_CONTINUITY_CONTROL_SELECTION),
-        ...sectorAreaSelections(6, SECTOR_06_ROOFTOP_EVACUATION_SELECTION)
+        ...sectorAreaSelections(6, SECTOR_06_ROOFTOP_EVACUATION_SELECTION),
+        ["boss-06", BOSS_06_CONTINUITY_WARDEN_ARENA_SELECTION]
     ])
 );
 
@@ -44,6 +46,28 @@ export function authoredAreaEnvironmentSelectionFor(area) {
 
 export function authoredAreaEnvironmentDefinitionFor(authoredAreaEnvironmentDefinitions, area, fallbackDefinition) {
     return authoredAreaEnvironmentDefinitions[areaIdFor(area)] ?? fallbackDefinition;
+}
+
+export function authoredEnvironmentDefinitionForStableId(
+    authoredAreaEnvironmentDefinitions,
+    stableId,
+    fallbackDefinition
+) {
+    if (typeof stableId !== "string" || stableId === "") return fallbackDefinition;
+    return authoredAreaEnvironmentDefinitions[stableId] ?? fallbackDefinition;
+}
+
+export function authoredBossStageEnvironmentDefinitionFor(
+    authoredAreaEnvironmentDefinitions,
+    bossStage,
+    fallbackDefinition
+) {
+    if (bossStage?.status !== "active") return fallbackDefinition;
+    return authoredEnvironmentDefinitionForStableId(
+        authoredAreaEnvironmentDefinitions,
+        bossStage.stageId,
+        fallbackDefinition
+    );
 }
 
 export async function loadAuthoredAreaEnvironmentDefinitions({

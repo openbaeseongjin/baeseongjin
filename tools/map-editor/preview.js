@@ -40,17 +40,18 @@ const runtimePresentationPromise = Promise.all([
 );
 const environmentDefinitionsByAreaId = new Map();
 
-function environmentDefinitionsForPreview(areaId) {
-    if (!environmentDefinitionsByAreaId.has(areaId)) {
+function environmentDefinitionsForPreview(...areaIds) {
+    const cacheKey = areaIds.join(":");
+    if (!environmentDefinitionsByAreaId.has(cacheKey)) {
         environmentDefinitionsByAreaId.set(
-            areaId,
-            loadAuthoredAreaEnvironmentDefinitions({ areaIds: [areaId] }).catch((cause) => {
-                environmentDefinitionsByAreaId.delete(areaId);
+            cacheKey,
+            loadAuthoredAreaEnvironmentDefinitions({ areaIds }).catch((cause) => {
+                environmentDefinitionsByAreaId.delete(cacheKey);
                 throw cause;
             })
         );
     }
-    return environmentDefinitionsByAreaId.get(areaId);
+    return environmentDefinitionsByAreaId.get(cacheKey);
 }
 
 function setStatus(text, kind = "") {
@@ -106,9 +107,9 @@ async function preparePreviewGraphics(areaId) {
     void previewResources.prepareRemaining(identity);
 }
 
-async function prepareBossPreviewGraphics(areaId) {
+async function prepareBossPreviewGraphics(areaId, bossStageId) {
     if (!previewResources) return;
-    const identity = previewGraphicsIdentity(areaId);
+    const identity = { ...previewGraphicsIdentity(areaId), bossStageId };
     await previewResources.prepareBossStage(identity);
     void previewResources.prepareRemaining(identity);
 }
@@ -127,10 +128,11 @@ async function createPreview() {
         weakpointStrikeButton.hidden = preview.specType !== "boss-stage";
         if (preview.specType === "boss-stage") {
             const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(
-                preview.spec.sourceAreaId
+                preview.spec.sourceAreaId,
+                preview.spec.id
             );
             const renderer = rendererForPreview({ ...presentation, authoredAreaEnvironmentDefinitions });
-            await prepareBossPreviewGraphics(preview.spec.sourceAreaId);
+            await prepareBossPreviewGraphics(preview.spec.sourceAreaId, preview.spec.id);
             currentApp = new BossStagePreviewGameApp({
                 canvas,
                 renderer,
