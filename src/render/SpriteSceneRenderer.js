@@ -41,6 +41,7 @@ import { DEFAULT_ENEMY_SPRITE_SECTOR_ID } from "./sprites/EnemySpriteCatalog.js"
 import { EnemySpritePackageCatalog } from "./sprites/EnemySpritePackageCatalog.js";
 import { DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION } from "./boss/ContinuityWardenSpriteCatalog.js";
 import { ContinuityWardenSpriteObjectRendererCatalog } from "./boss/ContinuityWardenSpriteObjectRenderer.js";
+import { ContinuityWardenObjectSpriteAssetCatalog } from "./boss/ContinuityWardenObjectSpriteCatalog.js";
 import { CONTINUITY_WARDEN_PROJECTILE_PRESET_ID } from "../game/boss/ContinuityWardenDefinition.js";
 import { HomingMissileRenderer } from "./projectiles/HomingMissileRenderer.js";
 
@@ -64,6 +65,7 @@ export class SpriteSceneResourceBundle {
         authoredAreaEnvironmentDefinitions = Object.freeze({}),
         continuityWardenDefinition = DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION,
         continuityWardenAssets = null,
+        continuityWardenObjectSpriteAssets = null,
         ImageClass = globalThis.Image
     } = {}) {
         this.playerDefinition = playerDefinition;
@@ -108,6 +110,8 @@ export class SpriteSceneResourceBundle {
                 ImageClass,
                 fallbackLabel: "Continuity Warden polygon fallback"
             });
+        this.continuityWardenObjectSpriteAssets =
+            continuityWardenObjectSpriteAssets ?? new ContinuityWardenObjectSpriteAssetCatalog({ ImageClass });
     }
 
     environmentDefinitionForArea(areaId) {
@@ -140,7 +144,8 @@ export class SpriteSceneResourceBundle {
             this.preparePlayer(),
             this.enemySpritePackages.prepareSector(sectorId),
             this.environmentAssets.prepare(environmentAtlasIds),
-            this.continuityWardenAssets.prepare()
+            this.continuityWardenAssets.prepare(),
+            this.continuityWardenObjectSpriteAssets.prepare()
         ]);
         return this.snapshotForArea({ areaId, sectorId });
     }
@@ -153,7 +158,8 @@ export class SpriteSceneResourceBundle {
         return Promise.all([
             this.enemySpritePackages.prepareRemaining([sectorId]),
             this.environmentAssets.prepare(remainingEnvironmentAtlasIds),
-            this.continuityWardenAssets.prepare()
+            this.continuityWardenAssets.prepare(),
+            this.continuityWardenObjectSpriteAssets.prepare()
         ]).then(() => this.snapshot());
     }
 
@@ -162,7 +168,8 @@ export class SpriteSceneResourceBundle {
             this.playerAssets.prepare(),
             this.enemySpritePackages.prepare(),
             this.environmentAssets.prepare(),
-            this.continuityWardenAssets.prepare()
+            this.continuityWardenAssets.prepare(),
+            this.continuityWardenObjectSpriteAssets.prepare()
         ]);
         return this.snapshot();
     }
@@ -179,7 +186,8 @@ export class SpriteSceneResourceBundle {
                 )
             ),
             environment: this.environmentAssets.status,
-            continuityWarden: this.continuityWardenAssets.status
+            continuityWarden: this.continuityWardenAssets.status,
+            continuityWardenObjects: this.continuityWardenObjectSpriteAssets.status
         });
     }
 
@@ -188,7 +196,8 @@ export class SpriteSceneResourceBundle {
             player: this.playerAssets.status,
             enemies: this.enemySpritePackages.statusForSector(sectorId),
             environment: this.environmentAssets.statusFor(this.environmentAtlasIdsForArea(areaId)),
-            continuityWarden: this.continuityWardenAssets.status
+            continuityWarden: this.continuityWardenAssets.status,
+            continuityWardenObjects: this.continuityWardenObjectSpriteAssets.status
         });
     }
 }
@@ -220,6 +229,7 @@ export class SpriteSceneRenderer {
         authoredAreaEnvironmentDefinitions = Object.freeze({}),
         continuityWardenDefinition = DEFAULT_CONTINUITY_WARDEN_SPRITE_DEFINITION,
         continuityWardenAssets = null,
+        continuityWardenObjectSpriteAssets = null,
         resources = null
     } = {}) {
         this.profile = "sprite";
@@ -240,7 +250,8 @@ export class SpriteSceneRenderer {
                 environmentAssets,
                 authoredAreaEnvironmentDefinitions,
                 continuityWardenDefinition,
-                continuityWardenAssets
+                continuityWardenAssets,
+                continuityWardenObjectSpriteAssets
             });
         this.playerDefinition = this.resources.playerDefinition;
         this.playerAssets = this.resources.playerAssets;
@@ -252,6 +263,7 @@ export class SpriteSceneRenderer {
         this.environmentAssets = this.resources.environmentAssets;
         this.continuityWardenDefinition = this.resources.continuityWardenDefinition;
         this.continuityWardenAssets = this.resources.continuityWardenAssets;
+        this.continuityWardenObjectSpriteAssets = this.resources.continuityWardenObjectSpriteAssets;
         this.environmentDiagnostics = null;
 
         const polygonBackdrop = new BackdropRenderer();
@@ -267,7 +279,8 @@ export class SpriteSceneRenderer {
 
         const bossObjectRenderers = new ContinuityWardenSpriteObjectRendererCatalog({
             assets: this.continuityWardenAssets,
-            definition: this.continuityWardenDefinition
+            definition: this.continuityWardenDefinition,
+            objectSpriteAssets: this.continuityWardenObjectSpriteAssets
         });
 
         const actorRenderers = new CameraWorldRenderer([

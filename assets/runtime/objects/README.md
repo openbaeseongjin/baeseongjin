@@ -9,8 +9,10 @@
 - `story-display-universal`: `64×48` 단일 상태 정보 표지판.
 - `exit-gate-universal`: `64×64` 닫힘·열림 출구문.
 - `gate-control-panel-universal`: `48×48` 닫힘·열림 조작 패널.
+- `boss-06-maintenance-shuttle`: Boss06 승리 후 `500×390` Boarding 셔틀.
 - 세 package는 Sector 01~06 공용 presentation ID를 사용하며 authored 좌표·anchor와 gameplay 상태를 변경하지 않는다.
 - 준비 전이나 로드 실패 시 각 presentation의 기존 Canvas mock으로 독립 fallback한다.
+- Boss06 셔틀은 Boss 전용 object kind와 center anchor를 유지하며 기존 Canvas 셔틀로 독립 fallback한다.
 
 ## 현재 공용 Canvas 표현
 

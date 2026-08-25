@@ -29,6 +29,7 @@ import { FinalEscapeCinematic } from "./presentation/FinalEscapeCinematic.js";
 import {
     BOSS_CAMERA_ZOOM_RATIO,
     bossCameraFocusPlayer,
+    bossCameraVisibilityTarget,
     localBossStageSnapshot
 } from "./presentation/BossStageLocalView.js";
 import { enemyPresentationDefinition, resolveEnemyPresentationState } from "../render/EnemyPresentationState.js";
@@ -397,7 +398,7 @@ export class GameApp {
             camera: this.camera,
             world,
             player: focusPlayer,
-            visibilityTarget: player,
+            visibilityTarget: bossCameraVisibilityTarget(player, localBossStage, focusPlayer),
             mobileView: this.mobileView,
             defaultZoom:
                 localBossStage?.status === "active"

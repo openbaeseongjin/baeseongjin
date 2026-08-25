@@ -2,6 +2,8 @@ import { bossBodyPolygonVertices } from "../../game/boss/BossBodyPolygon.js";
 import {
     CONTINUITY_WARDEN_LOCOMOTION_STATE,
     CONTINUITY_WARDEN_OBJECT_KIND,
+    CONTINUITY_WARDEN_SHUTTLE_SIZE,
+    CONTINUITY_WARDEN_SHUTTLE_STATE,
     CONTINUITY_WARDEN_STATE
 } from "../../game/boss/ContinuityWardenDefinition.js";
 import { resolveContinuityWardenPose } from "./ContinuityWardenPoseResolver.js";
@@ -527,8 +529,12 @@ class ThresholdBridgeRenderer extends BossPolygonObjectRenderer {
 
 class MaintenanceShuttleRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
-        if (object.state === "hidden") return;
-        const { width, height } = size(object, 500, 390);
+        if (object.state === CONTINUITY_WARDEN_SHUTTLE_STATE.HIDDEN) return;
+        const { width, height } = size(
+            object,
+            CONTINUITY_WARDEN_SHUTTLE_SIZE.width,
+            CONTINUITY_WARDEN_SHUTTLE_SIZE.height
+        );
         context.fillStyle = "#31434c";
         context.strokeStyle = "#dce8ec";
         context.lineWidth = 6;
