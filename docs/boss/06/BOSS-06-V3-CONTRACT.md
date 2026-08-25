@@ -1,5 +1,7 @@
 # Boss06 V3 전투·Arena 계약
 
+> **SUPERSEDED BY [`BOSS-06-V4-CONTRACT.md`](./BOSS-06-V4-CONTRACT.md).** 이 문서는 V3 이력이며 현재 구현 입력이 아니다.
+
 1. AS IS: Warden이 평지 보행과 선형 대시만 반복한다. → TO BE: 지상·3개 Raised Ledge를 점프로 오가는 수직 AI를 사용한다.
 2. AS IS: Boss와 미사일 이동이 별도 공식에 묶일 수 있다. → TO BE: 점프는 공용 acceleration 적분, 유도탄은 공용 projectile motion capability가 소유한다.
 3. 유도미사일은 지상에서 발사하지 않고 점프 정점에서 정확히 5발을 `-50°/-25°/0°/25°/50°` 부채꼴로 동시에 발사한다.

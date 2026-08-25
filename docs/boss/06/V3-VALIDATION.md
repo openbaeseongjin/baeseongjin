@@ -1,5 +1,7 @@
 # Boss06 V3 검증 현황
 
+> **SUPERSEDED BY V4.** 아래 결과는 V3 후보의 검증 이력이며 현재 Arena·상태 선택의 PASS 근거가 아니다.
+
 1. 기준 SHA `a8395580`; Map Editor Apply가 canonical Boss source와 generated module을 같은 transaction으로 갱신했다.
 2. Boss validator·production map parity·scenario integration checkpoint는 PASS다.
 3. Headless 120Hz에서 점프 표현은 `takeoff/jump/fall/landing`, 정점 spawn은 각도가 다른 정확히 5발이다.

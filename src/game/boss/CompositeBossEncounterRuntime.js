@@ -4,7 +4,7 @@ const VALID_PARTICIPANT_STATUS = Object.freeze(
     Object.fromEntries(Object.values(PARTICIPANT_STATUS).map((status) => [status, true]))
 );
 
-export const COMPOSITE_BOSS_STAGE_SNAPSHOT_REVISION = "composite-boss-stage-runtime-v1";
+export const COMPOSITE_BOSS_STAGE_SNAPSHOT_REVISION = "composite-boss-stage-runtime-v2";
 export { STAGE_STATUS as COMPOSITE_BOSS_STAGE_STATUS, PARTICIPANT_STATUS as COMPOSITE_BOSS_PARTICIPANT_STATUS };
 
 export function freezeComposite(value) {

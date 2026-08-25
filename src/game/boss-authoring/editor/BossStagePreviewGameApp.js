@@ -1,13 +1,15 @@
 import { GameApp } from "../../GameApp.js";
 import { BOSS_VULNERABILITY_TRIGGER } from "../BossStageSpec.js";
 import { defineBossStage } from "../../boss/BossStageDefinition.js";
-import { resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../../config.js";
+import { CONTINUITY_WARDEN_SURFACE_KIND } from "../../boss/ContinuityWardenDefinition.js";
+import { PLAYER_CONFIG, resolveEffectiveRopeConfig, resolveEffectiveRopeDisabledSeconds } from "../../config.js";
 import { LocalAuthority } from "../../runtime/LocalAuthority.js";
 import { PreviewFlightController } from "../../runtime/PreviewFlightController.js";
 import { GameSimulation } from "../../simulation/GameSimulation.js";
 import { createAuthoredSeamlessSectorRuntimeWorld } from "../../world/sectors/AuthoredSeamlessSectorRuntime.js";
 
 const BOSS_PREVIEW_DEBUG_WEAKPOINT_DAMAGE = 100;
+const BOSS_PREVIEW_EDGE_INSET = 64;
 
 class BossPreviewAuthority extends LocalAuthority {
     applyFlightMotion(position) {
@@ -123,9 +125,14 @@ export class BossStagePreviewGameApp extends GameApp {
         if (!bossBody?.position) return Object.freeze({ accepted: false });
         const stage = this.authority.simulation.world.bossStages?.find(({ id }) => id === this.previewBossStageId);
         if (!stage) return Object.freeze({ accepted: false });
+        const mainSurface = stage.surfaces.find(({ kind }) => kind === CONTINUITY_WARDEN_SURFACE_KIND.MAIN);
+        if (!mainSurface) return Object.freeze({ accepted: false });
         const target = {
-            x: Math.max(stage.bounds.x, bossBody.position.x - 420),
-            y: stage.entry.y
+            x: Math.max(
+                mainSurface.x + BOSS_PREVIEW_EDGE_INSET,
+                Math.min(mainSurface.x + mainSurface.width - BOSS_PREVIEW_EDGE_INSET, bossBody.position.x - 420)
+            ),
+            y: mainSurface.y - PLAYER_CONFIG.radius
         };
         this.authority.applyFlightMotion(target);
         return Object.freeze({ accepted: true, position: Object.freeze(target) });

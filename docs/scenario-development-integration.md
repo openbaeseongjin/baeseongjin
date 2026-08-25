@@ -5,7 +5,7 @@
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: d019865567c39fb44e073562cf1df11157fccb6cb4aba140bd3ee989883dc2ee
 authored-area-sha256: 006b82b383ea3d7bdebd21f322c1dbb54de85af8b3fc02cfa60a9dbd42477904
-authored-sector-sha256: 6a524b3cee43af5160d8af8f499bf85a0e898ebb22925b8c844dbe1c29d1edec
+authored-sector-sha256: 3c7250fe0a52e5b6c5f1120a411027b66953c3658453c9cfe5c244e95cbff51e
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
 reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
@@ -35,7 +35,7 @@ reviewed-upstream: a7d91f0404213ed89d8adc5e2cad3b5c2bfbadac
 
 - Stage의 authored geometry·objective·Enemy slot은 바꾸지 않고 증강 획득 설명을 현재 전투 계약에 맞췄다. Enemy XP는 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존하며, 이후 환경 원인 사망에도 해당 Player에게 한 번 귀속한다.
 - 48개 canonical Stage의 Enemy slot을 86개에서 189개로 늘렸다. Entry·Exit·Story·Safe 지점은 피하고 기존 route와 Stage-local activation band에 분산했으며 Swarm은 추가 pool에서 제외했다. production map parity가 1-3 이후 Sector별 최소 밀도를 검사한다.
-- Boss06 V3 candidate는 V2 평면 Security Court를 3920px Main·좌/중/우 Ledge·U1~~U10·좌우 Recovery·220px Victory Bridge로 교체했다. Warden은 authored landing point로 점프하고 정점에서 5발 fan 유도미사일을 생성하며, 별도 패턴은 이동형 공격 Enemy를 `2마리 / 최소 15초 / live 6 skip`으로 서버에 등록한다. Boss source와 generated module은 Map Editor Apply 한 transaction으로 갱신했으며 validator/parity는 통과했고 실제 desktop/mobile·1~~4인 Gameplay View는 아직 열린 검증이다.
+- Boss06 V4 candidate는 3200px 단일 Main·단방향 Ledge 3개·U1~~U10·좌우 낭떠러지·220px Victory Bridge를 사용하고 Recovery와 좌우 벽을 제거했다. Warden은 발 좌표와 authored surface bounds로 지지면을 판정해 걷기·점프·내려가기·낙하·착지를 수행하고, 공격은 조건을 통과한 상태 풀에서 사용 이력 가중치를 회복하는 결정적 랜덤으로 고른다. 5발 fan 유도미사일과 `2마리 / 최소 15초 / live 6 skip` 소환은 유지하며 실제 desktop/mobile·1~~4인 Gameplay View는 아직 열린 검증이다.
 - Sector 01~06의 Gate/Exit Panel 73개를 전수 감사해 이미 정확한 62개는 유지하고, 2-5 보조 Gate·Sector 04 Exit Panel 7개·5-7 Gate/Panel·6-8 Panel의 11개 `bottom-center`를 실제 collision surface top에 맞췄다. Resident Override A/B/C와 Service Relay B-03은 Gate Panel이 아닌 벽 장착 `terminal` 정체성으로 분리해 pedestal sprite가 공중에 표시되지 않게 했다. surface geometry·objective·interaction·portal·network 계약은 변경하지 않았으며 production map parity가 이 접지와 정체성 불변식을 검사한다.
 - 0.67.0은 `sector-01-04:maintenance-node`, `sector-02-03:specialization-node`, `sector-03-05:service-calibration-frame`과 관련 선택 objective·Augment 선택 cue를 canonical AREA-SPEC에서 제거했다. 해당 공간·Guard·Exit topology는 유지하며 Exit Panel은 증강 선택을 요구하지 않는다.
 - Sector 02·03·05의 `story-display` 36개를 발판 pedestal 19개와 벽 rail 17개로 구분했다. 기존에 발판 근처에서 `center` 또는 어긋난 Y를 쓰던 17개를 `bottom-center`와 해당 surface top Y로 맞췄고, 이미 정확했던 2개는 유지했다. Story cue·상호작용·collision·surface geometry는 변경하지 않았다.

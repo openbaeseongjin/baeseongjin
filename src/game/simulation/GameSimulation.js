@@ -333,7 +333,9 @@ export class GameSimulation {
             ? normalizedBossDefinitions({ bossDefinition, bossDefinitions })
             : Object.freeze([]);
         this.bossHazardRecords = new Map();
-        this.bossRuntime = this.isSeamlessSectorWorld ? createBossEncounterRuntime(this.bossDefinitions[0]) : null;
+        this.bossRuntime = this.isSeamlessSectorWorld
+            ? createBossEncounterRuntime(this.bossDefinitions[0], null, { worldSeed: this.world.seed })
+            : null;
         this.worldProgress = this.isSeamlessSectorWorld
             ? new SectorProgressState(this.world)
             : worldCatalog
@@ -885,7 +887,7 @@ export class GameSimulation {
         if (this.bossRuntime?.definition.id === stageId) return this.bossRuntime;
         const definition = this.bossDefinitions.find(({ id }) => id === stageId);
         if (!definition) throw new Error(`unknown Boss Stage definition: ${stageId}`);
-        this.bossRuntime = createBossEncounterRuntime(definition);
+        this.bossRuntime = createBossEncounterRuntime(definition, null, { worldSeed: this.world.seed });
         this.collisionBroadPhase.invalidateFrame();
         this.#setActiveDynamicCollisionSurfaces();
         return this.bossRuntime;
@@ -1102,7 +1104,10 @@ export class GameSimulation {
                     this.#bossWorldOffset(),
                     vectorState(player.physics.position)
                 );
-                if (!recoveryPosition) continue;
+                if (!recoveryPosition) {
+                    this.respawnPlayerAtCheckpoint(player, "fall", `boss-fall:${this.tick}:${player.id}`);
+                    continue;
+                }
                 player.physics.reset(recoveryPosition);
                 player.ropeObject.rope.detach();
                 player.ropeObject.swingDrag = null;
