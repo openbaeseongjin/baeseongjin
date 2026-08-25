@@ -37,8 +37,8 @@
 | `sector-01-01:ground-shutter` | sealed collision | 아래쪽 탈출 봉쇄 | `LOCKDOWN` |
 | `sector-01-01:cable-overhang` | non-damage collision | 늦은 B release를 R2로 유도 | scrape/impact mock |
 | `sector-01-01:cooling-fan` | background prop | Wind·damage 없는 비활성 Fan | inactive machinery loop |
-| `sector-01-01:service-terminal` | gate panel | `terminal-read` 0.9초×3 공용 Sequence 뒤 출구 개방 | cascade failure, Rooftop Pad 03 |
-| `sector-01-01:service-gate` | gate | Terminal 2.7초 Sequence 완료 뒤 `SERVICE SHAFT 02` 개방 | locked/unlocked/crossed |
+| `sector-01-01:exit-panel` | gate panel | W 입력 tick에 `terminal-read` objective 완료·출구 개방 | Direction의 cascade failure·Rooftop Pad 03 문구는 별도 재생 |
+| `sector-01-01:exit-gate` | gate | 같은 tick에 `SERVICE SHAFT 02` 개방, 문구 재생 중에도 통과 허용 | locked/unlocked/crossed |
 
 금지: Turret, Wind, Augment, 필수 공중 ReAttach, instant death.
 

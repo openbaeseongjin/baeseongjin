@@ -173,7 +173,7 @@
       "beatId": "s4-terminal-reveal",
       "status": "DESIGN LOCKED",
       "trigger": {
-        "type": "objective-started",
+        "type": "objective-completed",
         "objectiveId": "sector-01-01:terminal-read"
       },
       "scope": "local-player",

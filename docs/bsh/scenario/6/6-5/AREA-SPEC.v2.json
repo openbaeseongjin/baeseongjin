@@ -322,6 +322,17 @@
           "y": -1590
         },
         "presentationId": "world-object:gate-panel"
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-06-05:gate",
+        "id": "sector-06-05:exit-gate",
+        "kind": "gate",
+        "position": {
+          "x": 12,
+          "y": -1590
+        },
+        "presentationId": "world-object:gate"
       }
     ],
     "order": 5,

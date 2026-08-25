@@ -350,6 +350,17 @@ const SPEC = {
           "y": -650
         },
         "presentationId": "world-object:gate-panel"
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-06-02:gate",
+        "id": "sector-06-02:exit-gate",
+        "kind": "gate",
+        "position": {
+          "x": -1148,
+          "y": -650
+        },
+        "presentationId": "world-object:gate"
       }
     ],
     "order": 2,
