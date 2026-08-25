@@ -5,15 +5,15 @@
 <!-- scenario-integration-checkpoint:v1
 scenario-source-sha256: 46affc2a3a47301789b47b4f23c6f6dd4d2480380c6cbcfb101f25bd17d1a3b8
 authored-area-sha256: 006b82b383ea3d7bdebd21f322c1dbb54de85af8b3fc02cfa60a9dbd42477904
-authored-sector-sha256: a07ac64990545eefa1fc94a10afedd6ca0e022ffa56e2cd6ee2595fb6f80a945
+authored-sector-sha256: 592379e8682443826596c349dfded4f7969f5b4d41489449d51cf4dc12edf521
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: 2fddc3eab8664a60e17e619946cf9b4ad61cbf5e
+reviewed-upstream: 89ffa4a9aab6f956b8d55e5ebcbf47f7cb3026dc
 -->
 
 ## 현재 확인 체크포인트
 
-- Sector 01~06의 48개 canonical `AREA-SPEC.v2.json`은 generated Stage/catalog를 거쳐 authored Stage 48개와 개별 Player portal 47개로 compile된다. 각 Stage는 Entry·Exit·Exit Panel을 하나씩 소유하고 W 상호작용만으로 출구 objective를 완료하며 도달 objective는 사용하지 않는다. Runtime derived geometry와 scenario-only Stage는 0개다.
+- Sector 01~06의 48개 canonical `AREA-SPEC.v2.json`은 generated Stage/catalog를 거쳐 authored Stage 48개와 개별 Player portal 47개로 compile된다. 모든 target Entry는 source Exit와 같은 X·2160px 위의 desktop/mobile 기준 시야 밖에 있고, 각 Stage는 Entry·Exit·Exit Panel을 하나씩 소유해 W 상호작용으로만 전진한다. Runtime derived geometry와 scenario-only Stage는 0개다.
 - Enemy slot은 1-1·1-2만 도입부 예외로 두고 1-3 이후 최소 3개를 보장한다. Sector 01~02는 최소 3개, 03~04는 최소 4개, 05~06은 최소 5개이며 exact Stage 예산은 `enemy-density-composition.md`가 소유한다.
 - 0.67.0은 기존 연속 Stage portal을 유지하고 1-4·2-3·3-5의 authored Augment Node와 선택 prerequisite만 제거했다. 증강은 마지막으로 확정한 양수 Player 피해 귀속 XP 레벨업이 소유한다.
 - Player별 Stage Save·Gate 이동과 공용 objective를 유지한다. Sector Key/Access만 portal 사용 가능 여부를 바꾸며 barrier collision이나 영구 Stage cursor를 만들지 않는다. 부족한 상태의 Exit Panel W 입력은 당사자 화면 상단에 현재 수집 수와 필요 수를 표시한다.
@@ -30,6 +30,8 @@ reviewed-upstream: 2fddc3eab8664a60e17e619946cf9b4ad61cbf5e
 | Sector 06 / 6-1~6-8 | canonical v2/generated 8개, `6-8→Boss06→Boarding→Escape`   | Boss06 full combat·1~4인 boarding        |
 
 ## 최근 반영된 시나리오 변화
+
+- 0.74.0은 gap-0 Stage seam을 Gate 분리 배치로 대체했다. 47개 target Entry는 source Exit와 동일 X·2160px 위에 있으며 production parity가 portal endpoint·desktop/mobile 화면 밖·Bounds 비중첩·현재 Stage 하단+780px 낙사 복구 여유를 함께 검사한다. Stage-local canonical geometry와 Boss03·06 전투 계약은 유지하고 Boss Arena는 source Gate 기준 오른쪽 격리를 사용한다.
 
 - Boss03 Arena는 기존 천장 Crossbeam 3개를 주 바닥 안쪽의 단방향 Ledge 3개로 바꾸고, 400px Base Reach 안에서 이어지는 `swing-attack` Anchor 9개를 추가했다. Commander는 공용 authored support query와 Physics 점프 컴포넌트로 Player의 지지면을 추적한다. 그랩은 보스 중심 800px를 시전·실제 포획·예고 이탈 취소에 함께 사용하고, 성공 뒤 해머 연계는 0.5초이며 지면 충격 파티클을 표시한다. 일반 Stage와 `3-8→Boss03→4-1` 경계는 변경하지 않았다.
 

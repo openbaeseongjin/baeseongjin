@@ -12,7 +12,7 @@
 6. **의존성보다 기존 기반을 우선한다.** 새 패키지는 명시적인 필요와 승인 없이는 추가하지 않는다.
 7. **임시 완성을 금지한다.** 실행되지 않는 placeholder, 생략 부호, 설명 없는 TODO를 결과물로 남기지 않는다.
 8. **반복 수정은 구조 검증 신호다.** 같은 기능에서 유사 수정이 계속되거나 한 수정 뒤 연관 버그가 이어지면 추가 증상 패치를 멈추고 정체성·상태 소유권·capability·권한 경계를 검증한다.
-9. **Map Editor가 Stage 공간의 단일 권위다.** 일반 Stage의 surface·좌우 벽·상하 격벽·연결 발판·장식물 collision과 world object 위치는 canonical `AREA-SPEC.v2.json`에 명시한다. Runtime compiler는 `city-wing`, `sector-seam`, boundary divider, transit barrier 같은 지형을 추가하지 않는다. 출구는 통과한 Player 한 명만 다음 authored Entry로 텔레포트하며 별도 `currentStageId`를 저장하지 않는다. parity validator는 각 landmark의 surface ID가 authored surface ID와 정확히 같고 Editor가 모든 authored object를 같은 객체 단위로 노출하는지 검사한다.
+9. **Map Editor가 Stage 내부 공간의 단일 권위다.** 일반 Stage의 surface·좌우 벽·상하 격벽·연결 발판·장식물 collision과 world object 위치는 canonical `AREA-SPEC.v2.json`에 명시한다. Runtime compiler는 `city-wing`, `sector-seam`, boundary divider, transit barrier 같은 지형을 추가하지 않는다. Stage 조립은 다음 authored Entry를 이전 Exit와 같은 X·정확히 2160px 위에 배치해 현재 desktop/mobile 기준 시야 밖에 두고, Gate를 통과한 Player 한 명만 그 Entry로 텔레포트한다. Player 낙사는 현재 `respawnAnchorId` Stage 하단의 공백에서 복구하며 별도 `currentStageId`를 저장하지 않는다. parity validator는 각 landmark의 surface ID가 authored surface ID와 정확히 같고 Editor가 모든 authored object를 같은 객체 단위로 노출하는지와 47개 전환 배치·화면 밖·낙사 여유를 함께 검사한다.
 10. **Ropeable은 collision capability다.** `grappleable: true` surface는 실제 collision geometry를 가져야 하며 Rope는 그 surface boundary의 최근접 점에만 부착한다. route marker·중심점 Actor·비충돌 helper는 Rope target을 만들지 않는다. 움직이는 Ropeable body는 같은 collider snapshot을 collision·Rope·renderer에 공유한다.
 
 ## 2. 작업 시작과 종료

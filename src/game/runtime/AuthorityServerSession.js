@@ -404,7 +404,7 @@ export class AuthorityServerSession {
                 resolution: "ignored-player-ineligible"
             });
         }
-        if (state.position.y > this.simulation.fallRecoveryY()) {
+        if (state.position.y > this.simulation.fallRecoveryY(authenticatedPlayerId)) {
             this.simulation.resolvePlayerFall(authenticatedPlayerId);
             this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.authorityTick);
             this.lastOwnerMotionClientTicks.set(authenticatedPlayerId, state.clientTick);

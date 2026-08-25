@@ -111,12 +111,12 @@
 
 전문 작업물의 완료는 메인 개발, 플레이테스트, 최종 스퍼트와 예선 제출의 선행 조건이 아니다. 정해진 통합 마감까지 validator와 실제 화면·청취 검증을 통과한 결과만 제출 빌드에 반영하고, 준비되지 않았거나 통합 위험이 큰 영역은 검증된 mock을 유지한다. 다만 공개 manifest·loader·이벤트 binding처럼 전문 작업과 메인 개발이 함께 사용하는 계약 변경은 양쪽 작업 전에 먼저 합의한다.
 
-제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. `stageId`는 canonical AREA-SPEC v2와 landmark·objective·encounter를 연결하는 안정 식별자다. 48개 Stage 모두 authored bounds·surface·object만 Runtime에 사용하며 compiler가 city wing·seam·boundary를 추가하지 않는다. Gate portal은 Stage local 좌표를 바꾸지 않고 다음 authored Entry로 이동한다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리한다.
+제출 전 시나리오 자료는 총 6개 섹터 × 8개 Stage, 전체 48개 문서로 유지한다. `stageId`는 canonical AREA-SPEC v2와 landmark·objective·encounter를 연결하는 안정 식별자다. 48개 Stage 모두 authored bounds·surface·object만 Runtime에 사용하며 compiler가 city wing·seam·boundary를 추가하지 않는다. Gate portal은 Stage-local 좌표를 유지한 채 target Entry를 source Exit와 같은 X·2160px 위의 화면 밖에 배치하고 Player 한 명을 이동시킨다. 구현과 인계 일정은 `SECTOR 01 → 06`을 단위로 관리한다.
 
 ### 월드와 진행 영역 기준
 
 - `SectorDefinition`과 Sector validator는 canonical `stageId`를 landmark·encounter authoring 경계로 사용한다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`, `stageId`이며 별도 legacy Stage alias나 preview adapter를 권위로 두지 않는다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
-- 현재 `authored-continuous-stage-runtime-v21-boss03-commander`는 canonical Stage 48개와 독립 Boss03·06을 조립한다. `3-8→Boss03→4-1`, `6-8→Boss06→Boarding`을 사용하고 다른 Sector 경계는 direct portal이다. Boss03 catalog 항목을 제거하면 `3-8→4-1` direct portal이 자동 복구된다.
+- 현재 `authored-gate-separated-stage-runtime-v22-boss03-commander`는 canonical Stage 48개와 독립 Boss03·06을 조립한다. `3-8→Boss03→4-1`, `6-8→Boss06→Boarding`을 사용하고 다른 Sector 경계는 direct portal이다. Boss03 catalog 항목을 제거하면 `3-8→4-1` direct portal이 자동 복구된다.
 - Sector 01~03은 각 Sector의 정확히 세 Carrier를 모두 처리해 Access Module 3/3을 모은 뒤 outgoing authored Gate portal을 연다. 별도 transit barrier geometry는 없으며 개인·전원 사망 뒤에도 module·objective 진행을 보존한다.
 - 0.32.0은 Sector 01~03을 authored safe slot과 결정적 enemy pool로 채운다. 1-1·1-2는 비전투, 이후는 화면당 약 1기와 후반 역할 중첩을 기준으로 하며 exact slot 예산과 보존 계약은 [`enemy-density-composition.md`](./enemy-density-composition.md)를 따른다.
 - 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.
