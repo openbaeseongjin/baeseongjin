@@ -440,7 +440,11 @@ export function simulateTwoPlayerCombat() {
     const experienceState = progression.player(progressionPlayerId).experience.snapshot();
     assert(experienceState.totalExperience >= 50, "two enemy defeats must award last-hit experience");
     const reward = progression.simulation.getAugmentReward(progressionPlayerId);
-    assert(reward?.choices?.[0]?.id === SPELL_ID.METEOR, "first XP reward must unlock meteor");
+    assert(reward?.choices?.length === 3, "first XP reward must offer three high-power spells");
+    assert(
+        reward.choices.every(({ slotId }) => slotId === SPELL_SLOT_ID.POWER_ATTACK),
+        "first XP reward must only contain high-power slot spells"
+    );
     const selected = progression.simulation.resolveAugmentSelection(progressionPlayerId, {
         sourceId: reward.sourceId,
         augmentId: reward.choices[0].id
@@ -448,8 +452,8 @@ export function simulateTwoPlayerCombat() {
     assert(selected.accepted, "official XP reward selection must be accepted");
     assert(
         progression.player(progressionPlayerId).augmentCombat.spellState.slots[SPELL_SLOT_ID.POWER_ATTACK] ===
-            SPELL_ID.METEOR,
-        "accepted XP reward must auto-equip meteor"
+            reward.choices[0].id,
+        "accepted XP reward must auto-equip the selected high-power spell"
     );
 
     return Object.freeze({

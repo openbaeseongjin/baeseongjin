@@ -1,6 +1,10 @@
 import { compatibleAugmentsForSelection } from "./AugmentCatalog.js";
-import { augmentById } from "./AugmentCatalog.js";
-import { SPELL_ID } from "../spells/SpellDefinition.js";
+import { SPELL_SLOT_ID } from "../spells/SpellDefinition.js";
+
+const REWARD_SLOT_ID_BY_SELECTION_INDEX = Object.freeze({
+    0: SPELL_SLOT_ID.POWER_ATTACK,
+    1: SPELL_SLOT_ID.UTILITY
+});
 
 function requireIndex(value) {
     if (!Number.isSafeInteger(value) || value < 0) {
@@ -32,11 +36,10 @@ export function deterministicAugmentOffer({ runSeed, playerId, selectionIndex, s
     }
     if (typeof playerId !== "string" || playerId.length === 0) throw new Error("playerId must be non-empty");
     requireIndex(selectionIndex);
-    const guaranteedSpellId = Object.freeze({ 0: SPELL_ID.METEOR, 1: SPELL_ID.MOBILITY_SURGE })[selectionIndex] ?? null;
-    if (guaranteedSpellId && !selectedAugmentIds.includes(guaranteedSpellId)) {
-        return Object.freeze([augmentById(guaranteedSpellId).id]);
-    }
-    const pool = compatibleAugmentsForSelection(selectedAugmentIds).map(({ id }) => id);
+    const rewardSlotId = REWARD_SLOT_ID_BY_SELECTION_INDEX[selectionIndex] ?? null;
+    const pool = compatibleAugmentsForSelection(selectedAugmentIds)
+        .filter(({ slotId }) => rewardSlotId === null || slotId === rewardSlotId)
+        .map(({ id }) => id);
     if (pool.length === 0) return Object.freeze([]);
     const randomState = { value: hashOfferSeed(runSeed, playerId, selectionIndex) };
     for (let index = pool.length - 1; index > 0; index -= 1) {

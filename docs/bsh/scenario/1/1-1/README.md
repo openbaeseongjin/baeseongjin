@@ -165,6 +165,7 @@ S3 Open Swing:
 no text; optional nonverbal exhale only
 
 S4 VERIFIED Terminal:
+패널 W 입력은 같은 tick에 출구를 열고, 아래 텍스트 sequence는 이동·출구 진행을 지연시키지 않는다.
 1. `VERTICAL GRID / CASCADE FAILURE`
 2. +0.9s `LOWER TRANSIT / OFFLINE`
 3. +0.9s `ROOFTOP PAD 03 / MAINTENANCE SHUTTLE · STANDBY`

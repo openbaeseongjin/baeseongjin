@@ -128,10 +128,8 @@ const SPEC = {
     "nextAreaId": "sector-01-02",
     "objectives": [
       {
-        "completionDelaySeconds": 2.7,
         "id": "sector-01-01:terminal-read",
         "sourceObjectId": "sector-01-01:exit-panel",
-        "storySequenceId": "sector-01-01:terminal-read",
         "type": "interact"
       }
     ],

@@ -234,6 +234,17 @@ const SPEC = {
         "presentationId": "world-object:gate-panel"
       },
       {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-04-03:gate",
+        "id": "sector-04-03:exit-gate",
+        "kind": "gate",
+        "position": {
+          "x": 2060,
+          "y": -2010
+        },
+        "presentationId": "world-object:gate"
+      },
+      {
         "activationSpec": {
           "anchor": "center",
           "offset": {

@@ -94,14 +94,14 @@ Patrol Drone은 기존 Enemy 전투 FSM에 선택적 Patrol capability를 조합
 ### P0. 로그라이크 한 판의 순환 완성
 
 1. [완료] 하나의 큰 월드 정상에 최종 목표와 `completed` 상태를 추가한다. 완료 후 자동으로 다음 스테이지를 시작하지 않는다.
-2. [0.67.0] 몹 처치 XP가 첫 두 레벨의 메테오·기동 증폭과 이후 Rope 패시브 offer를 Player별로 제공한다.
+2. [0.67.0 이후 현행] 몹 처치 XP가 첫 레벨의 미획득 고위력 Spell 풀, 두 번째 레벨의 미획득 유틸 Spell 풀과 이후 전체 미획득 증강 offer를 Player별로 제공한다.
     - [실시간 선택 완료] 선택은 월드 시간을 멈추지 않고 해당 플레이어의 메뉴 입력만 이동·점프·로프 조작과 분리한다.
 3. [0.67.0] Player별 `AugmentLoadoutState`, `SpellRuntimeState`, `PlayerExperienceState`가 선택·슬롯·쿨다운·성장을 각각 소유한다.
 4. [완료] 사망 시 Player별 active Stage checkpoint 복귀를 적용한다. Timer·Purge가 미정인 현재는 같은 tick 전원 사망도 current Sector를 reset하지 않는다.
 
 완료 기준: 시작 → 등반·전투 → generic Augment 선택 → 빌드 변화 체감 → 사망 시 최근 Stage checkpoint 부활 → content boundary 도달을 한 흐름으로 플레이할 수 있다.
 
-현재 Catalog는 Rope 패시브 6장과 메테오·기동 증폭 2장만 소유한다. 과거 Action·Signature·Modifier와 Foundation 호환 경계는 제거됐다.
+현재 Catalog는 Rope 7장·이동 Passive 1장·Spell 16장의 총 24장을 소유한다. 과거 Action·Signature·Modifier와 Foundation 호환 경계는 제거됐다.
 
 ### P1. 초기 절차 프로토타입과 초반 난이도 검증
 

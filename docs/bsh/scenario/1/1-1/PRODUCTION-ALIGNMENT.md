@@ -14,6 +14,8 @@ Baseline: `5ae6efca720720ee34f2a8b45daf1778fd206c1f`
 
 `DIRECTION-SPEC.json`이 `DirectionDefinition`으로 compile되어 Camera·System Text·Bark·Audio·Lighting·비언어 track을 실행한다. `뭐야…?`는 entry System cue `GROUND SERVICE ACCESS / LOCKDOWN` 뒤, `…일단 위로.`는 `SERVICE SHAFT 02 / ACCESS OPEN` 뒤 local Player 머리 위 말풍선에서 글자가 차례로 나타나며 한 번 표시한다. Stage 문자열을 `AuthoredStoryPresentation`이나 Bark catalog에 중복하지 않는다.
 
+Exit Panel W 입력은 `terminal-read` objective를 같은 tick에 완료해 문을 즉시 열며, Direction의 0/0.9/1.8초 Terminal 텍스트는 `objective-completed` 사건에서 별도 재생되어 진행을 차단하지 않는다.
+
 ## Current Runtime vs target
 
 | Item | Current | REV8 Target | Status |

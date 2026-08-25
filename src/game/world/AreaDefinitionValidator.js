@@ -136,11 +136,20 @@ function validateGrappleLandmarks(area, issues) {
 }
 
 function validatePortalContract(area, issues) {
-    const panels = area.objects.filter(({ gateId, kind }) => gateId === area.gate.id && kind === "gate-panel");
+    const panels = area.objects.filter(({ kind }) => kind === "gate-panel");
+    const gates = area.objects.filter(({ kind }) => kind === "gate");
     if (panels.length === 0 && area.objects.length === 0 && area.objectives.length === 0) return;
     if (panels.length !== 1) {
         issues.push(issue("portal-panel-count", area.id, { expected: 1, actual: panels.length }));
         return;
+    }
+    if (panels[0].gateId !== area.gate.id) {
+        issues.push(issue("non-portal-panel-identity", area.id, { objectId: panels[0].id }));
+    }
+    if (gates.length !== 1) {
+        issues.push(issue("portal-gate-count", area.id, { expected: 1, actual: gates.length }));
+    } else if (gates[0].presentationId !== "world-object:gate") {
+        issues.push(issue("portal-gate-presentation", area.id, { objectId: gates[0].id }));
     }
     const objectiveIds = area.gate.requiredObjectiveIds ?? [];
     if (objectiveIds.length !== 1) {
@@ -158,6 +167,9 @@ function validatePortalContract(area, issues) {
     }
     if ((objective?.requiredObjectiveIds?.length ?? 0) > 0 || (panels[0].requiredObjectiveIds?.length ?? 0) > 0) {
         issues.push(issue("portal-objective-prerequisite", area.id, { objectiveId: objective?.id ?? null }));
+    }
+    if (objective?.completionDelaySeconds !== undefined) {
+        issues.push(issue("portal-objective-delay", area.id, { objectiveId: objective.id }));
     }
     for (const object of area.objects) {
         if (object.kind === "gate" && object.gateId !== area.gate.id) {

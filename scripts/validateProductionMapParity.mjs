@@ -548,6 +548,14 @@ function surfaceBounds(surface) {
 }
 
 function validateGroundedWorldObjectPresentations(area, stageId, issues) {
+    const exitPresentations = (area.objects ?? []).filter(({ gateId }) => gateId === area.gate?.id);
+    for (const [presentationId, code] of [
+        ["world-object:gate", "exit-gate-presentation-count"],
+        ["world-object:gate-panel", "exit-panel-presentation-count"]
+    ]) {
+        const count = exitPresentations.filter((object) => object.presentationId === presentationId).length;
+        if (count !== 1) issue(issues, code, { stageId, expected: 1, actual: count });
+    }
     for (const object of area.objects ?? []) {
         const expectedKind = GROUNDED_WORLD_OBJECT_KIND_BY_PRESENTATION_ID[object.presentationId];
         if (!expectedKind) continue;
