@@ -215,7 +215,7 @@ const SPEC = {
         "kind": "story-display",
         "position": {
           "x": -955,
-          "y": -130
+          "y": -135
         },
         "presentationId": "world-object:story-display"
       },
@@ -227,8 +227,8 @@ const SPEC = {
         "id": "sector-03-02:service-mount",
         "kind": "story-display",
         "position": {
-          "x": -375,
-          "y": -175
+          "x": -215,
+          "y": -120
         },
         "presentationId": "world-object:story-display"
       },
@@ -313,8 +313,8 @@ const SPEC = {
         "id": "sector-03-02:retail-security-ahead",
         "kind": "story-display",
         "position": {
-          "x": 935,
-          "y": -1460
+          "x": 1115,
+          "y": -1415
         },
         "presentationId": "world-object:story-display"
       },
@@ -436,12 +436,6 @@ const SPEC = {
         "sourceId": "g0",
         "x": -1280,
         "y": -128
-      },
-      {
-        "id": "sector-03-02:route-p1-right-edge",
-        "sourceId": "p1-right-edge",
-        "x": -945,
-        "y": -140
       },
       {
         "id": "sector-03-02:route-c2",

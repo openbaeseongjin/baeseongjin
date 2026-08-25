@@ -242,8 +242,8 @@ const SPEC = {
         "id": "sector-03-05:node-id",
         "kind": "story-display",
         "position": {
-          "x": 280,
-          "y": -555
+          "x": 285,
+          "y": -560
         },
         "presentationId": "world-object:story-display"
       },
@@ -255,7 +255,7 @@ const SPEC = {
         "id": "sector-03-05:access-summary",
         "kind": "story-display",
         "position": {
-          "x": 520,
+          "x": 575,
           "y": -960
         },
         "presentationId": "world-object:story-display"
@@ -268,8 +268,8 @@ const SPEC = {
         "id": "sector-03-05:premium-atrium-ahead",
         "kind": "story-display",
         "position": {
-          "x": 1376,
-          "y": -1210
+          "x": 1140,
+          "y": -780
         },
         "presentationId": "world-object:story-display"
       },
@@ -631,26 +631,26 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 416,
-          "y": -960
+          "x": 420,
+          "y": -955
         },
         "sourceId": "p4-signage-access-catwalk",
         "vertices": [
           {
-            "x": 256,
-            "y": -960
+            "x": 260,
+            "y": -955
           },
           {
-            "x": 576,
-            "y": -960
+            "x": 580,
+            "y": -955
           },
           {
-            "x": 576,
-            "y": -932
+            "x": 580,
+            "y": -927
           },
           {
-            "x": 256,
-            "y": -932
+            "x": 260,
+            "y": -927
           }
         ]
       },

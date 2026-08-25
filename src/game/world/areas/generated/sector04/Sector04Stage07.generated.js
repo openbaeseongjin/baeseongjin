@@ -314,8 +314,8 @@ const SPEC = {
         "kind": "terminal",
         "objectiveId": "sector-04-07:override-c-acquired",
         "position": {
-          "x": -635,
-          "y": -1965
+          "x": -645,
+          "y": -1955
         },
         "presentationId": "world-object:terminal"
       },
@@ -423,12 +423,6 @@ const SPEC = {
       }
     ],
     "routePoints": [
-      {
-        "id": "sector-04-07:route-route-4-main-1-1",
-        "sourceId": "route-4-main-1-1",
-        "x": -2400,
-        "y": -160
-      },
       {
         "id": "sector-04-07:route-route-4-main-2-2",
         "sourceId": "route-4-main-2-2",

@@ -307,8 +307,8 @@
         "id": "sector-01-08:lower-turret",
         "kind": "sentry",
         "position": {
-          "x": 544,
-          "y": -512
+          "x": 520,
+          "y": -575
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -432,8 +432,8 @@
         "id": "sector-01-08:sector-checkpoint",
         "kind": "checkpoint",
         "position": {
-          "x": 0,
-          "y": -1728
+          "x": -315,
+          "y": -1670
         },
         "presentationId": "world-object:checkpoint"
       }

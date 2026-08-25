@@ -342,8 +342,8 @@ const SPEC = {
         "id": "sector-03-07:concourse-sign",
         "kind": "story-display",
         "position": {
-          "x": -576,
-          "y": -650
+          "x": -390,
+          "y": -550
         },
         "presentationId": "world-object:story-display"
       },
@@ -355,8 +355,8 @@ const SPEC = {
         "id": "sector-03-07:access-directory",
         "kind": "story-display",
         "position": {
-          "x": 810,
-          "y": -1264
+          "x": 830,
+          "y": -1270
         },
         "presentationId": "world-object:story-display"
       },
@@ -368,8 +368,8 @@ const SPEC = {
         "id": "sector-03-07:upper-market-gate-ahead",
         "kind": "story-display",
         "position": {
-          "x": -480,
-          "y": -1754
+          "x": -635,
+          "y": -1700
         },
         "presentationId": "world-object:story-display"
       },
@@ -526,12 +526,6 @@ const SPEC = {
         "sourceId": "route-4-3-path-6-24",
         "x": 800,
         "y": -1088
-      },
-      {
-        "id": "sector-03-07:route-route-4-3-path-7-25",
-        "sourceId": "route-4-3-path-7-25",
-        "x": 832,
-        "y": -1264
       }
     ],
     "routes": [

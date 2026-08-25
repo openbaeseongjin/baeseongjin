@@ -2,26 +2,6 @@
   "anchors": [
     {
       "landmark": {
-        "id": "sector-06-05:p0",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P0",
-          "sourceId": "sector-06-05:p0"
-        },
-        "x": 520,
-        "y": -80
-      },
-      "target": {
-        "id": "sector-06-05:p0-surface",
-        "properties": {
-          "sourceId": "sector-06-05:p0"
-        },
-        "x": 520,
-        "y": -80
-      }
-    },
-    {
-      "landmark": {
         "id": "sector-06-05:h1",
         "properties": {
           "coordinateAnchor": "center",
@@ -133,8 +113,8 @@
     "cueIds": [],
     "entry": {
       "id": "sector-06-05:entry",
-      "x": 520,
-      "y": -80
+      "x": 515,
+      "y": -110
     },
     "exit": {
       "id": "sector-06-05:exit",
@@ -355,12 +335,6 @@
     ],
     "routePoints": [
       {
-        "id": "sector-06-05:route-sector-06-05:p0",
-        "sourceId": "sector-06-05:p0",
-        "x": 520,
-        "y": -80
-      },
-      {
         "id": "sector-06-05:route-sector-06-05:h1",
         "sourceId": "sector-06-05:h1",
         "x": 340,
@@ -458,54 +432,25 @@
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": 520,
-          "y": -48
+          "x": 515,
+          "y": -78
         },
         "vertices": [
           {
-            "x": 424,
-            "y": -48
+            "x": 419,
+            "y": -78
           },
           {
-            "x": 616,
-            "y": -48
+            "x": 611,
+            "y": -78
           },
           {
-            "x": 616,
-            "y": -16
+            "x": 611,
+            "y": -46
           },
           {
-            "x": 424,
-            "y": -16
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "array-entry",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": 390,
-          "y": -115
-        },
-        "vertices": [
-          {
-            "x": 390,
-            "y": -115
-          },
-          {
-            "x": 630,
-            "y": -115
-          },
-          {
-            "x": 630,
-            "y": -85
-          },
-          {
-            "x": 390,
-            "y": -85
+            "x": 419,
+            "y": -46
           }
         ]
       },

@@ -136,8 +136,8 @@
         "id": "sector-01-02:maintenance-lift",
         "kind": "background-prop",
         "position": {
-          "x": 115,
-          "y": -460
+          "x": 390,
+          "y": -605
         },
         "presentationId": "world-object:background-prop"
       },
@@ -150,8 +150,8 @@
         "id": "sector-01-02:counterweight-visual",
         "kind": "background-prop",
         "position": {
-          "x": -544,
-          "y": -480
+          "x": -520,
+          "y": -330
         },
         "presentationId": "world-object:background-prop"
       },

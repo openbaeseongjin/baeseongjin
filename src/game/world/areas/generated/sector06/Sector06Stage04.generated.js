@@ -10,26 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "h00",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h00",
-          "sourceId": "h00"
-        },
-        "x": -620,
-        "y": -120
-      },
-      "target": {
-        "id": "h00-surface",
-        "properties": {
-          "sourceId": "h00"
-        },
-        "x": -620,
-        "y": -120
-      }
-    },
-    {
-      "landmark": {
         "id": "h01",
         "properties": {
           "coordinateAnchor": "center",
@@ -138,8 +118,8 @@ const SPEC = {
     "cueIds": [],
     "entry": {
       "id": "sector-06-04:entry",
-      "x": -620,
-      "y": -120
+      "x": -570,
+      "y": -140
     },
     "exit": {
       "id": "sector-06-04:exit",
@@ -361,12 +341,6 @@ const SPEC = {
     ],
     "routePoints": [
       {
-        "id": "sector-06-04:route-h00",
-        "sourceId": "h00",
-        "x": -620,
-        "y": -120
-      },
-      {
         "id": "sector-06-04:route-h01",
         "sourceId": "h01",
         "x": -380,
@@ -422,54 +396,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -620,
-          "y": -88
+          "x": -570,
+          "y": -108
         },
         "vertices": [
           {
-            "x": -716,
-            "y": -88
+            "x": -666,
+            "y": -108
           },
           {
-            "x": -524,
-            "y": -88
+            "x": -474,
+            "y": -108
           },
           {
-            "x": -524,
-            "y": -56
+            "x": -474,
+            "y": -76
           },
           {
-            "x": -716,
-            "y": -56
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "shelter-entry",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -720,
-          "y": -150
-        },
-        "vertices": [
-          {
-            "x": -720,
-            "y": -150
-          },
-          {
-            "x": -470,
-            "y": -150
-          },
-          {
-            "x": -470,
-            "y": -120
-          },
-          {
-            "x": -720,
-            "y": -120
+            "x": -666,
+            "y": -76
           }
         ]
       },

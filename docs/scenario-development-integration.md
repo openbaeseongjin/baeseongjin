@@ -3,8 +3,8 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: 9b137edc346315de33e4d6a596a5ccc9b57b89f95a2b42eb21224712a8d7f266
-authored-area-sha256: 006b82b383ea3d7bdebd21f322c1dbb54de85af8b3fc02cfa60a9dbd42477904
+scenario-source-sha256: c1523f33a224fb9c5b2ac4a7dbb9470014da74d0ebdd53c4cb024419746c0834
+authored-area-sha256: 33fcd4d72eb0ddee6d57a0b662178ce789ac8e63b504953df4cda16cb7e4e172
 authored-sector-sha256: 592379e8682443826596c349dfded4f7969f5b4d41489449d51cf4dc12edf521
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
@@ -30,6 +30,8 @@ reviewed-upstream: 590f3d852d5d71149d4f9efdebd26dbefa117c87
 | Sector 06 / 6-1~6-8 | canonical v2/generated 8개, `6-8→Boss06→Boarding→Escape`   | Boss06 full combat·1~4인 boarding        |
 
 ## 최근 반영된 시나리오 변화
+
+- Map Editor에서 마지막으로 저장·적용한 37개 일반 Stage의 canonical 지형·Anchor·회수·경로·월드 오브젝트 배치를 generated Stage 모듈과 함께 갱신했다. 삭제한 surface·Anchor·route point는 canonical 원본과 Runtime에서 함께 제거했고, 48개 canonical Stage와 54개 생성물의 일치 검증을 통과했다. 실제 전체 traversal 체감은 별도 검증 범위다.
 
 - 0.74.0은 gap-0 Stage seam을 Gate 분리 배치로 대체했다. 47개 target Entry는 source Exit와 동일 X·2160px 위에 있으며 production parity가 portal endpoint·desktop/mobile 화면 밖·Bounds 비중첩·현재 Stage 하단+780px 낙사 복구 여유를 함께 검사한다. Stage-local canonical geometry와 Boss03·06 전투 계약은 유지하고 Boss Arena는 source Gate 기준 오른쪽 격리를 사용한다.
 

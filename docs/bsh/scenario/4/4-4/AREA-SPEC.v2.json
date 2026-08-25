@@ -648,36 +648,6 @@
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
-        "id": "door-b",
-        "kind": "scenario-surface",
-        "oneWay": false,
-        "position": {
-          "x": 760,
-          "y": -736
-        },
-        "sourceId": "door-b",
-        "vertices": [
-          {
-            "x": 712,
-            "y": -736
-          },
-          {
-            "x": 808,
-            "y": -736
-          },
-          {
-            "x": 808,
-            "y": -64
-          },
-          {
-            "x": 712,
-            "y": -64
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
         "id": "chamber-c-floor",
         "kind": "scenario-surface",
         "oneWay": true,

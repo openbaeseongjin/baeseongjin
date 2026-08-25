@@ -50,26 +50,6 @@ const SPEC = {
     },
     {
       "landmark": {
-        "id": "P5",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P5",
-          "sourceId": "P5"
-        },
-        "x": 460,
-        "y": -980
-      },
-      "target": {
-        "id": "P5-surface",
-        "properties": {
-          "sourceId": "P5"
-        },
-        "x": 460,
-        "y": -980
-      }
-    },
-    {
-      "landmark": {
         "id": "P6",
         "properties": {
           "coordinateAnchor": "center",
@@ -275,7 +255,7 @@ const SPEC = {
     "entry": {
       "id": "sector-04-08:entry",
       "x": -1120,
-      "y": -160
+      "y": -200
     },
     "exit": {
       "id": "sector-04-08:exit",
@@ -602,36 +582,6 @@ const SPEC = {
     "surfaces": [
       {
         "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "quorum-entry-deck",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -1180,
-          "y": -170
-        },
-        "sourceId": "entry-deck",
-        "vertices": [
-          {
-            "x": -1390,
-            "y": -170
-          },
-          {
-            "x": -970,
-            "y": -170
-          },
-          {
-            "x": -970,
-            "y": -140
-          },
-          {
-            "x": -1390,
-            "y": -140
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-center",
         "fullSafe": true,
         "grappleable": true,
         "id": "quorum-landing",
@@ -792,24 +742,24 @@ const SPEC = {
         "oneWay": true,
         "position": {
           "x": -1120,
-          "y": -128
+          "y": -168
         },
         "vertices": [
           {
             "x": -1216,
-            "y": -128
+            "y": -168
           },
           {
             "x": -1024,
-            "y": -128
+            "y": -168
           },
           {
             "x": -1024,
-            "y": -96
+            "y": -136
           },
           {
             "x": -1216,
-            "y": -96
+            "y": -136
           }
         ]
       },

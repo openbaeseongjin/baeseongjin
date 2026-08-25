@@ -132,16 +132,16 @@ const SPEC = {
           "label": "ACCESS B",
           "presentationId": "world-object:grapple-landmark"
         },
-        "x": -1056,
-        "y": -640
+        "x": -810,
+        "y": -545
       },
       "objectIndex": 9,
       "surfaceIndex": 14,
       "target": {
         "id": "sector-01-06:access-anchor-b-surface",
         "properties": {},
-        "x": -1056,
-        "y": -640
+        "x": -810,
+        "y": -545
       }
     }
   ],
@@ -282,8 +282,8 @@ const SPEC = {
         "id": "sector-01-06:access-carrier",
         "kind": "sentry",
         "position": {
-          "x": -1456,
-          "y": -672
+          "x": -1455,
+          "y": -675
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -601,25 +601,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -1456,
-          "y": -672
+          "x": -1455,
+          "y": -660
         },
         "vertices": [
           {
-            "x": -1808,
-            "y": -672
+            "x": -1807,
+            "y": -660
           },
           {
-            "x": -1104,
-            "y": -672
+            "x": -1103,
+            "y": -660
           },
           {
-            "x": -1104,
-            "y": -640
+            "x": -1103,
+            "y": -628
           },
           {
-            "x": -1808,
-            "y": -640
+            "x": -1807,
+            "y": -628
           }
         ]
       },

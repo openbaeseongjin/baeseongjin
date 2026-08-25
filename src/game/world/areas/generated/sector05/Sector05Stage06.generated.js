@@ -10,26 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "entry",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "entry",
-          "sourceId": "entry"
-        },
-        "x": 720,
-        "y": -100
-      },
-      "target": {
-        "id": "entry-surface",
-        "properties": {
-          "sourceId": "entry"
-        },
-        "x": 720,
-        "y": -100
-      }
-    },
-    {
-      "landmark": {
         "id": "p0",
         "properties": {
           "coordinateAnchor": "center",
@@ -322,7 +302,7 @@ const SPEC = {
     "entry": {
       "id": "sector-05-06:entry",
       "x": 720,
-      "y": -100
+      "y": -105
     },
     "exit": {
       "id": "sector-05-06:exit",
@@ -690,24 +670,24 @@ const SPEC = {
         "oneWay": true,
         "position": {
           "x": 720,
-          "y": -68
+          "y": -73
         },
         "vertices": [
           {
             "x": 624,
-            "y": -68
+            "y": -73
           },
           {
             "x": 816,
-            "y": -68
+            "y": -73
           },
           {
             "x": 816,
-            "y": -36
+            "y": -41
           },
           {
             "x": 624,
-            "y": -36
+            "y": -41
           }
         ]
       },

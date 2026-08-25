@@ -10,26 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "e",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "E",
-          "sourceId": "e"
-        },
-        "x": -2100,
-        "y": -100
-      },
-      "target": {
-        "id": "e-surface",
-        "properties": {
-          "sourceId": "e"
-        },
-        "x": -2100,
-        "y": -100
-      }
-    },
-    {
-      "landmark": {
         "id": "h1",
         "properties": {
           "coordinateAnchor": "center",
@@ -86,26 +66,6 @@ const SPEC = {
         },
         "x": -1380,
         "y": -735
-      }
-    },
-    {
-      "landmark": {
-        "id": "h3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "H3",
-          "sourceId": "h3"
-        },
-        "x": -920,
-        "y": -780
-      },
-      "target": {
-        "id": "h3-surface",
-        "properties": {
-          "sourceId": "h3"
-        },
-        "x": -920,
-        "y": -780
       }
     },
     {
@@ -255,8 +215,8 @@ const SPEC = {
     "cueIds": [],
     "entry": {
       "id": "sector-05-02:entry",
-      "x": -2100,
-      "y": -100
+      "x": -1965,
+      "y": -165
     },
     "exit": {
       "id": "sector-05-02:exit",
@@ -292,16 +252,16 @@ const SPEC = {
         "activation": {
           "height": 600,
           "width": 640,
-          "x": -1395,
-          "y": -1100
+          "x": -1695,
+          "y": -1090
         },
         "coordinateAnchor": "center",
         "enemyType": "shield-drone-t1",
         "id": "sector-05-02:aegis-a",
         "kind": "sentry",
         "position": {
-          "x": -895,
-          "y": -820
+          "x": -1195,
+          "y": -810
         },
         "presentationId": "world-object:sentry",
         "rules": []
@@ -371,8 +331,8 @@ const SPEC = {
         "id": "sector-05-02:route-guard-01",
         "kind": "sentry",
         "position": {
-          "x": 980,
-          "y": -1870
+          "x": -370,
+          "y": -2200
         },
         "presentationId": "world-object:sentry",
         "rules": [
@@ -572,36 +532,6 @@ const SPEC = {
     ],
     "subtitle": "STAGGERED SECURITY PARTITION FLANK / AEGIS ANGLE CONTROL",
     "surfaces": [
-      {
-        "coordinateAnchor": "top-center",
-        "grappleable": true,
-        "id": "authored-entry-deck",
-        "kind": "scenario-surface",
-        "oneWay": true,
-        "position": {
-          "x": -2180,
-          "y": -120
-        },
-        "sourceId": "entry-deck",
-        "vertices": [
-          {
-            "x": -2345,
-            "y": -120
-          },
-          {
-            "x": -2015,
-            "y": -120
-          },
-          {
-            "x": -2015,
-            "y": -92
-          },
-          {
-            "x": -2345,
-            "y": -92
-          }
-        ]
-      },
       {
         "coordinateAnchor": "top-center",
         "grappleable": true,
@@ -880,25 +810,25 @@ const SPEC = {
         "oneWay": true,
         "position": {
           "x": -165,
-          "y": -1295
+          "y": -1290
         },
         "sourceId": "upper-security-partition-horizontal",
         "vertices": [
           {
             "x": -465,
-            "y": -1295
+            "y": -1290
           },
           {
             "x": 135,
-            "y": -1295
+            "y": -1290
           },
           {
             "x": 135,
-            "y": -1200
+            "y": -1195
           },
           {
             "x": -465,
-            "y": -1200
+            "y": -1195
           }
         ]
       },
@@ -909,25 +839,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -2100,
-          "y": -68
+          "x": -1965,
+          "y": -133
         },
         "vertices": [
           {
-            "x": -2196,
-            "y": -68
+            "x": -2061,
+            "y": -133
           },
           {
-            "x": -2004,
-            "y": -68
+            "x": -1869,
+            "y": -133
           },
           {
-            "x": -2004,
-            "y": -36
+            "x": -1869,
+            "y": -101
           },
           {
-            "x": -2196,
-            "y": -36
+            "x": -2061,
+            "y": -101
           }
         ]
       }

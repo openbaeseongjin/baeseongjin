@@ -10,26 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "h00",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h00",
-          "sourceId": "h00"
-        },
-        "x": -2120,
-        "y": -260
-      },
-      "target": {
-        "id": "h00-surface",
-        "properties": {
-          "sourceId": "h00"
-        },
-        "x": -2120,
-        "y": -260
-      }
-    },
-    {
-      "landmark": {
         "id": "h01",
         "properties": {
           "coordinateAnchor": "center",
@@ -321,8 +301,8 @@ const SPEC = {
     "cueIds": [],
     "entry": {
       "id": "sector-05-04:entry",
-      "x": -2120,
-      "y": -260
+      "x": -2075,
+      "y": -255
     },
     "exit": {
       "id": "sector-05-04:exit",
@@ -772,25 +752,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -2120,
-          "y": -228
+          "x": -2075,
+          "y": -223
         },
         "vertices": [
           {
-            "x": -2216,
-            "y": -228
+            "x": -2171,
+            "y": -223
           },
           {
-            "x": -2024,
-            "y": -228
+            "x": -1979,
+            "y": -223
           },
           {
-            "x": -2024,
-            "y": -196
+            "x": -1979,
+            "y": -191
           },
           {
-            "x": -2216,
-            "y": -196
+            "x": -2171,
+            "y": -191
           }
         ]
       }

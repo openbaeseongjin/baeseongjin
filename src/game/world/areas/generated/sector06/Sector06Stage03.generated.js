@@ -10,26 +10,6 @@ const SPEC = {
   "anchors": [
     {
       "landmark": {
-        "id": "h00",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "h00",
-          "sourceId": "h00"
-        },
-        "x": -1100,
-        "y": -120
-      },
-      "target": {
-        "id": "h00-surface",
-        "properties": {
-          "sourceId": "h00"
-        },
-        "x": -1100,
-        "y": -120
-      }
-    },
-    {
-      "landmark": {
         "id": "h01",
         "properties": {
           "coordinateAnchor": "center",
@@ -201,8 +181,8 @@ const SPEC = {
     "cueIds": [],
     "entry": {
       "id": "sector-06-03:entry",
-      "x": -1100,
-      "y": -120
+      "x": -1060,
+      "y": -145
     },
     "exit": {
       "id": "sector-06-03:exit",
@@ -504,54 +484,25 @@ const SPEC = {
         "kind": "safe-deck",
         "oneWay": true,
         "position": {
-          "x": -1100,
-          "y": -88
+          "x": -1060,
+          "y": -113
         },
         "vertices": [
           {
-            "x": -1196,
-            "y": -88
+            "x": -1156,
+            "y": -113
           },
           {
-            "x": -1004,
-            "y": -88
+            "x": -964,
+            "y": -113
           },
           {
-            "x": -1004,
-            "y": -56
+            "x": -964,
+            "y": -81
           },
           {
-            "x": -1196,
-            "y": -56
-          }
-        ]
-      },
-      {
-        "coordinateAnchor": "top-left",
-        "grappleable": true,
-        "id": "entry-span",
-        "kind": "safe-deck",
-        "oneWay": true,
-        "position": {
-          "x": -1200,
-          "y": -155
-        },
-        "vertices": [
-          {
-            "x": -1200,
-            "y": -155
-          },
-          {
-            "x": -940,
-            "y": -155
-          },
-          {
-            "x": -940,
-            "y": -125
-          },
-          {
-            "x": -1200,
-            "y": -125
+            "x": -1156,
+            "y": -81
           }
         ]
       },

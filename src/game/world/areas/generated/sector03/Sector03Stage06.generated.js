@@ -495,8 +495,8 @@ const SPEC = {
         "id": "sector-03-06:atrium-id",
         "kind": "story-display",
         "position": {
-          "x": -1680,
-          "y": -218
+          "x": -1180,
+          "y": -90
         },
         "presentationId": "world-object:story-display"
       },
@@ -508,8 +508,8 @@ const SPEC = {
         "id": "sector-03-06:power-state",
         "kind": "story-display",
         "position": {
-          "x": 1460,
-          "y": -928
+          "x": 1470,
+          "y": -935
         },
         "presentationId": "world-object:story-display"
       },
@@ -521,8 +521,8 @@ const SPEC = {
         "id": "sector-03-06:upper-concourse",
         "kind": "story-display",
         "position": {
-          "x": -845,
-          "y": -1675
+          "x": -850,
+          "y": -1680
         },
         "presentationId": "world-object:story-display"
       },
@@ -534,8 +534,8 @@ const SPEC = {
         "id": "sector-03-06:access-control-ahead",
         "kind": "story-display",
         "position": {
-          "x": 1184,
-          "y": -2128
+          "x": 1335,
+          "y": -2075
         },
         "presentationId": "world-object:story-display"
       },

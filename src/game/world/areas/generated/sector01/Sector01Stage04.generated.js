@@ -112,8 +112,8 @@ const SPEC = {
         "id": "sector-01-04:calibration-far-sensor",
         "kind": "background-prop",
         "position": {
-          "x": 245,
-          "y": -525
+          "x": 250,
+          "y": -515
         },
         "presentationId": "world-object:background-prop"
       },
@@ -124,8 +124,8 @@ const SPEC = {
         "id": "sector-01-04:calibration-receiver",
         "kind": "background-prop",
         "position": {
-          "x": 224,
-          "y": -512
+          "x": 100,
+          "y": -515
         },
         "presentationId": "world-object:background-prop"
       },
@@ -148,8 +148,8 @@ const SPEC = {
         "id": "sector-01-04:calibration-scan-field",
         "kind": "background-prop",
         "position": {
-          "x": -215,
-          "y": -605
+          "x": -100,
+          "y": -515
         },
         "presentationId": "world-object:background-prop"
       },
