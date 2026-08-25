@@ -151,3 +151,4 @@
 - [그래픽 리소스 작업 가이드](../../graphics-asset-guide.md)
 - [픽셀 그래픽 디자인 규격](../../pixel-graphics-design-guide.md)
 - [오디오 리소스 작업 가이드](../../audio-asset-guide.md)
+- [Commander 이미지 생성 기획](./COMMANDER-IMAGE-GENERATION-PLAN.md)

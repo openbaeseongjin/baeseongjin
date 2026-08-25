@@ -13,3 +13,4 @@ Boss06의 현행 기획과 terminal Boarding은 유지한다. Boss Timer와 시�
 ## 참고용 비활성 설계
 
 - [Boss03 LOWER SECTOR COMMANDER 재도입 참고 계약](./03/LOWER-SECTOR-COMMANDER-REFERENCE-CONTRACT.md)은 제공된 기획을 현재 Runtime·게임·그래픽·오디오 규칙으로 점검한 문서다. 제품 Boss 카탈로그, `3-8 → 4-1` direct portal, Map Editor 또는 Runtime을 복구·변경하는 승인 문서가 아니다.
+- [Boss03 Commander 이미지 생성 기획](./03/COMMANDER-IMAGE-GENERATION-PLAN.md)은 본체 기본 스프라이트와 양팔 장비 참고 이미지를 만들기 전의 시각 기준이다. 생성물이 Runtime 자산이나 제품 Boss 재도입을 뜻하지 않는다.
