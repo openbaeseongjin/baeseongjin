@@ -1,11 +1,11 @@
-import { POINTER_SPELL_COMMAND_BY_TOKENS } from "./PointerSpellCommandBuffer.js";
+import { SPELL_SLOT_COMMAND_BY_ID } from "./SpellSlotCommandInput.js";
 
 export const MOBILE_GAMEPLAY_ACTION_ID = Object.freeze({
     ROPE: "rope"
 });
 
 function isSpellAction(actionId) {
-    return Boolean(POINTER_SPELL_COMMAND_BY_TOKENS[actionId]);
+    return Object.hasOwn(SPELL_SLOT_COMMAND_BY_ID, actionId);
 }
 
 export class MobileGameplayInputAdapter {

@@ -684,8 +684,7 @@ export class MultiplayerGameApp {
             mobileControls: {
                 ...this.latestInput.mobileControls,
                 visible: this.mobileView || this.latestInput.mobileControls.visible
-            },
-            spellInput: this.latestInput.spellCommand
+            }
         });
         if (this.metricsVisible) {
             this.onDiagnostics({
