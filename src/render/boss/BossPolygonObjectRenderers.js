@@ -9,9 +9,12 @@ import {
 import { resolveContinuityWardenPose } from "./ContinuityWardenPoseResolver.js";
 import {
     LOWER_SECTOR_COMMANDER_ACTION_PHASE,
+    LOWER_SECTOR_COMMANDER_GRAB_STAGE,
     LOWER_SECTOR_COMMANDER_OBJECT_KIND,
-    LOWER_SECTOR_COMMANDER_STATE
+    LOWER_SECTOR_COMMANDER_STATE,
+    LOWER_SECTOR_COMMANDER_SURFACE_KIND
 } from "../../game/boss/LowerSectorCommanderDefinition.js";
+import { KINEMATIC_JUMP_PHASE } from "../../game/boss/KinematicJumpMotion.js";
 
 const COLOR = Object.freeze({
     BODY: "#273442",
@@ -310,6 +313,10 @@ class LowerSectorCommanderRenderer extends BossPolygonObjectRenderer {
         if (object.state === LOWER_SECTOR_COMMANDER_STATE.WALK) {
             context.translate(0, -Math.abs(Math.sin(walkRadians)) * 4);
             context.rotate(sign * Math.sin(walkRadians) * 0.035);
+        } else if (object.state === LOWER_SECTOR_COMMANDER_STATE.JUMP) {
+            const rising = object.jumpPhase === KINEMATIC_JUMP_PHASE.JUMP;
+            context.rotate(sign * (rising ? -0.12 : 0.08));
+            context.scale(rising ? 0.94 : 1.04, rising ? 1.08 : 0.96);
         } else if (
             object.state === LOWER_SECTOR_COMMANDER_STATE.CHARGE &&
             object.actionState === LOWER_SECTOR_COMMANDER_ACTION_PHASE.TELEGRAPH
@@ -351,7 +358,10 @@ class LowerSectorCommanderRenderer extends BossPolygonObjectRenderer {
         context.arc(sign * (hookReach + width * 0.08), shoulderY + height * 0.07, width * 0.12, 0.2, Math.PI * 1.65);
         context.stroke();
 
-        const hammerRaised = object.state === LOWER_SECTOR_COMMANDER_STATE.HAMMER;
+        const hammerRaised =
+            object.state === LOWER_SECTOR_COMMANDER_STATE.HAMMER ||
+            (object.state === LOWER_SECTOR_COMMANDER_STATE.GRAB &&
+                object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.HAMMER);
         context.save();
         context.translate(-sign * width * 0.3, -height * 0.04);
         context.rotate(sign * (hammerRaised ? -0.75 : 0.35));
@@ -398,7 +408,7 @@ class CommanderGrabRangeRenderer extends BossPolygonObjectRenderer {
 class CommanderArenaSurfaceRenderer extends BossPolygonObjectRenderer {
     drawShape(context, object) {
         const { width, height } = size(object, 240, 80);
-        context.fillStyle = object.variant === "commander-crossbeam" ? "#24313a" : "#354149";
+        context.fillStyle = object.variant === LOWER_SECTOR_COMMANDER_SURFACE_KIND.LEDGE ? "#24313a" : "#354149";
         context.strokeStyle = "#7f8f91";
         context.lineWidth = 4;
         context.fillRect(-width * 0.5, -height * 0.5, width, height);

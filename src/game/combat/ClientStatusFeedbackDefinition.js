@@ -55,6 +55,13 @@ export const CLIENT_STATUS_KEY = Object.freeze({
 });
 
 function normalizeClientStatusEvent(event) {
+    if (
+        event?.type === ROPE_IMPACT_EVENT_TYPE.REJECTED &&
+        event.reason === ROPE_IMPACT_REJECTION_REASON.SWING_REQUIRED &&
+        event.targetKind === IMPACT_TARGET_KIND.BOSS
+    ) {
+        return null;
+    }
     if (event?.eventType === CLIENT_STATUS_EVENT_TYPE.PLAYER_RESPAWNED) {
         if (!CLIENT_RESPAWN_STATUS_TYPES.includes(event.statusType)) return null;
         return Object.freeze({
@@ -90,3 +97,5 @@ export function selectClientStatusFeedback(event, viewerId) {
     const personalViewerId = PERSONAL_STATUS_TYPES.includes(normalized.type) ? (normalized.playerId ?? null) : null;
     return !personalViewerId || personalViewerId === viewerId ? normalized : null;
 }
+import { ROPE_IMPACT_EVENT_TYPE, ROPE_IMPACT_REJECTION_REASON } from "./RopeImpactAttack.js";
+import { IMPACT_TARGET_KIND } from "./ImpactTarget.js";

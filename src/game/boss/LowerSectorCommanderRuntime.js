@@ -12,12 +12,17 @@ import { CombatStatusEffectPool } from "../status-effects/CombatStatusEffectPool
 import { BossStatePool, BOSS_STATE_LANE } from "./BossStatePool.js";
 import { createLowerSectorCommanderStateCatalog } from "./LowerSectorCommanderStateCatalog.js";
 import { CommanderLocomotion } from "./CommanderLocomotion.js";
+import { BOSS_ARENA_SUPPORT_KIND, BossArenaSpatialQuery } from "./BossArenaSpatialQuery.js";
+import { KinematicJumpMotion } from "./KinematicJumpMotion.js";
 import {
     LOWER_SECTOR_COMMANDER_ACTION_PHASE as ACTION_PHASE,
+    LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITION as CAPTURE_DEFINITION,
     LOWER_SECTOR_COMMANDER_HAZARD as HAZARD,
+    LOWER_SECTOR_COMMANDER_GRAB_STAGE as GRAB_STAGE,
     LOWER_SECTOR_COMMANDER_ID as ID,
     LOWER_SECTOR_COMMANDER_OBJECT_KIND as OBJECT_KIND,
-    LOWER_SECTOR_COMMANDER_STATE as STATE
+    LOWER_SECTOR_COMMANDER_STATE as STATE,
+    LOWER_SECTOR_COMMANDER_SURFACE_KIND as SURFACE_KIND
 } from "./LowerSectorCommanderDefinition.js";
 
 const PLAYER_RADIUS = 15;
@@ -28,6 +33,10 @@ const OPENING_DIALOGUE = Object.freeze([
 const VICTORY_TEXT = "LOWER-SECTOR TRANSFER / RETURN PROTOCOL OFFLINE";
 const VICTORY_SECONDS = 1.5;
 const HAZARD_SEQUENCE_LIMIT = 64;
+const SUPPORT_KIND_BY_SURFACE_KIND = Object.freeze({
+    [SURFACE_KIND.MAIN]: BOSS_ARENA_SUPPORT_KIND.GROUND,
+    [SURFACE_KIND.LEDGE]: BOSS_ARENA_SUPPORT_KIND.PLATFORM
+});
 
 function positive(value, fallback) {
     return Number.isFinite(value) && value > 0 ? value : fallback;
@@ -72,10 +81,15 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.hazardSequence = 0;
         this.grabCooldownRemaining = 0;
         this.grabCapturedPlayerId = null;
-        this.grabStage = "idle";
+        this.grabStage = GRAB_STAGE.IDLE;
         this.chargeDistanceRemaining = 0;
         this.victoryRemaining = 0;
         this.statusEffects = new CombatStatusEffectPool();
+        this.spatialQuery = new BossArenaSpatialQuery({
+            surfaces: definition.arena.surfaces,
+            supportKindBySurfaceKind: SUPPORT_KIND_BY_SURFACE_KIND,
+            label: "Lower Sector Commander"
+        });
         this.body = new KinematicPhysicsBody({
             id: ID.BODY,
             actorKind: PHYSICS_ACTOR_KIND.BOSS,
@@ -96,13 +110,17 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             floorBounds: this.config.mainBounds,
             bodyWidth: this.config.bodyWidth
         });
+        this.jumpMotion = new KinematicJumpMotion({
+            position: definition.arena.boss.position,
+            gravity: this.config.jumpGravity
+        });
         this.resetAttempt({ preserveCompleted: false });
         if (snapshot) this.restore(snapshot);
     }
 
     #configuration() {
         const parameters = this.definition.arena.mechanics?.[0]?.parameters ?? {};
-        const main = this.definition.arena.surfaces.find(({ kind }) => kind === "commander-main-runway");
+        const main = this.definition.arena.surfaces.find(({ kind }) => kind === SURFACE_KIND.MAIN);
         return freezeComposite({
             mainBounds: main.bounds,
             bodyWidth: positive(this.definition.arena.boss.collider?.width, 128),
@@ -112,14 +130,17 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             walkSpeeds: positiveArray(parameters.walkSpeeds, Object.freeze([180, 220, 260])),
             intensityHealthRatios: positiveArray(parameters.intensityHealthRatios, Object.freeze([0.7, 0.35])),
             recoverySeconds: positiveArray(parameters.recoverySeconds, Object.freeze([1, 0.8, 0.6])),
-            grabRange: positive(parameters.grabRange, 450),
+            grabRange: positive(parameters.grabRange, 800),
             grabLeadSeconds: positive(parameters.grabLeadSeconds, 0.25),
             grabTelegraphSeconds: positive(parameters.grabTelegraphSeconds, 1.5),
             grabTimeoutSeconds: positive(parameters.grabTimeoutSeconds, 0.5),
             grabDamage: positive(parameters.grabDamage, 20),
-            grabHoldSeconds: positive(parameters.grabHoldSeconds, 2),
+            grabHoldSeconds: CAPTURE_DEFINITION.holdSeconds,
             grabHammerDamage: positive(parameters.grabHammerDamage, 40),
             grabCooldownSeconds: positive(parameters.grabCooldownSeconds, 15),
+            jumpGravity: positive(parameters.jumpGravity, 1500),
+            jumpDurationSeconds: positive(parameters.jumpDurationSeconds, 0.95),
+            jumpRecoverySeconds: positive(parameters.jumpRecoverySeconds, 0.3),
             captureCliffMargin: positive(parameters.captureCliffMargin, 120),
             captureFrontGap: positive(parameters.captureFrontGap, 50),
             hammerRange: positive(parameters.hammerRange, 260),
@@ -155,12 +176,13 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.hazardSequence = 0;
         this.grabCooldownRemaining = 0;
         this.grabCapturedPlayerId = null;
-        this.grabStage = "idle";
+        this.grabStage = GRAB_STAGE.IDLE;
         this.chargeDistanceRemaining = 0;
         this.victoryRemaining = completed ? 0 : this.victoryRemaining;
         this.statusEffects.reset();
         this.body?.setPhysicsPosition(this.definition.arena.boss.position);
         this.body?.setPhysicsVelocity({ x: 0, y: 0 });
+        this.jumpMotion?.cancel(this.definition.arena.boss.position);
         if (this.locomotion) this.locomotion.distance = 0;
         this.statePool?.resetAttempt({ attempt: this.attempt });
     }
@@ -194,6 +216,55 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         return Math.hypot(target.position.x - edge.x, target.position.y - edge.y);
     }
 
+    #grabDistance(target) {
+        return target
+            ? Math.hypot(target.position.x - this.body.position.x, target.position.y - this.body.position.y)
+            : Infinity;
+    }
+
+    #grabTargetInsideRange(target) {
+        return this.#grabDistance(target) <= this.config.grabRange;
+    }
+
+    #bodyFoot(position = this.body.position) {
+        return { x: position.x, y: position.y + this.config.bodyHeight * 0.5 };
+    }
+
+    #targetSupport(target) {
+        if (!target) return null;
+        const foot = { x: target.position.x, y: target.position.y + PLAYER_RADIUS };
+        return this.spatialQuery.currentSupport(foot, { tolerance: 24 }) ?? this.spatialQuery.supportBelow(foot);
+    }
+
+    #currentSupport() {
+        return this.spatialQuery.currentSupport(this.#bodyFoot(), { tolerance: 2 });
+    }
+
+    #supportPosition(support, targetX) {
+        const halfWidth = this.config.bodyWidth * 0.5;
+        return {
+            x: Math.max(support.minX + halfWidth, Math.min(support.maxX - halfWidth, targetX)),
+            y: support.topY - this.config.bodyHeight * 0.5
+        };
+    }
+
+    #nextJumpSupport(current, target) {
+        if (!current || !target || current.id === target.id) return null;
+        if (
+            current.supportKind === BOSS_ARENA_SUPPORT_KIND.GROUND ||
+            target.supportKind === BOSS_ARENA_SUPPORT_KIND.GROUND
+        ) {
+            return target;
+        }
+        const platforms = this.spatialQuery.supports
+            .filter(({ supportKind }) => supportKind === BOSS_ARENA_SUPPORT_KIND.PLATFORM)
+            .sort((left, right) => left.minX - right.minX);
+        const currentIndex = platforms.findIndex(({ id }) => id === current.id);
+        const targetIndex = platforms.findIndex(({ id }) => id === target.id);
+        if (currentIndex < 0 || targetIndex < 0) return target;
+        return platforms[currentIndex + Math.sign(targetIndex - currentIndex)] ?? target;
+    }
+
     #faceTarget(target) {
         const delta = target.position.x - this.body.position.x;
         if (delta !== 0) this.facing = Math.sign(delta);
@@ -201,19 +272,21 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.targetPosition = { ...target.position };
     }
 
-    #capturePosition(facing = this.facing) {
+    #capturePosition(facing = this.facing, support = this.#currentSupport()) {
         const edge = this.body.collider.outsidePointToward(
             this.body.position,
             { x: this.body.position.x + facing, y: this.body.position.y },
             this.config.captureFrontGap + PLAYER_RADIUS
         );
-        return { x: edge.x, y: this.config.mainBounds.y - PLAYER_RADIUS };
+        return { x: edge.x, y: (support?.topY ?? this.config.mainBounds.y) - PLAYER_RADIUS };
     }
 
     #safeCapturePosition(facing = this.facing) {
-        const position = this.#capturePosition(facing);
-        const minimumX = this.config.mainBounds.x + this.config.captureCliffMargin;
-        const maximumX = this.config.mainBounds.x + this.config.mainBounds.width - this.config.captureCliffMargin;
+        const support = this.#currentSupport();
+        const position = this.#capturePosition(facing, support);
+        const bounds = support?.bounds ?? this.config.mainBounds;
+        const minimumX = bounds.x + this.config.captureCliffMargin;
+        const maximumX = bounds.x + bounds.width - this.config.captureCliffMargin;
         return position.x >= minimumX && position.x <= maximumX ? position : null;
     }
 
@@ -222,9 +295,15 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         return Boolean(
             target &&
             this.grabCooldownRemaining <= 0 &&
-            this.#bodyBoundaryDistance(target) <= this.config.grabRange &&
+            this.#grabTargetInsideRange(target) &&
             this.#safeCapturePosition(facing)
         );
+    }
+
+    canJump(target) {
+        const current = this.#currentSupport();
+        const destination = this.#targetSupport(target);
+        return Boolean(target && current && destination && current.id !== destination.id && !this.jumpMotion.active);
     }
 
     canHammer(target) {
@@ -247,7 +326,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
 
     beginGrab(target) {
         this.#beginAttack(STATE.GRAB, target, this.config.grabLeadSeconds);
-        this.grabStage = "lead";
+        this.grabStage = GRAB_STAGE.LEAD;
     }
 
     beginHammer(target) {
@@ -257,6 +336,22 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
     beginCharge(target) {
         this.#beginAttack(STATE.CHARGE, target, this.config.chargeTelegraphSeconds);
         this.chargeDistanceRemaining = this.config.chargeDistance;
+    }
+
+    beginJump(target) {
+        const destination = this.#nextJumpSupport(this.#currentSupport(), this.#targetSupport(target));
+        if (!destination) return false;
+        this.#faceTarget(target);
+        this.state = STATE.JUMP;
+        this.actionPhase = ACTION_PHASE.RECOVERY;
+        this.timer = this.config.jumpDurationSeconds;
+        this.locomotion.stop();
+        this.jumpMotion.begin({
+            position: this.body.position,
+            target: this.#supportPosition(destination, target.position.x),
+            durationSeconds: this.config.jumpDurationSeconds
+        });
+        return true;
     }
 
     #activateHazard(kind, seconds) {
@@ -273,31 +368,35 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.targetPlayerId = null;
         this.targetPosition = null;
         this.grabCapturedPlayerId = null;
-        this.grabStage = "idle";
+        this.grabStage = GRAB_STAGE.IDLE;
         this.chargeDistanceRemaining = 0;
         this.locomotion.stop();
     }
 
     advanceGrab(dt, target) {
         if (target?.id === this.targetPlayerId) this.targetPosition = { ...target.position };
+        if (this.actionPhase === ACTION_PHASE.TELEGRAPH && (!target || !this.#grabTargetInsideRange(target))) {
+            this.cancelTargetCapture(this.targetPlayerId);
+            return;
+        }
         this.timer = Math.max(0, this.timer - dt);
-        if (this.actionPhase === ACTION_PHASE.TELEGRAPH && this.grabStage === "lead" && this.timer <= 0) {
-            this.grabStage = "telegraph";
+        if (this.actionPhase === ACTION_PHASE.TELEGRAPH && this.grabStage === GRAB_STAGE.LEAD && this.timer <= 0) {
+            this.grabStage = GRAB_STAGE.TELEGRAPH;
             this.timer = this.config.grabTelegraphSeconds;
             return;
         }
-        if (this.actionPhase === ACTION_PHASE.TELEGRAPH && this.grabStage === "telegraph" && this.timer <= 0) {
-            this.grabStage = "search";
+        if (this.actionPhase === ACTION_PHASE.TELEGRAPH && this.grabStage === GRAB_STAGE.TELEGRAPH && this.timer <= 0) {
+            this.grabStage = GRAB_STAGE.SEARCH;
             this.#activateHazard(HAZARD.GRAB, this.config.grabTimeoutSeconds);
             return;
         }
         if (this.actionPhase !== ACTION_PHASE.ACTIVE || this.timer > 0) return;
-        if (this.grabStage === "captured") {
-            this.grabStage = "hammer";
+        if (this.grabStage === GRAB_STAGE.CAPTURED) {
+            this.grabStage = GRAB_STAGE.HAMMER;
             this.#activateHazard(HAZARD.HAMMER, this.config.hammerActiveSeconds);
             return;
         }
-        if (this.grabStage === "hammer") {
+        if (this.grabStage === GRAB_STAGE.HAMMER) {
             this.grabCooldownRemaining = this.config.grabCooldownSeconds;
             this.#finishAttack();
             return;
@@ -321,9 +420,26 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         }
         if (this.actionPhase !== ACTION_PHASE.ACTIVE) return;
         const previousX = this.body.position.x;
-        this.locomotion.moveAtVelocity(this.facing * this.config.chargeSpeed, dt);
+        this.locomotion.moveAtVelocity(
+            this.facing * this.config.chargeSpeed,
+            dt,
+            this.#currentSupport()?.bounds ?? this.config.mainBounds
+        );
         this.chargeDistanceRemaining -= Math.abs(this.body.position.x - previousX);
         if (this.timer <= 0 || this.chargeDistanceRemaining <= 0) this.#finishAttack();
+    }
+
+    advanceJump(dt) {
+        this.jumpMotion.advance(dt);
+        this.body.setKinematicPosition(this.jumpMotion.position, dt);
+        this.timer = Math.max(0, this.timer - dt);
+        if (this.jumpMotion.active) return;
+        this.body.holdKinematicPosition();
+        this.state = STATE.NEUTRAL;
+        this.actionPhase = ACTION_PHASE.RECOVERY;
+        this.timer = this.config.jumpRecoverySeconds;
+        this.targetPlayerId = null;
+        this.targetPosition = null;
     }
 
     cancelTargetCapture(playerId) {
@@ -336,6 +452,10 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
     #advanceNeutral(dt, target, { canSelectAttack = true } = {}) {
         if (this.timer > 0) {
             this.timer = Math.max(0, this.timer - dt);
+            return;
+        }
+        if (target && this.canJump(target)) {
+            this.statePool.enter(STATE.JUMP, { runtime: this, target });
             return;
         }
         const selection = canSelectAttack
@@ -351,7 +471,13 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         if (target) {
             this.state = STATE.WALK;
             this.#faceTarget(target);
-            this.locomotion.advanceToward(target.position.x, dt, this.#walkSpeed(), this.config.hammerRange * 0.8);
+            this.locomotion.advanceToward(
+                target.position.x,
+                dt,
+                this.#walkSpeed(),
+                this.config.hammerRange * 0.8,
+                this.#currentSupport()?.bounds ?? this.config.mainBounds
+            );
             return;
         }
         this.state = STATE.NEUTRAL;
@@ -396,13 +522,14 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
     }
 
     #hazardBounds(width, height) {
+        const supportTopY = this.#currentSupport()?.topY ?? this.config.mainBounds.y;
         const edge = this.body.collider.outsidePointToward(this.body.position, {
             x: this.body.position.x + this.facing,
             y: this.body.position.y
         });
         return freezeComposite({
             x: this.facing > 0 ? edge.x : edge.x - width,
-            y: this.config.mainBounds.y - height,
+            y: supportTopY - height,
             width,
             height
         });
@@ -433,14 +560,20 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
                 })
             ]);
         }
-        if (this.state === STATE.GRAB && this.grabCapturedPlayerId && this.grabStage === "hammer") {
+        if (this.state === STATE.GRAB && this.grabCapturedPlayerId && this.grabStage === GRAB_STAGE.HAMMER) {
+            const localBounds = this.#hazardBounds(this.config.hammerRange, this.config.hammerHeight);
             return Object.freeze([
                 freezeComposite({
                     ...common,
                     kind: HAZARD.HAMMER,
                     damage: this.config.grabHammerDamage,
                     targetPlayerId: this.grabCapturedPlayerId,
-                    automaticTarget: true
+                    automaticTarget: true,
+                    bounds: {
+                        ...localBounds,
+                        x: localBounds.x + worldOffset.x,
+                        y: localBounds.y + worldOffset.y
+                    }
                 })
             ]);
         }
@@ -474,12 +607,22 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         return Object.freeze([]);
     }
 
+    overlapsHazardTarget({ hazard, targetPosition }) {
+        if (hazard?.kind !== HAZARD.GRAB) return null;
+        if (!Number.isFinite(hazard.position?.x) || !Number.isFinite(hazard.position?.y)) return false;
+        if (!Number.isFinite(targetPosition?.x) || !Number.isFinite(targetPosition?.y)) return false;
+        return (
+            Math.hypot(targetPosition.x - hazard.position.x, targetPosition.y - hazard.position.y) <=
+            this.config.grabRange
+        );
+    }
+
     applyHazardContact({ contactId, playerId, damage }) {
         const outcome = super.applyHazardContact({ contactId, playerId, damage });
         if (!outcome.changed || this.state !== STATE.GRAB) return outcome;
         if (!this.grabCapturedPlayerId) {
             this.grabCapturedPlayerId = playerId;
-            this.grabStage = "captured";
+            this.grabStage = GRAB_STAGE.CAPTURED;
             this.timer = this.config.grabHoldSeconds;
             return outcome;
         }
@@ -556,6 +699,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             this.targetPlayerId = null;
             this.victoryRemaining = VICTORY_SECONDS;
             this.locomotion.stop();
+            this.jumpMotion.cancel(this.body.position);
             this.emit("boss-dialogue", {
                 channel: "player-bark",
                 lines: Object.freeze([Object.freeze({ speakerId: "lower-sector-system", text: VICTORY_TEXT })])
@@ -635,6 +779,8 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
                 actionState: this.actionPhase,
                 remainingSeconds: this.timer,
                 movementProgress: this.locomotion.distance,
+                jumpPhase: this.jumpMotion.phase,
+                grabStage: this.grabStage,
                 direction: this.facing,
                 physicsBody: this.state !== STATE.DEFEATED,
                 ropeAttachable: false,
@@ -646,7 +792,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         if (
             this.state === STATE.GRAB &&
             this.actionPhase === ACTION_PHASE.TELEGRAPH &&
-            this.grabStage === "telegraph"
+            this.grabStage === GRAB_STAGE.TELEGRAPH
         ) {
             objects.push({
                 id: `${ID.BODY}:grab-range`,
@@ -734,6 +880,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             chargeDistanceRemaining: this.chargeDistanceRemaining,
             victoryRemaining: this.victoryRemaining,
             locomotion: this.locomotion.snapshot(),
+            jumpMotion: this.jumpMotion.snapshot(),
             stateSelection: this.statePool.snapshot(),
             statusEffects: this.statusEffects.snapshot()
         });
@@ -752,10 +899,12 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.hazardSequence = snapshot.hazardSequence ?? 0;
         this.grabCooldownRemaining = snapshot.grabCooldownRemaining ?? 0;
         this.grabCapturedPlayerId = snapshot.grabCapturedPlayerId ?? null;
-        this.grabStage = snapshot.grabStage ?? "idle";
+        this.grabStage = snapshot.grabStage ?? GRAB_STAGE.IDLE;
         this.chargeDistanceRemaining = snapshot.chargeDistanceRemaining ?? 0;
         this.victoryRemaining = snapshot.victoryRemaining ?? 0;
         this.locomotion.restore(snapshot.locomotion);
+        if (snapshot.jumpMotion) this.jumpMotion.restore(snapshot.jumpMotion);
+        else this.jumpMotion.cancel(this.body.position);
         this.statePool.restore(snapshot.stateSelection);
         this.statusEffects.restore(snapshot.statusEffects);
         return this;

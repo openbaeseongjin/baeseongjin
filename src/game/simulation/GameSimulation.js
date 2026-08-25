@@ -597,13 +597,23 @@ export class GameSimulation {
             const { eventId: bossEventId, eventType, sequence: bossSequence, ...payload } = event;
             if (eventType === CONTINUITY_WARDEN_EVENT.MISSILE_FIRED) this.#spawnBossMissile(payload);
             if (eventType === CONTINUITY_WARDEN_EVENT.ENEMY_SUMMONED) this.#spawnBossSummonedEnemy(payload);
-            const bossBody = this.bossStageSnapshot()?.presentation?.objects.find(
-                ({ physicsBody }) => physicsBody === true
+            const bossObjects = this.bossStageSnapshot()?.presentation?.objects ?? Object.freeze([]);
+            const bossBody = bossObjects.find(({ physicsBody }) => physicsBody === true);
+            const activeHazard = bossObjects.find(
+                ({ variant, damaging, active }) => variant === payload.kind && damaging === true && active === true
             );
+            const impactPosition =
+                activeHazard?.position && activeHazard?.size
+                    ? {
+                          x: activeHazard.position.x,
+                          y: activeHazard.position.y + activeHazard.size.height * 0.5
+                      }
+                    : null;
             this.recordReplicationEvent(eventType, {
                 ...payload,
                 bossEventId,
                 bossSequence,
+                ...(impactPosition ? { impactPosition } : {}),
                 ...(bossBody?.position ? { position: bossBody.position } : {})
             });
         }
@@ -1369,7 +1379,16 @@ export class GameSimulation {
                 )
                     continue;
                 if (hazard.capture && this.combatInteractions.hasInteraction(hazard.capture.interactionId)) continue;
-                if (hazard.automaticTarget !== true && !this.#compositeHazardOverlapsPlayer(hazard, player)) continue;
+                const runtimeOverlap = this.bossRuntime?.overlapsHazardTarget?.({
+                    hazard,
+                    targetPosition: player.physics.position
+                });
+                if (
+                    hazard.automaticTarget !== true &&
+                    runtimeOverlap !== true &&
+                    (runtimeOverlap === false || !this.#compositeHazardOverlapsPlayer(hazard, player))
+                )
+                    continue;
                 const contactId = `${stage.id}:attempt:${snapshot.attempt}:hazard:${hazard.id}:${player.id}`;
                 const contact = this.bossRuntime.applyHazardContact({
                     contactId,
