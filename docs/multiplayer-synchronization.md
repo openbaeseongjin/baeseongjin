@@ -219,7 +219,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 
 현재 권위 복귀 구현은 사망한 플레이어 한 명의 물리·로프·입력·체력·무기 상태만 자기 active Stage checkpoint에서 초기화한다. 해당 플레이어의 `player-respawned` 사건을 남기며 다른 플레이어와 공용 진행·적·투사체 상태는 유지한다. 같은 tick에 모든 플레이어가 부활해도 공용 상태를 reset하지 않는다.
 
-낙사 경계는 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 판정한다. 한 플레이어가 경계를 통과하면 fallen `owner-motion`을 즉시 보내고 같은 프레임에 로컬 active Stage checkpoint 부활을 예측한다. 멀티 서버 fixed tick은 지연된 복제 위치만으로 낙사를 시작하지 않으며 claim을 받은 뒤 체력 소진과 같은 `respawnPlayerAtCheckpoint` 호환 메서드로 현재 `respawnAnchorId` 복구와 공유 사건을 한 번 확정한다. 소유자 운동 receipt는 `player-fell`, 공유 사건은 원인 `fall`이 포함된 `player-respawned`를 사용한다. 싱글은 같은 프로세스의 `GameSimulation`이 자동 경계 판정과 복구를 계속 수행한다.
+낙사 경계는 Stage·checkpoint별 경계가 아니라 전체 authored world의 `bottomY + recoveryMargin` 하나이며, 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 판정한다. 한 플레이어가 경계를 통과하면 fallen `owner-motion`을 즉시 보내고 같은 프레임에 로컬 active Stage checkpoint 부활을 예측한다. 멀티 서버 fixed tick은 지연된 복제 위치만으로 낙사를 시작하지 않으며 claim을 받은 뒤 체력 소진과 같은 `respawnPlayerAtCheckpoint` 호환 메서드로 현재 `respawnAnchorId` 복구와 공유 사건을 한 번 확정한다. 소유자 운동 receipt는 `player-fell`, 공유 사건은 원인 `fall`이 포함된 `player-respawned`를 사용한다. 싱글은 같은 프로세스의 `GameSimulation`이 자동 경계 판정과 복구를 계속 수행한다.
 
 `owner-motion`은 위치·속도 같은 연속 운동과 로프 상태·낙사 경계 보고를 하나의 최신 소유자 상태로 운반한다. 서버는 최신 tick의 물리·로프 상태를 원자적으로 적용하므로 과거 부착 상태가 최신 해제를 되돌리지 못한다. 낙사 경계를 넘은 최신 상태는 위치를 그대로 복제하는 대신 `GameSimulation`의 공용 낙사 복구 전이로 처리하고 `player-fell` receipt를 보낸다. 중복·역순 tick은 성공한 no-op으로 끝나며 별도 rope tick이나 부분 승인 경로를 두지 않는다.
 

@@ -101,7 +101,7 @@ import { resolveEnemyEncounter } from "../world/EnemyEncounterSelection.js";
 import { advanceSectorProgress } from "../world/SectorProgressController.js";
 import { SectorProgressState } from "../world/SectorProgressState.js";
 import { playerOverlapsStageSavePoint } from "../world/StageSavePointGeometry.js";
-import { STAGE_TRANSITION_LAYOUT } from "../world/StageTransitionLayout.js";
+import { worldFallRecoveryY } from "../world/WorldFallBoundary.js";
 import { collisionSurfacesForProgress, collisionSurfacesForSectorProgress } from "../world/WorldGateGeometry.js";
 import {
     pointInsideBounds,
@@ -2595,15 +2595,7 @@ export class GameSimulation {
         ) {
             return Number.POSITIVE_INFINITY;
         }
-        if (playerId !== null && this.isSeamlessSectorWorld) {
-            const anchor = this.respawnAnchorForPlayer(playerId);
-            const landmark = this.landmarkById[anchor?.landmarkId];
-            if (landmark?.bounds) {
-                return landmark.bounds.y + landmark.bounds.height + STAGE_TRANSITION_LAYOUT.fallRecoveryMargin;
-            }
-        }
-        const worldBottomY = Number.isFinite(this.world.bottomY) ? this.world.bottomY : WORLD_CONFIG.floorY;
-        return worldBottomY + STAGE_TRANSITION_LAYOUT.fallRecoveryMargin;
+        return worldFallRecoveryY(this.world.bottomY, WORLD_CONFIG.floorY);
     }
 
     resolvePlayerFall(playerId) {

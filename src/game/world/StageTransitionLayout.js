@@ -1,6 +1,5 @@
 export const STAGE_TRANSITION_LAYOUT = Object.freeze({
-    verticalDistance: 2160,
-    fallRecoveryMargin: 780
+    verticalDistance: 2160
 });
 
 export function stageOriginFromGate(sourceExit, targetEntry) {
