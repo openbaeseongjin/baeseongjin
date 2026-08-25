@@ -116,7 +116,7 @@
 ### 월드와 진행 영역 기준
 
 - `SectorDefinition`과 Sector validator는 canonical `stageId`를 landmark·encounter authoring 경계로 사용한다. `encounterSlot`의 topology 권위는 `encounterId`, `slotId`, `position`, `activation`, `stageId`이며 별도 legacy Stage alias나 preview adapter를 권위로 두지 않는다. 적 종류의 fixed/pool 선택은 topology와 분리된 `enemySelection`이 소유하며 `fixedEnemyType` 또는 `allowedEnemyTypes` 중 정확히 하나만 허용한다.
-- 현재 `authored-continuous-stage-runtime-v18-boss06-direct-sector-portals`는 Sector 01~~06의 canonical v2/generated Stage 48개를 Bounds edge가 맞닿는 연속 authored 월드로 배치한다. `1-8→2-1`, `2-8→3-1`, `3-8→4-1`, `4-8→5-1`, `5-8→6-1`은 source Gate→target Entry portal로 직접 전환하고, `6-8` 뒤에만 독립 Boss Stage를 둔다. 일반 Stage derived geometry와 legacy fallback은 없다. Hardpoint Jammer는 전용 Anchor 목록 없이 일반 Rope surface를 공간 질의해 다음 후보를 고르고, 부착 시 owner-first 감전·절단을 시작한다.
+- 현재 `authored-continuous-stage-runtime-v19-boss06-open-edge-state-pool`은 Sector 01~~06의 canonical v2/generated Stage 48개를 Bounds edge가 맞닿는 연속 authored 월드로 배치한다. `1-8→2-1`, `2-8→3-1`, `3-8→4-1`, `4-8→5-1`, `5-8→6-1`은 source Gate→target Entry portal로 직접 전환하고, `6-8` 뒤에만 독립 Boss Stage를 둔다. 일반 Stage derived geometry와 legacy fallback은 없다. Hardpoint Jammer는 전용 Anchor 목록 없이 일반 Rope surface를 공간 질의해 다음 후보를 고르고, 부착 시 owner-first 감전·절단을 시작한다.
 - Sector 01~03은 각 Sector의 정확히 세 Carrier를 모두 처리해 Access Module 3/3을 모은 뒤 outgoing authored Gate portal을 연다. 별도 transit barrier geometry는 없으며 개인·전원 사망 뒤에도 module·objective 진행을 보존한다.
 - 0.32.0은 Sector 01~03을 authored safe slot과 결정적 enemy pool로 채운다. 1-1·1-2는 비전투, 이후는 화면당 약 1기와 후반 역할 중첩을 기준으로 하며 exact slot 예산과 보존 계약은 [`enemy-density-composition.md`](./enemy-density-composition.md)를 따른다.
 - 아래의 Area·Gate·보스 전환 규칙은 migration source와 이전 revision 설명이다. 새 Sector의 first-landmark/route Timer mapping으로 자동 변환하지 않는다.

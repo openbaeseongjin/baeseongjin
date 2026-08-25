@@ -30,12 +30,18 @@ export const CONTINUITY_WARDEN_ACTION_PHASE = Object.freeze({
     RECOVERY: "recovery"
 });
 
+export const CONTINUITY_WARDEN_REACTION_STATE = Object.freeze({
+    DAMAGED: "damaged"
+});
+
 export const CONTINUITY_WARDEN_LOCOMOTION_STATE = Object.freeze({
-    GROUNDED: "grounded",
-    TAKEOFF: "takeoff",
-    JUMP: "jump",
-    FALL: "fall",
-    LANDING: "landing"
+    GROUNDED: "locomotion-grounded",
+    WALK: "locomotion-walk",
+    TAKEOFF: "locomotion-takeoff",
+    JUMP: "locomotion-jump",
+    DESCEND: "locomotion-descend",
+    FALL: "locomotion-fall",
+    LANDING: "locomotion-landing"
 });
 
 export const CONTINUITY_WARDEN_PATTERN = Object.freeze({
@@ -112,7 +118,6 @@ export const CONTINUITY_WARDEN_ID = Object.freeze({
 export const CONTINUITY_WARDEN_SURFACE_KIND = Object.freeze({
     MAIN: "main-security-runway",
     LEDGE: "raised-ledge",
-    RECOVERY: "recovery-deck",
     DEPARTURE: "departure-deck",
     GRAPPLE_TARGET: "grapple-target"
 });

@@ -59,6 +59,19 @@ export class ContinuityWardenJumpMotion extends withGravityPhysics(withPhysics(c
         return this;
     }
 
+    beginDrop({ position, target }) {
+        const launchPosition = requireFinitePhysicsVector(position, "ContinuityWardenJumpMotion drop position");
+        const landingTarget = requireFinitePhysicsVector(target, "ContinuityWardenJumpMotion drop target");
+        const verticalDrop = landingTarget.y - launchPosition.y;
+        if (verticalDrop <= 0) {
+            throw new RangeError("ContinuityWardenJumpMotion drop target must be below its position");
+        }
+        const durationSeconds = Math.sqrt((2 * verticalDrop) / this.gravity);
+        this.begin({ position: launchPosition, target: landingTarget, durationSeconds });
+        this.setPhysicsVelocity({ x: this.velocity.x, y: 0 });
+        return this;
+    }
+
     advance(dt) {
         requireNonNegativeFinite(dt, "ContinuityWardenJumpMotion dt");
         if (!this._active || dt === 0) return this.position;

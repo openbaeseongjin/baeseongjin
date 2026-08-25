@@ -1,19 +1,19 @@
 # Boss 06 — CONTINUITY WARDEN
 
-상태: **V3 SKYBRIDGE ARENA / AIRBORNE HOMING MISSILE + SUMMON IMPLEMENTED / PIXEL PHASE1 INTEGRATED / FULL PLAYTEST PENDING**
+상태: **V4 OPEN-EDGE ARENA / FULL STATE CATALOG + WEIGHTED SELECTION IMPLEMENTED / FULL PLAYTEST PENDING**
 
 이 문서는 기존 `PAD 03 Containment Clamp Security System` 기획을 대체하기 위한 Boss06 인간형 최종 보스 재설계 Blockout이다.
 
 - source ZIP SHA-256: `72be0adfc27e3f714024c6d0f6f331652b2d3d50c288fb32adc2f83b299edd4d`
 - imported Blockout Markdown은 저장소의 `git diff --check` 규칙에 맞춰 줄끝 공백만 정규화했으며, 정규화 전 원본 파일 SHA-256은 package manifest와 대조했다.
-- 현행 구현 기준은 [`BOSS-06-V3-CONTRACT.md`](./BOSS-06-V3-CONTRACT.md)와 canonical `boss-06.json`이다. `blockout-draft/`는 V2 설계·검증 이력이며 V3 좌표나 패턴의 권위가 아니다.
+- 현행 구현 기준은 [`BOSS-06-V4-CONTRACT.md`](./BOSS-06-V4-CONTRACT.md)와 canonical `boss-06.json`이다. V2/V3 문서는 대체된 설계·검증 이력이며 V4 좌표나 상태 선택의 권위가 아니다.
 
 ## 현재 기준
 
 - Authoring baseline: `9cf4b0189030921b212c512e686f1b85d499d106`
 - 6-8 현행: `ROOFTOP PAD 03`, `nextAreaId: null`, `pad-access-console` 완료 후 `content-boundary`
 - Base Rope Reach: `400px`
-- V2 flat Security Court와 U1~U8/RR1/RR3 좌표: **SUPERSEDED BY V3**
+- V2/V3 Security Court 좌표와 Recovery 구조: **SUPERSEDED BY V4**
 
 ## 핵심 정의
 
@@ -21,7 +21,7 @@
 
 Warden은 Rope를 사용하지 않는다. Shield, Baton, Thruster Dash와 Pad Security Beam Gate를 이용해 공간을 통제하고, Player는 Rope를 이용해 정면 통제를 우회한다.
 
-V3에서는 Warden이 Raised Ledge를 포함한 authored landing point로 직접 점프하며, 정점에서 5발 유도미사일을 부채꼴로 동시에 전개한다. 각 탄은 즉시 목표 방향으로 꺾이지 않고 제한된 각속도로 Player를 향해 휘어진다.
+V4에서는 Warden이 좌표로 판정한 주 바닥·Raised Ledge를 평상 걷기·점프·내려가기 상태로 계속 추적한다. 공격은 실행 가능한 상태 풀에서 결정적 가중 랜덤으로 고르며, 정점의 5발 유도미사일과 제한 각속도는 유지한다.
 
 별도 소환 패턴은 이동형 공격 Enemy pool에서 2마리를 생성한다. 성공한 패턴 뒤 15초 동안 재사용하지 않고, 살아 있는 Boss 소환몹이 6마리 이상이면 패턴 순서에서 건너뛴다.
 
@@ -39,13 +39,13 @@ V3에서는 Warden이 Raised Ledge를 포함한 authored landing point로 직접
 
 ## Arena
 
-`PAD 03 SECURITY COURT`
+`PAD 03 OPEN-EDGE SECURITY COURT`
 
-- 3920px Main Security Runway와 좌·중·우 Raised Ledge
+- 3200px Main Security Runway와 좌·중·우 단방향 Raised Ledge
 - 파형 Upper `swing-attack` Hardpoint U1~U10
 - Warden 점프 착지점은 authored Raised Ledge top과 Main top에서 파생
 - Open Sky
-- 좌·우 Recovery와 RR-left/right 실제 복귀 Anchor; 완전 이탈만 Runtime fallback
+- 좌우 벽과 Recovery 0개; 바닥 이탈은 해당 Player의 Boss 입구 낙사 부활
 - 오른쪽 Main edge와 Gate 사이 220px fall lane
 - Victory 시 220px threshold bridge가 열려 Boarding Deck과 연결
 - Shuttle은 전투 중 숨김
@@ -59,8 +59,9 @@ Boss06는 이를 우선 재사용하고, 별도의 Rope AI나 새 범용 hazard 
 
 ## 문서
 
-- [`BOSS-06-V3-CONTRACT.md`](./BOSS-06-V3-CONTRACT.md) — 현재 전투·Arena 계약
-- [`V3-VALIDATION.md`](./V3-VALIDATION.md) — 현재 fresh 검증과 열린 playtest
+- [`BOSS-06-V4-CONTRACT.md`](./BOSS-06-V4-CONTRACT.md) — 현재 전투·Arena·상태 선택 계약
+- [`BOSS-06-V3-CONTRACT.md`](./BOSS-06-V3-CONTRACT.md) — 대체된 V3 계약
+- [`V3-VALIDATION.md`](./V3-VALIDATION.md) — 대체된 V3 검증 기록
 - [`BOSS-06-BRIEF.md`](./blockout-draft/BOSS-06-BRIEF.md)
 - [`BOSS-06-COMPONENTS.md`](./blockout-draft/BOSS-06-COMPONENTS.md)
 - [`MAP-PREVIEW.html`](./blockout-draft/MAP-PREVIEW.html)
@@ -74,8 +75,8 @@ Boss06는 이를 우선 재사용하고, 별도의 Rope AI나 새 범용 hazard 
 - Warden body ImpactTarget 하나, 96×150 Polygon body, Guard/Counter, Baton·Dash·Charge·LOW/HIGH Security와 점프 상태를 `ContinuityWardenRuntime`이 소유한다.
 - 점프 물리는 공용 Physics mixin 기반 Has-A 컴포넌트, 5발 유도탄은 `enemy + homing` projectile 조합과 서버 spawn/resolve 사건을 사용한다.
 - 소환 요청은 Boss Runtime이 만들고 서버 `GameSimulation`만 동적 Enemy를 등록한다. Patrol·Pursuit·Shield·Artillery를 결정적 순서로 고르며 wipe·승리 때 소환몹과 잔탄을 제거한다.
-- 승인된 Phase1 Warden pixel sprite를 유지하고, 전용 jump atlas가 없는 V3 `takeoff/jump/fall/landing`은 `combat-idle` body의 renderer-local pose fallback으로 표현한다. 소환 명령은 `security-command` clip을 재사용한다.
-- `boss-06.json`의 Main·Ledge 3개·U1~U10·RR-left/right·Recovery·Gate·220px Bridge·Boarding Deck을 authored geometry로 실행한다. 모든 solid surface는 일반 부착 가능하다.
+- 승인된 Phase1 Warden pixel sprite를 유지하고, 전용 locomotion atlas가 없는 V4 `walk/jump/descend/fall/landing`은 `combat-idle` body의 renderer-local pose fallback으로 표현한다. 소환 명령은 `security-command` clip을 재사용한다.
+- `boss-06.json`의 3200px Main·단방향 Ledge 3개·U1~U10·Gate·220px Bridge·Boarding Deck을 authored geometry로 실행한다. 모든 solid surface는 일반 부착 가능하다.
 - 승리 뒤 Warden은 기절하고 Gate light/open → Threshold Bridge → Shuttle reveal → Player별 Boarding → 모든 active Player ready → `beginCompletion()` 순서로 진행한다. 첫 Player가 동료를 순간이동시키지 않는다.
 - Browser Gameplay View와 실제 1~4인·멀티 수렴은 구현 상태와 분리해 검증한다.
 

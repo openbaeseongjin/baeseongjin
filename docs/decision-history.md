@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L1] 2026-08-25 — Boss06 V3 Recovery Arena와 고정 패턴 순서를 대체한다
+
+- 맥락: 좌우 하단 Recovery와 시각 벽·충돌 불일치가 보스 이동을 막았고, 좌표 clamp와 고정 패턴 순서가 플랫폼 확장을 상태별 예외 처리로 만들었다.
+- 결정: 3200px open-edge Arena와 단방향 플랫폼 3개를 사용하고, 좌표 기반 전체 상태 카탈로그와 사용 이력 회복형 결정적 가중 공격 풀로 전환한다.
+- 영향: 자동 Recovery와 `PATTERN_ORDER`·강제 pending chain을 제거하고 World snapshot protocol 18·Boss runtime snapshot v2·0.70.0을 사용한다.
+- 대체: 3920px Main·좌우 Recovery·V3 landing 좌표·고정 체력 구간별 패턴 배열.
+- 검증 상태: 현재 계약은 `docs/boss/06/BOSS-06-V4-CONTRACT.md`와 canonical `boss-06.json`이 소유한다.
+
 ## [L1] 2026-08-25 — Enemy XP를 마지막 체력 제거 Player에게만 귀속한다
 
 - 맥락: 경험치 성장 도입 시 투사체·Rope·Spell의 치명타 사건에서 보상 Player를 즉시 정하는 단순 계약이 필요했다.

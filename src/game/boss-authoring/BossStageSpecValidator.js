@@ -44,8 +44,18 @@ const CONTINUITY_WARDEN_POSITIVE_PARAMETERS = Object.freeze([
     "missileDamage",
     "missileRadius",
     "missileLifetimeSeconds",
-    "missileTurnRateRadiansPerSecond"
+    "missileTurnRateRadiansPerSecond",
+    "trackingStopDistance",
+    "walkSpeed"
 ]);
+const CONTINUITY_WARDEN_ARENA = Object.freeze({
+    MAIN_KIND: "main-security-runway",
+    PLATFORM_KIND: "raised-ledge",
+    MAIN_WIDTH: 3200,
+    PLATFORM_COUNT: 3,
+    ANCHOR_COUNT: 10,
+    BODY_HEIGHT: 150
+});
 
 function issue(issues, file, code, details = {}) {
     issues.push({ file, code, ...details });
@@ -343,6 +353,40 @@ function validateMechanics(spec, issues, file) {
     return ids;
 }
 
+function validateContinuityWardenArena(spec, issues, file) {
+    if (!spec.mechanics?.some(({ type }) => type === BOSS_MECHANIC_TYPE.CONTINUITY_WARDEN)) return;
+    const surfaces = spec.arena?.surfaces ?? [];
+    const mains = surfaces.filter(({ kind }) => kind === CONTINUITY_WARDEN_ARENA.MAIN_KIND);
+    const platforms = surfaces.filter(({ kind }) => kind === CONTINUITY_WARDEN_ARENA.PLATFORM_KIND);
+    const main = mains[0];
+    if (mains.length !== 1 || main?.bounds.width !== CONTINUITY_WARDEN_ARENA.MAIN_WIDTH) {
+        issue(issues, file, "continuity-warden-main-floor-invalid");
+    }
+    if (
+        platforms.length !== CONTINUITY_WARDEN_ARENA.PLATFORM_COUNT ||
+        platforms.some(({ oneWay }) => oneWay !== true)
+    ) {
+        issue(issues, file, "continuity-warden-platform-layout-invalid");
+    }
+    if ((spec.arena.recoveryPoints ?? []).length !== 0) {
+        issue(issues, file, "continuity-warden-recovery-forbidden");
+    }
+    if ((spec.arena.anchors ?? []).length !== CONTINUITY_WARDEN_ARENA.ANCHOR_COUNT) {
+        issue(issues, file, "continuity-warden-anchor-count-invalid");
+    }
+    if (
+        main &&
+        platforms.some(
+            ({ bounds }) =>
+                bounds.x < main.bounds.x ||
+                bounds.x + bounds.width > main.bounds.x + main.bounds.width ||
+                main.bounds.y - bounds.y < CONTINUITY_WARDEN_ARENA.BODY_HEIGHT
+        )
+    ) {
+        issue(issues, file, "continuity-warden-platform-support-invalid");
+    }
+}
+
 function validatePhases(spec, mechanicIds, issues, file) {
     if (!Array.isArray(spec.phases) || spec.phases.length === 0) {
         issue(issues, file, "phases-invalid");
@@ -414,6 +458,7 @@ export function validateBossStageSpec(spec, { file = "boss-stage.json" } = {}) {
         issue(issues, file, "boss-transition-area-invalid");
     }
     validateArena(spec, issues, file);
+    validateContinuityWardenArena(spec, issues, file);
     validateCombat(spec, issues, file);
     if (
         !isObject(spec.boss) ||

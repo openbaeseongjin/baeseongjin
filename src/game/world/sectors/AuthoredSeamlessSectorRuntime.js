@@ -12,7 +12,7 @@ import { BOSS_STAGE_CATALOG } from "../../boss-authoring/BossStageCatalog.js";
 import { isAuthoredRuntimeContentBoundary } from "../area-authoring-v2/AreaRuntimePromotion.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "./SectorDefinition.js";
 
-export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-continuous-stage-runtime-v18-boss06-direct-sector-portals";
+export const SEAMLESS_SECTOR_RUNTIME_REVISION = "authored-continuous-stage-runtime-v19-boss06-open-edge-state-pool";
 
 const DEFAULT_AUTHORED_AREA_CATALOGS = Object.freeze([
     SECTOR_01_AREA_CATALOG,
