@@ -6,7 +6,6 @@ import {
 } from "./EnvironmentComponentRenderer.js";
 import { authoredBackdropEnvironmentAreas, PixelBackdropRenderer } from "./renderers/PixelBackdropRenderer.js";
 import { PixelTerrainRenderer } from "./renderers/PixelTerrainRenderer.js";
-import { PixelDecorationRenderer } from "./renderers/PixelDecorationRenderer.js";
 import {
     authoredAreaEnvironmentDefinitionFor,
     authoredBossStageEnvironmentDefinitionFor
@@ -21,15 +20,10 @@ function terrainAtlasIds(definition) {
     return Object.values(definition.terrain.materials).flatMap(({ fill, edge }) => [fill.atlasId, edge.atlasId]);
 }
 
-function decorationAtlasIds(definition) {
-    return Object.values(definition.decoration.groups).flatMap(({ items }) => items.map(({ frame }) => frame.atlasId));
-}
-
-function componentAtlasIds(definition) {
+export function environmentRenderingAtlasIds(definition) {
     return Object.freeze({
         backdrop: Object.freeze([...new Set(backdropAtlasIds(definition))]),
-        terrain: Object.freeze([...new Set(terrainAtlasIds(definition))]),
-        decoration: Object.freeze([...new Set(decorationAtlasIds(definition))])
+        terrain: Object.freeze([...new Set(terrainAtlasIds(definition))])
     });
 }
 
@@ -38,7 +32,7 @@ function componentAtlasIdsByDefinition(definition, authoredAreaEnvironmentDefini
         Object.fromEntries(
             [definition, ...Object.values(authoredAreaEnvironmentDefinitions)].map((candidate) => [
                 candidate.id,
-                componentAtlasIds(candidate)
+                environmentRenderingAtlasIds(candidate)
             ])
         )
     );
@@ -66,12 +60,7 @@ export class EnvironmentRendererComposer {
                 scene.bossStage,
                 definitionForScene(scene)
             );
-        const definitionForComponent = Object.freeze({
-            terrain: definitionForTerrainScene,
-            decoration: definitionForScene
-        });
-        const atlasIdsForScene = (componentId) => (scene) =>
-            atlasIdsByDefinitionId[definitionForComponent[componentId](scene).id][componentId];
+        const terrainAtlasIdsForScene = (scene) => atlasIdsByDefinitionId[definitionForTerrainScene(scene).id].terrain;
         let cachedBackdropDefinitions = Object.freeze([]);
         let cachedBackdropAtlasIds = atlasIdsByDefinitionId[definition.id].backdrop;
         const backdropAtlasIdsForScene = (scene) => {
@@ -102,24 +91,14 @@ export class EnvironmentRendererComposer {
         const terrain = new EnvironmentComponentRenderer({
             id: "terrain",
             atlasIds: atlasIdsByDefinitionId[definition.id].terrain,
-            atlasIdsForScene: atlasIdsForScene("terrain"),
+            atlasIdsForScene: terrainAtlasIdsForScene,
             assets,
             renderer: new PixelTerrainRenderer({ definition, assets, authoredAreaEnvironmentDefinitions }),
             fallbackRenderer: polygonTerrain ?? new EmptyEnvironmentRenderer(),
             warn
         });
-        const decoration = new EnvironmentComponentRenderer({
-            id: "decoration",
-            atlasIds: atlasIdsByDefinitionId[definition.id].decoration,
-            atlasIdsForScene: atlasIdsForScene("decoration"),
-            assets,
-            renderer: new PixelDecorationRenderer({ definition, assets, authoredAreaEnvironmentDefinitions }),
-            fallbackRenderer: new EmptyEnvironmentRenderer(),
-            warn
-        });
-
-        this.components = Object.freeze([backdrop, terrain, decoration]);
-        this.renderers = new RendererGroup([backdrop, new CameraWorldRenderer([terrain, decoration])]);
+        this.components = Object.freeze([backdrop, terrain]);
+        this.renderers = new RendererGroup([backdrop, new CameraWorldRenderer([terrain])]);
         this.status = new EnvironmentRendererDiagnostics(this.components);
     }
 

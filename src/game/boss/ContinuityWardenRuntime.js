@@ -253,7 +253,6 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             attempt: this.attempt
         });
         this.scaledHealth = null;
-        this.health = 0;
         this.state = CONTINUITY_WARDEN_STATE.NEUTRAL;
         this.actionPhase = ACTION_PHASE.RECOVERY;
         this.timer = 0;

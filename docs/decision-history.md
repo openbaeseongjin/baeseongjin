@@ -15,6 +15,14 @@
 
 ## 현재 이력
 
+## [L2] 2026-08-25 — Surface 기반 자동 배경 장식을 authored 표현으로 대체한다
+
+- 맥락: `7bad2308`의 구조 검증용 `PixelDecorationRenderer`가 surface마다 seed/hash로 작은 mock sprite를 자동 배치했다. `e73dac74`는 authored Area에서 이를 차단했지만 `d6f1a366`이 Area별 환경 package를 연결하면서 차단을 제거해 mock 안테나가 다시 나타났다.
+- 결정: 절차 배치 renderer와 Runtime 등록·자산 준비·진단 경로를 제거한다. 배경 세부는 authored backdrop이, 독립 장식 객체는 Map Editor world object가 소유한다.
+- 영향: manifest의 decoration atlas/group은 교환 형식 호환 자료로만 남고 일반 gameplay가 로드하거나 그리지 않는다. Runtime은 world seed·surface 목록에서 비충돌 배경 장식을 생성하지 않는다.
+- 대체: environment package의 decoration item을 surface 옆에 결정적으로 자동 배치하고 authored Area에서도 활성화한 계약.
+- 검증 상태: 현재 계약은 `docs/development-rules.md`, `docs/architecture.md`, `docs/environment-asset-format.md`가 소유한다.
+
 ## [L1] 2026-08-25 — Gate 분리 배치와 낙사 경계를 분리한다
 
 - 맥락: Gate 사이를 2160px로 분리한 변경이 현재 checkpoint Stage 하단을 낙사 경계로도 사용해 여러 Stage를 지나는 낙하를 중간에서 복구했다.

@@ -33,7 +33,10 @@ import { DEFAULT_PLAYER_SPRITE_DEFINITION } from "./sprites/PlayerSpriteCatalog.
 import { PolygonLocalPlayerRenderer, PolygonRemotePlayerRenderer } from "./polygon/PolygonActorRenderers.js";
 import { DEFAULT_ENVIRONMENT_DEFINITION } from "./environment/EnvironmentCatalog.js";
 import { EnvironmentAssetSet } from "./environment/EnvironmentAssetSet.js";
-import { EnvironmentRendererComposer } from "./environment/EnvironmentRendererComposer.js";
+import {
+    EnvironmentRendererComposer,
+    environmentRenderingAtlasIds
+} from "./environment/EnvironmentRendererComposer.js";
 import { AuthoredAreaStructureRenderer } from "./world/AuthoredAreaStructureRenderer.js";
 import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
@@ -48,9 +51,18 @@ import { BossStageSpriteObjectRendererCatalog } from "./boss/BossStageSpriteObje
 import { CONTINUITY_WARDEN_PROJECTILE_PRESET_ID } from "../game/boss/ContinuityWardenDefinition.js";
 import { HomingMissileRenderer } from "./projectiles/HomingMissileRenderer.js";
 
+function renderingAtlases(definition) {
+    const ids = environmentRenderingAtlasIds(definition);
+    return Object.fromEntries(
+        [...ids.backdrop, ...ids.terrain].map((atlasId) => [atlasId, definition.atlases[atlasId]])
+    );
+}
+
 function authoredEnvironmentAtlases(authoredAreaEnvironmentDefinitions) {
     return Object.fromEntries(
-        Object.values(authoredAreaEnvironmentDefinitions).flatMap((definition) => Object.entries(definition.atlases))
+        Object.values(authoredAreaEnvironmentDefinitions).flatMap((definition) =>
+            Object.entries(renderingAtlases(definition))
+        )
     );
 }
 
@@ -100,7 +112,7 @@ export class SpriteSceneResourceBundle {
             environmentAssets ??
             new EnvironmentAssetSet({
                 atlases: {
-                    ...environmentDefinition.atlases,
+                    ...renderingAtlases(environmentDefinition),
                     ...authoredEnvironmentAtlases(authoredAreaEnvironmentDefinitions)
                 },
                 autoStart: false,
@@ -133,7 +145,7 @@ export class SpriteSceneResourceBundle {
     }
 
     environmentAtlasIdsForArea(areaId) {
-        return Object.keys(this.environmentDefinitionForArea(areaId).atlases);
+        return Object.keys(renderingAtlases(this.environmentDefinitionForArea(areaId)));
     }
 
     environmentAtlasIdsForBossStage(areaId, bossStageId) {

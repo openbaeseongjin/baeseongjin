@@ -7,6 +7,7 @@ import {
 } from "../augments/AugmentImpactEventDefinition.js";
 import { BOSS_STAGE_CATALOG } from "../boss-authoring/BossStageCatalog.js";
 import { createBossEncounterRuntime } from "../boss/BossEncounterRuntimeFactory.js";
+import { BOSS_PARTICIPANT_DEFEAT_SOURCE } from "../boss/CompositeBossEncounterRuntime.js";
 import { CONTINUITY_WARDEN_EVENT, CONTINUITY_WARDEN_ID } from "../boss/ContinuityWardenDefinition.js";
 import { BOSS_ENEMY_SUMMON_EVENT, BOSS_SUMMONED_ENEMY_ID } from "../boss/BossEnemySummonPattern.js";
 import { BOSS_ANCHOR_ROLE } from "../boss-authoring/BossStageSpec.js";
@@ -702,7 +703,7 @@ export class GameSimulation {
         return outcome;
     }
 
-    handleBossParticipantDefeat(playerId, cause) {
+    handleBossParticipantDefeat(playerId, defeat) {
         if (!this.bossRuntime) {
             return Object.freeze({
                 accepted: false,
@@ -711,7 +712,7 @@ export class GameSimulation {
                 retryStarted: false
             });
         }
-        const outcome = this.bossRuntime.handlePlayerDefeat(playerId, cause);
+        const outcome = this.bossRuntime.handlePlayerDefeat(playerId, defeat);
         if (outcome.retryStarted) {
             this.#clearBossMissiles("boss-attempt-reset");
             this.#clearBossSummonedEnemies("boss-attempt-reset");
@@ -1307,8 +1308,8 @@ export class GameSimulation {
         return transitioned;
     }
 
-    #resolveBossParticipantDefeat(player, cause) {
-        const defeat = this.handleBossParticipantDefeat(player.id, cause);
+    #resolveBossParticipantDefeat(player, cause, source = BOSS_PARTICIPANT_DEFEAT_SOURCE.OTHER) {
+        const defeat = this.handleBossParticipantDefeat(player.id, { cause, source });
         if (!defeat.accepted) return defeat;
         this.#applyExperienceDeathPenalty(player, cause);
         this.combatInteractions.cancelTarget(player.id);
@@ -1446,7 +1447,13 @@ export class GameSimulation {
                     player.physics.applyImpulse({ x: hazard.direction < 0 ? -1 : 1, y: 0 }, hazard.knockback);
                 }
                 const defeated = player.health <= 0;
-                if (defeated) this.#resolveBossParticipantDefeat(player, `boss-${hazard.kind}`);
+                if (defeated) {
+                    this.#resolveBossParticipantDefeat(
+                        player,
+                        `boss-${hazard.kind}`,
+                        BOSS_PARTICIPANT_DEFEAT_SOURCE.BOSS
+                    );
+                }
                 const event = createPlayerDamageEvent({
                     impactId: contactId,
                     targetId: player.id,
@@ -4213,7 +4220,7 @@ export class GameSimulation {
                 const partyBeforeImpact = bossHazardImpact
                     ? this.players.map((participant) => this.playerState(participant.id))
                     : null;
-                this.#applyVictimImpactTransition(player, claim, damage);
+                this.#applyVictimImpactTransition(player, claim, damage, projectile);
                 const digest = createPlayerImpactStateDigest(this.playerState(player.id), {
                     impactType: claim.impactType,
                     respawned: claim.outcome.respawned
@@ -4307,12 +4314,20 @@ export class GameSimulation {
         );
         this.metrics.recordPlayerImpact(claim.impactType, projectile.damage);
         if (claim.impactType === "player-hit" && player.health <= 0) {
-            this.respawnPlayerAtCheckpoint(player, "health", impactId);
+            if (projectile.ownerId === CONTINUITY_WARDEN_ID.MISSILE_OWNER && this.bossRuntime?.status === "active") {
+                this.#resolveBossParticipantDefeat(
+                    player,
+                    projectile.visualPresetId,
+                    BOSS_PARTICIPANT_DEFEAT_SOURCE.BOSS
+                );
+            } else {
+                this.respawnPlayerAtCheckpoint(player, "health", impactId);
+            }
         }
         return Object.freeze({ accepted: true, resolution: claim.impactType, damage: projectile.damage });
     }
 
-    #applyVictimImpactTransition(player, claim, damage) {
+    #applyVictimImpactTransition(player, claim, damage, projectile = null) {
         if (claim.impactType === PLAYER_IMPACT_TYPE.JAMMER_SHOCK) {
             player.ropeObject.rope.detach();
             player.ropeObject.swingDrag = null;
@@ -4338,6 +4353,7 @@ export class GameSimulation {
             return;
         }
         const bossHazard = claim.sourceKind === PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD;
+        const bossProjectile = projectile?.ownerId === CONTINUITY_WARDEN_ID.MISSILE_OWNER;
         if (bossHazard && claim.sourceType === LOWER_SECTOR_COMMANDER_HAZARD.GRAB) {
             releaseRopeFromBody(player.physics, player.ropeObject.rope);
             player.ropeObject.swingDrag = null;
@@ -4382,8 +4398,9 @@ export class GameSimulation {
                 if (impulse) player.physics.applyImpulse(impulse.direction, impulse.magnitude);
             }
         }
-        if (bossHazard && player.health <= 0) {
-            this.#resolveBossParticipantDefeat(player, `boss-${claim.sourceType}`);
+        if ((bossHazard || bossProjectile) && player.health <= 0) {
+            const cause = bossHazard ? `boss-${claim.sourceType}` : projectile.visualPresetId;
+            this.#resolveBossParticipantDefeat(player, cause, BOSS_PARTICIPANT_DEFEAT_SOURCE.BOSS);
         } else if (claim.outcome.respawned) {
             this.#resetPlayerAtCheckpoint(player);
         }
@@ -4393,7 +4410,10 @@ export class GameSimulation {
         const recoveredState = claim.outcome.state;
         const fatal = claim.outcome.respawned || recoveredState.lifeState === "spectating";
         if (fatal) {
-            const defeat = this.bossRuntime.handlePlayerDefeat(player.id, `boss-${claim.sourceType}`);
+            const defeat = this.bossRuntime.handlePlayerDefeat(player.id, {
+                cause: `boss-${claim.sourceType}`,
+                source: BOSS_PARTICIPANT_DEFEAT_SOURCE.BOSS
+            });
             if (defeat.retryStarted) {
                 this.#clearBossMissiles("boss-attempt-reset");
                 this.#clearBossSummonedEnemies("boss-attempt-reset");

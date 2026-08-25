@@ -105,10 +105,6 @@ export class EnvironmentRendererDiagnostics {
         return this.component("terrain");
     }
 
-    get decoration() {
-        return this.component("decoration");
-    }
-
     anyFailed() {
         return this.components.some(({ status }) => status.status === "failed");
     }

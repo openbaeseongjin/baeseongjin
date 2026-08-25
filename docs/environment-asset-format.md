@@ -1,6 +1,6 @@
 # 환경 도트 에셋 교환 형식
 
-이 문서는 배경·지형 표면·비충돌 장식을 정식 도트 리소스로 교체할 때 사용하는 현재 기준이다. 캐릭터 애니메이션 입력은 [`sprite-asset-format.md`](./sprite-asset-format.md)를 따르며 환경 manifest와 섞지 않는다.
+이 문서는 배경·지형 표면과 호환용 비충돌 장식 리소스를 정식 도트 리소스로 교체할 때 사용하는 현재 기준이다. 캐릭터 애니메이션 입력은 [`sprite-asset-format.md`](./sprite-asset-format.md)를 따르며 환경 manifest와 섞지 않는다.
 
 그래픽 담당자는 먼저 [`graphics-asset-guide.md`](./graphics-asset-guide.md)에서 공통 작업 위치와 가독성 기준을 확인하고 `assets/artwork/environments/<asset-id>/`에 납품한다. 담당 개발자는 환경 pack을 runtime 경로로 정규화할 때 이 문서의 전체 계약을 따른다.
 
@@ -38,13 +38,13 @@ environment-pack/
 | 이미지 | 투명도를 포함한 PNG |
 | atlas 수 | 하나 이상, ID 기반 다중 atlas |
 | atlas 배열·배치 | atlas별 `size`, `frameSize`와 frame의 0 기반 cell 또는 정수 rectangle |
-| frame 수·순서 | backdrop layer와 decoration item 배열에서 가변 |
-| 출력 크기 | backdrop의 `tileWidth`·`peakHeight`, decoration item의 `size`로 원본 셀과 분리 |
+| frame 수·순서 | backdrop layer 배열에서 가변, decoration item은 호환 metadata로 검증 |
+| 출력 크기 | backdrop의 `tileWidth`·`peakHeight`로 원본 셀과 분리 |
 | 고도 구역 | 실제 8,880m 월드 범위 안의 `waste` 0m, `industrial-maintenance` 1,800m, `residential-commercial` 3,600m, `corporate-security` 5,400m, `landing-pad` 7,200m |
 | 배경 | package별 1~6개 layer의 atlas, frame 배열, 수평·수직 parallax, 기준선과 높이 |
 | 지형 | 구역별 fill·edge frame·one-way edge 색과 gameplay 역할→Block Pool preset 대응표 |
-| 장식 | 구역별 item 배열, frame, depth, 표면 기준 offset, 출력 크기 |
-| 진단 | backdrop·terrain·decoration별 독립 준비/실패 상태와 실패 atlas ID |
+| 장식 | 기존 group/item은 교환 형식 호환용이며 Runtime 자동 배치는 지원하지 않음 |
+| 진단 | backdrop·terrain별 독립 준비/실패 상태와 실패 atlas ID |
 
 현재 runtime 입력으로 GIF·WebP·PSD·ASE·프로그램 고유 프로젝트 파일은 지원하지 않는다. 이 형식들은 제작 원본이나 미리보기로만 보관하고 최종 입력을 PNG와 표준 JSON으로 내보낸다. frame duration과 상태 전이는 캐릭터 애니메이션 계약이며 환경 manifest에는 넣지 않는다.
 
@@ -115,24 +115,22 @@ Authored backdrop은 `imageSmoothingEnabled = false`를 유지하고 layer의 de
 
 ## 렌더링과 충돌 경계
 
-- backdrop, collision-aligned terrain skin, non-collision decoration은 독립 하위 renderer component다. 상위 composer는 고정 순서로 호출할 뿐 profile이나 구체 장식 종류를 분기하지 않는다.
+- backdrop과 collision-aligned terrain skin은 독립 하위 renderer component다. 상위 composer는 고정 순서로 호출할 뿐 profile이나 구체 atlas 종류를 분기하지 않는다.
 - terrain은 기존 `WorldGenerator`의 surface polygon 내부만 clip해 채운다. 보이는 외곽선과 one-way edge chain도 같은 collision vertices와 `oneWayEdgeEnd`를 사용한다. 에셋 교체가 충돌체를 바꾸지 않는다.
 - terrain preset과 variant는 현재 Area의 environment package, `surface.kind`, stable `surface.id`로 결정한다. surface ID는 variant seed이며 collision·Rope·bounds·camera·multiplayer state를 읽거나 쓰지 않는다.
-- decoration은 충돌을 만들지 않는다. 이동 경로 위에 단단한 발판이나 통과 가능한 벽처럼 오해할 전경을 두지 않고 배경 또는 traversal surface 바깥에만 배치한다.
-- authored Area에서는 backdrop·terrain·decoration이 모두 같은 `AuthoredAreaEnvironmentCatalog` package를 사용한다. package atlas가 실패하면 terrain과 decoration은 기존 component fallback을 독립적으로 사용하며 collision이나 gameplay 상태를 바꾸지 않는다.
-- 동일 world seed와 scene snapshot은 같은 장식 배치를 만든다. `draw()`에서 `Math.random()`을 호출하지 않는다.
+- Runtime은 decoration group/item을 world seed, surface ID나 collision bounds에서 자동 생성·배치하지 않는다. 비충돌 배경 세부는 authored backdrop에 포함하고 독립 객체는 Map Editor world object로 명시한다.
+- authored Area의 backdrop·terrain은 같은 `AuthoredAreaEnvironmentCatalog` package를 사용하고 Boss 전용 terrain은 stable Boss Stage ID로 선택한다. package atlas가 실패하면 두 component가 독립적으로 fallback하며 collision이나 gameplay 상태를 바꾸지 않는다.
 - 싱글과 멀티는 같은 scene renderer 경로를 사용한다. 앱에 모드별 환경 로직이나 renderer type 분기를 추가하지 않는다.
-- terrain은 collision surface bounds와 edge geometry를 world가 바뀔 때만 다시 만들고, decoration은 seed·zone별 배치를 캐시한다. camera 이동 때는 공통 viewport와 교차하는 surface·edge·decoration만 그리며 이 최적화가 collision polygon이나 결정 배치를 바꾸면 안 된다.
+- terrain은 collision surface bounds와 edge geometry를 world가 바뀔 때만 다시 만들고 camera 이동 때는 공통 viewport와 교차하는 surface·edge만 그린다. 이 최적화가 collision polygon을 바꾸면 안 된다.
 
 ## 독립 fallback과 진단
 
-atlas 준비와 실패는 backdrop, terrain, decoration이 각각 판단한다.
+atlas 준비와 실패는 backdrop과 terrain이 각각 판단한다.
 
-bootstrap의 `SpriteSceneResourceBundle.prepareArea()`는 실제 시작 Area definition이 참조하는 Environment atlas만 load·decode·크기 검증까지 기다린다. Boss Preview의 `prepareBossStage()`는 source Area와 stable Boss Stage ID가 선택한 terrain atlas까지 함께 기다린다. 다른 Sector package는 같은 lazy asset set 안에서 독립 promise로 background 준비하며 current Area component readiness에 포함되지 않는다. terrain·decoration은 current Area definition만, Sector backdrop crossfade는 실제 from/to 두 definition만 readiness에 포함한다. 정상 gameplay은 current Area asset이 terminal ready/failed인 뒤에만 시작하므로 pending polygon 표현이 첫 frame에 보였다가 교체되는 흐름을 허용하지 않는다. 준비된 asset set은 싱글·멀티·디버그 재시작이 공유한다.
+bootstrap의 `SpriteSceneResourceBundle.prepareArea()`는 실제 시작 Area definition이 참조하는 backdrop·terrain atlas만 load·decode·크기 검증까지 기다린다. decoration atlas는 일반 gameplay 자산 집합에 등록하지 않는다. Boss Preview의 `prepareBossStage()`는 source Area와 stable Boss Stage ID가 선택한 terrain atlas까지 함께 기다린다. 다른 Sector package는 같은 lazy asset set 안에서 독립 promise로 background 준비하며 current Area component readiness에 포함되지 않는다. terrain은 current Area definition만, Sector backdrop crossfade는 실제 from/to 두 definition만 readiness에 포함한다. 정상 gameplay은 current Area asset이 terminal ready/failed인 뒤에만 시작하므로 pending polygon 표현이 첫 frame에 보였다가 교체되는 흐름을 허용하지 않는다. 준비된 asset set은 싱글·멀티·디버그 재시작이 공유한다.
 
-- backdrop atlas만 실패하면 기존 polygon backdrop만 대신 그리고 terrain·decoration은 계속 도트로 그린다.
+- backdrop atlas만 실패하면 기존 polygon backdrop만 대신 그리고 terrain은 계속 도트로 그린다.
 - terrain atlas만 실패하면 기존 collision geometry만 대신 그린다.
-- decoration atlas만 실패하면 장식만 생략한다. 충돌이나 다른 환경 component에는 영향이 없다.
 - 아직 로딩 중인 `pending`은 실패로 보고하지 않으며 startup loading이 계속 소유한다. 실제 load·decode·크기 검증 실패로 전환할 때 한 번만 console 경고를 남긴다.
 - 디버그 수치 표시는 실패한 component와 관련 atlas ID를 표시한다.
 
@@ -144,8 +142,8 @@ bootstrap의 `SpriteSceneResourceBundle.prepareArea()`는 실제 시작 Area def
 - 모든 atlas ID와 frame cell·rectangle 참조가 존재하고 범위 안이다.
 - 5개 zone이 하단부터 정상까지 연결되고 밝기가 고도에 따라 감소하지 않는다.
 - terrain fill과 edge가 collision polygon·one-way edge chain을 정확히 따른다.
-- 같은 seed에서 decoration 배치가 같다.
-- camera 밖 surface·edge·decoration은 그리지 않고 다시 화면에 들어오면 같은 위치·frame으로 복원된다.
+- 일반 gameplay 자산 준비·scene renderer·진단 collection에 decoration atlas나 절차 배치가 없다.
+- camera 밖 surface·edge는 그리지 않고 다시 화면에 들어오면 같은 geometry로 복원된다.
 - 각 component atlas를 따로 실패시켰을 때 해당 component만 fallback한다.
 - 기본 `sprite`와 `?renderer=polygon`, 싱글과 멀티가 같은 게임 상태·충돌·네트워크 계약을 유지한다.
 - 데스크톱과 모바일에서 하단·중단·정상 구역을 실제 화면으로 확인한다.

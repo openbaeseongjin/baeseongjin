@@ -40,6 +40,7 @@ V4에서는 Warden이 좌표로 판정한 주 바닥·Raised Ledge를 평상 걷
 - 직접전 : Pad Security ≈ 50 : 50
 - HP가 낮아져도 신규 기술 추가 없음
 - 후반 난도 = 패턴 연결 증가 + Security 사용 증가
+- Warden이 직접 Player를 처치할 때마다 현재 HP를 최대 HP 이내에서 100 회복하며 별도 Boss06 회복 규칙은 두지 않음
 
 ## Arena
 
