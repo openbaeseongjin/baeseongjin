@@ -1,6 +1,9 @@
 import { boundsForVertices, circleBounds, isVisible } from "../../RenderViewport.js";
-import { authoredAreaEnvironmentDefinitionFor } from "../AuthoredAreaEnvironmentCatalog.js";
-import { authoredEnvironmentZone } from "../AltitudeZoneResolver.js";
+import {
+    authoredAreaEnvironmentDefinitionFor,
+    authoredEnvironmentDefinitionForStableId
+} from "../AuthoredAreaEnvironmentCatalog.js";
+import { activeBossEnvironmentArea, authoredEnvironmentZone } from "../AltitudeZoneResolver.js";
 import { drawCheckpointBeacon, drawExitBeacon } from "../../world/WorldMarkerPrimitives.js";
 import { isSurfaceEnabledForProgress } from "../../../game/world/WorldGateGeometry.js";
 import { PixelTerrainSurfacePainter } from "../terrain/PixelTerrainSurfacePainter.js";
@@ -35,6 +38,7 @@ export class PixelTerrainRenderer {
             ? PIXEL_TERRAIN_RENDERER_DEFINITION.STATUS.READY
             : PIXEL_TERRAIN_RENDERER_DEFINITION.STATUS.PENDING;
         this.cachedWorld = null;
+        this.cachedBossEnvironmentArea = null;
         this.cachedSurfaces = Object.freeze([]);
         this.surfaceRenderers = createPixelTerrainSurfaceRendererCatalog({
             painter: new PixelTerrainSurfacePainter({ assets })
@@ -43,7 +47,7 @@ export class PixelTerrainRenderer {
 
     draw({ context, scene, viewport, renderStats }) {
         const playerAltitude = -(scene.player?.position?.y ?? 0);
-        const surfaces = this.surfaceEntries(scene.world, scene.worldProgress);
+        const surfaces = this.surfaceEntries(scene.world, scene.worldProgress, activeBossEnvironmentArea(scene));
         const visibleSurfaces = surfaces.filter(({ bounds }) => isVisible(viewport, bounds));
 
         for (const entry of visibleSurfaces) {
@@ -80,19 +84,28 @@ export class PixelTerrainRenderer {
         this.drawSummit(context, scene.world.summit, scene.runState, viewport);
     }
 
-    surfaceEntries(world, progress) {
-        if (this.cachedWorld !== world) {
+    surfaceEntries(world, progress, bossEnvironmentArea = null) {
+        if (this.cachedWorld !== world || this.cachedBossEnvironmentArea !== bossEnvironmentArea) {
             this.cachedWorld = world;
+            this.cachedBossEnvironmentArea = bossEnvironmentArea;
             const areasById = regionIndex(world);
             this.cachedSurfaces = Object.freeze(
                 (world.surfaces ?? [])
                     .filter(({ renderable }) => renderable !== false)
                     .map((surface) => {
-                        const area = areasById[surface.landmarkId] ?? areasById[surface.areaId] ?? null;
-                        const definition = authoredAreaEnvironmentDefinitionFor(
+                        const area =
+                            areasById[surface.landmarkId] ??
+                            areasById[surface.areaId] ??
+                            (surface.bossStageId ? bossEnvironmentArea : null);
+                        const areaDefinition = authoredAreaEnvironmentDefinitionFor(
                             this.authoredAreaEnvironmentDefinitions,
                             area,
                             this.definition
+                        );
+                        const definition = authoredEnvironmentDefinitionForStableId(
+                            this.authoredAreaEnvironmentDefinitions,
+                            surface.bossStageId,
+                            areaDefinition
                         );
                         return Object.freeze({
                             surface,

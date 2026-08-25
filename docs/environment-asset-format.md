@@ -37,7 +37,7 @@ environment-pack/
 | --- | --- |
 | 이미지 | 투명도를 포함한 PNG |
 | atlas 수 | 하나 이상, ID 기반 다중 atlas |
-| atlas 배열·배치 | atlas별 `size`, `frameSize`와 frame의 0 기반 `column`·`row` |
+| atlas 배열·배치 | atlas별 `size`, `frameSize`와 frame의 0 기반 cell 또는 정수 rectangle |
 | frame 수·순서 | backdrop layer와 decoration item 배열에서 가변 |
 | 출력 크기 | backdrop의 `tileWidth`·`peakHeight`, decoration item의 `size`로 원본 셀과 분리 |
 | 고도 구역 | 실제 8,880m 월드 범위 안의 `waste` 0m, `industrial-maintenance` 1,800m, `residential-commercial` 3,600m, `corporate-security` 5,400m, `landing-pad` 7,200m |
@@ -91,9 +91,11 @@ Authored backdrop은 `imageSmoothingEnabled = false`를 유지하고 layer의 de
 - backdrop layer `id`는 package 안에서 유일한 kebab-case이고 layer 수는 1~6개다. renderer는 숫자 `depth` 오름차순으로 합성한다.
 - backdrop layer나 decoration group에 atlas를 중복 지정하지 않는다. 각 frame이 자기 atlas ID를 가지므로 한 component와 한 배열 안에서도 여러 atlas를 섞을 수 있다.
 - `size`는 실제 PNG 전체 크기, `frameSize`는 균일 grid 셀 크기다. 모두 양의 정수이고 전체 크기는 셀 크기로 나누어떨어져야 한다.
-- frame의 `column`과 `row`는 왼쪽 위부터 시작하는 0 기반 좌표이며 선언된 grid 밖을 참조할 수 없다.
+- cell frame의 `column`과 `row`는 왼쪽 위부터 시작하는 0 기반 좌표이며 선언된 grid 밖을 참조할 수 없다.
+- 비균일 module sheet를 변형 없이 사용할 때는 frame에 `atlas`, `x`, `y`, `width`, `height` 정수 rectangle을 선언한다. cell과 rectangle field를 섞지 않고 atlas 경계 밖을 참조하지 않는다.
 - zone의 `minAltitude`는 실제 `WORLD_CONFIG`의 약 8,880m 등반 범위 안에서 오름차순으로 정규화한다. 배경 밝기는 구역 전환과 별개로 월드 하단에서 정상까지 연속적이고 단조롭게 증가한다.
 - `terrain.blockPool`은 `fallbackPresetId`와 역할별 `presetByRole` 대응표를 반드시 가진다. preset과 variant 목록은 공통 Block Pool이 소유하고 package는 어느 gameplay 역할이 어느 preset을 쓸지만 고른다. Map Editor와 `AREA-SPEC`에는 presentation field를 추가하지 않는다.
+- terrain material의 `blockOverlay`는 기본값 `true`다. 승인된 module sheet가 구조 패널을 직접 포함해 공통 절차형 panel·brace를 중복해서 그리면 안 되는 package만 `false`로 선언한다.
 
 전체 field와 제한은 JSON Schema와 example manifest가 실행 가능한 기준이다. 문서 예시와 충돌하면 validator가 사용하는 schema·loader 계약을 먼저 맞춘 뒤 문서를 함께 고친다.
 
@@ -126,7 +128,7 @@ Authored backdrop은 `imageSmoothingEnabled = false`를 유지하고 layer의 de
 
 atlas 준비와 실패는 backdrop, terrain, decoration이 각각 판단한다.
 
-bootstrap의 `SpriteSceneResourceBundle.prepareArea()`는 실제 시작 Area definition이 참조하는 Environment atlas만 load·decode·크기 검증까지 기다린다. 다른 Sector package는 같은 lazy asset set 안에서 독립 promise로 background 준비하며 current Area component readiness에 포함되지 않는다. terrain·decoration은 current Area definition만, Sector backdrop crossfade는 실제 from/to 두 definition만 readiness에 포함한다. 정상 gameplay은 current Area asset이 terminal ready/failed인 뒤에만 시작하므로 pending polygon 표현이 첫 frame에 보였다가 교체되는 흐름을 허용하지 않는다. 준비된 asset set은 싱글·멀티·디버그 재시작이 공유한다.
+bootstrap의 `SpriteSceneResourceBundle.prepareArea()`는 실제 시작 Area definition이 참조하는 Environment atlas만 load·decode·크기 검증까지 기다린다. Boss Preview의 `prepareBossStage()`는 source Area와 stable Boss Stage ID가 선택한 terrain atlas까지 함께 기다린다. 다른 Sector package는 같은 lazy asset set 안에서 독립 promise로 background 준비하며 current Area component readiness에 포함되지 않는다. terrain·decoration은 current Area definition만, Sector backdrop crossfade는 실제 from/to 두 definition만 readiness에 포함한다. 정상 gameplay은 current Area asset이 terminal ready/failed인 뒤에만 시작하므로 pending polygon 표현이 첫 frame에 보였다가 교체되는 흐름을 허용하지 않는다. 준비된 asset set은 싱글·멀티·디버그 재시작이 공유한다.
 
 - backdrop atlas만 실패하면 기존 polygon backdrop만 대신 그리고 terrain·decoration은 계속 도트로 그린다.
 - terrain atlas만 실패하면 기존 collision geometry만 대신 그린다.
@@ -139,7 +141,7 @@ bootstrap의 `SpriteSceneResourceBundle.prepareArea()`는 실제 시작 Area def
 ## 검증 체크리스트
 
 - 모든 PNG signature와 실제 크기가 manifest와 일치한다.
-- 모든 atlas ID와 frame grid 참조가 존재하고 범위 안이다.
+- 모든 atlas ID와 frame cell·rectangle 참조가 존재하고 범위 안이다.
 - 5개 zone이 하단부터 정상까지 연결되고 밝기가 고도에 따라 감소하지 않는다.
 - terrain fill과 edge가 collision polygon·one-way edge chain을 정확히 따른다.
 - 같은 seed에서 decoration 배치가 같다.

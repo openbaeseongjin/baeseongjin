@@ -44,6 +44,24 @@ export function currentAuthoredArea(scene) {
     return authoredRegionForPosition(scene?.world, scene?.player?.position);
 }
 
+function authoredRegions(world) {
+    return world?.landmarks?.length ? world.landmarks : (world?.areas ?? []);
+}
+
+export function activeBossEnvironmentArea(scene) {
+    const bossStage = scene?.bossStage;
+    if (bossStage?.status !== "active") return null;
+    const areaId = bossStage.environmentAreaId;
+    if (typeof areaId !== "string" || areaId === "") return null;
+    return authoredRegions(scene.world).find(
+        (region) => region.id === areaId || region.areaId === areaId || region.stageId === areaId
+    );
+}
+
+export function currentEnvironmentArea(scene) {
+    return activeBossEnvironmentArea(scene) ?? currentAuthoredArea(scene);
+}
+
 export function authoredEnvironmentZone(definition, area, fallbackAltitude = 0) {
     const authoredZoneId = AUTHORED_SECTOR_ZONE_IDS[area?.sectorId];
     if (authoredZoneId) {
@@ -54,7 +72,7 @@ export function authoredEnvironmentZone(definition, area, fallbackAltitude = 0) 
 }
 
 export function sceneEnvironmentZone(definition, scene) {
-    const area = currentAuthoredArea(scene);
+    const area = currentEnvironmentArea(scene);
     const playerAltitude = -(scene?.player?.position?.y ?? 0);
     return authoredEnvironmentZone(definition, area, playerAltitude);
 }

@@ -27,7 +27,11 @@ const TERRAIN_BLOCK_ROLE_BY_SURFACE_KIND = Object.freeze({
     cover: TERRAIN_BLOCK_ROLE.COVER,
     solid: TERRAIN_BLOCK_ROLE.SOLID,
     "solid-architectural-blocker": TERRAIN_BLOCK_ROLE.SOLID,
-    "solid-los-blocker": TERRAIN_BLOCK_ROLE.SOLID
+    "solid-los-blocker": TERRAIN_BLOCK_ROLE.SOLID,
+    "main-security-runway": TERRAIN_BLOCK_ROLE.PLATFORM,
+    "raised-ledge": TERRAIN_BLOCK_ROLE.RECOVERY,
+    "departure-deck": TERRAIN_BLOCK_ROLE.SAFE_DECK,
+    "grapple-target": TERRAIN_BLOCK_ROLE.PLATFORM
 });
 
 export const TERRAIN_BLOCK_POOL = Object.freeze({

@@ -327,11 +327,14 @@ function normalizeTerrain(terrain, atlases) {
     const materials = Object.fromEntries(
         Object.entries(obj.materials).map(([matId, spec]) => {
             const item = plainObject(spec, `terrain material '${matId}'`);
-            knownKeys(item, ["id", "fill", "edge", "oneWayColor"], `terrain material '${matId}'`);
+            knownKeys(item, ["id", "fill", "edge", "oneWayColor", "blockOverlay"], `terrain material '${matId}'`);
             const fill = normalizeFrame(item.fill, `terrain material '${matId}' fill`, atlases);
             const edge = normalizeFrame(item.edge, `terrain material '${matId}' edge`, atlases);
             if (item.oneWayColor !== undefined && (typeof item.oneWayColor !== "string" || !item.oneWayColor.trim())) {
                 throw new Error(`terrain material '${matId}' oneWayColor must be a non-empty string`);
+            }
+            if (item.blockOverlay !== undefined && typeof item.blockOverlay !== "boolean") {
+                throw new Error(`terrain material '${matId}' blockOverlay must be boolean`);
             }
             return [
                 matId,
@@ -339,7 +342,8 @@ function normalizeTerrain(terrain, atlases) {
                     id: matId,
                     fill,
                     edge,
-                    oneWayColor: item.oneWayColor ?? "#a8d8cf"
+                    oneWayColor: item.oneWayColor ?? "#a8d8cf",
+                    blockOverlay: item.blockOverlay ?? true
                 })
             ];
         })

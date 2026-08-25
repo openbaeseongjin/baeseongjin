@@ -65,7 +65,7 @@
         "row": { "type": "integer", "minimum": 0 }
       }
     },
-    "frame": {
+    "cellFrame": {
       "type": "object",
       "additionalProperties": false,
       "required": ["atlas", "cell"],
@@ -73,6 +73,21 @@
         "atlas": { "type": "string", "minLength": 1 },
         "cell": { "$ref": "#/$defs/cell" }
       }
+    },
+    "rectangleFrame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["atlas", "x", "y", "width", "height"],
+      "properties": {
+        "atlas": { "type": "string", "minLength": 1 },
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "frame": {
+      "oneOf": [{ "$ref": "#/$defs/cellFrame" }, { "$ref": "#/$defs/rectangleFrame" }]
     },
     "zone": {
       "type": "object",
@@ -175,7 +190,8 @@
         "id": { "type": "string", "minLength": 1 },
         "fill": { "$ref": "#/$defs/frame" },
         "edge": { "$ref": "#/$defs/frame" },
-        "oneWayColor": { "type": "string", "minLength": 1 }
+        "oneWayColor": { "type": "string", "minLength": 1 },
+        "blockOverlay": { "type": "boolean" }
       }
     },
     "decoration": {

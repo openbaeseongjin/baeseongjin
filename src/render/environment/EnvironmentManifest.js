@@ -71,6 +71,22 @@ function normalizeZone(raw) {
     };
 }
 
+function normalizeFrameReference(raw) {
+    if (raw.cell !== undefined) {
+        return {
+            atlas: raw.atlas,
+            cell: { column: raw.cell.column, row: raw.cell.row }
+        };
+    }
+    return {
+        atlasId: raw.atlas,
+        x: raw.x,
+        y: raw.y,
+        width: raw.width,
+        height: raw.height
+    };
+}
+
 function normalizeBackdrop(raw) {
     return {
         layers: (raw.layers ?? []).map((layer) => ({
@@ -78,10 +94,7 @@ function normalizeBackdrop(raw) {
             depth: layer.depth,
             parallaxX: layer.parallaxX,
             parallaxY: layer.parallaxY,
-            frames: (layer.frames ?? []).map((f) => ({
-                atlas: f.atlas,
-                cell: { column: f.cell.column, row: f.cell.row }
-            })),
+            frames: (layer.frames ?? []).map(normalizeFrameReference),
             tileWidth: layer.tileWidth,
             baselineRatio: layer.baselineRatio,
             peakHeight: layer.peakHeight
@@ -95,9 +108,10 @@ function normalizeTerrain(raw) {
             Object.entries(raw.materials ?? {}).map(([matId, spec]) => [
                 matId,
                 {
-                    fill: { atlas: spec.fill.atlas, cell: { column: spec.fill.cell.column, row: spec.fill.cell.row } },
-                    edge: { atlas: spec.edge.atlas, cell: { column: spec.edge.cell.column, row: spec.edge.cell.row } },
-                    oneWayColor: spec.oneWayColor
+                    fill: normalizeFrameReference(spec.fill),
+                    edge: normalizeFrameReference(spec.edge),
+                    oneWayColor: spec.oneWayColor,
+                    blockOverlay: spec.blockOverlay
                 }
             ])
         ),
@@ -115,10 +129,7 @@ function normalizeDecoration(raw) {
                 groupId,
                 {
                     items: (spec.items ?? []).map((di) => ({
-                        frame: {
-                            atlas: di.frame.atlas,
-                            cell: { column: di.frame.cell.column, row: di.frame.cell.row }
-                        },
+                        frame: normalizeFrameReference(di.frame),
                         placement: {
                             depth: di.placement.depth,
                             surfaceLevelOffset: di.placement.surfaceLevelOffset,
