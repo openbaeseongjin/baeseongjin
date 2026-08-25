@@ -1032,6 +1032,6 @@ Verified current Runtime contract:
 - no Wind
 - no Rope Cut
 - Exit remains:
-  `final-deck-reached → exit-panel-engaged → physical crossing → sector-03-07`
+  `exit-panel-engaged → exit-panel-engaged → physical crossing → sector-03-07`
 
 REV8.0 re-authors the old compact vertical Premium Atrium into one monumental public-commercial Atrium while preserving these Runtime contracts.

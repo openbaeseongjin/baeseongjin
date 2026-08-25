@@ -359,23 +359,7 @@ const SPEC = {
         "type": "interact"
       },
       {
-        "bounds": {
-          "height": 180,
-          "width": 420,
-          "x": -130,
-          "y": -2360
-        },
-        "id": "final-deck-reached",
-        "requiredObjectiveIds": [
-          "capacity-record-deck-reached"
-        ],
-        "type": "reach"
-      },
-      {
         "id": "exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "final-deck-reached"
-        ],
         "sourceObjectId": "sector-05-04:exit-panel",
         "type": "interact"
       }

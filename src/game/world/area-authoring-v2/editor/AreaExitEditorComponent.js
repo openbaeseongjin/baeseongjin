@@ -4,16 +4,26 @@ const EXIT_DECK_ID = Object.freeze({
 const EXIT_ROUTE_SUFFIXES = Object.freeze([":route-exit", ":route-final-deck", ":route-checkpoint"]);
 const EXIT_DECK_SIZE = Object.freeze({ width: 320, height: 32 });
 const EXIT_OFFSETS = Object.freeze({ doorFromCenterX: 128, panelFromDoorX: -112, routeFromDoorX: -64 });
+const EXIT_ID = Object.freeze({
+    gate: (areaId) => `${areaId}:gate`,
+    panel: (areaId) => `${areaId}:exit-panel`,
+    panelObjective: (areaId) => `${areaId}:exit-panel-engaged`
+});
 
 export class AreaExitEditorDefinition {
     create({ definition, position }) {
         const areaId = definition.id;
         const nextAreaId = definition.nextAreaId ?? null;
-        const gateId = `${areaId}:gate`;
-        const panelId = `${areaId}:exit-panel`;
+        const gateId = EXIT_ID.gate(areaId);
+        const panelId = EXIT_ID.panel(areaId);
         const doorX = position.x + EXIT_OFFSETS.doorFromCenterX;
         const exitY = position.y - EXIT_DECK_SIZE.height;
-        const panelObjectiveId = definition.objectives?.find(({ sourceObjectId }) => sourceObjectId === panelId)?.id;
+        const existingObjective = definition.objectives?.find(({ sourceObjectId }) => sourceObjectId === panelId);
+        const panelObjective = {
+            id: existingObjective?.id ?? EXIT_ID.panelObjective(areaId),
+            sourceObjectId: panelId,
+            type: "interact"
+        };
         return {
             exit: { id: `${areaId}:exit`, x: doorX, y: exitY },
             deck: {
@@ -39,7 +49,7 @@ export class AreaExitEditorDefinition {
             gate: {
                 id: gateId,
                 nextAreaId,
-                requiredObjectiveIds: panelObjectiveId ? [panelObjectiveId] : [],
+                requiredObjectiveIds: [panelObjective.id],
                 trigger:
                     nextAreaId === null
                         ? { x: doorX - 48, y: position.y - 128, width: 96, height: 160 }
@@ -54,7 +64,7 @@ export class AreaExitEditorDefinition {
                     position: { x: doorX + EXIT_OFFSETS.panelFromDoorX, y: position.y },
                     coordinateAnchor: "bottom-center",
                     interactionRadius: 72,
-                    ...(panelObjectiveId ? { objectiveId: panelObjectiveId } : {}),
+                    objectiveId: panelObjective.id,
                     gateId
                 },
                 {
@@ -66,6 +76,7 @@ export class AreaExitEditorDefinition {
                     gateId
                 }
             ],
+            objective: panelObjective,
             routePoint: {
                 id: `${areaId}:route-exit`,
                 x: doorX + EXIT_OFFSETS.routeFromDoorX,
@@ -86,10 +97,15 @@ export class AreaExitEditorDefinition {
                 !EXIT_ROUTE_SUFFIXES.some((suffix) => id.toLocaleLowerCase("en-US").endsWith(suffix))
         );
         definition.objects = definition.objects.filter(({ gateId }) => !gateIds.has(gateId));
+        definition.objectives = definition.objectives.filter(
+            ({ id, sourceObjectId }) =>
+                id !== created.objective.id && sourceObjectId !== created.objective.sourceObjectId
+        );
         definition.exit = created.exit;
         definition.gate = created.gate;
         definition.surfaces.push(created.deck);
         definition.objects.push(...created.objects);
+        definition.objectives.push(created.objective);
         definition.routePoints.push(created.routePoint);
         return created;
     }

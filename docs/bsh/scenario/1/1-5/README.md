@@ -45,7 +45,7 @@ At baseline:
 - exactly 2 enemy slots using Sector 01 Early Pool
 - no Wind
 - no moving platform
-- objective `final-deck-reached`
+- objective `exit-panel-engaged`
 - exit panel requires final deck
 - Camera phases: load-gap / relay-spine / live-security / exit
 - Story entry:

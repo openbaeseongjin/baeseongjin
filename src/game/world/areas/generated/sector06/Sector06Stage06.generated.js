@@ -213,7 +213,7 @@ const SPEC = {
       "id": "sector-06-06:gate",
       "nextAreaId": "sector-06-07",
       "requiredObjectiveIds": [
-        "exit-reached"
+        "sector-06-06:exit-panel-engaged"
       ],
       "trigger": {
         "height": 160,
@@ -227,14 +227,9 @@ const SPEC = {
     "nextAreaId": "sector-06-07",
     "objectives": [
       {
-        "bounds": {
-          "height": 160,
-          "width": 96,
-          "x": 612,
-          "y": -1760
-        },
-        "id": "exit-reached",
-        "type": "reach"
+        "id": "sector-06-06:exit-panel-engaged",
+        "sourceObjectId": "sector-06-06:exit-panel",
+        "type": "interact"
       }
     ],
     "objects": [
@@ -406,6 +401,19 @@ const SPEC = {
           "no-rope-cut",
           "activation-band-only"
         ]
+      },
+      {
+        "coordinateAnchor": "bottom-center",
+        "gateId": "sector-06-06:gate",
+        "id": "sector-06-06:exit-panel",
+        "interactionRadius": 72,
+        "kind": "gate-panel",
+        "objectiveId": "sector-06-06:exit-panel-engaged",
+        "position": {
+          "x": 660,
+          "y": -1710
+        },
+        "presentationId": "world-object:gate-panel"
       }
     ],
     "order": 6,

@@ -51,7 +51,7 @@ GATE REQUIREMENT
 2 OVERRIDES REQUIRED
 ```
 
-The protected ascent remains closed and a real return path/safe return mechanism remains available. No damage, death, substitute credential, or stage-local bypass is allowed.
+Stage traversal remains open. Only the Exit Panel portal stays unavailable, and W interaction shows the current collected Key count against the required count at the top of the screen. No damage, death, substitute credential, or stage-local reach objective may unlock it.
 
 ## Final Story
 

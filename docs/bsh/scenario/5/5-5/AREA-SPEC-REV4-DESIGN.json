@@ -276,20 +276,9 @@
       ]
     },
     {
-      "id": "final-deck-reached",
-      "type": "reach",
-      "preset": "reach-deck",
-      "requiredObjectiveIds": [
-        "priority-directive"
-      ]
-    },
-    {
       "id": "exit-panel-engaged",
       "type": "interact",
-      "preset": "exit-panel",
-      "requiredObjectiveIds": [
-        "final-deck-reached"
-      ]
+      "preset": "exit-panel"
     }
   ],
   "route": {

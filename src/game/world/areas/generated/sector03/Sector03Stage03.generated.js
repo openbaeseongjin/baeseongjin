@@ -220,20 +220,7 @@ const SPEC = {
     "nextAreaId": "sector-03-04",
     "objectives": [
       {
-        "bounds": {
-          "height": 96,
-          "width": 320,
-          "x": 544,
-          "y": -1728
-        },
-        "id": "sector-03-03:final-deck-reached",
-        "type": "reach"
-      },
-      {
         "id": "sector-03-03:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-03-03:final-deck-reached"
-        ],
         "sourceObjectId": "sector-03-03:exit-panel",
         "type": "interact"
       }
@@ -380,10 +367,7 @@ const SPEC = {
           "x": 624,
           "y": -1696
         },
-        "presentationId": "world-object:gate-panel",
-        "requiredObjectiveIds": [
-          "sector-03-03:final-deck-reached"
-        ]
+        "presentationId": "world-object:gate-panel"
       },
       {
         "coordinateAnchor": "bottom-center",

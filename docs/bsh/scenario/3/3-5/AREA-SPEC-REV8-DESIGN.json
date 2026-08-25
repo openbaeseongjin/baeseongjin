@@ -419,7 +419,6 @@
       "properties": {
         "objectiveId": "sector-03-05:exit-panel-engaged",
         "requiredObjectiveIds": [
-          "sector-03-05:final-deck-reached",
           "sector-03-05:augment-selected"
         ]
       }
@@ -441,16 +440,10 @@
       "sourceObjectId": "sector-03-05:service-calibration-frame"
     },
     {
-      "id": "sector-03-05:final-deck-reached",
-      "type": "reach",
-      "target": "exit-deck"
-    },
-    {
       "id": "sector-03-05:exit-panel-engaged",
       "type": "interact",
       "sourceObjectId": "sector-03-05:exit-panel",
       "requiredObjectiveIds": [
-        "sector-03-05:final-deck-reached",
         "sector-03-05:augment-selected"
       ]
     }

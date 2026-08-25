@@ -1,7 +1,7 @@
 import {
-    CLIENT_RESPAWN_STATUS_TYPES,
     CLIENT_STATUS_FEEDBACK_CONFIG,
     CLIENT_STATUS_KEY,
+    CLIENT_TRACKED_STATUS_TYPES,
     selectClientStatusFeedback
 } from "./ClientStatusFeedbackDefinition.js";
 
@@ -23,7 +23,7 @@ export class ClientStatusFeedback {
     apply(events) {
         for (const event of events ?? []) {
             const status = selectClientStatusFeedback(event, this.viewerId);
-            if (!status || !CLIENT_RESPAWN_STATUS_TYPES.includes(status.type)) continue;
+            if (!status || !CLIENT_TRACKED_STATUS_TYPES.includes(status.type)) continue;
             const id = CLIENT_STATUS_KEY.status(status);
             if (this.seenIds.has(id)) continue;
             this.seenIds.add(id);

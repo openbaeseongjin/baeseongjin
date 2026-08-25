@@ -274,7 +274,7 @@ const SPEC = {
       "id": "sector-06-08:gate",
       "nextAreaId": null,
       "requiredObjectiveIds": [
-        "pad-access-denied"
+        "sector-06-08:exit-panel-engaged"
       ],
       "trigger": {
         "height": 160,
@@ -288,8 +288,8 @@ const SPEC = {
     "nextAreaId": null,
     "objectives": [
       {
-        "id": "pad-access-denied",
-        "sourceObjectId": "pad-access-console",
+        "id": "sector-06-08:exit-panel-engaged",
+        "sourceObjectId": "sector-06-08:exit-panel",
         "type": "interact"
       }
     ],
@@ -297,10 +297,10 @@ const SPEC = {
       {
         "coordinateAnchor": "bottom-center",
         "gateId": "sector-06-08:gate",
-        "id": "pad-access-console",
+        "id": "sector-06-08:exit-panel",
         "interactionRadius": 72,
         "kind": "gate-panel",
-        "objectiveId": "pad-access-denied",
+        "objectiveId": "sector-06-08:exit-panel-engaged",
         "position": {
           "x": 1750,
           "y": -1705

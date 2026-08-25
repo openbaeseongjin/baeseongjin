@@ -198,17 +198,9 @@
   "windZones": [],
   "objectives": [
     {
-      "id": "final-deck-reached",
-      "type": "reach",
-      "preset": "reach-deck"
-    },
-    {
       "id": "exit-panel-engaged",
       "type": "interact",
-      "preset": "exit-panel",
-      "requiredObjectiveIds": [
-        "final-deck-reached"
-      ]
+      "preset": "exit-panel"
     }
   ],
   "route": {
@@ -303,7 +295,6 @@
     "targetStageAlias": "4-7",
     "mode": "objective-gated-connector",
     "requiredObjectiveIds": [
-      "final-deck-reached",
       "exit-panel-engaged"
     ]
   },

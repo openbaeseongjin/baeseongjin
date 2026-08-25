@@ -192,20 +192,7 @@
     "nextAreaId": "sector-03-03",
     "objectives": [
       {
-        "bounds": {
-          "height": 96,
-          "width": 320,
-          "x": 800,
-          "y": -1440
-        },
-        "id": "sector-03-02:final-deck-reached",
-        "type": "reach"
-      },
-      {
         "id": "sector-03-02:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-03-02:final-deck-reached"
-        ],
         "sourceObjectId": "sector-03-02:exit-panel",
         "type": "interact"
       }

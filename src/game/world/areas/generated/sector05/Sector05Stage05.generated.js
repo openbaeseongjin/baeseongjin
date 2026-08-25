@@ -336,23 +336,7 @@ const SPEC = {
         "type": "interact"
       },
       {
-        "bounds": {
-          "height": 180,
-          "width": 420,
-          "x": 50,
-          "y": -2610
-        },
-        "id": "final-deck-reached",
-        "requiredObjectiveIds": [
-          "priority-directive"
-        ],
-        "type": "reach"
-      },
-      {
         "id": "exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "final-deck-reached"
-        ],
         "sourceObjectId": "sector-05-05:exit-panel",
         "type": "interact"
       }

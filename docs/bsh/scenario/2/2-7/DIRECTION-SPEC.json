@@ -286,7 +286,7 @@
       "purpose": "decompress and hand off to Sector 02 finale",
       "trigger": {
         "type": "exit-ready",
-        "objectiveId": "sector-02-07:exit-reached"
+        "objectiveId": "sector-02-07:exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "gameplay-repeatable-no-new-story",

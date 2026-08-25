@@ -82,20 +82,7 @@
     "nextAreaId": "sector-02-03",
     "objectives": [
       {
-        "bounds": {
-          "height": 96,
-          "width": 128,
-          "x": 768,
-          "y": -864
-        },
-        "id": "sector-02-02:exit-reached",
-        "type": "reach"
-      },
-      {
         "id": "sector-02-02:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-02-02:exit-reached"
-        ],
         "sourceObjectId": "sector-02-02:exit-panel",
         "type": "interact"
       }
@@ -204,10 +191,7 @@
           "x": 720,
           "y": -800
         },
-        "presentationId": "world-object:gate-panel",
-        "requiredObjectiveIds": [
-          "sector-02-02:exit-reached"
-        ]
+        "presentationId": "world-object:gate-panel"
       },
       {
         "coordinateAnchor": "bottom-center",

@@ -14,6 +14,7 @@ export function createClientFeedbackEventRules() {
             CLIENT_FEEDBACK_EVENT.AUGMENT_EFFECT
         ),
         particle: rules(
+            CLIENT_FEEDBACK_EVENT.ENEMY_DEFEAT_PARTICLE,
             CLIENT_FEEDBACK_EVENT.SPELL_PARTICLE,
             CLIENT_FEEDBACK_EVENT.SPAWN_PARTICLE,
             CLIENT_FEEDBACK_EVENT.SHOT_ENDED_PARTICLE,

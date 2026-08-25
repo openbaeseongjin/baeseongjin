@@ -33,7 +33,7 @@ import {
     ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE
 } from "../combat/enemy-behavior/EnemyBehaviorDefinition.js";
 import { createEnemyObject } from "../combat/EnemyObject.js";
-import { recordEnemyImpactTombstone } from "../combat/EnemyImpactTombstones.js";
+import { ENEMY_LIFECYCLE_EVENT_TYPE, recordEnemyImpactTombstone } from "../combat/EnemyImpactTombstones.js";
 import { resolvePlayerEnemyImpact } from "../combat/PlayerEnemyImpactResolver.js";
 import { fallDamageForImpactSpeed } from "../combat/FallDamage.js";
 import { ROPE_IMPACT_EVENT_TYPE, ropeImpactDamageForSpeed } from "../combat/RopeImpactAttack.js";
@@ -365,6 +365,7 @@ export class GameSimulation {
         this.#inputDispatcher = new InputDispatcher();
         this.portalTransitions = new Map();
         this.lastAcceptedPlayerProjectileSpawnTick = new Map();
+        this.enemyDefeatCausalIds = new Map();
         const startArea = this.world.areas?.find(({ id }) => id === startAreaId) ?? this.world.areas?.[0];
         const startLandmark = this.isSeamlessSectorWorld
             ? (this.world.landmarks.find(
@@ -2396,6 +2397,7 @@ export class GameSimulation {
         }
         this.#resolveBossHazardContacts();
         this.#advanceEnemyStatusEffects(dt);
+        this.#removeDefeatedEnemies();
         if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
         const wallImpactEvents = this.#advanceEnemyImpactKnockbacks(dt, {
             emitWallImpacts: advanceInputDrivenObjects
@@ -2456,6 +2458,9 @@ export class GameSimulation {
         for (const event of combatEvents) {
             const enemy = this.objects.enemies.find(event.targetId);
             if (enemy && event.damage > 0) enemy.recordPlayerDamage(event.sourcePlayerId, event.damage);
+            if (event.type === ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED) {
+                this.#rememberEnemyDefeatCause(event.targetId, event.predictionId ?? event.projectileId);
+            }
         }
         const hitByProjectileId = new Map(combatEvents.map((event) => [event.projectileId, event]));
         for (const resolution of playerProjectileEvents.resolutions) {
@@ -2813,6 +2818,9 @@ export class GameSimulation {
         if (!result.accepted || !result.emitEffects) return result;
         if (target && result.damage > 0) target.recordPlayerDamage(event.sourcePlayerId, result.damage);
         const resolution = result.resolution;
+        if (resolution === ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED) {
+            this.#rememberEnemyDefeatCause(event.targetId, event.predictionId);
+        }
         this.recordReplicationEvent("resolve", {
             objectId: event.predictionId,
             resolution,
@@ -3114,6 +3122,9 @@ export class GameSimulation {
         }
         if (!result.accepted || !result.emitEffects) return result;
         if (target && result.damage > 0) target.recordPlayerDamage(authenticatedPlayerId, result.damage);
+        if (result.resolution === ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED) {
+            this.#rememberEnemyDefeatCause(claim.targetId, claim.predictionId ?? claim.eventId);
+        }
         const statusEffectId = SPELL_STATUS_EFFECT[claim.effectId] ?? null;
         if (statusEffectId && target) target.statusEffects.apply(statusEffectId, { sourceId: authenticatedPlayerId });
         if (replicate)
@@ -3833,13 +3844,21 @@ export class GameSimulation {
         if (projectile) this.objects.playerProjectiles.remove(projectile.id);
         target.health = Math.max(0, target.health - damage);
         target.recordPlayerDamage(authenticatedPlayerId, damage);
-        const resolution = target.health <= 0 ? "enemy-defeated" : "enemy-hit";
+        const resolution = target.health <= 0 ? ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED : "enemy-hit";
+        if (resolution === ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED) {
+            this.#rememberEnemyDefeatCause(target.id, claim.predictionId);
+        }
         this.recordProjectileResolution(
             { projectileId: projectile?.id ?? claim.predictionId, resolution, position: target.position },
             { damage, sourcePlayerId: authenticatedPlayerId, targetId: claim.targetId }
         );
         this.#removeDefeatedEnemies();
         return Object.freeze({ accepted: true, resolution, damage });
+    }
+
+    #rememberEnemyDefeatCause(enemyId, causalId) {
+        if (typeof enemyId !== "string" || typeof causalId !== "string" || causalId.length === 0) return;
+        this.enemyDefeatCausalIds.set(enemyId, causalId);
     }
 
     #removeDefeatedEnemies() {
@@ -3861,10 +3880,20 @@ export class GameSimulation {
                     pendingRewardCount: experience.pendingRewardCount
                 });
             }
+            this.recordReplicationEvent(ENEMY_LIFECYCLE_EVENT_TYPE.DEFEATED, {
+                enemyId: enemy.id,
+                targetId: enemy.id,
+                position: vectorState(enemy.position),
+                sourcePlayerId: creditedPlayer?.id ?? null,
+                ...(this.enemyDefeatCausalIds.has(enemy.id)
+                    ? { causalId: this.enemyDefeatCausalIds.get(enemy.id) }
+                    : {})
+            });
             recordEnemyImpactTombstone(this.enemyImpactTombstones, {
                 targetId: enemy.id,
                 defeatedAtTick: this.tick
             });
+            this.enemyDefeatCausalIds.delete(enemy.id);
         }
         if (this.isSeamlessSectorWorld) {
             for (const enemy of this.enemies) {
@@ -3906,6 +3935,7 @@ export class GameSimulation {
         }
         this.objects.enemies.removeWhere(({ health }) => health <= 0);
         if (defeatedTrainingDummyId) {
+            this.enemyDefeatCausalIds.delete(defeatedTrainingDummyId);
             this.objects.enemyProjectiles.removeOwnedBy(defeatedTrainingDummyId);
             this.debugTrainingDummy.clear();
             this.collisionBroadPhase.invalidateFrame();

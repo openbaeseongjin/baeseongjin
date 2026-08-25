@@ -908,6 +908,6 @@ Verified current Runtime contract:
 - no Wind
 - no Rope Cut
 - Exit contract remains:
-  `final-deck-reached → exit-panel-engaged → physical crossing → sector-03-05`
+  `exit-panel-engaged → exit-panel-engaged → physical crossing → sector-03-05`
 
 REV8 expands the existing Public-vs-Service contract into a full double-skin architectural route choice.

@@ -245,7 +245,7 @@
       "purpose": "handoff to 2-7 where evacuation pressure returns",
       "trigger": {
         "type": "exit-ready",
-        "objectiveId": "sector-02-06:exit-reached"
+        "objectiveId": "sector-02-06:exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "gameplay-repeatable-no-new-story",

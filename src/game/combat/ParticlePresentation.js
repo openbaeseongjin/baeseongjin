@@ -110,6 +110,21 @@ const PARTICLE_PRESET_DEFINITIONS = {
         gravity: 190,
         glow: 0.28
     },
+    "enemy-death-explosion": {
+        emission: "burst",
+        motion: "ballistic",
+        shape: "shard",
+        palette: ["#fff7ed", "#fde68a", "#fb923c", "#67e8f9"],
+        count: 22,
+        size: 6,
+        speed: 285,
+        spread: Math.PI * 2,
+        lifetime: 0.62,
+        gravity: 160,
+        drag: 3.2,
+        glow: 0.52,
+        blend: "additive"
+    },
     "boss-warden-melee-active": {
         ...BOSS_WARDEN_ACTIVE_PRESET,
         palette: ["#fff7ed", "#fde68a", "#fb923c"],

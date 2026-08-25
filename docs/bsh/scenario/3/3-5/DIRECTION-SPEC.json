@@ -303,7 +303,7 @@
       "purpose": "hand off from commercial back-of-house compression to Grand Central Atrium expansion",
       "trigger": {
         "type": "exit-ready",
-        "objectiveId": "sector-03-05:final-deck-reached"
+        "objectiveId": "sector-03-05:exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "gameplay-repeatable",

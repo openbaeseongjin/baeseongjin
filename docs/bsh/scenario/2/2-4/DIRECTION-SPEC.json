@@ -239,7 +239,7 @@
       "purpose": "handoff to 2-5",
       "trigger": {
         "type": "exit-ready",
-        "objectiveId": "sector-02-04:exit-reached"
+        "objectiveId": "sector-02-04:exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "gameplay-repeatable-no-new-story",

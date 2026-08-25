@@ -282,7 +282,7 @@
       "purpose": "preserve 2-2 first moving-security reveal",
       "trigger": {
         "type": "exit-ready",
-        "objectiveId": "sector-02-01:exit-reached"
+        "objectiveId": "sector-02-01:exit-panel-engaged"
       },
       "scope": "local-player",
       "replayPolicy": "gameplay-repeatable-no-new-story",

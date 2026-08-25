@@ -242,20 +242,7 @@
     "nextAreaId": null,
     "objectives": [
       {
-        "bounds": {
-          "height": 96,
-          "width": 320,
-          "x": 800,
-          "y": -2102
-        },
-        "id": "sector-03-08:final-deck-reached",
-        "type": "reach"
-      },
-      {
         "id": "sector-03-08:exit-panel-engaged",
-        "requiredObjectiveIds": [
-          "sector-03-08:final-deck-reached"
-        ],
         "sourceObjectId": "sector-03-08:exit-panel",
         "type": "interact"
       }
@@ -530,10 +517,7 @@
           "x": 880,
           "y": -2070
         },
-        "presentationId": "world-object:gate-panel",
-        "requiredObjectiveIds": [
-          "sector-03-08:final-deck-reached"
-        ]
+        "presentationId": "world-object:gate-panel"
       },
       {
         "coordinateAnchor": "bottom-center",

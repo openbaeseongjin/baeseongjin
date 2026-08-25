@@ -30,7 +30,7 @@ Current `sector-03-01` owns:
 - Wind: none
 - Camera: authored default camera만 사용하며 별도 Camera Zone 수치는 저작하지 않는다. 이는 REV8의 `customZonesRequired: false` 계약을 따른다.
 - objective chain:
-  `final-deck-reached → exit-panel-engaged → physical crossing`
+  `exit-panel-engaged → exit-panel-engaged → physical crossing`
 - late activation sentry: `sector-03-01:promenade-guard`는 Right Market 착지 이후의 384×192 activation band에만 활성화되어 Left Market·Suspended Market Island Story safe zone을 침범하지 않는다.
 
 ## Cutover boundary
