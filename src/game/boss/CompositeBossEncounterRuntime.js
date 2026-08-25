@@ -1,11 +1,13 @@
 const STAGE_STATUS = Object.freeze({ INACTIVE: "inactive", ACTIVE: "active", COMPLETED: "completed" });
 const PARTICIPANT_STATUS = Object.freeze({ ACTIVE: "active", SPECTATING: "spectating", DISCONNECTED: "disconnected" });
 const INDIVIDUAL_RESPAWN_POLICY = "individual-respawn";
+const BOSS_HEALTH_RECOVERY_BY_DEFEAT_SOURCE = Object.freeze({ boss: 100, other: 0 });
 const VALID_PARTICIPANT_STATUS = Object.freeze(
     Object.fromEntries(Object.values(PARTICIPANT_STATUS).map((status) => [status, true]))
 );
 
 export const COMPOSITE_BOSS_STAGE_SNAPSHOT_REVISION = "composite-boss-stage-runtime-v2";
+export const BOSS_PARTICIPANT_DEFEAT_SOURCE = Object.freeze({ BOSS: "boss", OTHER: "other" });
 export { STAGE_STATUS as COMPOSITE_BOSS_STAGE_STATUS, PARTICIPANT_STATUS as COMPOSITE_BOSS_PARTICIPANT_STATUS };
 
 export function freezeComposite(value) {
@@ -53,6 +55,7 @@ export class CompositeBossEncounterRuntime {
         this.events = [];
         this.processedImpactIds = new Set();
         this.processedHazardContactIds = new Set();
+        this.health = 0;
         if (snapshot) this.restore(snapshot);
     }
 
@@ -145,7 +148,13 @@ export class CompositeBossEncounterRuntime {
         return typeof contactId === "string" && this.processedHazardContactIds.has(contactId);
     }
 
-    handlePlayerDefeat(playerId, cause = "unknown") {
+    recoverHealth(amount = BOSS_HEALTH_RECOVERY_BY_DEFEAT_SOURCE[BOSS_PARTICIPANT_DEFEAT_SOURCE.BOSS]) {
+        const previousHealth = this.totalHealth();
+        this.health = Math.min(this.maximumHealth(), previousHealth + amount);
+        return this.health - previousHealth;
+    }
+
+    handlePlayerDefeat(playerId, { cause = "unknown", source = BOSS_PARTICIPANT_DEFEAT_SOURCE.OTHER } = {}) {
         if (this.status !== STAGE_STATUS.ACTIVE || this.participants.get(playerId) !== PARTICIPANT_STATUS.ACTIVE) {
             return freezeComposite({
                 accepted: false,
@@ -154,14 +163,26 @@ export class CompositeBossEncounterRuntime {
                 retryStarted: false
             });
         }
-        this.emit("boss-participant-defeated", { playerId, cause, attempt: this.attempt });
+        const recoveryAmount = BOSS_HEALTH_RECOVERY_BY_DEFEAT_SOURCE[source];
+        if (!Number.isFinite(recoveryAmount)) throw new Error(`Unknown Boss participant defeat source '${source}'`);
+        const recoveredHealth = recoveryAmount > 0 ? this.recoverHealth(recoveryAmount) : 0;
+        this.emit("boss-participant-defeated", {
+            playerId,
+            cause,
+            source,
+            recoveredHealth,
+            health: this.totalHealth(),
+            attempt: this.attempt
+        });
         if (this.definition.participantDefeatPolicy === INDIVIDUAL_RESPAWN_POLICY) {
             return freezeComposite({
                 accepted: true,
                 changed: true,
                 retryStarted: false,
                 individualRespawn: true,
-                attempt: this.attempt
+                attempt: this.attempt,
+                recoveredHealth,
+                health: this.totalHealth()
             });
         }
         this.participants.set(playerId, PARTICIPANT_STATUS.SPECTATING);
@@ -179,7 +200,14 @@ export class CompositeBossEncounterRuntime {
             this.resetAttempt({ preserveCompleted: true });
             this.emit("boss-attempt-started", { attempt: this.attempt, health: this.totalHealth() });
         }
-        return freezeComposite({ accepted: true, changed: true, retryStarted, attempt: this.attempt });
+        return freezeComposite({
+            accepted: true,
+            changed: true,
+            retryStarted,
+            attempt: this.attempt,
+            recoveredHealth,
+            health: this.totalHealth()
+        });
     }
 
     drainEvents() {

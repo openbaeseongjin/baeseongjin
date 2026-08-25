@@ -1023,11 +1023,7 @@ export class CanvasRenderer {
                 x + 12,
                 startY + 95
             );
-            ctx.fillText(
-                `S ${count("terrainSurfaces")} | D ${count("decorations")} | E ${count("enemies")}`,
-                x + 12,
-                startY + 114
-            );
+            ctx.fillText(`S ${count("terrainSurfaces")} | E ${count("enemies")}`, x + 12, startY + 114);
         }
         ctx.restore();
     }

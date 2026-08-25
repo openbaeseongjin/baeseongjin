@@ -39,7 +39,7 @@
 5. **정적·동적 상태 분리:** world definition, authored geometry와 static collider 정보는 snapshot마다 복제하지 않는다. 동적 위치·속도·수명·진행만 sample에 넣는다.
 6. **공간 index를 우회하지 않음:** Quadtree가 있어도 호출자가 원본 배열을 직접 전수 검사하면 최적화 계약 위반이다. 새 공간 판정은 기존 query를 확장하거나 도메인 index를 조합한다.
 7. **군집은 전체 roster에 곱하지 않음:** member별 이웃 계산은 동일 group 또는 spatial candidate만 사용한다. member마다 전체 Enemy 배열을 훑는 O(N²) 구현을 금지한다.
-8. **렌더 정적 계산 캐시:** gradient·layer order·surface bounds·decoration placement처럼 상태가 바뀌지 않는 자료는 owner가 cache하고 world·asset·viewport 정책 변경 때만 무효화한다.
+8. **렌더 정적 계산 캐시:** gradient·layer order·surface bounds처럼 상태가 바뀌지 않는 자료는 owner가 cache하고 world·asset·viewport 정책 변경 때만 무효화한다.
 
 ## 변경 전 감사
 

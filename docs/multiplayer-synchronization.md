@@ -193,6 +193,8 @@
 
 Boss 입장은 Player별 위치 주도 사건이다. source Gate trigger에 들어간 Player만 즉시 Boss Entry로 이동해 participant가 되고, 같은 Boss가 진행 중일 때 늦게 들어온 Player만 participant로 추가한다. 다른 Stage·Sector의 Player를 소환하지 않으며 각 클라이언트의 Boss camera·HUD·world presentation은 local Player가 해당 Arena Bounds 안에 있을 때만 활성화한다. Boss 완료 ID는 공용 Sector progress에 남아 재등반 Player의 source Gate를 다음 Sector Entry로 직행시킨다.
 
+피해 클라이언트와 서버는 같은 멱등 Boss hazard 사망에서 `CompositeBossEncounterRuntime.handlePlayerDefeat()`를 한 번 호출한다. 직접 Boss 처치면 공통 Runtime이 Boss HP를 최대 HP 이내에서 100 회복하고 `boss-participant-defeated` 사건과 다음 Boss snapshot이 같은 회복 결과를 공유한다. 일반 Enemy·환경·낙사 같은 다른 원인의 참가자 사망은 Boss HP를 회복시키지 않으며 Boss별 별도 회복 경로를 두지 않는다.
+
 Boss03 사슬 훅 Grab은 서버 중립 Boss가 target·telegraph를 시작하고 피해 Player client가 로컬 위치에서 사거리 충돌을 먼저 적용하는 Boss hazard claim이다. 성공 시 Rope 해제·20 피해와 `ActorCaptureInteractionState`의 Pull/입력 잠금을 즉시 적용하며 2초 뒤 target-only Hammer 40을 같은 멱등 hazard 경계로 확정한다. 사망·연결 종료·Boss 행동 불가·처치에는 interaction을 취소하고 정상 snapshot·receipt가 owner 상태를 되감지 않는다.
 
 Boss06 승리 뒤 Boarding은 Player별 위치 주도 사건과 공용 완료 상태를 분리한다. 각 소유 Player는 Gate/Bridge를 직접 건너 boarding zone에 들어가고 서버는 Player별 ready ID를 공유한다. 연결된 모든 참가자가 ready일 때만 run completion을 확정하며 첫 ready Player가 동료를 순간이동시키지 않는다. Boss spectator는 승리 시 ID 순서로 final safe Bridge deck에 간격을 두고 복귀하며 참가 상태도 `active`로 함께 전환한 뒤 같은 Boarding 경로를 사용한다. Wipe respawn도 같은 정렬·간격 계약을 사용한다.

@@ -76,7 +76,6 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.stateCatalog = createLowerSectorCommanderStateCatalog();
         this.statePool = new BossStatePool({ catalog: this.stateCatalog, worldSeed, attempt: this.attempt });
         this.scaledHealth = null;
-        this.health = 0;
         this.state = STATE.NEUTRAL;
         this.actionPhase = ACTION_PHASE.RECOVERY;
         this.timer = 0;

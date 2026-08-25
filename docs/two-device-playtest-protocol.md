@@ -95,7 +95,7 @@
 | 최근 / 누적 dropped fixed steps | | |
 | CSS viewport / backing store | | |
 | 실제 DPR / 유효 DPR | | |
-| terrain·decoration·enemy·projectile drawn/total | | |
+| terrain·enemy·projectile drawn/total | | |
 
 ### 문제 기록
 
