@@ -103,5 +103,6 @@ category는 아래 이름을 사용한다.
 | 일반 몹 | `assets/runtime/characters/<enemy-package-id>/` | [`enemy-sprite-asset-format.md`](./enemy-sprite-asset-format.md), `npm run validate:enemy-sprite-assets -- <directory>` |
 | 환경 | `assets/runtime/environments/<pack-id>/` | [`environment-asset-format.md`](./environment-asset-format.md), `npm run validate:environment-assets -- assets/runtime/environments/<pack-id>` |
 | 증강 아이콘 | `assets/runtime/ui/augment-icons/` | Stable ID와 같은 `32×32` 또는 `48×48` 정사각 PNG, `npm run validate:augment-icons -- assets/runtime/ui/augment-icons` |
+| 시작 스플래시 | `assets/runtime/ui/startup-splash/one-rope-splash.png` | 원본 비율을 유지한 불투명 PNG를 `object-fit: contain`으로 표시하고 실제 데스크톱·모바일 화면에서 제목·주인공·좌측 하단 로더가 잘리지 않는지 확인 |
 
-증강 아이콘은 [`assets/artwork/ui/augment-icons/`](../assets/artwork/ui/augment-icons/)에서 파일명을 바꾸지 않고 납품한다. 장애물, 상호작용 오브젝트, 투사체와 VFX에는 아직 전용 runtime 계약이 없다. 일반 몹은 `enemy-sprite-asset-format.md`를 사용한다. 그래픽 담당자는 runtime 연결, 충돌, 물리, 전투, 네트워크와 fallback을 수정하지 않는다.
+증강 아이콘은 [`assets/artwork/ui/augment-icons/`](../assets/artwork/ui/augment-icons/)에서 파일명을 바꾸지 않고 납품한다. 시작 스플래시는 [`assets/artwork/ui/startup-splash/`](../assets/artwork/ui/startup-splash/)의 승인된 export와 runtime PNG를 같은 픽셀로 유지한다. 장애물, 상호작용 오브젝트, 투사체와 VFX에는 아직 전용 runtime 계약이 없다. 일반 몹은 `enemy-sprite-asset-format.md`를 사용한다. 그래픽 담당자는 runtime 연결, 충돌, 물리, 전투, 네트워크와 fallback을 수정하지 않는다.

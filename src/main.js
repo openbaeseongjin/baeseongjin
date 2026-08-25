@@ -10,7 +10,7 @@ import {
 import { GameModeMenu } from "./game/ui/GameModeMenu.js";
 import { setupInstallPrompt } from "./pwa/InstallPrompt.js";
 import { setupServiceWorkerUpdater } from "./pwa/ServiceWorkerUpdater.js";
-import { StartupUpdateLoadingScreen } from "./pwa/StartupUpdateLoadingScreen.js";
+import { StartupSplashScreen } from "./pwa/StartupSplashScreen.js";
 import { setupPlaytestDiagnostics } from "./game/metrics/PlaytestDiagnostics.js";
 import { createGameRenderer, DEFAULT_RENDERER_PROFILE, resolveRendererProfile } from "./render/GameRendererFactory.js";
 import { SpriteSceneResourceBundle } from "./render/SpriteSceneRenderer.js";
@@ -61,7 +61,7 @@ const DEFAULT_GAME_AUDIO_SELECTION = Object.freeze({
     packageOverrides: Object.freeze({ bgm: "main-theme" })
 });
 const modeMenu = new GameModeMenu(document.getElementById("game-mode-menu"));
-const startupLoadingScreen = new StartupUpdateLoadingScreen(document.getElementById("startup-update-loading"));
+const startupSplashScreen = new StartupSplashScreen(document.getElementById("startup-splash"));
 const channelBadge = document.getElementById("channel-badge");
 const audioResumeNotice = document.getElementById("audio-resume-notice");
 const hudToggle = document.getElementById("hud-toggle");
@@ -372,7 +372,8 @@ function returnToMenu(message) {
 }
 
 async function bootstrap() {
-    startupLoadingScreen.show();
+    startupSplashScreen.show();
+    const minimumSplashDuration = startupSplashScreen.waitForMinimumDuration();
     await serviceWorkerUpdater.ready;
     if (pageClosing) return;
     [playerDefinition, enemyDefinitionsBySectorId, authoredAreaEnvironmentDefinitions, directionDefinitions] =
@@ -395,7 +396,9 @@ async function bootstrap() {
     if (pageClosing) return;
     await refreshMultiplayerAvailability();
     startMultiplayerAvailabilityMonitor();
-    startupLoadingScreen.hide();
+    await minimumSplashDuration;
+    if (pageClosing) return;
+    startupSplashScreen.hide();
     launch();
 }
 

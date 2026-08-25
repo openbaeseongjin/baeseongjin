@@ -75,47 +75,57 @@
             .orientation-notice {
                 display: none;
             }
-            .startup-update-loading {
+            .startup-splash {
                 position: fixed;
-                z-index: 31;
+                z-index: 100;
                 inset: 0;
-                display: grid;
-                place-items: center;
-                padding: 24px;
-                background: rgba(5, 9, 17, 0.84);
-                backdrop-filter: blur(8px);
+                background: #000;
+                overflow: hidden;
+                pointer-events: none;
             }
-            .startup-update-loading[hidden] {
+            .startup-splash[hidden] {
                 display: none;
             }
-            .startup-update-card {
-                width: min(460px, 100%);
-                padding: 28px 24px;
-                border: 1px solid rgba(103, 232, 249, 0.4);
-                border-radius: 18px;
-                background: rgba(15, 23, 42, 0.96);
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                text-align: center;
+            .startup-splash-image {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                object-position: center;
             }
-            .startup-update-spinner {
-                width: 32px;
-                height: 32px;
-                margin: 0 auto 16px;
-                border: 3px solid rgba(103, 232, 249, 0.2);
-                border-top-color: #67e8f9;
+            .startup-splash-loader {
+                position: absolute;
+                left: max(24px, calc(env(safe-area-inset-left) + 18px));
+                bottom: max(24px, calc(env(safe-area-inset-bottom) + 18px));
+                width: 44px;
+                height: 44px;
                 border-radius: 50%;
-                animation: startup-update-spin 0.9s linear infinite;
+                background: rgba(2, 8, 19, 0.72);
+                box-shadow:
+                    0 0 0 1px rgba(64, 221, 255, 0.22),
+                    0 0 18px rgba(25, 211, 255, 0.2);
             }
-            .startup-update-card h1 {
-                margin: 0 0 8px;
-                font-size: 26px;
+            .startup-splash-loader::before,
+            .startup-splash-loader::after {
+                content: "";
+                position: absolute;
+                border-radius: 50%;
             }
-            .startup-update-card p {
-                margin: 0;
-                color: #cbd5e1;
-                line-height: 1.5;
+            .startup-splash-loader::before {
+                inset: 5px;
+                border: 3px solid rgba(94, 226, 255, 0.16);
+                border-top-color: #67e8f9;
+                border-right-color: #22d3ee;
+                box-shadow: 0 0 8px rgba(34, 211, 238, 0.42);
+                animation: startup-splash-spin 0.8s linear infinite;
             }
-            @keyframes startup-update-spin {
+            .startup-splash-loader::after {
+                inset: 13px;
+                border: 2px solid rgba(103, 232, 249, 0.18);
+                border-bottom-color: #a5f3fc;
+                animation: startup-splash-spin 0.55s linear infinite reverse;
+            }
+            @keyframes startup-splash-spin {
                 to {
                     transform: rotate(360deg);
                 }
@@ -843,7 +853,8 @@
                 border: 0;
             }
             @media (prefers-reduced-motion: reduce) {
-                .startup-update-spinner {
+                .startup-splash-loader::before,
+                .startup-splash-loader::after {
                     animation: none;
                 }
             }
@@ -867,18 +878,21 @@
     <body>
         <main>
             <section
-                class="startup-update-loading"
-                id="startup-update-loading"
+                class="startup-splash"
+                id="startup-splash"
                 role="status"
-                aria-live="polite"
+                aria-label="ONE ROPE 불러오는 중"
                 aria-busy="true"
-                aria-labelledby="startup-update-title"
             >
-                <div class="startup-update-card">
-                    <div class="startup-update-spinner" aria-hidden="true"></div>
-                    <h1 id="startup-update-title">최신 버전을 확인하는 중</h1>
-                    <p>업데이트가 있으면 자동으로 적용합니다.</p>
-                </div>
+                <img
+                    class="startup-splash-image"
+                    src="./assets/runtime/ui/startup-splash/one-rope-splash.png"
+                    alt=""
+                    aria-hidden="true"
+                    decoding="async"
+                    fetchpriority="high"
+                />
+                <div class="startup-splash-loader" aria-hidden="true"></div>
             </section>
             <section class="game-mode-menu" id="game-mode-menu" aria-labelledby="game-mode-title" hidden>
                 <div class="game-mode-card">
@@ -1184,7 +1198,7 @@
                     <button type="button" data-install-action>앱 설치</button>
                 </div>
             </section>
-            <output class="version-badge" id="app-version" data-version="0.76.0" aria-label="배포 버전">v0.76.0</output>
+            <output class="version-badge" id="app-version" data-version="0.77.0" aria-label="배포 버전">v0.77.0</output>
         </main>
         <noscript><p>이 게임을 실행하려면 JavaScript가 필요합니다.</p></noscript>
         <script type="module" src="./src/main.js"></script>
