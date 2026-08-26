@@ -5,6 +5,7 @@ import { deserializeWorldSnapshotEnvelope } from "../src/game/network/WorldSnaps
 import { WORLD_SNAPSHOT_REPLICATION_KIND } from "../src/game/network/WorldSnapshotReplication.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { channelSocketUrl } from "../src/game/runtime/MultiplayerServerEndpoint.js";
+import { RemoteWorldStateBuffer } from "../src/game/runtime/RemoteWorldStateBuffer.js";
 import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
 import { MultiplayerGameServer } from "../src/server/MultiplayerGameServer.js";
 
@@ -91,6 +92,86 @@ function fieldBytes(state) {
     return Object.fromEntries(Object.entries(state).map(([key, value]) => [key, payloadBytes(value)]));
 }
 
+function verifyRemotePlayerAuthorityTimeline() {
+    const buffer = new RemoteWorldStateBuffer({
+        interpolationSeconds: 0.1,
+        maxExtrapolationSeconds: 0.12,
+        maxSnapshots: 4,
+        playerInterpolationSeconds: 0.1,
+        maxPlayerInterpolationSeconds: 0.3,
+        playerPresentationSmoothingSeconds: 0
+    });
+    let snapshotSequence = 0;
+    const snapshot = ({ serverTick, ownerMotionTick, remoteX, remoteAngle }) => ({
+        snapshotSequence: snapshotSequence++,
+        serverTick,
+        state: {
+            players: [
+                {
+                    id: "local",
+                    ownerMotionTick,
+                    position: { x: 0, y: 0 },
+                    velocity: { x: 0, y: 0 },
+                    angle: 0,
+                    angularVelocity: 0
+                },
+                {
+                    id: "remote",
+                    ownerMotionTick,
+                    position: { x: remoteX, y: 0 },
+                    velocity: { x: 0, y: 0 },
+                    angle: remoteAngle,
+                    angularVelocity: 0
+                }
+            ],
+            enemies: [{ id: "enemy", position: { x: serverTick - 100, y: 0 }, velocity: { x: 0, y: 0 } }]
+        },
+        events: []
+    });
+    buffer.push(snapshot({ serverTick: 100, ownerMotionTick: 94, remoteX: 0, remoteAngle: 0 }), 0);
+    buffer.sample({ now: 0, localPlayerId: "local" });
+    buffer.push(snapshot({ serverTick: 106, ownerMotionTick: 94, remoteX: 0, remoteAngle: 0 }), 50);
+    buffer.sample({ now: 50, localPlayerId: "local" });
+    buffer.push(snapshot({ serverTick: 112, ownerMotionTick: 106, remoteX: 12, remoteAngle: 1.2 }), 100);
+    buffer.sample({ now: 100, localPlayerId: "local" });
+    buffer.push(snapshot({ serverTick: 118, ownerMotionTick: 112, remoteX: 18, remoteAngle: 1.8 }), 150);
+    const sampled = buffer.sample({ now: 150, localPlayerId: "local" });
+    const remote = sampled.players.find(({ id }) => id === "remote");
+    assert(
+        Math.abs(remote.position.x - 6) < 0.5,
+        `원격 Player 위치가 authority tick 사이를 보간하지 않았습니다: ${remote.position.x}`
+    );
+    assert(
+        Math.abs(remote.angle - 0.6) < 0.05,
+        `원격 Player 회전이 authority tick 사이를 보간하지 않았습니다: ${remote.angle}`
+    );
+    const smoothedBuffer = new RemoteWorldStateBuffer({
+        interpolationSeconds: 0.1,
+        maxExtrapolationSeconds: 0.12,
+        maxSnapshots: 4
+    });
+    snapshotSequence = 0;
+    smoothedBuffer.push(snapshot({ serverTick: 100, ownerMotionTick: 94, remoteX: 0, remoteAngle: 0 }), 0);
+    smoothedBuffer.sample({ now: 0, localPlayerId: "local" });
+    smoothedBuffer.push(snapshot({ serverTick: 106, ownerMotionTick: 94, remoteX: 0, remoteAngle: 0 }), 50);
+    smoothedBuffer.sample({ now: 50, localPlayerId: "local" });
+    smoothedBuffer.push(snapshot({ serverTick: 112, ownerMotionTick: 106, remoteX: 12, remoteAngle: 1.2 }), 100);
+    smoothedBuffer.sample({ now: 100, localPlayerId: "local" });
+    smoothedBuffer.push(snapshot({ serverTick: 118, ownerMotionTick: 112, remoteX: 18, remoteAngle: 1.8 }), 150);
+    const smoothed = smoothedBuffer
+        .sample({ now: 150, localPlayerId: "local" })
+        .players.find(({ id }) => id === "remote");
+    assert(
+        smoothed.position.x > 0 && smoothed.position.x < 12,
+        `2차 smoothing이 새 authority 위치를 한 frame에 snap했습니다: ${smoothed.position.x}`
+    );
+    return Object.freeze({
+        positionX: remote.position.x,
+        angle: remote.angle,
+        smoothedPositionX: smoothed.position.x
+    });
+}
+
 function movementCommand(horizontal, aimWorld) {
     return createPlayerCommand(
         {
@@ -140,6 +221,7 @@ async function startRuntime() {
 }
 
 async function run() {
+    const remoteInterpolation = verifyRemotePlayerAuthorityTimeline();
     const runtime = await startRuntime();
     const first = new RemoteGameAuthority({
         url: channelSocketUrl(runtime.serverUrl, "new"),
@@ -420,6 +502,7 @@ async function run() {
         );
 
         const report = {
+            remoteInterpolation,
             enemyCount: baselineState.enemies.length,
             before: {
                 bytes: beforeBytes,

@@ -93,6 +93,12 @@ export class RemoteWorldStateBuffer {
         maxSnapshots = 8,
         interpolationSeconds = MULTIPLAYER_TIMING.remoteInterpolationSeconds,
         maxExtrapolationSeconds = MULTIPLAYER_TIMING.deadReckoningMaxSeconds,
+        playerInterpolationSeconds = MULTIPLAYER_TIMING.remotePlayerInterpolationSeconds,
+        maxPlayerInterpolationSeconds = MULTIPLAYER_TIMING.remotePlayerMaxInterpolationSeconds,
+        playerJitterBufferMultiplier = MULTIPLAYER_TIMING.remotePlayerJitterBufferMultiplier,
+        playerPlaybackRateAdjustment = MULTIPLAYER_TIMING.remotePlayerPlaybackRateAdjustment,
+        playerPresentationSmoothingSeconds = MULTIPLAYER_TIMING.remotePlayerPresentationSmoothingSeconds,
+        playerPresentationSnapDistance = MULTIPLAYER_TIMING.remotePlayerPresentationSnapDistance,
         clockCorrectionRatio = MULTIPLAYER_TIMING.remoteClockCorrectionRatio,
         maxClockCorrectionSeconds = MULTIPLAYER_TIMING.remoteClockMaxCorrectionSeconds
     } = {}) {
@@ -108,6 +114,31 @@ export class RemoteWorldStateBuffer {
         if (!Number.isFinite(maxExtrapolationSeconds) || maxExtrapolationSeconds <= 0) {
             throw new Error("maxExtrapolationSeconds must be positive");
         }
+        if (!Number.isFinite(playerInterpolationSeconds) || playerInterpolationSeconds < 0) {
+            throw new Error("playerInterpolationSeconds must be non-negative");
+        }
+        if (
+            !Number.isFinite(maxPlayerInterpolationSeconds) ||
+            maxPlayerInterpolationSeconds < playerInterpolationSeconds
+        ) {
+            throw new Error("maxPlayerInterpolationSeconds must be at least playerInterpolationSeconds");
+        }
+        if (!Number.isFinite(playerJitterBufferMultiplier) || playerJitterBufferMultiplier < 0) {
+            throw new Error("playerJitterBufferMultiplier must be non-negative");
+        }
+        if (
+            !Number.isFinite(playerPlaybackRateAdjustment) ||
+            playerPlaybackRateAdjustment < 0 ||
+            playerPlaybackRateAdjustment >= 1
+        ) {
+            throw new Error("playerPlaybackRateAdjustment must be in [0, 1)");
+        }
+        if (!Number.isFinite(playerPresentationSmoothingSeconds) || playerPresentationSmoothingSeconds < 0) {
+            throw new Error("playerPresentationSmoothingSeconds must be non-negative");
+        }
+        if (!Number.isFinite(playerPresentationSnapDistance) || playerPresentationSnapDistance <= 0) {
+            throw new Error("playerPresentationSnapDistance must be positive");
+        }
         if (!Number.isFinite(clockCorrectionRatio) || clockCorrectionRatio <= 0 || clockCorrectionRatio > 1) {
             throw new Error("clockCorrectionRatio must be in (0, 1]");
         }
@@ -118,6 +149,12 @@ export class RemoteWorldStateBuffer {
         this.maxSnapshots = maxSnapshots;
         this.interpolationSeconds = interpolationSeconds;
         this.maxExtrapolationSeconds = maxExtrapolationSeconds;
+        this.baseInterpolationTicks = playerInterpolationSeconds * TICKS_PER_SECOND;
+        this.maxPlayerInterpolationTicks = maxPlayerInterpolationSeconds * TICKS_PER_SECOND;
+        this.playerJitterBufferMultiplier = playerJitterBufferMultiplier;
+        this.playerPlaybackRateAdjustment = playerPlaybackRateAdjustment;
+        this.playerPresentationSmoothingSeconds = playerPresentationSmoothingSeconds;
+        this.playerPresentationSnapDistance = playerPresentationSnapDistance;
         this.clockCorrectionRatio = clockCorrectionRatio;
         this.maxClockCorrectionTicks = maxClockCorrectionSeconds * TICKS_PER_SECOND;
         this.history = [];
@@ -134,6 +171,42 @@ export class RemoteWorldStateBuffer {
         this.lastClockCorrectionTicks = 0;
         this.maxClockCorrectionTicksObserved = 0;
         this.sampleCalls = 0;
+        this.playerTimingById = new Map();
+        this.playerPresentationById = new Map();
+        this.lastPlayerInterpolationDelayTicks = this.baseInterpolationTicks;
+        this.maxPlayerInterpolationDelayTicksObserved = this.baseInterpolationTicks;
+    }
+
+    updatePlayerTiming(snapshot, receivedAt) {
+        const currentPlayerIds = new Set(snapshot.state.players.map(({ id }) => id));
+        for (const playerId of this.playerTimingById.keys()) {
+            if (!currentPlayerIds.has(playerId)) this.playerTimingById.delete(playerId);
+        }
+        for (const playerId of this.playerPresentationById.keys()) {
+            if (!currentPlayerIds.has(playerId)) this.playerPresentationById.delete(playerId);
+        }
+        for (const player of snapshot.state.players) {
+            if (!Number.isSafeInteger(player.ownerMotionTick)) continue;
+            const timing = this.playerTimingById.get(player.id);
+            if (!timing) {
+                this.playerTimingById.set(player.id, {
+                    playbackTick: Math.max(0, player.ownerMotionTick - this.baseInterpolationTicks),
+                    sampledAt: receivedAt,
+                    jitterTicks: 0,
+                    lastOwnerMotionTick: player.ownerMotionTick,
+                    lastReceivedAt: receivedAt
+                });
+                continue;
+            }
+            if (player.ownerMotionTick <= timing.lastOwnerMotionTick) continue;
+            const arrivalTicks = ((receivedAt - timing.lastReceivedAt) * TICKS_PER_SECOND) / 1000;
+            const ownerTickDelta = player.ownerMotionTick - timing.lastOwnerMotionTick;
+            const variationTicks = Math.abs(arrivalTicks - ownerTickDelta);
+            timing.jitterTicks +=
+                (variationTicks - timing.jitterTicks) * MULTIPLAYER_TIMING.remotePlayerJitterSmoothingRatio;
+            timing.lastOwnerMotionTick = player.ownerMotionTick;
+            timing.lastReceivedAt = receivedAt;
+        }
     }
 
     push(snapshot, receivedAt = performance.now()) {
@@ -153,6 +226,7 @@ export class RemoteWorldStateBuffer {
         }
 
         const sameTick = this.latest?.serverTick === snapshot.serverTick;
+        this.updatePlayerTiming(snapshot, receivedAt);
         if (this.clockAnchorTick === null) {
             this.clockAnchorTick = snapshot.serverTick;
             this.clockAnchorAt = receivedAt;
@@ -200,14 +274,19 @@ export class RemoteWorldStateBuffer {
         const latestState = this.latest.state;
         const sampled = {
             ...latestState,
-            players: latestState.players.map((player) => ({
-                ...player,
-                position:
-                    player.id === localPlayerId
-                        ? player.position
-                        : this.samplePosition("players", player.id, targetTick),
-                angle: player.id === localPlayerId ? player.angle : this.samplePlayerAngle(player.id, targetTick)
-            })),
+            players: latestState.players.map((player) => {
+                if (player.id === localPlayerId) return player;
+                const playerTargetTick = this.playerTargetTick(player.id, now, targetTick);
+                return {
+                    ...player,
+                    ...this.smoothPlayerPresentation(
+                        player.id,
+                        this.samplePosition("players", player.id, playerTargetTick),
+                        this.samplePlayerAngle(player.id, playerTargetTick),
+                        now
+                    )
+                };
+            }),
             enemies: (latestState.enemies ?? []).map((enemy) => ({
                 ...enemy,
                 position: this.samplePosition("enemies", enemy.id, targetTick)
@@ -220,14 +299,70 @@ export class RemoteWorldStateBuffer {
         return sampled;
     }
 
+    playerTargetTick(playerId, now, fallbackTargetTick) {
+        const timing = this.playerTimingById.get(playerId);
+        const latest = entityAt(this.history.at(-1), "players", playerId);
+        if (!timing || !latest) return fallbackTargetTick;
+        const desiredDelayTicks = Math.min(
+            this.maxPlayerInterpolationTicks,
+            this.baseInterpolationTicks + timing.jitterTicks * this.playerJitterBufferMultiplier
+        );
+        const elapsedTicks = (Math.max(0, now - timing.sampledAt) * TICKS_PER_SECOND) / 1000;
+        const desiredTick = latest.tick - desiredDelayTicks;
+        const projectedTick = timing.playbackTick + elapsedTicks;
+        const errorTicks = desiredTick - projectedTick;
+        let nextTick;
+        if (Math.abs(errorTicks) > this.maxPlayerInterpolationTicks) {
+            nextTick = desiredTick;
+        } else {
+            const normalizedError = desiredDelayTicks > 0 ? errorTicks / desiredDelayTicks : 0;
+            const rateAdjustment = Math.max(
+                -this.playerPlaybackRateAdjustment,
+                Math.min(this.playerPlaybackRateAdjustment, normalizedError)
+            );
+            nextTick = timing.playbackTick + elapsedTicks * (1 + rateAdjustment);
+        }
+        nextTick = Math.max(0, Math.min(nextTick, latest.tick + this.maxExtrapolationSeconds * TICKS_PER_SECOND));
+        timing.playbackTick = nextTick;
+        timing.sampledAt = now;
+        this.lastPlayerInterpolationDelayTicks = Math.max(0, latest.tick - nextTick);
+        this.maxPlayerInterpolationDelayTicksObserved = Math.max(
+            this.maxPlayerInterpolationDelayTicksObserved,
+            this.lastPlayerInterpolationDelayTicks
+        );
+        return nextTick;
+    }
+
+    smoothPlayerPresentation(playerId, targetPosition, targetAngle, now) {
+        const previous = this.playerPresentationById.get(playerId);
+        if (!previous) {
+            const initial = { position: targetPosition, angle: targetAngle, sampledAt: now };
+            this.playerPresentationById.set(playerId, initial);
+            return { position: initial.position, angle: initial.angle };
+        }
+        const distance = Math.hypot(targetPosition.x - previous.position.x, targetPosition.y - previous.position.y);
+        const elapsedSeconds = Math.max(0, now - previous.sampledAt) / 1000;
+        const alpha =
+            this.playerPresentationSmoothingSeconds === 0
+                ? 1
+                : 1 - Math.exp(-elapsedSeconds / this.playerPresentationSmoothingSeconds);
+        const next =
+            distance > this.playerPresentationSnapDistance
+                ? { position: targetPosition, angle: targetAngle, sampledAt: now }
+                : {
+                      position: interpolatePosition(previous, { position: targetPosition }, alpha),
+                      angle: interpolateAngle(previous, { angle: targetAngle }, alpha),
+                      sampledAt: now
+                  };
+        this.playerPresentationById.set(playerId, next);
+        return { position: next.position, angle: next.angle };
+    }
+
     samplePosition(collection, id, serverTargetTick) {
         let samples = this.history.map((entry) => entityAt(entry, collection, id)).filter((entity) => entity !== null);
         let latest = samples.at(-1);
         if (!latest) return null;
-        const targetTick =
-            collection === "players" && Number.isSafeInteger(latest.ownerMotionTick)
-                ? serverTargetTick + MULTIPLAYER_TIMING.inputLeadTicks
-                : serverTargetTick;
+        const targetTick = serverTargetTick;
         if (collection === "players") samples = samplesOnPortalSide(this.history, id, samples, targetTick);
         const oldest = samples[0];
         latest = samples.at(-1);
@@ -251,9 +386,7 @@ export class RemoteWorldStateBuffer {
         let samples = this.history.map((entry) => entityAt(entry, "players", id)).filter((entity) => entity !== null);
         let latest = samples.at(-1);
         if (!latest) return 0;
-        const targetTick = Number.isSafeInteger(latest.ownerMotionTick)
-            ? serverTargetTick + MULTIPLAYER_TIMING.inputLeadTicks
-            : serverTargetTick;
+        const targetTick = serverTargetTick;
         samples = samplesOnPortalSide(this.history, id, samples, targetTick);
         const oldest = samples[0];
         latest = samples.at(-1);
@@ -280,6 +413,8 @@ export class RemoteWorldStateBuffer {
             maxExtrapolationMs: this.maxExtrapolationSecondsObserved * 1000,
             clockCorrectionMs: (this.lastClockCorrectionTicks / TICKS_PER_SECOND) * 1000,
             maxClockCorrectionMs: (this.maxClockCorrectionTicksObserved / TICKS_PER_SECOND) * 1000,
+            playerInterpolationDelayMs: (this.lastPlayerInterpolationDelayTicks / TICKS_PER_SECOND) * 1000,
+            maxPlayerInterpolationDelayMs: (this.maxPlayerInterpolationDelayTicksObserved / TICKS_PER_SECOND) * 1000,
             sampleCalls: this.sampleCalls
         });
     }
