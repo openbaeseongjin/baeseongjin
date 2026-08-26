@@ -2,7 +2,7 @@
 
 *IMPLEMENTATION TASK · REV 1.0 · SECTOR 03 CORE RUNTIME*
 
-> **COMPLETED / HISTORICAL HANDOFF** — 이 실행 지시서는 `AccessScanField`, authored `scannerGroups`, authority/owner-prediction 공용 phase와 회귀 테스트로 반영됐다. 현재 구현 상태는 [`3-2/PRODUCTION-ALIGNMENT.md`](./3-2/PRODUCTION-ALIGNMENT.md)와 [`../../../scenario-development-integration.md`](../../../scenario-development-integration.md)가 소유한다.
+> **COMPLETED / HISTORICAL HANDOFF** — 이 실행 지시서는 `AccessScanField`, authored `scannerGroups`, authority/owner-prediction 공용 phase와 회귀 테스트로 반영됐다. 현재 구현 상태는 [`3-2/PRODUCTION-ALIGNMENT.md`](./3-2/PRODUCTION-ALIGNMENT.md)와 Runtime source가 소유한다.
 
 Project:
 OpenAI Game Builders Hackathon

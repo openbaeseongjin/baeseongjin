@@ -33,7 +33,7 @@
 | `docs/bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md`  | 실제 UI 구현 범위, additive snapshot 경계, 수치 미구현 범위를 기록한다.                                |
 | `docs/bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md`  | 직접 플레이로 확인한 Camera/경로/LOS 결과만 기록한다.                                                  |
 | `docs/bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md`  | 직접 플레이로 확인한 Camera/경로/Wind 결과만 기록한다.                                                 |
-| `docs/scenario-development-integration.md`         | 변경된 Runtime·시나리오 상태와 검증 marker를 실제 근거로 갱신한다.                                     |
+| `scripts/checkpoints/scenario-integration.v1.json` | 관련 Stage 근거를 재검토한 뒤 검증 fingerprint를 갱신한다.                                              |
 
 `docs/bsh/scenario/1/{1-4,1-5,1-7}/AREA-SPEC.v2.json`과 `src/game/world/areas/generated/sector01/Sector01Stage{04,05,07}.generated.js`는 직접 플레이에서 시나리오 불일치가 증명될 때만 Map Editor Apply의 한 묶음으로 변경한다. Camera Zone을 포함한 해당 generated 파일은 수기 편집 금지다.
 
@@ -215,7 +215,7 @@
 - 수정: `docs/bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md`
 - 수정: `docs/bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md`
 - 수정: `docs/bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md`
-- 수정: `docs/scenario-development-integration.md`
+- 수정: `scripts/checkpoints/scenario-integration.v1.json`
 - 수정: `SESSION-HANDOFF.md`
 
 **인터페이스:**
@@ -234,7 +234,7 @@
 
 - [ ] **3단계: 시나리오 통합 marker와 handoff를 정리한다.**
 
-    `npm run check:scenario-integration -- --print`로 최신 fingerprint와 열린 gate를 재검토한 후 `docs/scenario-development-integration.md`에 Runtime 상태·근거·미구현 범위를 기록한다. 1-4 Presentation, map editor 범위, Camera 범위의 영구 문서 소유가 충분하면 `SESSION-HANDOFF.md`의 L1을 완전히 제거한다.
+    `npm run check:scenario-integration -- --print`로 최신 fingerprint를 확인하고 관련 Stage `PRODUCTION-ALIGNMENT.md`에 Runtime 상태·근거·미구현 범위를 기록한 후 checkpoint를 갱신한다. 1-4 Presentation, map editor 범위, Camera 범위의 영구 문서 소유가 충분하면 `SESSION-HANDOFF.md`의 L1을 완전히 제거한다.
 
 - [ ] **4단계: 단일 최종 candidate 검증을 한 번 실행하고 ledger를 남긴다.**
 
@@ -250,7 +250,7 @@
 - [ ] **5단계: 문서 변경을 커밋한다.**
 
     ```powershell
-    git add docs/bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md docs/bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md docs/bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md docs/scenario-development-integration.md SESSION-HANDOFF.md
+    git add docs/bsh/scenario/1/1-4/PRODUCTION-ALIGNMENT.md docs/bsh/scenario/1/1-5/PRODUCTION-ALIGNMENT.md docs/bsh/scenario/1/1-7/PRODUCTION-ALIGNMENT.md scripts/checkpoints/scenario-integration.v1.json SESSION-HANDOFF.md
     git commit -m "docs: record Sector 01 map parity evidence"
     ```
 

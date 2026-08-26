@@ -1,31 +1,26 @@
 # 프로젝트 문서 인덱스
 
-이 문서는 `docs/` 아래 문서의 역할과 읽는 순서를 안내한다. 같은 주제를 다루는 문서가 있으면 아래에 표시한 **현재 기준 문서**가 우선한다. 저장소 루트의 [`SESSION-HANDOFF.md`](../SESSION-HANDOFF.md)는 아직 기준 문서에 흡수되지 않은 항목만 제공하며, 현재 구현 순서와 시나리오 상태는 아래 기준 문서에서 직접 확인한다.
+이 문서는 `docs/` 아래 문서의 역할과 읽는 순서를 안내한다. 같은 주제를 다루는 문서가 있으면 아래에 표시한 **현재 기준 문서**가 우선한다. 저장소 루트의 [`SESSION-HANDOFF.md`](../SESSION-HANDOFF.md)는 아직 기준 문서에 흡수되지 않은 항목만 제공한다.
 
 ## 빠른 시작
 
 처음 프로젝트를 파악할 때는 다음 순서로 읽는다.
 
 1. [`game-hackathon-planning.md`](./game-hackathon-planning.md) — 게임의 목표와 핵심 경험
-2. [`implementation-roadmap.md`](./implementation-roadmap.md) — 현재 구현 상태와 다음 개발 순서
-3. [`scenario-development-integration.md`](./scenario-development-integration.md) — 시나리오 문서와 Runtime의 최근 통합 현황
-4. [`architecture.md`](./architecture.md) — 코드 구조와 객체 책임
-5. [`development-rules.md`](./development-rules.md) — 모든 개발 작업에 적용하는 규칙
-6. [`multiplayer-synchronization.md`](./multiplayer-synchronization.md) — 현재 멀티플레이 동기화 방식
-7. [`dev-environment-setup.md`](./dev-environment-setup.md) — 로컬 실행과 검증 방법
+2. [`architecture.md`](./architecture.md) — 코드 구조와 객체 책임
+3. [`development-rules.md`](./development-rules.md) — 모든 개발 작업에 적용하는 규칙
+4. [`multiplayer-synchronization.md`](./multiplayer-synchronization.md) — 현재 멀티플레이 동기화 방식
+5. [`performance-architecture.md`](./performance-architecture.md) — 게임 Runtime 성능 계약
+6. [`dev-environment-setup.md`](./dev-environment-setup.md) — 로컬 실행과 검증 방법
 
 ## 제품과 기획
 
 | 문서 | 역할 |
 | --- | --- |
 | [`game-hackathon-planning.md`](./game-hackathon-planning.md) | 제품 방향과 핵심 경험 |
-| [`development-schedule.md`](./development-schedule.md) | 역할별 병렬 작업, 필수 선행 관계와 제출 일정 |
-| [`implementation-roadmap.md`](./implementation-roadmap.md) | 구현 현황과 개발 우선순위 |
 | [`augment-v1.md`](./augment-v1.md) | 0.26.0 증강 22장·선택·Action·멀티 피해 계약 |
 | [`enemy-density-composition.md`](./enemy-density-composition.md) | 0.32.0 Sector 01~03 authored slot 밀도·결정적 적 조합 계약 |
-| [`scenario-development-integration.md`](./scenario-development-integration.md) | 상세 Stage 목록, authored Runtime 연결 상태, 차단 요소와 마지막 확인 근거 |
 | [`sector-timer-and-boss-flow.md`](./sector-timer-and-boss-flow.md) | 섹터 `60/+10/cap60` Timer·Purge 240px/s·topology HOLD·보스 분리 기준 |
-| [`design-decision-requests.md`](./design-decision-requests.md) | P1~P5 기획 결정의 확정 답변과 구현 상태 추적 |
 | [`design-decision-resolution-package.md`](./design-decision-resolution-package.md) | Boss·Timer·NPC·Ending의 구현 가능한 통합 기획 계약 |
 | [`boss/README.md`](./boss/README.md) | Boss03·06 제품 Runtime 기준과 Commander 시각 기획 |
 | [`decision-history.md`](./decision-history.md) | 대체되거나 완료된 결정 이력 |

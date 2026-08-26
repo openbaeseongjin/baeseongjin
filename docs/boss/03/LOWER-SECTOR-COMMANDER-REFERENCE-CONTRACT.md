@@ -190,7 +190,7 @@
 ## 기준 문서
 
 - [Boss 콘텐츠 기준](../README.md)
-- [시나리오 기획·개발 통합 현황](../../scenario-development-integration.md)
+- [Runtime 아키텍처](../../architecture.md)
 - [게임 기획](../../game-hackathon-planning.md)
 - [그래픽 리소스 작업 가이드](../../graphics-asset-guide.md)
 - [픽셀 그래픽 디자인 규격](../../pixel-graphics-design-guide.md)

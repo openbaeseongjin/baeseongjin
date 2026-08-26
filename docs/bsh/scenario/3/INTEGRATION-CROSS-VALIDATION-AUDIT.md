@@ -12,7 +12,7 @@
 Sector 03 Master Plan REV 1.1, 3-2 Runtime Note, 3-1/3-2 Exit Contract, 3-8 REV 1.1 교체와
 같은 변경에서 모두 적용됐다.
 
-아래 본문은 패치 적용 이전 시점의 원본 감사 기록이다. 이후 Sector 03 3-1~3-8과 Access Scan Field prototype이 메인 authored world에 통합됐으므로, 본문의 Runtime 미연결·Scanner 미구현 판정은 현재 판정으로 사용하지 않는다. 현재 좌표·Stable ID·검증 근거는 각 Stage의 `PRODUCTION-ALIGNMENT.md`와 [`../../../scenario-development-integration.md`](../../../scenario-development-integration.md)가 소유한다.
+아래 본문은 패치 적용 이전 시점의 원본 감사 기록이다. 이후 Sector 03 3-1~3-8과 Access Scan Field prototype이 메인 authored world에 통합됐으므로, 본문의 Runtime 미연결·Scanner 미구현 판정은 현재 판정으로 사용하지 않는다. 현재 좌표·Stable ID·검증 근거는 각 Stage의 `PRODUCTION-ALIGNMENT.md`와 Runtime source가 소유한다.
 
 ---
 

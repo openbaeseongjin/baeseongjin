@@ -19,7 +19,7 @@
 | Static Grapple Filter | VERIFIED — IMPLEMENTED |
 | Dynamic Scanner Eligibility | IMPLEMENTED — `AccessScanField` + authored `scannerGroups` |
 | Multiplayer Model | time-derived state from shared `worldElapsedSeconds`, gated by prediction-clock parity test |
-| Runtime Sector 03 | MOCK INTEGRATED — current truth is owned by `docs/scenario-development-integration.md` |
+| Runtime Sector 03 | MOCK INTEGRATED — current truth is owned by each Stage `PRODUCTION-ALIGNMENT.md` and Runtime source |
 | Art | MOCK / DEBUG ONLY until Sector 03 Runtime + Camera Zone stable |
 | Production Timing | HYPOTHESIS — 3-2 baseline initially |
 | Success Definition | authority + owner prediction match across normal, boundary, reconcile, and delayed-owner-motion cases |

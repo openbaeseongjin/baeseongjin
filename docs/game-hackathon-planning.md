@@ -19,6 +19,8 @@
 
 장르 중심은 **로프 액션 로그라이크**로 확정한다. 한 런의 공용 진행은 하나로 계속되지만 각 Stage 공간은 Map Editor가 소유하는 독립 authored 맵이다. 출구를 통과한 Player 한 명만 다음 Stage Entry로 이동하며 개인 사망은 최근 접촉한 Stage 세이브 포인트에서 즉시 재개한다.
 
+Enemy roster는 행동 요소별 기본형을 먼저 단독 안정화한 뒤 같은 계열의 확장형과 Sector별 해금·허용 조합을 추가한다. 새 변형을 기본형 검증보다 앞세우지 않는다.
+
 ## 3. 핵심 플레이 경험
 
 초반 목표는 플레이 시작 후 **1~2분 안에 “로프 타는 게 재미있다”를 느끼게 하는 것**이다.
@@ -135,7 +137,7 @@
 ## 9. 일정과 목표
 
 - 정기 회의: 매일 22:00~23:00, Discord
-- `SECTOR 01`~`06`의 상세 Stage 문서는 48/48 작성됐다. 문서 작성과 Runtime 연결은 별도 상태이며, 현재 연결 수·차단 요소·마지막 확인 근거는 [`scenario-development-integration.md`](./scenario-development-integration.md)가 소유한다.
+- `SECTOR 01`~`06`의 상세 Stage 문서는 48/48 작성됐다. 문서 작성과 Runtime 연결은 별도 상태이며 각 Stage의 실제 정렬 근거는 해당 `PRODUCTION-ALIGNMENT.md`와 Runtime source가 소유한다.
 - 메인 개발은 문서 수를 완료 수치로 사용하지 않고 섹터 순서대로 mock Runtime을 연결한다. 다음 섹터 전체 연결 완료를 선언하려면 해당 섹터의 8개 영역 흐름·오브젝트 요구·전환 계약과 실제 검증이 모두 필요하다.
 - 0.67.0은 authored 장비 Node를 제거하고 마지막 양수 Player 피해 귀속 경험치·자동 계산 레벨업·Player별 Augment 선택으로 전환한다. 완전 회복·Encounter reset 전에는 이후 환경 원인 사망도 해당 Player에게 귀속한다. Catalog와 현재 보상 범위의 기준은 [`augment-v1.md`](./augment-v1.md)다.
 - 0.75.0의 PC Spell 입력은 `Q` 기본·`E` 유틸·`R` 고위력·`Shift` 이동 직접 슬롯이며 Rope 부착·스윙을 해제하지 않는다. 모바일은 같은 네 역할을 `슬롯 선택 → 월드 터치 1회 시전`으로 사용한다.

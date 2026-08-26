@@ -47,8 +47,8 @@ Master or the 6-1 REV3.0 package.
 
 Importing these sources does not create Runtime geometry, a Sector transition,
 the Final Security encounter, a general timer, or multiplayer behavior. Current
-main and Runtime integration status are owned by
-[`scenario-development-integration.md`](../../../scenario-development-integration.md).
+Runtime alignment is owned by each Stage `PRODUCTION-ALIGNMENT.md` and the
+production source.
 
 ### Authoring Snapshot
 
@@ -2309,7 +2309,7 @@ retry boss only
 
 ## 43. Boss / Ending Product Decision Status
 
-GitHub `design-decision-requests.md`의 P5:
+당시 기획 결정 요청의 P5:
 
 ```text
 ENDING / FINAL TRANSITION
@@ -2497,7 +2497,7 @@ FINAL PURE MOVEMENT ARRIVAL
 ### Before Every Stage
 
 1. re-fetch latest `main`
-2. check `scenario-development-integration.md`
+2. check the target Stage `PRODUCTION-ALIGNMENT.md` and production source
 3. check current Sector06 Master
 4. check previous Stage
 5. check next planned role

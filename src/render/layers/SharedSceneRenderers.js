@@ -4,6 +4,7 @@ import { HARDPOINT_JAMMER_PHASE } from "../../game/world/HardpointJammerField.js
 import { windBladePhase } from "../../game/world/WorldForceField.js";
 import { isSurfaceEnabledForProgress } from "../../game/world/WorldGateGeometry.js";
 import { authoredRegionForPosition } from "../../game/world/AuthoredLandmarkResolver.js";
+import { Quadtree } from "../../game/physics/spatial/Quadtree.js";
 import { resolveAccessModuleTargets } from "../ScreenEdgeGuide.js";
 import { boundsForVertices, circleBounds, isVisible } from "../RenderViewport.js";
 import {
@@ -47,6 +48,24 @@ const SPRITE_STATE_BY_OPENED = Object.freeze({
     false: WORLD_OBJECT_SPRITE_STATE.CLOSED,
     true: WORLD_OBJECT_SPRITE_STATE.OPENED
 });
+
+const EMPTY_WORLD_OBJECTS = Object.freeze([]);
+const WORLD_OBJECT_RENDER_SPATIAL_ID = Object.freeze({
+    entry(index) {
+        return `world-object-render:${index}`;
+    }
+});
+
+function quadtreeBoundsForViewport(viewport) {
+    const bounds = viewport?.worldBounds;
+    if (!bounds) return null;
+    return {
+        x: bounds.minX,
+        y: bounds.minY,
+        width: bounds.maxX - bounds.minX,
+        height: bounds.maxY - bounds.minY
+    };
+}
 
 function drawRope(context, rope, player, { electrified = false, time = 0 } = {}) {
     if (!rope?.anchor) return;
@@ -405,16 +424,17 @@ export class AuthoredWorldObjectRenderer {
     constructor({ presentationCatalog = DEFAULT_WORLD_OBJECT_MOCK_CATALOG, spriteAssets = null } = {}) {
         this.presentationCatalog = presentationCatalog;
         this.spriteAssets = spriteAssets ?? new WorldObjectSpriteAssetCatalog({ presentations: presentationCatalog });
+        this.cachedObjectSource = null;
+        this.indexedObjects = EMPTY_WORLD_OBJECTS;
+        this.spatialIndex = new Quadtree();
     }
 
     draw({ context, scene, viewport, renderStats, presentationTimeSeconds = 0 }) {
-        const objects = (scene.world.objects ?? []).filter(
-            (object) => this.presentationFor(object)?.renderMode === "mock-shape"
+        this.prepareSpatialIndex(scene.world.objects ?? EMPTY_WORLD_OBJECTS);
+        const queryBounds = quadtreeBoundsForViewport(viewport);
+        const visible = (queryBounds ? this.spatialIndex.query(queryBounds) : [...this.indexedObjects]).sort(
+            (left, right) => left.order - right.order
         );
-        const visible = objects.filter((object) => {
-            const style = this.presentationFor(object);
-            return isVisible(viewport, worldObjectWorldBounds(object, style));
-        });
         const elapsedSeconds = Number.isFinite(scene.tick) ? scene.tick / 120 : presentationTimeSeconds;
         const windZones = scene.world.windZones ?? [];
         const windStates = scene.windStates ?? [];
@@ -424,10 +444,37 @@ export class AuthoredWorldObjectRenderer {
             windZoneById: Object.freeze(Object.fromEntries(windZones.map((zone) => [zone.id, zone]))),
             windStateById: Object.freeze(Object.fromEntries(windStates.map((state) => [state.id, state])))
         };
-        for (const object of visible) this.drawObject(context, object, scene, renderArgs);
+        for (const { object, style } of visible) this.drawObject(context, object, scene, renderArgs, style);
         const recoveryPoints = (scene.world.areas ?? []).flatMap(({ recoveryPoints }) => recoveryPoints ?? []);
-        renderStats?.recordCollection("worldObjects", objects.length, visible.length);
+        renderStats?.recordCollection("worldObjects", this.indexedObjects.length, visible.length);
         renderStats?.recordCollection("recoveryPoints", recoveryPoints.length, 0);
+    }
+
+    prepareSpatialIndex(objects) {
+        if (objects === this.cachedObjectSource) return this.indexedObjects;
+        const indexed = [];
+        for (const [order, object] of objects.entries()) {
+            const style = this.presentationFor(object);
+            if (style?.renderMode !== "mock-shape") continue;
+            indexed.push(
+                Object.freeze({
+                    object,
+                    style,
+                    order,
+                    bounds: worldObjectWorldBounds(object, style)
+                })
+            );
+        }
+        this.cachedObjectSource = objects;
+        this.indexedObjects = Object.freeze(indexed);
+        this.spatialIndex.rebuild(
+            indexed.map((entry, index) => ({
+                id: WORLD_OBJECT_RENDER_SPATIAL_ID.entry(index),
+                bounds: entry.bounds,
+                value: entry
+            }))
+        );
+        return this.indexedObjects;
     }
 
     presentationFor(object) {
@@ -441,8 +488,7 @@ export class AuthoredWorldObjectRenderer {
         return (scene.world.areas ?? []).find(({ id }) => id === object.areaId)?.sectorId ?? null;
     }
 
-    drawObject(context, object, scene, renderArgs = {}) {
-        const style = this.presentationFor(object);
+    drawObject(context, object, scene, renderArgs = {}, style = this.presentationFor(object)) {
         const sectorId = this.sectorIdFor(object, scene);
         const progress = scene.worldProgress;
         const objectiveComplete = object.objectiveId
