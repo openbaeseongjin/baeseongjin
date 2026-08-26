@@ -51,6 +51,12 @@ function debugFlightBounds(state) {
     return previewFlightBoundsForWorld(state.world, state.player.position);
 }
 
+export function singlePlayerProjectileSimulationState(state, owner) {
+    if (!Array.isArray(state?.players)) throw new Error("single player snapshot requires the canonical players array");
+    if (!owner || typeof owner.id !== "string") throw new Error("single player projectile state requires an owner");
+    return Object.freeze({ ...state, localPlayer: owner });
+}
+
 export class GameApp {
     constructor({
         canvas,
@@ -365,15 +371,7 @@ export class GameApp {
         const authorityFeedback = this.predictableProjectiles.apply(authorityEvents, state.tick, state);
         const owner = this.authority.ownerState();
         const predictedImpacts = this.predictableProjectiles
-            .update(
-                dt,
-                {
-                    enemies: state.enemies,
-                    bossStage: state.bossStage ?? state.bossRuntime ?? null,
-                    localPlayer: owner
-                },
-                state.tick
-            )
+            .update(dt, singlePlayerProjectileSimulationState(state, owner), state.tick)
             .filter(({ projectileId }) => projectileId);
         for (const impact of predictedImpacts) {
             this.predictableProjectiles.applyImpactReceipts([this.authority.submitImpactClaim(impact)]);
@@ -389,7 +387,7 @@ export class GameApp {
             state.world,
             state.bossStage ?? state.bossStageRuntime ?? state.bossRuntime
         );
-        this.combatFeedback.syncContinuous({ ...state, players: [state.player] }, dt, particleBounds);
+        this.combatFeedback.syncContinuous(state, dt, particleBounds);
         this.combatFeedback.update(dt);
         const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
         this.directionRuntime.update(dt, {

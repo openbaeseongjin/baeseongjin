@@ -17,3 +17,6 @@ Implementation must preserve:
 - no new mechanics
 - arrival without boarding
 - existing interact for denial
+- the authored access-denial console and logical content-boundary trigger without a separate exit Gate visual
+- no P3 Grapple Anchor overlapping the terminal trigger; the exit route point remains authored
+- exact Map Editor object parity; Runtime and validators do not synthesize missing exit objects

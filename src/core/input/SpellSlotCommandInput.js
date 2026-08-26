@@ -62,4 +62,14 @@ export class SpellSlotCommandInput {
             commandKey: this.commandKey
         });
     }
+
+    consume() {
+        const command = this.snapshot();
+        this.commandKey = null;
+        return command;
+    }
+
+    clear() {
+        this.commandKey = null;
+    }
 }

@@ -166,14 +166,15 @@ function validatePortalContract(area, issues) {
     ) {
         issues.push(issue("portal-panel-interaction-bounds", area.id, { objectId: panels[0].id }));
     }
-    if (gates.length !== 1) {
-        issues.push(issue("portal-gate-count", area.id, { expected: 1, actual: gates.length }));
-    } else if (gates[0].presentationId !== "world-object:gate") {
+    if (gates.length > 1) {
+        issues.push(issue("portal-gate-count", area.id, { maximum: 1, actual: gates.length }));
+    } else if (gates[0] && gates[0].presentationId !== "world-object:gate") {
         issues.push(issue("portal-gate-presentation", area.id, { objectId: gates[0].id }));
     } else if (
-        gates[0].position.x !== area.exit.x ||
-        gates[0].position.x !== area.gate.trigger.x + area.gate.trigger.width * 0.5 ||
-        panels[0].position.y !== gates[0].position.y
+        gates[0] &&
+        (gates[0].position.x !== area.exit.x ||
+            gates[0].position.x !== area.gate.trigger.x + area.gate.trigger.width * 0.5 ||
+            panels[0].position.y !== gates[0].position.y)
     ) {
         issues.push(
             issue("portal-gate-layout", area.id, {

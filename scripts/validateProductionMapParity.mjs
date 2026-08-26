@@ -561,13 +561,12 @@ function boundsOverlap(left, right) {
 
 function validateGroundedWorldObjectPresentations(area, stageId, issues) {
     const exitPresentations = (area.objects ?? []).filter(({ gateId }) => gateId === area.gate?.id);
-    for (const [presentationId, code] of [
-        ["world-object:gate", "exit-gate-presentation-count"],
-        ["world-object:gate-panel", "exit-panel-presentation-count"]
-    ]) {
-        const count = exitPresentations.filter((object) => object.presentationId === presentationId).length;
-        if (count !== 1) issue(issues, code, { stageId, expected: 1, actual: count });
-    }
+    const panelCount = exitPresentations.filter(
+        ({ presentationId }) => presentationId === "world-object:gate-panel"
+    ).length;
+    if (panelCount !== 1) issue(issues, "exit-panel-presentation-count", { stageId, expected: 1, actual: panelCount });
+    const gateCount = exitPresentations.filter(({ presentationId }) => presentationId === "world-object:gate").length;
+    if (gateCount > 1) issue(issues, "exit-gate-presentation-count", { stageId, maximum: 1, actual: gateCount });
     const panel = exitPresentations.find(({ presentationId }) => presentationId === "world-object:gate-panel");
     const gate = exitPresentations.find(({ presentationId }) => presentationId === "world-object:gate");
     if (
