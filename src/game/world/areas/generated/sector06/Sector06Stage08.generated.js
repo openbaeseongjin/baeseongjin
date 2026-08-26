@@ -207,26 +207,6 @@ const SPEC = {
         "x": 1600,
         "y": -1520
       }
-    },
-    {
-      "landmark": {
-        "id": "sector-06-08:p3",
-        "properties": {
-          "coordinateAnchor": "center",
-          "label": "P3",
-          "sourceId": "sector-06-08:p3"
-        },
-        "x": 1750,
-        "y": -1670
-      },
-      "target": {
-        "id": "sector-06-08:p3-surface",
-        "properties": {
-          "sourceId": "sector-06-08:p3"
-        },
-        "x": 1750,
-        "y": -1670
-      }
     }
   ],
   "authoringMode": "runtime",
@@ -296,17 +276,6 @@ const SPEC = {
           "y": -1705
         },
         "presentationId": "world-object:gate-panel"
-      },
-      {
-        "coordinateAnchor": "bottom-center",
-        "gateId": "sector-06-08:gate",
-        "id": "sector-06-08:exit-gate",
-        "kind": "gate",
-        "position": {
-          "x": 1752,
-          "y": -1705
-        },
-        "presentationId": "world-object:gate"
       },
       {
         "activationSpec": {

@@ -162,11 +162,12 @@ export class InputSampler {
         this.controlPointers.clear();
         this.pointer.down = false;
         this.mobileGameplayInput.reset();
+        this.spellSlotCommands.clear();
         if (releasedRope && reason) this.notifyRopeRelease(reason);
     }
 
     notifyRopeRelease(reason) {
-        this.onRopeRelease(this.snapshot(), reason);
+        this.onRopeRelease(this.snapshot({ consumeSpellCommand: reason !== "pointerup" }), reason);
     }
 
     setSuspended(suspended, reason = "input-suspended") {
@@ -209,8 +210,8 @@ export class InputSampler {
         this.attached = false;
     }
 
-    snapshot() {
-        const spellCommand = this.spellSlotCommands.snapshot();
+    snapshot({ consumeSpellCommand = true } = {}) {
+        const spellCommand = consumeSpellCommand ? this.spellSlotCommands.consume() : this.spellSlotCommands.snapshot();
         const keyboardHorizontal =
             Number(this.keys.has("ArrowRight") || this.keys.has("KeyD")) -
             Number(this.keys.has("ArrowLeft") || this.keys.has("KeyA"));

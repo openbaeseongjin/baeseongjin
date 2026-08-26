@@ -1,6 +1,6 @@
 {
     "name": "baeseongjin-rope-roguelike",
-    "version": "0.81.2",
+    "version": "0.81.3",
     "private": true,
     "type": "module",
     "scripts": {
@@ -11,10 +11,11 @@
         "publish:multiplayer": "node scripts/publish-multiplayer.mjs",
         "smoke:multiplayer": "node scripts/smokeMultiplayer.mjs",
         "simulate:multiplayer-combat": "node scripts/simulateTwoPlayerCombat.mjs && node scripts/simulateTwoPlayerCombatWire.mjs",
+        "simulate:single-gameplay-combat": "node scripts/simulateSingleGameplayCombat.mjs",
         "simulate:multiplayer-combat:coverage": "node scripts/simulateTwoPlayerCombatWire.mjs --coverage",
         "simulate:multiplayer-combat:wire": "node scripts/simulateTwoPlayerCombatWire.mjs",
         "test": "node tests/sector03BackgroundTransition.mjs",
-        "check": "node scripts/checkSyntax.mjs && node scripts/validateAreaSpecs.mjs && node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check && node scripts/map-editor/validateBossStageSpecs.mjs && node scripts/validateProductionMapParity.mjs && node scripts/validateDirectionSpecs.mjs && node scripts/checkScenarioIntegration.mjs",
+        "check": "node scripts/checkSyntax.mjs && node scripts/simulateSingleGameplayCombat.mjs && node scripts/validateAreaSpecs.mjs && node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check && node scripts/map-editor/validateBossStageSpecs.mjs && node scripts/validateProductionMapParity.mjs && node scripts/validateDirectionSpecs.mjs && node scripts/checkScenarioIntegration.mjs",
         "check:scenario-integration": "node scripts/checkScenarioIntegration.mjs",
         "validate:area-specs": "node scripts/validateAreaSpecs.mjs",
         "validate:production-map-parity": "node scripts/validateProductionMapParity.mjs",
