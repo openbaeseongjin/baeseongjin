@@ -1080,6 +1080,19 @@
                                 <span>디버그 수치 표시</span>
                                 <input type="checkbox" data-debug-metrics />
                             </label>
+                            <label class="debug-toggle">
+                                <span>실제 충돌체 표시</span>
+                                <input type="checkbox" data-debug-collider-overlay />
+                            </label>
+                            <p class="debug-note">
+                                빨강 지형 · 주황 단방향 · 분홍 몸체 · 흰 투사체 · 노랑 상호작용 · 청록 출구 · 보라 목표
+                                · 초록 세이브
+                            </p>
+                            <label class="debug-toggle">
+                                <span>비행 모드</span>
+                                <input type="checkbox" data-debug-flight-mode />
+                            </label>
+                            <p class="debug-note" data-debug-flight-mode-status role="status"></p>
                             <label class="debug-select-row">
                                 <span>싱글플레이 시작 맵</span>
                                 <select data-debug-start-area>
@@ -1087,9 +1100,9 @@
                                 </select>
                             </label>
                             <p class="debug-note">
-                                수치 표시와 시작 맵은 적용 버튼으로 반영됩니다. 싱글에서는 현재 Run을 종료하고 저장된
-                                시작 맵·Rope 수치·획득 증강 상태로 즉시 새 Run을 시작합니다. 마법은 역할 슬롯에 자동
-                                장착됩니다.
+                                충돌체·비행 토글은 즉시 반영됩니다. 수치 표시와 시작 맵은 적용 버튼으로 반영됩니다.
+                                싱글에서는 현재 Run을 종료하고 저장된 시작 맵·Rope 수치·획득 증강 상태로 즉시 새 Run을
+                                시작합니다. 마법은 역할 슬롯에 자동 장착됩니다.
                             </p>
                             <fieldset class="debug-augment-fieldset" data-debug-augment-loadout>
                                 <legend>획득 증강 테스트</legend>

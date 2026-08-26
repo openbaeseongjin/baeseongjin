@@ -34,6 +34,22 @@ import {
 } from "./presentation/BossStageLocalView.js";
 import { enemyPresentationDefinition, resolveEnemyPresentationState } from "../render/EnemyPresentationState.js";
 import { isCanonicalEnemyType } from "./combat/EnemyArchetypeCatalog.js";
+import { PreviewFlightController, previewFlightBoundsForWorld } from "./runtime/PreviewFlightController.js";
+
+function boundsContains(bounds, position) {
+    return (
+        position.x >= bounds.x &&
+        position.x <= bounds.x + bounds.width &&
+        position.y >= bounds.y &&
+        position.y <= bounds.y + bounds.height
+    );
+}
+
+function debugFlightBounds(state) {
+    const bossBounds = state.bossStage?.arena?.bounds ?? state.bossRuntime?.arena?.bounds ?? null;
+    if (bossBounds && boundsContains(bossBounds, state.player.position)) return bossBounds;
+    return previewFlightBoundsForWorld(state.world, state.player.position);
+}
 
 export class GameApp {
     constructor({
@@ -45,6 +61,8 @@ export class GameApp {
         worldSeed = selectWorldSeed(globalThis.location?.search),
         startAreaId = null,
         metricsVisible = false,
+        colliderOverlayVisible = false,
+        debugFlightEnabled = false,
         hudVisible = true,
         ropeTuning = null,
         debugAugmentIds = [],
@@ -74,6 +92,9 @@ export class GameApp {
             );
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = metricsVisible;
+        this.colliderOverlayVisible = colliderOverlayVisible === true;
+        this.debugFlight = new PreviewFlightController();
+        this.debugFlight.setEnabled(debugFlightEnabled);
         this.hudVisible = hudVisible !== false;
         this.onDiagnostics = onDiagnostics;
         this.audioBindings = audioBindings;
@@ -128,13 +149,30 @@ export class GameApp {
         this.metricsVisible = Boolean(visible);
     }
 
+    setColliderOverlayVisible(visible) {
+        this.colliderOverlayVisible = Boolean(visible);
+        return this.colliderOverlayVisible;
+    }
+
+    setDebugFlightEnabled(enabled) {
+        if (enabled && typeof this.authority.applyFlightMotion !== "function") return false;
+        return this.debugFlight.setEnabled(enabled);
+    }
+
     setHudVisible(visible) {
         this.hudVisible = Boolean(visible);
         return this.hudVisible;
     }
 
-    applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
+    applyDebugSettings({
+        metrics = this.metricsVisible,
+        colliderOverlay = this.colliderOverlayVisible,
+        flightMode = this.debugFlight.enabled,
+        startAreaId = null
+    } = {}) {
         this.setMetricsVisible(metrics);
+        this.setColliderOverlayVisible(colliderOverlay);
+        this.setDebugFlightEnabled(flightMode);
         if (startAreaId && this.authority.applyDebugStartArea(startAreaId)) {
             this.camera = this.createCamera();
             this.currentRenderSnapshot = this.authority.snapshot();
@@ -303,8 +341,14 @@ export class GameApp {
         }).worldBounds;
         const before = this.currentRenderSnapshot;
         this.previousRenderSnapshot = before;
+        const flightBounds = this.debugFlight.enabled ? debugFlightBounds(before) : null;
+        const flightPosition = flightBounds
+            ? this.debugFlight.nextPosition(before.player.position, flightBounds, dt, input)
+            : null;
+        const simulationInput = flightPosition ? this.debugFlight.neutralInput(input) : input;
         const aimWorld = this.renderer.screenToWorld(input.pointer, this.camera);
-        this.authority.step(dt, createPlayerCommand(input, aimWorld));
+        this.authority.step(dt, createPlayerCommand(simulationInput, aimWorld));
+        if (flightPosition) this.authority.applyFlightMotion(flightPosition);
         this.advanceDebugTrainingDummy(dt);
         let state = this.authority.snapshot();
         const authorityEvents = this.authority.drainEvents();
@@ -501,6 +545,9 @@ export class GameApp {
             stats: this.stats,
             mobileView: this.mobileView,
             metricsVisible: this.metricsVisible,
+            collisionDebugGeometry: this.colliderOverlayVisible
+                ? (this.authority.collisionDebugSnapshot?.() ?? null)
+                : null,
             hudVisible: this.hudVisible,
             mobileControls: {
                 ...this.latestInput.mobileControls,

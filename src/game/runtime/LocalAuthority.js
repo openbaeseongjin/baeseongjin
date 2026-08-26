@@ -12,6 +12,19 @@ export class LocalAuthority {
         return this.simulation.snapshot();
     }
 
+    collisionDebugSnapshot() {
+        return this.simulation.collisionDebugSnapshot();
+    }
+
+    applyFlightMotion(position) {
+        this.simulation.applyOwnerMotion(this.playerId, {
+            ...this.ownerState(),
+            position,
+            velocity: { x: 0, y: 0 },
+            isGrounded: false
+        });
+    }
+
     ownerState() {
         return this.simulation.playerState(this.playerId);
     }

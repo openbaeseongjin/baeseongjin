@@ -31,6 +31,7 @@ import { ActorStatusRenderer } from "./ActorStatusPresentation.js";
 import { BossStageWorldRenderer } from "./boss/BossStageWorldRenderer.js";
 import { CONTINUITY_WARDEN_PROJECTILE_PRESET_ID } from "../game/boss/ContinuityWardenDefinition.js";
 import { HomingMissileRenderer } from "./projectiles/HomingMissileRenderer.js";
+import { DebugCollisionRenderer } from "./debug/DebugCollisionRenderer.js";
 
 export class PolygonSceneRenderer {
     constructor() {
@@ -91,6 +92,7 @@ export class PolygonSceneRenderer {
                     new EventEffectRenderer(),
                     new AttachmentCandidateRenderer(),
                     new PolygonLocalPlayerRenderer(),
+                    new DebugCollisionRenderer(),
                     new ActorStatusRenderer()
                 ])
             ]

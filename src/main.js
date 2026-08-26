@@ -191,6 +191,10 @@ debugSettings.subscribe((value) => {
     diagnostics.release();
     diagnostics = setupPlaytestDiagnostics({ ...diagnosticsOptions, enabled: diagnosticsEnabled });
 });
+debugSettings.subscribe((value) => {
+    app?.setColliderOverlayVisible?.(value.colliderOverlay);
+    if (app instanceof GameApp) app.setDebugFlightEnabled(value.flightMode);
+});
 const releaseInstallPrompt = setupInstallPrompt({
     window: globalThis.window,
     navigator: globalThis.navigator,
@@ -266,6 +270,8 @@ function createSingleGameApp(debug) {
         onDiagnostics: updateDiagnostics,
         startAreaId: debug.startAreaId ?? undefined,
         metricsVisible: debug.metrics,
+        colliderOverlayVisible: debug.colliderOverlay,
+        debugFlightEnabled: debug.flightMode,
         hudVisible,
         ropeTuning: debug.ropeTuning,
         debugAugmentIds: debug.debugAugmentIds,
@@ -323,12 +329,14 @@ async function launch() {
             if (choice.mode === "single") {
                 activeChannelId = null;
                 debugPanel.setRopeTuningEnabled(true);
+                debugPanel.setSinglePlayerToolsEnabled(true);
                 debugEnemyTrainingControls.setEnabled(true);
                 const debug = debugSettings.snapshot();
                 await prepareGraphicsResources(graphicsResourceIdentityForStage(debug.startAreaId));
                 app = createSingleGameApp(debug);
             } else {
                 debugPanel.setRopeTuningEnabled(false);
+                debugPanel.setSinglePlayerToolsEnabled(false);
                 debugEnemyTrainingControls.setEnabled(false);
                 const serverUrl = configuredMultiplayerServer();
                 if (!serverUrl) throw new Error("고정 멀티 서버 주소가 아직 설정되지 않았습니다.");
@@ -346,6 +354,7 @@ async function launch() {
                     onDisconnect: returnToMenu,
                     onDiagnostics: updateDiagnostics,
                     metricsVisible: debug.metrics,
+                    colliderOverlayVisible: debug.colliderOverlay,
                     hudVisible,
                     directionDefinitions,
                     chatPanelRoot: document.getElementById("party-chat-panel")
@@ -358,6 +367,7 @@ async function launch() {
         } catch (error) {
             authority?.close();
             debugPanel.setRopeTuningEnabled(true);
+            debugPanel.setSinglePlayerToolsEnabled(true);
             debugEnemyTrainingControls.setEnabled(true);
             modeMenu.setStatus(error.message, true);
             modeMenu.setBusy(false);
@@ -374,6 +384,7 @@ function returnToMenu(message) {
     modeMenu.rememberChannel(stoppedApp?.authority?.channelId);
     stoppedApp?.stop();
     debugPanel.setRopeTuningEnabled(true);
+    debugPanel.setSinglePlayerToolsEnabled(true);
     debugEnemyTrainingControls.setEnabled(true);
     audioBindings?.stopScene();
     channelBadge.hidden = true;

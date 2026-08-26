@@ -288,6 +288,10 @@ export class RemoteGameAuthority {
         return this.ownerRuntime?.renderSnapshot() ?? null;
     }
 
+    collisionDebugSnapshot() {
+        return this.ownerRuntime?.collisionDebugSnapshot() ?? null;
+    }
+
     worldSnapshot() {
         return this.ownerRuntime?.worldSnapshot() ?? null;
     }
