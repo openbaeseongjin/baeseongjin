@@ -2808,6 +2808,7 @@ export class GameSimulation {
                       commandKey: null
                   },
                   pointer: activePlayer ? { ...player.ropeObject.lastPointer } : { x: 0, y: 0, down: false },
+                  viewport: { ...player.ropeObject.lastViewport },
                   aimWorld: player.ropeObject.aimWorld
               };
         const effectiveRopeConfig = player.augmentLoadout.effectiveRopeConfig(this.ropeConfig);
