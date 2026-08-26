@@ -213,7 +213,9 @@ export class OwnerPredictionRuntime {
             );
         }
         this.simulation.restoreHardpointJammers(snapshot.state.hardpointJammerStates ?? []);
-        this.simulation.restoreBossRuntime(snapshot.state.bossStage ?? snapshot.state.bossRuntime ?? null);
+        this.simulation.restoreBossRuntime(snapshot.state.bossStage ?? snapshot.state.bossRuntime ?? null, {
+            preserveOwnerHazardContacts: this.initialized
+        });
         this.simulation.restoreCombatInteractions(snapshot.state.combatInteractions, { preserveActive: true });
         if (!preserveCheckpoint) this.simulation.synchronizePredictionProgress(this.ownerId, progress);
     }

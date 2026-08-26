@@ -17,6 +17,7 @@ export const withEnemyRenderSnapshot = createRenderSnapshotCapabilityMixin({
             velocity: snapshotVector(this.velocity),
             collider: this.collider.snapshot(),
             level: this.level,
+            sectorId: this.sectorId,
             areaId: this.areaId,
             objectId: this.objectId,
             enemyType: this.enemyType,

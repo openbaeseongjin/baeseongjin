@@ -1,5 +1,7 @@
 import { CaptureDefinition } from "../interactions/CaptureDefinition.js";
 
+export const LOWER_SECTOR_COMMANDER_SECTOR_ID = "sector-03";
+
 export const LOWER_SECTOR_COMMANDER_STATE = Object.freeze({
     NEUTRAL: "neutral",
     WALK: "walk",

@@ -35,6 +35,7 @@ import {
     CONTINUITY_WARDEN_REACTION_STATE,
     CONTINUITY_WARDEN_SECURITY_STAR_SIZE,
     CONTINUITY_WARDEN_SECURITY_STAR_STATE,
+    CONTINUITY_WARDEN_SECTOR_ID as SECTOR_ID,
     CONTINUITY_WARDEN_SHUTTLE_CONTACT_ANCHOR,
     CONTINUITY_WARDEN_SHUTTLE_SIZE,
     CONTINUITY_WARDEN_SHUTTLE_STATE,
@@ -75,6 +76,12 @@ const PATTERN_WEIGHT = Object.freeze({
     })
 });
 const SECURITY_BAND = Object.freeze({ LOW: "low", HIGH: "high" });
+const SECURITY_BEAM_CONTACT_ID_MARKER = ":pulse:";
+const SECURITY_BEAM_TIME_EPSILON = 1e-9;
+const SECURITY_BEAM_HAZARD_KIND = Object.freeze({
+    [CONTINUITY_WARDEN_HAZARD.SECURITY_LOW]: true,
+    [CONTINUITY_WARDEN_HAZARD.SECURITY_HIGH]: true
+});
 const MELEE_HAZARD_STATE = Object.freeze({
     [CONTINUITY_WARDEN_STATE.BATON_1]: true,
     [CONTINUITY_WARDEN_STATE.BATON_2]: true,
@@ -126,7 +133,9 @@ const DEFAULT = Object.freeze({
     counterSeconds: 1.2,
     comboRange: 260,
     securityTelegraphSeconds: 1,
-    beamSeconds: 0.8,
+    beamSeconds: 3,
+    beamPulseSeconds: 0.5,
+    beamDamage: 20,
     beamGapSeconds: 0.3,
     securityRecoverySeconds: 0.8,
     victoryBatonDropSeconds: 0.35,
@@ -273,6 +282,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         this.config = this.#configuration();
         this.summonPattern = new BossEnemySummonPattern({
             bossStageId: definition.id,
+            sectorId: SECTOR_ID,
             ...this.config.summonPattern
         });
         this.spatialQuery = new ContinuityWardenSpatialQuery({ surfaces: definition.arena.surfaces });
@@ -399,6 +409,8 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
             comboRange: positive(parameters.comboRange, DEFAULT.comboRange),
             securityTelegraphSeconds: positive(parameters.securityTelegraphSeconds, DEFAULT.securityTelegraphSeconds),
             beamSeconds: positive(parameters.beamSeconds, DEFAULT.beamSeconds),
+            beamPulseSeconds: positive(parameters.beamPulseSeconds, DEFAULT.beamPulseSeconds),
+            beamDamage: positive(parameters.beamDamage, DEFAULT.beamDamage),
             beamGapSeconds: positive(parameters.beamGapSeconds, DEFAULT.beamGapSeconds),
             securityRecoverySeconds: positive(parameters.securityRecoverySeconds, DEFAULT.securityRecoverySeconds),
             walkSpeed: positive(parameters.walkSpeed, DEFAULT.walkSpeed),
@@ -1589,6 +1601,72 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
         };
     }
 
+    contactIdsForHazardObservation({ hazard, contactIdPrefix, playerId, overlapping, dt, emit = true }) {
+        if (SECURITY_BEAM_HAZARD_KIND[hazard?.kind] !== true) {
+            return super.contactIdsForHazardObservation({ contactIdPrefix, playerId, overlapping });
+        }
+        if (!overlapping || emit === false) return Object.freeze([]);
+        const pulseIndex = this.#securityBeamPulseIndex();
+        return pulseIndex > 0
+            ? Object.freeze([`${contactIdPrefix}${SECURITY_BEAM_CONTACT_ID_MARKER}${pulseIndex}:${playerId}`])
+            : Object.freeze([]);
+    }
+
+    hazardRecordKeyForContact(contactId, playerId) {
+        return (
+            this.#securityBeamPulseContact(contactId, playerId)?.recordKey ??
+            super.hazardRecordKeyForContact(contactId, playerId)
+        );
+    }
+
+    validatesHazardContactId({ contactId, playerId, hazardKind, recordKey }) {
+        if (SECURITY_BEAM_HAZARD_KIND[hazardKind] !== true) {
+            return super.validatesHazardContactId({ contactId, playerId, hazardKind, recordKey });
+        }
+        const pulse = this.#securityBeamPulseContact(contactId, playerId);
+        return Boolean(pulse && pulse.recordKey === recordKey);
+    }
+
+    #securityBeamPulseIndex() {
+        const elapsed = Math.max(0, this.config.beamSeconds - this.timer);
+        return Math.min(
+            Math.floor((this.config.beamSeconds + SECURITY_BEAM_TIME_EPSILON) / this.config.beamPulseSeconds),
+            Math.floor((elapsed + SECURITY_BEAM_TIME_EPSILON) / this.config.beamPulseSeconds) + 1
+        );
+    }
+
+    hazardContactSnapshot() {
+        return Object.freeze(
+            [...this.processedHazardContactIds]
+                .filter((contactId) => contactId.includes(SECURITY_BEAM_CONTACT_ID_MARKER))
+                .sort()
+        );
+    }
+
+    restoreHazardContacts(snapshot) {
+        for (const contactId of snapshot ?? []) {
+            if (typeof contactId === "string" && contactId.includes(SECURITY_BEAM_CONTACT_ID_MARKER)) {
+                this.processedHazardContactIds.add(contactId);
+            }
+        }
+        return this.hazardContactSnapshot();
+    }
+
+    #securityBeamPulseContact(contactId, playerId) {
+        if (typeof contactId !== "string" || typeof playerId !== "string") return null;
+        const playerSuffix = `:${playerId}`;
+        if (!contactId.endsWith(playerSuffix)) return null;
+        const withoutPlayer = contactId.slice(0, -playerSuffix.length);
+        const markerIndex = withoutPlayer.lastIndexOf(SECURITY_BEAM_CONTACT_ID_MARKER);
+        if (markerIndex < 1) return null;
+        const pulseIndex = Number(withoutPlayer.slice(markerIndex + SECURITY_BEAM_CONTACT_ID_MARKER.length));
+        const maximumPulseCount = Math.floor(
+            (this.config.beamSeconds + SECURITY_BEAM_TIME_EPSILON) / this.config.beamPulseSeconds
+        );
+        if (!Number.isSafeInteger(pulseIndex) || pulseIndex < 1 || pulseIndex > maximumPulseCount) return null;
+        return Object.freeze({ recordKey: withoutPlayer.slice(0, markerIndex), pulseIndex });
+    }
+
     activeHazards(worldOffset = { x: 0, y: 0 }) {
         if (this.status !== "active" || this.actionPhase !== ACTION_PHASE.ACTIVE) return Object.freeze([]);
         const hazard = this.#currentHazardDefinition();
@@ -1605,7 +1683,7 @@ export class ContinuityWardenRuntime extends CompositeBossEncounterRuntime {
                           collider: this.body.collider.snapshot()
                       }
                     : {}),
-                damage: this.config.damage
+                damage: SECURITY_BEAM_HAZARD_KIND[hazard.kind] === true ? this.config.beamDamage : this.config.damage
             })
         ]);
     }

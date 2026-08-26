@@ -105,6 +105,7 @@ class EnemyBodyObject extends withSurfacePhysics(
         id,
         position,
         level,
+        sectorId = null,
         areaId = null,
         objectId = null,
         enemyType = ENEMY_TYPE.SENTRY_T1,
@@ -141,6 +142,7 @@ class EnemyBodyObject extends withSurfacePhysics(
             motionType: enemyCollisionMotionType(enemyType)
         });
         this.level = level;
+        this.sectorId = sectorId;
         this.areaId = areaId;
         this.objectId = objectId;
         this.enemyType = enemyType;
@@ -293,6 +295,7 @@ class EnemyBodyObject extends withSurfacePhysics(
         const behaviorState = state?.behaviorState ?? null;
         if (
             state?.id !== this.id ||
+            state.sectorId !== this.sectorId ||
             state.objectId !== this.objectId ||
             state.enemyType !== this.enemyType ||
             !colliderSnapshotsEqual(

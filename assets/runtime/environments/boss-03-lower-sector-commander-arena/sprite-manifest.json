@@ -1,0 +1,203 @@
+{
+    "$schema": "../sprite-manifest.schema.json",
+    "formatVersion": 1,
+    "id": "environment-boss-03-lower-sector-commander-arena",
+    "generator": {
+        "tool": "approved-runtime-package-composition",
+        "exportVersion": "2026-08-26-boss-03-arena-platforms-v1",
+        "sourceExport": "assets/runtime/environments/boss-06-continuity-warden-arena/platform-modules.png"
+    },
+    "atlases": {
+        "boss-03-backdrop-v8-far": {
+            "image": "backdrop-v8-far.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "boss-03-backdrop-v8-mid": {
+            "image": "backdrop-v8-mid.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "boss-03-backdrop-v8-near": {
+            "image": "backdrop-v8-near.png",
+            "size": { "width": 1024, "height": 1536 },
+            "frameSize": { "width": 1024, "height": 1536 }
+        },
+        "boss-03-platform-modules": {
+            "image": "platform-modules.png",
+            "size": { "width": 1619, "height": 971 },
+            "frameSize": { "width": 1619, "height": 971 }
+        },
+        "boss-03-decoration": {
+            "image": "decoration.png",
+            "size": { "width": 96, "height": 24 },
+            "frameSize": { "width": 24, "height": 24 }
+        }
+    },
+    "zones": [
+        {
+            "id": "waste",
+            "label": "Boss 03 하부 지휘 Arena",
+            "minAltitude": 0,
+            "palette": {
+                "skyTop": "#17162c",
+                "skyBottom": "#090a16",
+                "silhouetteFar": "#25284a",
+                "silhouetteMid": "#303252",
+                "silhouetteNear": "#0b0d18",
+                "terrainFill": "#282838",
+                "terrainEdge": "#5b5d78",
+                "oneWayEdge": "#7d8888",
+                "accent": "#817049"
+            },
+            "backdropVariant": "sector-03-lower",
+            "terrainMaterial": "boss-03-commercial-armor",
+            "decorationGroup": "sector-03-commercial"
+        },
+        {
+            "id": "industrial-maintenance",
+            "label": "Boss 03 하부 지휘 Arena",
+            "minAltitude": 1800,
+            "palette": {
+                "skyTop": "#1a1932",
+                "skyBottom": "#0b0c19",
+                "silhouetteFar": "#292d50",
+                "silhouetteMid": "#363958",
+                "silhouetteNear": "#0c0f1c",
+                "terrainFill": "#2b2b3b",
+                "terrainEdge": "#60627d",
+                "oneWayEdge": "#818c8c",
+                "accent": "#85744c"
+            },
+            "backdropVariant": "sector-03-service",
+            "terrainMaterial": "boss-03-commercial-armor",
+            "decorationGroup": "sector-03-commercial"
+        },
+        {
+            "id": "residential-commercial",
+            "label": "Boss 03 하부 지휘 Arena",
+            "minAltitude": 3600,
+            "palette": {
+                "skyTop": "#1d1c38",
+                "skyBottom": "#0d0e1d",
+                "silhouetteFar": "#2e3358",
+                "silhouetteMid": "#3b3f60",
+                "silhouetteNear": "#0e1120",
+                "terrainFill": "#2f2f40",
+                "terrainEdge": "#686985",
+                "oneWayEdge": "#858f8f",
+                "accent": "#89784f"
+            },
+            "backdropVariant": "sector-03-retail",
+            "terrainMaterial": "boss-03-commercial-armor",
+            "decorationGroup": "sector-03-commercial"
+        },
+        {
+            "id": "corporate-security",
+            "label": "Boss 03 하부 지휘 Arena",
+            "minAltitude": 5400,
+            "palette": {
+                "skyTop": "#212040",
+                "skyBottom": "#101120",
+                "silhouetteFar": "#343960",
+                "silhouetteMid": "#424668",
+                "silhouetteNear": "#101322",
+                "terrainFill": "#333344",
+                "terrainEdge": "#70718c",
+                "oneWayEdge": "#899393",
+                "accent": "#8d7c52"
+            },
+            "backdropVariant": "sector-03-atrium",
+            "terrainMaterial": "boss-03-commercial-armor",
+            "decorationGroup": "sector-03-commercial"
+        },
+        {
+            "id": "landing-pad",
+            "label": "Boss 03 하부 지휘 Arena",
+            "minAltitude": 7200,
+            "palette": {
+                "skyTop": "#252348",
+                "skyBottom": "#121424",
+                "silhouetteFar": "#3a4068",
+                "silhouetteMid": "#494d70",
+                "silhouetteNear": "#121626",
+                "terrainFill": "#373748",
+                "terrainEdge": "#787994",
+                "oneWayEdge": "#8d9797",
+                "accent": "#918055"
+            },
+            "backdropVariant": "sector-03-upper",
+            "terrainMaterial": "boss-03-commercial-armor",
+            "decorationGroup": "sector-03-commercial"
+        }
+    ],
+    "backdrop": {
+        "layers": [
+            {
+                "id": "far-background",
+                "depth": 0,
+                "parallaxX": 0.018,
+                "parallaxY": 0.03,
+                "frames": [{ "atlas": "boss-03-backdrop-v8-far", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            },
+            {
+                "id": "mid-structure",
+                "depth": 1,
+                "parallaxX": 0.05,
+                "parallaxY": 0.065,
+                "frames": [{ "atlas": "boss-03-backdrop-v8-mid", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            },
+            {
+                "id": "near-frame",
+                "depth": 2,
+                "parallaxX": 0.08,
+                "parallaxY": 0.1,
+                "frames": [{ "atlas": "boss-03-backdrop-v8-near", "cell": { "column": 0, "row": 0 } }],
+                "tileWidth": 1024,
+                "baselineRatio": 1,
+                "peakHeight": 1536
+            }
+        ]
+    },
+    "terrain": {
+        "materials": {
+            "boss-03-commercial-armor": {
+                "fill": { "atlas": "boss-03-platform-modules", "x": 330, "y": 250, "width": 900, "height": 120 },
+                "edge": { "atlas": "boss-03-platform-modules", "x": 330, "y": 250, "width": 900, "height": 8 },
+                "oneWayColor": "#858f8f",
+                "blockOverlay": false
+            }
+        },
+        "blockPool": {
+            "fallbackPresetId": "platform",
+            "presetByRole": {
+                "platform": "platform",
+                "safe-deck": "safe-deck",
+                "recovery": "recovery",
+                "overhang": "overhang",
+                "sealed-door": "sealed-door",
+                "cover": "cover",
+                "solid": "solid"
+            }
+        }
+    },
+    "decoration": {
+        "groups": {
+            "sector-03-commercial": {
+                "items": [
+                    {
+                        "frame": { "atlas": "boss-03-decoration", "cell": { "column": 1, "row": 0 } },
+                        "placement": { "depth": "mid", "surfaceLevelOffset": 0, "avoidPlayPath": true },
+                        "size": { "width": 14, "height": 14 }
+                    }
+                ]
+            }
+        }
+    }
+}

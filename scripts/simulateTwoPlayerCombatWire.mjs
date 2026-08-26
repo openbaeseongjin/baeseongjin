@@ -11,6 +11,8 @@ import {
     LOWER_SECTOR_COMMANDER_HAZARD,
     LOWER_SECTOR_COMMANDER_OBJECT_KIND
 } from "../src/game/boss/LowerSectorCommanderDefinition.js";
+import { CONTINUITY_WARDEN_HAZARD } from "../src/game/boss/ContinuityWardenDefinition.js";
+import { createBossEncounterRuntime } from "../src/game/boss/BossEncounterRuntimeFactory.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { channelSocketUrl } from "../src/game/runtime/MultiplayerServerEndpoint.js";
 import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
@@ -828,6 +830,253 @@ export async function simulateBoss03GrabSlamWire() {
     }
 }
 
+export async function simulateBoss06SecurityBeamWire() {
+    const runtime = await startInspectableServer([], { startAreaId: "6-8" });
+    const WebSocketImpl = websocketFromOrigin(TEST_ORIGIN);
+    const first = new RemoteGameAuthority({ url: channelSocketUrl(runtime.serverUrl, "new"), WebSocketImpl });
+    let second = null;
+    try {
+        await first.connect();
+        second = new RemoteGameAuthority({ url: channelSocketUrl(runtime.serverUrl, first.channelId), WebSocketImpl });
+        await second.connect();
+        await waitFor(
+            () => first.latestSnapshot?.state.players.length === 2 && second.latestSnapshot?.state.players.length === 2,
+            "Boss06 Beam wire 시나리오의 2인 snapshot을 받지 못했습니다",
+            runtime
+        );
+        const room = runtime.multiplayer.rooms.get(first.channelId);
+        const serverSimulation = room?.simulation;
+        assert(serverSimulation, "Boss06 Beam wire 시나리오의 서버 simulation을 찾지 못했습니다");
+        const boss06Definition = serverSimulation.bossDefinitions.find(({ id }) => id === "boss-06");
+        assert(boss06Definition, "Boss06 definition을 찾지 못했습니다");
+        const boss06Initial = createBossEncounterRuntime(boss06Definition, null, {
+            worldSeed: serverSimulation.world.seed
+        }).snapshot();
+        serverSimulation.restoreBossRuntime(boss06Initial);
+        first.ownerRuntime.simulation.restoreBossRuntime(boss06Initial);
+        second.ownerRuntime.simulation.restoreBossRuntime(boss06Initial);
+        const started = serverSimulation.startBossEncounter([first.playerId, second.playerId]);
+        assert(started.accepted, `Boss06 encounter를 시작하지 못했습니다: ${started.reason ?? "unknown"}`);
+
+        const beamKinds = Object.freeze({
+            [CONTINUITY_WARDEN_HAZARD.SECURITY_LOW]: true,
+            [CONTINUITY_WARDEN_HAZARD.SECURITY_HIGH]: true
+        });
+        const bossSurfaces = serverSimulation.world.surfaces.filter(({ bossStageId }) => bossStageId === "boss-06");
+        const surfacePosition = (surface) => {
+            const minX = Math.min(...surface.vertices.map(({ x }) => x));
+            const maxX = Math.max(...surface.vertices.map(({ x }) => x));
+            const topY = Math.min(...surface.vertices.map(({ y }) => y));
+            return Object.freeze({ x: (minX + maxX) * 0.5, y: topY - 15 });
+        };
+        const departure = bossSurfaces.find(({ kind }) => kind === "departure-deck");
+        const main = bossSurfaces.find(({ kind }) => kind === "main-security-runway");
+        const ledge = bossSurfaces.find(({ kind }) => kind === "raised-ledge");
+        assert(departure && main && ledge, "Boss06 Beam wire 지지면을 찾지 못했습니다");
+        const outsidePosition = surfacePosition(departure);
+        const simulations = Object.freeze([
+            serverSimulation,
+            first.ownerRuntime.simulation,
+            second.ownerRuntime.simulation
+        ]);
+        const placeOwner = (authority, position, reason) => {
+            authority.ownerRuntime.simulation.applyPortalTransition(
+                authority.playerId,
+                position,
+                authority.ownerRuntime.simulation.getTick(),
+                reason
+            );
+            authority.submitOwnerMotion();
+        };
+        const activateBeam = () => {
+            serverSimulation.bossRuntime._beginSecurity();
+            serverSimulation.bossRuntime.activateSecurityBand();
+            const sharedBoss = serverSimulation.bossRuntime.snapshot();
+            first.ownerRuntime.simulation.restoreBossRuntime(sharedBoss);
+            second.ownerRuntime.simulation.restoreBossRuntime(sharedBoss);
+            const hazard = serverSimulation
+                .collisionDebugSnapshot()
+                .bossHazards.find(({ kind }) => beamKinds[kind] === true);
+            assert(hazard, "Boss06 Security Beam hazard를 활성화하지 못했습니다");
+            const insidePosition = surfacePosition(
+                hazard.kind === CONTINUITY_WARDEN_HAZARD.SECURITY_HIGH ? ledge : main
+            );
+            serverSimulation.applyPortalTransition(
+                second.playerId,
+                insidePosition,
+                serverSimulation.getTick(),
+                "boss06-beam-inside"
+            );
+            placeOwner(second, insidePosition, "boss06-beam-inside");
+            serverSimulation.applyPortalTransition(
+                first.playerId,
+                outsidePosition,
+                serverSimulation.getTick(),
+                "boss06-beam-safe"
+            );
+            placeOwner(first, outsidePosition, "boss06-beam-safe");
+            return Object.freeze({ hazard, insidePosition });
+        };
+        const setVictimHealth = (healthValue) => {
+            for (const simulation of simulations) {
+                const victim = simulation.players.find(({ id }) => id === second.playerId);
+                if (!victim) continue;
+                victim.maxHealth = healthValue;
+                victim.health = healthValue;
+            }
+        };
+        let predictedBeamEvents = [];
+        let receipts = [];
+        let commandSequence = 0;
+        const advanceTicks = async (count, { delayMs = 4 } = {}) => {
+            for (let index = 0; index < count; index += 1) {
+                commandSequence += 1;
+                const firstCommand = movementCommand(0, first.ownerState().position);
+                const secondCommand = movementCommand(0, second.ownerState().position);
+                first.advance(firstCommand);
+                second.advance(secondCommand);
+                if (commandSequence % 2 === 0) {
+                    first.submit(firstCommand);
+                    second.submit(secondCommand);
+                }
+                for (const event of first.drainPredictedEvents()) {
+                    if (event.parameters?.sourceKind === "boss-hazard") first.submitPredictedBossImpact(event);
+                }
+                for (const event of second.drainPredictedEvents()) {
+                    if (event.parameters?.sourceKind !== "boss-hazard") continue;
+                    second.submitPredictedBossImpact(event);
+                    if (beamKinds[event.parameters.sourceType] === true) predictedBeamEvents.push(event);
+                }
+                receipts.push(...second.drainImpactClaimReceipts());
+                await delay(delayMs);
+            }
+        };
+
+        setVictimHealth(300);
+        const firstBeam = activateBeam();
+        serverSimulation.applyPortalTransition(
+            second.playerId,
+            outsidePosition,
+            serverSimulation.getTick(),
+            "boss06-beam-initial-safe"
+        );
+        placeOwner(second, outsidePosition, "boss06-beam-initial-safe");
+        await advanceTicks(30);
+        assert(predictedBeamEvents.length === 0, "Boss06 Beam 밖의 Player에게 pulse 피해를 적용했습니다");
+        await advanceTicks(36);
+        assert(predictedBeamEvents.length === 0, "Boss06 Beam 이탈 중 접촉 피해가 진행됐습니다");
+        serverSimulation.applyPortalTransition(
+            second.playerId,
+            firstBeam.insidePosition,
+            serverSimulation.getTick(),
+            "boss06-beam-reentry"
+        );
+        placeOwner(second, firstBeam.insidePosition, "boss06-beam-reentry");
+        for (let index = 0; index < 35 && predictedBeamEvents.length === 0; index += 1) await advanceTicks(1);
+        assert(
+            predictedBeamEvents.length === 1,
+            `Boss06 Beam 재진입 뒤 남은 active pulse를 적용하지 않았습니다: ${predictedBeamEvents.length}`
+        );
+        const firstPulseId = predictedBeamEvents[0].impactId;
+        const firstPulseReceipt = await waitFor(
+            () => {
+                receipts.push(...second.drainImpactClaimReceipts());
+                return receipts.find(({ impactId }) => impactId === firstPulseId) ?? null;
+            },
+            "Boss06 Beam 재진입 pulse receipt를 받지 못했습니다",
+            runtime
+        );
+        assert(
+            firstPulseReceipt.accepted,
+            `Boss06 Beam 재진입 pulse claim이 거부됐습니다: ${firstPulseReceipt.reason ?? "unknown"}`
+        );
+
+        setVictimHealth(300);
+        predictedBeamEvents = [];
+        receipts = [];
+        const secondBeam = activateBeam();
+        const secondBeamRecordKey = `boss-06:attempt:1:hazard:${secondBeam.hazard.id}`;
+        await waitFor(
+            () => serverSimulation.bossHazardRecords.has(secondBeamRecordKey),
+            "Boss06 Beam 서버 검증 record가 활성화되지 않았습니다",
+            runtime
+        );
+        const fullExposureDeadline = performance.now() + 6_000;
+        let fullExposureTicks = 0;
+        while (predictedBeamEvents.length < 6 && performance.now() < fullExposureDeadline) {
+            await advanceTicks(1, { delayMs: 0 });
+            fullExposureTicks += 1;
+        }
+        const uniquePulseIds = new Set(predictedBeamEvents.map(({ impactId }) => impactId));
+        assert(
+            predictedBeamEvents.length === 6,
+            `Boss06 Beam 3초 완전 노출에서 6 pulse가 발생하지 않았습니다: ${JSON.stringify({
+                predictedCount: predictedBeamEvents.length,
+                fullExposureTicks,
+                ownerContacts: second.ownerRuntime.simulation.bossRuntime.hazardContactSnapshot()
+            })}`
+        );
+        assert(uniquePulseIds.size === 6, "Boss06 Beam 같은 tick pulse가 중복 생성됐습니다");
+        assert(
+            predictedBeamEvents.every(({ damage, parameters }) => damage === 20 && parameters.damage === 20),
+            "Boss06 Beam pulse 피해가 20이 아닙니다"
+        );
+        try {
+            await waitFor(
+                () => {
+                    receipts.push(...second.drainImpactClaimReceipts());
+                    return [...uniquePulseIds].every(
+                        (impactId) => receipts.find((receipt) => receipt.impactId === impactId)?.accepted === true
+                    );
+                },
+                "Boss06 Beam 6 pulse receipt가 모두 승인되지 않았습니다",
+                runtime
+            );
+        } catch (error) {
+            throw new Error(`${error.message}: ${JSON.stringify(receipts)}`);
+        }
+        const converged = await waitFor(
+            () => {
+                const local = second.ownerState();
+                const peer = first.latestSnapshot?.state.players.find(({ id }) => id === second.playerId);
+                const server = serverSimulation.players.find(({ id }) => id === second.playerId);
+                return local.health === 180 && peer?.health === 180 && server?.health === 180
+                    ? Object.freeze({ local: local.health, peer: peer.health, server: server.health })
+                    : null;
+            },
+            "Boss06 Beam 120 피해가 로컬·서버·동료에 수렴하지 않았습니다",
+            runtime
+        );
+        const ownerPulseContacts = await waitFor(
+            () => {
+                const contacts = second.ownerRuntime.simulation.bossRuntime
+                    .hazardContactSnapshot()
+                    .filter(
+                        (contactId) =>
+                            contactId.includes(secondBeam.hazard.id) && contactId.endsWith(`:${second.playerId}`)
+                    );
+                return contacts.length === 6 ? contacts : null;
+            },
+            "정상 snapshot이 피해자 owner의 소비 Beam pulse ID를 보존하지 못했습니다",
+            runtime
+        );
+        const finalHealth = await health(runtime.serverUrl);
+        return Object.freeze({
+            serverStatus: finalHealth.status,
+            reentryPulseDamage: 20,
+            fullExposurePulseCount: predictedBeamEvents.length,
+            fullExposureDamage: 120,
+            ownerPulseCountAfterSnapshots: ownerPulseContacts.length,
+            convergedHealth: converged,
+            serverAliveAfterBeam: true
+        });
+    } finally {
+        await closeAuthority(second);
+        await closeAuthority(first);
+        await runtime.stop();
+    }
+}
+
 export async function simulateTwoPlayerCombatWire() {
     return Object.freeze({
         [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_SESSION_LIFECYCLE]: await simulateSessionLifecycleWire(),
@@ -835,7 +1084,8 @@ export async function simulateTwoPlayerCombatWire() {
         [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_ENERGY_ORB_PLAYER_HIT]: await simulateEnergyOrbWire(),
         [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_METEOR_IGNITED_PRESENTATION]: await simulateMeteorParticleWire(),
         [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_DEATH_RESPAWN]: await simulateDeathRespawnWire(),
-        [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_BOSS03_GRAB_SLAM]: await simulateBoss03GrabSlamWire()
+        [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_BOSS03_GRAB_SLAM]: await simulateBoss03GrabSlamWire(),
+        [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_BOSS06_SECURITY_BEAM]: await simulateBoss06SecurityBeamWire()
     });
 }
 

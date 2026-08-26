@@ -144,6 +144,25 @@ export class CompositeBossEncounterRuntime {
         return freezeComposite({ accepted: true, changed: true, damage });
     }
 
+    contactIdsForHazardObservation({ contactIdPrefix, playerId, overlapping }) {
+        if (!overlapping) return Object.freeze([]);
+        return Object.freeze([`${contactIdPrefix}:${playerId}`]);
+    }
+
+    hazardRecordKeyForContact(contactId, playerId) {
+        if (typeof contactId !== "string" || typeof playerId !== "string") return null;
+        const playerSuffix = `:${playerId}`;
+        return contactId.endsWith(playerSuffix) ? contactId.slice(0, -playerSuffix.length) : null;
+    }
+
+    validatesHazardContactId({ contactId, playerId, hazardKind, recordKey }) {
+        return (
+            typeof hazardKind === "string" &&
+            typeof recordKey === "string" &&
+            this.hazardRecordKeyForContact(contactId, playerId) === recordKey
+        );
+    }
+
     hasHazardContact(contactId) {
         return typeof contactId === "string" && this.processedHazardContactIds.has(contactId);
     }

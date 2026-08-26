@@ -17,6 +17,7 @@ assets/runtime/environments/
 │     ├─ terrain-fill.png        # 지형 fill tile atlas
 │     ├─ terrain-edge.png        # 지형 edge tile atlas
 │     └─ decoration.png          # 장식 atlas
+├─ boss-03-lower-sector-commander-arena/ # Boss 03 전용 terrain skin
 ├─ boss-06-continuity-warden-arena/ # Boss 06 전용 terrain skin
 ├─ sector-01-maintenance/        # Sector 01 최종 authored package
 ├─ sector-02-worker-district/    # Sector 02 최종 authored package
@@ -43,7 +44,7 @@ npm run validate:environment-assets -- assets/runtime/environments/default-mock
 - 상대 PNG 경로만 허용하고 asset directory 이탈을 거부한다.
 - `formatVersion: 1`, 5개 zone, backdrop layer, terrain material, terrain Block Pool 대응표, decoration group을 필수로 요구한다.
 - Runtime은 world seed·surface hash로 decoration item을 자동 배치하지 않는다. 배경 세부는 authored backdrop에 포함하고 독립 객체는 Map Editor world object로 명시한다.
-- authored package 선택은 `AuthoredAreaEnvironmentCatalog`의 stable Area ID가 소유하며 Boss 전용 terrain package는 stable Boss Stage ID가 소유한다.
+- authored package 선택은 `AuthoredAreaEnvironmentCatalog`의 stable Area ID가 소유하며 Boss 전용 terrain package는 stable Boss Stage ID가 소유한다. Boss03은 Sector03 backdrop·palette를 유지하면서 Boss06과 같은 승인된 긴 장갑 panel module을 전용 material로 소비한다.
 - 일반 맵은 Player의 현재 Area package를 사용한다. Boss source Area는 Boss encounter가 `active`인 동안 backdrop 기준을 override하고, stable Boss Stage ID에 전용 terrain package가 있으면 `bossStageId`를 가진 Arena 표면만 그 terrain material을 사용한다. 개별 edge atlas가 준비되지 않은 표면은 collision polygon 외곽선으로 복구하고 draw를 중단하지 않는다.
 - terrain preset/variant는 package의 역할→preset 대응표와 `sectorId + surface.kind + stable surface.id`로 resolver가 고른다. `AREA-SPEC`과 Map Editor는 terrain skin field를 소유하지 않는다.
 - Sector 01→02, Sector 02→03, Sector 03→04, Sector 04→05, Sector 05→06 전환은 `PixelBackdropRenderer`가 Player world Y에서만 파생한 비율로 양쪽 backdrop과 sky를 교차 합성한다. Sector 05→06만 나가는 Sector 05 package 전체에 같은 alpha와 증가하는 blur를 적용하고 들어오는 Sector 06 package는 blur 없이 합성한다. gameplay·camera·network state나 collision을 추가하지 않는다.

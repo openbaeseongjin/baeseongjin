@@ -180,10 +180,12 @@
 | Boss kinematic body·Beam/Ram/Charge/Slam/Dive 피격 | Boss motion은 서버, Player 반응은 피해 클라이언트 | 활성 Boss Stage ID와 mechanism snapshot을 결정적으로 진행해 공통 actor collision·피해를 즉시 적용하고 `boss-hazard` state digest claim으로 수렴 |
 | 예측 가능한 투사체·낙하물                          | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                                           |
 | 자기 사망·active Stage checkpoint 부활             | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                                                    |
-| 월드 시드·지형·Sector entry                        | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v21 검증                                                                                |
+| 월드 시드·지형·Sector entry                        | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v22 검증                                                                                |
 | Sector objective                                   | 서버                                              | 독립 trigger/source/prerequisite 결과를 공유하며 마지막 objective는 content boundary 유지                                                       |
 | 플레이어별 Augment 선택·효과                       | 행동·피해 클라이언트 선행, 서버 검증·공유         | 경험치 보상 선택과 효과를 즉시 적용하고 `augment-selection`·`augment-impact` 뒤 Player별 상태를 수렴                                            |
 | 카메라·HUD·파티클                                  | 클라이언트                                        | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용                                                                                           |
+
+Boss06 Security Beam은 서버 Boss timer가 active 시작과 이후 0.5초 간격의 pulse ID 6개를 결정한다. 피해자 owner는 각 pulse 순간 자기 Player의 로컬 겹침만 판정해 20 피해 claim을 즉시 적용하고, 이탈 중인 pulse는 소비하지 않으며 재진입하면 현재 이후 pulse부터 다시 적용한다. 정상 snapshot reconcile은 receipt 전 로컬에서 이미 소비한 같은 pulse ID를 보존한다.
 
 충돌 broad phase와 화면 기반 Enemy 활성화도 권위별로 같은 결정적 world-space 규칙을 사용한다. 소유 클라이언트는 자기 Player 주변 관심 영역에서 즉시 Player↔Enemy 후보를 조회하고, 서버는 채널의 모든 active Player 관심 영역을 합쳐 중립 Enemy 활성 집합을 정한다. 실제 viewport 크기·카메라 zoom을 전송하거나 한 대표 Player에게 중립 활성 판단을 맡기지 않는다. 관심 영역 밖 Enemy는 서버에서 전체 fixed-step을 동결하고 snapshot 위치를 유지하되 공개 velocity와 충돌 잔류 속도는 0으로 보내 원격 외삽이 잠든 Enemy를 이동시키지 않게 한다. 행동·Patrol·knockback 잔여 상태는 소비하지 않으며 영역 안으로 다시 들어오면 전역 surface Quadtree와 동적 actor Quadtree에서 swept bounds 후보를 조회해 재개한다.
 
@@ -207,7 +209,7 @@ Boss06 공격 선택은 `worldSeed + attempt + selectionSequence`로 재현한�
 
 generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. `AugmentLoadoutState`, `augment-selection`, `augmentRewards`는 이전 snapshot과 wire 호환을 위한 이름이며 과거 Augment 3종 gameplay를 뜻하지 않는다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 호환 `augment-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 대상 Player state의 `respawnAnchorId`가 가리키는 최근 직접 접촉 Stage checkpoint로 되돌리며 선택 카드와 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
-기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. WorldSnapshot v21은 v20의 Player·active capture interaction에 Boss03 hook tip 비행 snapshot을 추가하며 피격 후 무적 타이머는 포함하지 않는다.
+기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. WorldSnapshot v22는 v21의 Player·active capture interaction·Boss03 hook tip 비행에 동적 Boss 소환몹의 명시적 `sectorId`를 추가하며 피격 후 무적 타이머는 포함하지 않는다. Boss06 Beam의 0.5초 pulse index는 서버 소유 Boss timer에서 결정하고 피해자 owner가 pulse 순간의 로컬 겹침만 판정한다. 정상 snapshot reconcile은 receipt 전 로컬에서 이미 소비한 같은 pulse ID를 보존하며 초기 welcome·서버·복구 rollback은 snapshot 상태를 그대로 복원한다.
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·authorityTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
@@ -232,7 +234,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
 
 - `owner-motion` protocol v11은 Rope joint와 함께 Spell·Experience·공통 상태이상 Pool을 보낸다.
-- `WorldSnapshot` protocol v21의 각 Player는 Rope joint, `selectedAugmentIds`, `augmentRuntimeState`, Experience와 공통 `statusEffects`를 포함하고 top-level state는 active combat interaction과 Boss03 hook tip 비행 상태를 포함한다.
+- `WorldSnapshot` protocol v22의 각 Player는 Rope joint, `selectedAugmentIds`, `augmentRuntimeState`, Experience와 공통 `statusEffects`를 포함하고 top-level state는 active combat interaction과 Boss03 hook tip 비행 상태를 포함한다. 동적 Boss 소환몹의 Enemy snapshot은 `sectorId`를 포함해 클라이언트가 같은 섹터 package 또는 기본 fallback을 선택한다.
 - 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
 - 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 도착한 최신 detached `owner-motion`은 같은 tick의 위치·속도·각도와 함께 해제를 원자적으로 확정하며, 이후 도착한 과거 tick은 성공한 no-op으로 무시한다.
 - `player-impact` protocol v13의 `recovery-required` 전체 상태에는 angle·angularVelocity·Rope attachment ID/surface/local anchor/length·Hook tip·`RopeImpactState`·개인 `respawnAnchorId`·`lifeState`·감전 상태와 generic Augment 선택·순간 상태가 포함된다. Boss hazard claim은 Stage·hazard kind·sequence를, Jammer claim은 field group·target surface·cycle sequence를 서버 중립 상태와 대조한다. 부활 결과 지문에도 회전·부착 손·상태 효과·Augment·checkpoint 상태를 포함하지만, 정상 비치명 impact마다 전체 상태를 별도 전송하지 않는다.

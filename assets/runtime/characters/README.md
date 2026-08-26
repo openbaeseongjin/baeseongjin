@@ -21,7 +21,7 @@ This mock is not the final interchange format. Production PixelLab, SpriteCook, 
 
 게임 bootstrap은 [`player-main/sprite-manifest.json`](./player-main/sprite-manifest.json)을 기본 플레이어 리소스로 읽어 싱글·멀티 renderer에 주입합니다. 사용자가 제공한 최종 캐릭터 외형의 원본과 생성·정규화 기록은 `assets/artwork/characters/player-main/`에 있습니다.
 
-일반 몹은 Map Editor에서 gameplay 종류만 저작하고 Area의 `sectorId`로 `sector-<nn>-enemies` package를 자동 선택합니다. 새 섹터 package는 기존 [`sector-01-enemies`](./sector-01-enemies)의 상태·atlas 계약을 기준으로 만들고 validator를 통과시킨 뒤 `EnemySpriteCatalog`의 고정 selection에 등록합니다. 섹터별 팔레트 변형은 런타임 filter가 아니라 최종 투명 PNG에 반영하며, 미납품 타입은 기본 package와 built-in mock 순으로 복구됩니다.
+일반 몹은 Map Editor에서 gameplay 종류만 저작하고 Area의 `sectorId`로 `sector-<nn>-enemies` package를 자동 선택합니다. Boss가 동적으로 소환하는 몹은 Boss definition이 같은 `sectorId`를 생성 요청과 Enemy render snapshot에 전달하며 Renderer가 Boss ID 문자열을 해석하지 않습니다. 새 섹터 package는 기존 [`sector-01-enemies`](./sector-01-enemies)의 상태·atlas 계약을 기준으로 만들고 validator를 통과시킨 뒤 `EnemySpriteCatalog`의 고정 selection에 등록합니다. 섹터별 팔레트 변형은 런타임 filter가 아니라 최종 투명 PNG에 반영하며, Sector06처럼 package가 아직 없는 경우를 포함해 미납품 타입은 기본 package와 built-in mock 순으로 복구됩니다.
 
 Boss03 중량형 스프라이트와 그랩 부착 VFX는 [`lower-sector-commander-v1`](./lower-sector-commander-v1/), Boss06 인간형 스프라이트는 [`continuity-warden-phase-1`](./continuity-warden-phase-1/)의 코드 소유 불변 clip definition을 사용합니다. 둘 다 player·일반 몹 manifest를 재사용하지 않습니다. Boss 전용 공개 manifest·validator가 아직 없으므로 로컬 Runtime 통합 상태이며 미지원 상태와 로드 실패는 기존 Boss Polygon 표현으로 복구합니다.
 

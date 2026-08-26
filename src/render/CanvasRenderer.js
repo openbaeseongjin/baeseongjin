@@ -34,6 +34,11 @@ const AUGMENT_ICON_RENDERING = Object.freeze({
     smoothingQuality: "high"
 });
 
+const EXPERIENCE_BAR_LAYOUT = Object.freeze({
+    desktop: Object.freeze({ height: 7, slotGap: 8, labelInside: false }),
+    mobile: Object.freeze({ height: 14, slotGap: 10, labelInside: true })
+});
+
 const ROPE_IMPACT_REJECTION_STATUS = Object.freeze({
     [ROPE_IMPACT_REJECTION_REASON.SWING_REQUIRED]: Object.freeze({
         title: "스윙 필요",
@@ -753,20 +758,27 @@ export class CanvasRenderer {
             }
         }
         const experienceWidth = totalWidth;
-        const experienceY = mobileControlLayout ? y - 8 : y + cellSize + 8;
+        const experienceLayout = mobileControlLayout ? EXPERIENCE_BAR_LAYOUT.mobile : EXPERIENCE_BAR_LAYOUT.desktop;
+        const experienceY = mobileControlLayout
+            ? y - experienceLayout.slotGap - experienceLayout.height
+            : y + cellSize + experienceLayout.slotGap;
         const nextRequirement = Math.max(0, experience?.nextLevelRequirement ?? 0);
         const experienceRatio =
             nextRequirement > 0 ? Math.min(1, (experience?.experienceIntoLevel ?? 0) / nextRequirement) : 1;
         ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
-        ctx.fillRect(startX, experienceY, experienceWidth, 7);
+        ctx.fillRect(startX, experienceY, experienceWidth, experienceLayout.height);
         ctx.fillStyle = "#a78bfa";
-        ctx.fillRect(startX, experienceY, experienceWidth * experienceRatio, 7);
+        ctx.fillRect(startX, experienceY, experienceWidth * experienceRatio, experienceLayout.height);
         ctx.strokeStyle = "rgba(226, 232, 240, 0.55)";
-        ctx.strokeRect(startX, experienceY, experienceWidth, 7);
+        ctx.strokeRect(startX, experienceY, experienceWidth, experienceLayout.height);
         ctx.textAlign = "left";
-        ctx.fillStyle = "#e2e8f0";
-        ctx.font = "800 9px ui-monospace, monospace";
-        ctx.fillText(`LV ${experience?.level ?? 0}`, startX, experienceY - 3);
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = `${experienceLayout.labelInside ? 900 : 800} ${experienceLayout.labelInside ? 10 : 9}px ui-monospace, monospace`;
+        ctx.fillText(
+            `LV ${experience?.level ?? 0}`,
+            startX + (experienceLayout.labelInside ? 4 : 0),
+            experienceY + (experienceLayout.labelInside ? 11 : -3)
+        );
         ctx.restore();
     }
 
