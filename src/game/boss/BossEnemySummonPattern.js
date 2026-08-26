@@ -47,6 +47,7 @@ function point(value, label) {
 export class BossEnemySummonPattern {
     constructor({
         bossStageId,
+        sectorId,
         spawnPoints,
         count = BOSS_ENEMY_SUMMON_DEFAULT.count,
         cooldownSeconds = BOSS_ENEMY_SUMMON_DEFAULT.cooldownSeconds,
@@ -59,6 +60,9 @@ export class BossEnemySummonPattern {
         if (typeof bossStageId !== "string" || bossStageId.length === 0) {
             throw new Error("BossEnemySummonPattern requires bossStageId");
         }
+        if (typeof sectorId !== "string" || sectorId.length === 0) {
+            throw new Error("BossEnemySummonPattern requires sectorId");
+        }
         if (!Array.isArray(spawnPoints) || spawnPoints.length === 0) {
             throw new Error("BossEnemySummonPattern requires spawnPoints");
         }
@@ -67,6 +71,7 @@ export class BossEnemySummonPattern {
         }
         this.definition = freezeComposite({
             bossStageId,
+            sectorId,
             spawnPoints: spawnPoints.map((entry, index) => point(entry, `Boss summon point ${index}`)),
             count: positiveInteger(count, BOSS_ENEMY_SUMMON_DEFAULT.count),
             cooldownSeconds: positive(cooldownSeconds, BOSS_ENEMY_SUMMON_DEFAULT.cooldownSeconds),
@@ -116,6 +121,7 @@ export class BossEnemySummonPattern {
             requests.push(
                 freezeComposite({
                     bossStageId: this.definition.bossStageId,
+                    sectorId: this.definition.sectorId,
                     enemyId: BOSS_SUMMONED_ENEMY_ID.create(this.definition.bossStageId, attempt, this.sequence, index),
                     enemyType: this.definition.enemyTypes[poolIndex],
                     position: compositeWorldPoint(

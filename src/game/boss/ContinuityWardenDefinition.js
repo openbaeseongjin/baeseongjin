@@ -1,3 +1,5 @@
+export const CONTINUITY_WARDEN_SECTOR_ID = "sector-06";
+
 export const CONTINUITY_WARDEN_STATE = Object.freeze({
     NEUTRAL: "neutral",
     BATON_1: "baton-1",

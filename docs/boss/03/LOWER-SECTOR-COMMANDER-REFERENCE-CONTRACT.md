@@ -112,7 +112,7 @@
 - 손·손잡이·해머 머리는 서로 분리돼야 하며 해머를 팔에 융합하거나 손 자체를 해머로 바꾸지 않는다. 본체, 사슬 훅과 휴대형 해머의 방향은 작은 화면에서도 구분돼야 한다.
 - 최소 표현 상태는 대기, 대상 고정 예고, 끌어오기, 해머 내려찍기, 피격, 처치다. 상태 차이는 색 하나가 아니라 자세·외곽선·방향·움직임으로 함께 구분한다.
 - Runtime v1은 대기·보행·점프·대상 고정·끌어오기·구속 유지·해머 내려찍기·중량 돌진·소환·피격·처치 상태를 sprite로 표현한다. built-in imagegen으로 기존 승인 모션을 reference edit한 pull v2와 summon 6프레임을 정규화해 사용한다. `grab-pull`은 눈높이 이동 0.35초, `grab-hold`는 남은 고정 구간을 소유하고, 사출 훅·양 끝점 사이 반복 사슬 링크·포획 지점 장력은 본체와 분리된 부착 VFX로 재생한다. 초기 진입·atlas pending·소환 상태는 Polygon 본체로 전환하지 않고 현재 frame 또는 idle sprite를 유지하며 실제 필수 atlas 실패에만 Polygon으로 복구한다.
-- Sprite profile의 Boss03 Arena surface는 별도 Polygon presentation으로 덮지 않는다. authored collision surface는 source Area인 Sector03 terrain package가 그대로 그리며 자산 실패 때만 환경 component의 collision geometry fallback을 사용한다.
+- Sprite profile의 Boss03 Arena surface는 별도 Polygon presentation으로 덮지 않는다. stable `boss-03` 환경 package가 Sector03 backdrop·palette와 Boss06식 긴 장갑 panel module을 조합해 authored collision surface 위에 그리며, 자산 실패 때만 환경 component의 collision geometry fallback을 사용한다. PNG는 surface geometry·Rope capability를 바꾸지 않는다.
 - 비처치 모션은 대기 본체와 같은 시각 배율·접지 anchor를 유지한다. 긴 해머·훅 자세는 본체를 축소하지 않고 투명 canvas를 확장하며, 그랩·해머·돌진 중 본체는 해당 공격 판정 방향을 바라본다.
 - 보행 8프레임은 이동 거리 `144px`마다 한 주기를 재생한다. 이 표현 주기는 collider·이동 속도·AI·공격 판정과 분리한다.
 - 보스 그래픽의 제작 크기, 출력 크기, 좌우 방향과 기준점은 자산 README에 기록한다.

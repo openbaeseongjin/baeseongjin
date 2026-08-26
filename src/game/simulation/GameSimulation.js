@@ -562,6 +562,7 @@ export class GameSimulation {
             id: payload.enemyId,
             position: new Vector2(payload.position.x, payload.position.y),
             level: stage?.level ?? this.world.landmarks?.length ?? 0,
+            sectorId: payload.sectorId,
             areaId: stage?.id ?? null,
             objectId: payload.enemyId,
             enemyType: payload.enemyType,
@@ -721,15 +722,26 @@ export class GameSimulation {
         return outcome;
     }
 
-    restoreBossRuntime(snapshot) {
+    restoreBossRuntime(snapshot, { preserveOwnerHazardContacts = false } = {}) {
         if (!this.bossRuntime) {
             if (snapshot) throw new Error("cannot restore Boss runtime outside a seamless Sector world");
             return null;
         }
         if (snapshot) {
             const stageId = snapshot.stageId ?? snapshot.encounterId;
+            const preservedHazardContacts =
+                preserveOwnerHazardContacts &&
+                snapshot.status === "active" &&
+                this.bossRuntime.definition.id === stageId
+                    ? this.bossRuntime
+                          .hazardContactSnapshot?.()
+                          ?.filter((contactId) =>
+                              contactId.startsWith(`${stageId}:attempt:${snapshot.attempt}:hazard:`)
+                          )
+                    : null;
             this.#selectBossRuntime(stageId);
             this.bossRuntime.restore(snapshot);
+            if (preservedHazardContacts) this.bossRuntime.restoreHazardContacts?.(preservedHazardContacts);
             if (snapshot.status === "completed") this.worldProgress?.completeBossStage(this.bossRuntime.definition.id);
         }
         this.collisionBroadPhase.invalidateFrame();
@@ -1379,7 +1391,7 @@ export class GameSimulation {
         return Math.hypot(position.x - closestX, position.y - closestY) <= radius;
     }
 
-    #resolveCompositeBossHazards({ players, replicate }) {
+    #resolveCompositeBossHazards({ players, replicate, dt }) {
         const stage = this.#bossStageWorld();
         const snapshot = this.bossStageSnapshot();
         const hazards = this.bossRuntime?.activeHazards?.(this.#bossWorldOffset()) ?? Object.freeze([]);
@@ -1399,102 +1411,109 @@ export class GameSimulation {
                     hazard,
                     targetPosition: player.physics.position
                 });
-                if (
-                    hazard.automaticTarget !== true &&
-                    runtimeOverlap !== true &&
-                    (runtimeOverlap === false || !this.#compositeHazardOverlapsPlayer(hazard, player))
-                )
-                    continue;
-                const contactId = `${stage.id}:attempt:${snapshot.attempt}:hazard:${hazard.id}:${player.id}`;
-                const contact = this.bossRuntime.applyHazardContact({
-                    contactId,
+                const overlapping =
+                    hazard.automaticTarget === true ||
+                    runtimeOverlap === true ||
+                    (runtimeOverlap !== false && this.#compositeHazardOverlapsPlayer(hazard, player));
+                const contactIdPrefix = `${stage.id}:attempt:${snapshot.attempt}:hazard:${hazard.id}`;
+                const contactIds = this.bossRuntime.contactIdsForHazardObservation({
+                    hazard,
+                    contactIdPrefix,
                     playerId: player.id,
-                    damage: hazard.damage
+                    overlapping,
+                    dt
                 });
-                if (!contact.changed) continue;
-                const protection = player.augmentCombat.absorbPlayerDamage({
-                    amount: contact.damage,
-                    type: "combat-hp",
-                    sourceKind: `boss-${hazard.kind}`,
-                    attackerId: null
-                });
-                const appliedDamage = protection.appliedDamage;
-                if (hazard.capture) {
-                    releaseRopeFromBody(player.physics, player.ropeObject.rope);
-                    player.ropeObject.swingDrag = null;
-                    player.ropeImpactState.reset();
-                    this.combatInteractions.beginCapture({
-                        ...hazard.capture,
-                        targetActorId: player.id,
-                        startPosition: vectorState(player.physics.position)
+                for (const contactId of contactIds) {
+                    const contact = this.bossRuntime.applyHazardContact({
+                        contactId,
+                        playerId: player.id,
+                        damage: hazard.damage
                     });
-                }
-                player.health = Math.max(0, player.health - appliedDamage);
-                if (hazard.kind === "counter-bash" && hazard.bounds) {
-                    const originX = hazard.bounds.x + hazard.bounds.width * 0.5;
-                    const originY = hazard.bounds.y + hazard.bounds.height * 0.5;
-                    const dx = player.physics.position.x - originX;
-                    const dy = player.physics.position.y - originY;
-                    const pushDistance = Math.hypot(dx, dy);
-                    if (pushDistance > 0) {
-                        player.physics.applyImpulse(
-                            { x: dx / pushDistance, y: dy / pushDistance },
-                            COMBAT_CONFIG.playerHitKnockback
+                    if (!contact.changed) continue;
+                    const protection = player.augmentCombat.absorbPlayerDamage({
+                        amount: contact.damage,
+                        type: "combat-hp",
+                        sourceKind: `boss-${hazard.kind}`,
+                        attackerId: null
+                    });
+                    const appliedDamage = protection.appliedDamage;
+                    if (hazard.capture) {
+                        releaseRopeFromBody(player.physics, player.ropeObject.rope);
+                        player.ropeObject.swingDrag = null;
+                        player.ropeImpactState.reset();
+                        this.combatInteractions.beginCapture({
+                            ...hazard.capture,
+                            targetActorId: player.id,
+                            startPosition: vectorState(player.physics.position)
+                        });
+                    }
+                    player.health = Math.max(0, player.health - appliedDamage);
+                    if (hazard.kind === "counter-bash" && hazard.bounds) {
+                        const originX = hazard.bounds.x + hazard.bounds.width * 0.5;
+                        const originY = hazard.bounds.y + hazard.bounds.height * 0.5;
+                        const dx = player.physics.position.x - originX;
+                        const dy = player.physics.position.y - originY;
+                        const pushDistance = Math.hypot(dx, dy);
+                        if (pushDistance > 0) {
+                            player.physics.applyImpulse(
+                                { x: dx / pushDistance, y: dy / pushDistance },
+                                COMBAT_CONFIG.playerHitKnockback
+                            );
+                        }
+                    }
+                    if (Number.isFinite(hazard.knockback) && hazard.knockback > 0) {
+                        player.physics.applyImpulse({ x: hazard.direction < 0 ? -1 : 1, y: 0 }, hazard.knockback);
+                    }
+                    if (hazard.kind === LOWER_SECTOR_COMMANDER_HAZARD.GRAB_HAMMER) {
+                        this.#beginCapturedSlamMotion(player);
+                    }
+                    const defeated = player.health <= 0;
+                    if (defeated) {
+                        this.#resolveBossParticipantDefeat(
+                            player,
+                            `boss-${hazard.kind}`,
+                            BOSS_PARTICIPANT_DEFEAT_SOURCE.BOSS
                         );
                     }
+                    const event = createPlayerDamageEvent({
+                        impactId: contactId,
+                        targetId: player.id,
+                        damage: contact.damage,
+                        respawned: defeated && player.lifeState === "active",
+                        details: {
+                            contactId,
+                            bossStageId: stage.id,
+                            hazardKind: hazard.kind,
+                            hazardSequence: hazard.sequence,
+                            appliedDamage,
+                            health: player.health,
+                            position: vectorState(player.physics.position),
+                            velocity: vectorState(player.physics.velocity),
+                            projectileId: contactId,
+                            clientTick: this.tick,
+                            parameters: Object.freeze({
+                                sourceKind: PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD,
+                                sourceId: stage.id,
+                                sourceType: hazard.kind,
+                                sourceSequence: hazard.sequence,
+                                damage: contact.damage
+                            })
+                        }
+                    });
+                    if (replicate) this.recordReplicationEvent(PLAYER_DAMAGE_REPLICATION_EVENT_TYPE.BOSS_HIT, event);
+                    this.eventFlash = { type: "player-hit", age: 0, ...event };
+                    outcomes.push(event);
                 }
-                if (Number.isFinite(hazard.knockback) && hazard.knockback > 0) {
-                    player.physics.applyImpulse({ x: hazard.direction < 0 ? -1 : 1, y: 0 }, hazard.knockback);
-                }
-                if (hazard.kind === LOWER_SECTOR_COMMANDER_HAZARD.GRAB_HAMMER) {
-                    this.#beginCapturedSlamMotion(player);
-                }
-                const defeated = player.health <= 0;
-                if (defeated) {
-                    this.#resolveBossParticipantDefeat(
-                        player,
-                        `boss-${hazard.kind}`,
-                        BOSS_PARTICIPANT_DEFEAT_SOURCE.BOSS
-                    );
-                }
-                const event = createPlayerDamageEvent({
-                    impactId: contactId,
-                    targetId: player.id,
-                    damage: contact.damage,
-                    respawned: defeated && player.lifeState === "active",
-                    details: {
-                        contactId,
-                        bossStageId: stage.id,
-                        hazardKind: hazard.kind,
-                        hazardSequence: hazard.sequence,
-                        appliedDamage,
-                        health: player.health,
-                        position: vectorState(player.physics.position),
-                        velocity: vectorState(player.physics.velocity),
-                        projectileId: contactId,
-                        clientTick: this.tick,
-                        parameters: Object.freeze({
-                            sourceKind: PLAYER_IMPACT_SOURCE_KIND.BOSS_HAZARD,
-                            sourceId: stage.id,
-                            sourceType: hazard.kind,
-                            sourceSequence: hazard.sequence,
-                            damage: contact.damage
-                        })
-                    }
-                });
-                if (replicate) this.recordReplicationEvent(PLAYER_DAMAGE_REPLICATION_EVENT_TYPE.BOSS_HIT, event);
-                this.eventFlash = { type: "player-hit", age: 0, ...event };
-                outcomes.push(event);
             }
         }
         if (replicate) this.#commitBossEvents();
         return Object.freeze(outcomes);
     }
 
-    #resolveBossHazardContacts({ players = this.players, replicate = true } = {}) {
+    #resolveBossHazardContacts({ players = this.players, replicate = true, dt } = {}) {
         if (this.bossRuntime?.status !== "active") return Object.freeze([]);
         if (this.victimImpactAuthority === VICTIM_IMPACT_AUTHORITY.CLAIM) return Object.freeze([]);
-        return this.#resolveCompositeBossHazards({ players, replicate });
+        return this.#resolveCompositeBossHazards({ players, replicate, dt });
     }
 
     portalTransitionTick(playerId) {
@@ -1645,6 +1664,7 @@ export class GameSimulation {
             id: this.registry.createId("debug-enemy-training-dummy"),
             position: new Vector2(placement.x, placement.y),
             level: region?.level ?? 0,
+            sectorId: region?.sectorId ?? null,
             areaId: region?.id ?? null,
             objectId: null,
             enemyType,
@@ -2182,7 +2202,7 @@ export class GameSimulation {
         const wallImpactEvents = this.#advanceEnemyImpactKnockbacks(dt, { emitWallImpacts: true });
         this.#applyWorldForce(player, dt);
         const inputOutcome = this.dispatchOwnerInput(ownerId, command, dt, { replicateSurfaceCollisionImpacts: false });
-        const bossImpactEvents = this.#resolveBossHazardContacts({ players: [player], replicate: false });
+        const bossImpactEvents = this.#resolveBossHazardContacts({ players: [player], replicate: false, dt });
         if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
         const ropeImpactOutcome = this.#advanceRopeImpactAttacks(player, { commit: false });
         const collisionExplosionEvents = player.augmentCombat.collisionExplosionEvents({
@@ -2536,7 +2556,7 @@ export class GameSimulation {
             this.#advanceAuthoredWorldProgress(gameplayCommands, { dt });
             if (this.isSeamlessSectorWorld) this.#advanceBossStage();
         }
-        this.#resolveBossHazardContacts();
+        this.#resolveBossHazardContacts({ dt });
         this.#advanceEnemyStatusEffects(dt);
         this.#removeDefeatedEnemies();
         if (this.collisionBroadPhase.frameTick !== this.tick) this.#prepareCollisionFrame();
@@ -3887,6 +3907,7 @@ export class GameSimulation {
                     id: this.registry.createId("enemy"),
                     position: new Vector2(member.position.x, member.position.y),
                     level: member.level,
+                    sectorId: member.sectorId ?? null,
                     areaId: member.areaId ?? null,
                     objectId: member.objectId,
                     enemyType: member.enemyType,
@@ -4148,9 +4169,8 @@ export class GameSimulation {
         const stage = this.#bossStageWorld();
         if (!stage || claim.sourceId !== stage.id)
             return Object.freeze({ accepted: false, reason: "boss-stage-mismatch" });
-        const playerSuffix = `:${player.id}`;
-        if (!claim.impactId.endsWith(playerSuffix)) return Object.freeze({ accepted: false, reason: "boss-impact-id" });
-        const recordKey = claim.impactId.slice(0, -playerSuffix.length);
+        const recordKey = this.bossRuntime.hazardRecordKeyForContact(claim.impactId, player.id);
+        if (!recordKey) return Object.freeze({ accepted: false, reason: "boss-impact-id" });
         const record = this.bossHazardRecords.get(recordKey);
         if (!record || record.stageId !== stage.id || record.attempt !== this.bossRuntime.snapshot().attempt) {
             return Object.freeze({ accepted: false, reason: "boss-hazard-sequence" });
@@ -4158,6 +4178,16 @@ export class GameSimulation {
         if (this.tick > record.expiryTick) return Object.freeze({ accepted: false, reason: "boss-hazard-expired" });
         if (claim.sourceSequence !== record.sequence || claim.sourceType !== record.hazardKind) {
             return Object.freeze({ accepted: false, reason: "boss-hazard-mismatch" });
+        }
+        if (
+            !this.bossRuntime.validatesHazardContactId({
+                contactId: claim.impactId,
+                playerId: player.id,
+                hazardKind: record.hazardKind,
+                recordKey
+            })
+        ) {
+            return Object.freeze({ accepted: false, reason: "boss-impact-id" });
         }
         if (record.targetPlayerId && record.targetPlayerId !== player.id) {
             return Object.freeze({ accepted: false, reason: "boss-hazard-target" });

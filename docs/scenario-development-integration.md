@@ -31,13 +31,13 @@ reviewed-upstream: f6cdf777e9df28b383a194f8a20610044cdbf6cd
 
 ## 최근 반영된 시나리오 변화
 
-- Boss03 그랩은 800px 중심 원의 SEARCH 즉시 포획을 제거하고 Commander 손에서 실제 hook tip이 고정 Player까지 비행해 collider가 닿을 때만 성공한다. 성공 뒤 Player를 눈높이까지 0.35초 동안 끌어올리고 0.15초 고정한 뒤 Grab Hammer로 아래에 내리꽂으며, Player owner는 첫 실제 지형 상면 충돌에서 별도 플랫폼 충돌 피해 없이 위로 반동하고 결과 운동을 공유한다. 기본 sprite profile은 built-in imagegen으로 생성·정규화한 pull v2·summon clip을 사용하고 초기 진입·atlas pending에 Polygon 본체를 노출하지 않는다. Arena surface의 중복 Polygon presentation을 제거해 기존 Sector03 terrain package가 authored collision surface를 그대로 그린다.
+- Boss03 그랩은 800px 중심 원의 SEARCH 즉시 포획을 제거하고 Commander 손에서 실제 hook tip이 고정 Player까지 비행해 collider가 닿을 때만 성공한다. 성공 뒤 Player를 눈높이까지 0.35초 동안 끌어올리고 0.15초 고정한 뒤 Grab Hammer로 아래에 내리꽂으며, Player owner는 첫 실제 지형 상면 충돌에서 별도 플랫폼 충돌 피해 없이 위로 반동하고 결과 운동을 공유한다. 기본 sprite profile은 built-in imagegen으로 생성·정규화한 pull v2·summon clip을 사용하고 초기 진입·atlas pending에 Polygon 본체를 노출하지 않는다. Arena surface의 중복 Polygon presentation은 제거하고 stable `boss-03` 환경 package가 Sector03 backdrop·palette와 Boss06식 긴 장갑 panel module을 조합해 authored collision surface 위에 그린다.
 
 - 0.78.1은 Panel 활성화와 Gate 통과를 분리했다. 48개 Exit Panel의 중심점 원형 반경을 authored 96×144 직사각형 interaction Polygon으로 교체하고 Player collider overlap으로 판정한다. Sector 03의 Panel 8개와 4-4·4-7·4-8·Sector 06의 이전 불일치를 정리해 `Exit X = Gate visual X = Gate trigger 중심 X`를 복구하고 Panel+Player 영역과 Gate trigger를 분리했다. Gate 중심·Gate visual·Gate trigger는 Panel 상호작용을 대신하지 않는다. seamless objective·route 사건은 canonical objective·Gate source ID를 보존해 1-1의 Terminal 3문구와 `SERVICE SHAFT 02 / ACCESS OPEN`을 실제 Runtime 사건에서 순서대로 재생한다. surface geometry·Gate trigger shape/size·Sector Key·network authority는 변경하지 않았다.
 
 - 48개 Stage 출구 표현을 전수 감사해 Sector 05를 포함한 32개 정상 Stage는 유지하고, canonical과 generated Runtime에서 누락됐던 Sector 04·06의 Gate 16개를 각 Exit Panel 옆 authored surface top에 복구했다. 1-1의 유일한 2.7초 출구 objective 지연도 제거해 W/점프 입력 tick에 즉시 문을 열고 Terminal 텍스트는 Direction이 별도 재생한다. geometry·objective 의미·portal trigger·Sector Key·network 계약은 바꾸지 않았으며 validator가 Stage별 Gate·Exit Panel 정확히 1개와 출구 objective 무지연을 검사한다.
 
-- Boss03·06은 공용 Enemy 소환 계약의 `2마리 / 15초 / live 6 skip`과 결정적 공격형 pool을 사용한다. Boss06 유도미사일은 서로 다른 projectile ID의 동시 swept contact를 각 객체별로 소비해 지연 catch-up에서도 Player 피격을 누락하지 않는다. 두 Boss의 Arena·일반 Stage geometry·전환 경계는 변경하지 않았다.
+- Boss03·06은 공용 Enemy 소환 계약의 `2마리 / 15초 / live 6 skip`과 결정적 공격형 pool을 사용한다. Boss06 유도미사일은 서로 다른 projectile ID의 동시 swept contact를 각 객체별로 소비하며, Security Beam은 3초 active 시작과 이후 0.5초 간격의 서버 공용 pulse 6개에서 겹친 Player에게 20 피해를 적용한다. 이탈 중인 pulse는 피해가 없고 재진입하면 현재 이후 pulse부터 피해자 owner claim으로 수렴한다. 두 Boss의 Arena·일반 Stage geometry·전환 경계는 변경하지 않았다.
 
 - Boss06 승리 표현은 Departure Gate의 locked/light/open와 0.3초 opening motion을 Runtime sprite로 연결하고, Gate·Shuttle의 bottom-center를 Departure Deck top에 맞췄다. Gate collision·Bridge·Boarding zone·승리 타임라인·멀티 권한은 변경하지 않았다.
 

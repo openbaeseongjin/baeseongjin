@@ -374,7 +374,9 @@ export const BOSS_06_STAGE_SPEC = freezeBossStageValue({
             id: "boss-06:warden-combat",
             parameters: {
                 beamGapSeconds: 0.3,
-                beamSeconds: 0.8,
+                beamDamage: 20,
+                beamPulseSeconds: 0.5,
+                beamSeconds: 3,
                 boardingBounds: {
                     height: 280,
                     width: 430,

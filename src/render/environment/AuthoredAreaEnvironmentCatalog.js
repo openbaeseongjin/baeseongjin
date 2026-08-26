@@ -14,6 +14,7 @@ const SECTOR_03_CENTRAL_EXCHANGE_SELECTION = environmentSelection("sector-03-cen
 const SECTOR_04_UPPER_RESIDENTIAL_SELECTION = environmentSelection("sector-04-upper-residential");
 const SECTOR_05_CONTINUITY_CONTROL_SELECTION = environmentSelection("sector-05-continuity-control");
 const SECTOR_06_ROOFTOP_EVACUATION_SELECTION = environmentSelection("sector-06-rooftop-evacuation");
+const BOSS_03_LOWER_SECTOR_COMMANDER_ARENA_SELECTION = environmentSelection("boss-03-lower-sector-commander-arena");
 const BOSS_06_CONTINUITY_WARDEN_ARENA_SELECTION = environmentSelection("boss-06-continuity-warden-arena");
 
 function sectorAreaSelections(sectorNumber, selection) {
@@ -32,6 +33,7 @@ export const AUTHORED_AREA_ENVIRONMENT_SELECTIONS = Object.freeze(
         ...sectorAreaSelections(4, SECTOR_04_UPPER_RESIDENTIAL_SELECTION),
         ...sectorAreaSelections(5, SECTOR_05_CONTINUITY_CONTROL_SELECTION),
         ...sectorAreaSelections(6, SECTOR_06_ROOFTOP_EVACUATION_SELECTION),
+        ["boss-03", BOSS_03_LOWER_SECTOR_COMMANDER_ARENA_SELECTION],
         ["boss-06", BOSS_06_CONTINUITY_WARDEN_ARENA_SELECTION]
     ])
 );

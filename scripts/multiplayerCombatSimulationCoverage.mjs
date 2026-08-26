@@ -5,7 +5,8 @@ export const MULTIPLAYER_COMBAT_SIMULATION_ID = Object.freeze({
     WIRE_ENERGY_ORB_PLAYER_HIT: "wire-energy-orb-player-hit",
     WIRE_METEOR_IGNITED_PRESENTATION: "wire-meteor-ignited-presentation",
     WIRE_DEATH_RESPAWN: "wire-death-respawn",
-    WIRE_BOSS03_GRAB_SLAM: "wire-boss03-grab-slam"
+    WIRE_BOSS03_GRAB_SLAM: "wire-boss03-grab-slam",
+    WIRE_BOSS06_SECURITY_BEAM: "wire-boss06-security-beam"
 });
 
 export const MULTIPLAYER_COMBAT_SIMULATION_COVERAGE = Object.freeze({
@@ -70,10 +71,21 @@ export const MULTIPLAYER_COMBAT_SIMULATION_COVERAGE = Object.freeze({
         runner: "scripts/simulateTwoPlayerCombatWire.mjs",
         boundary: "production-wire-with-controlled-boss03",
         verifies: Object.freeze([
-            "Boss03 hook tip 비행 WorldSnapshot v21 직렬화",
+            "Boss03 hook tip 비행 WorldSnapshot v22 직렬화",
             "피해자 로컬 눈높이 pull과 Grab Hammer 하강",
             "첫 지형 상면 충돌 반동과 플랫폼 피해 중복 억제",
             "서버·동료 owner-motion 반동 속도 수렴",
+            "사건 뒤 서버 health"
+        ])
+    }),
+    [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_BOSS06_SECURITY_BEAM]: Object.freeze({
+        runner: "scripts/simulateTwoPlayerCombatWire.mjs",
+        boundary: "production-wire-with-controlled-boss06",
+        verifies: Object.freeze([
+            "Boss06 Security Beam 3초 active 시작+0.5초 간격/20 피해 6 pulse",
+            "Beam 이탈 중 pulse 무피해와 같은 Beam 재진입 뒤 남은 pulse 적용",
+            "정상 snapshot reconcile 동안 피해자 owner의 소비 pulse ID 비되감김",
+            "고유 pulse claim의 중복 억제와 로컬·서버·동료 HP 수렴",
             "사건 뒤 서버 health"
         ])
     })

@@ -25,6 +25,7 @@ import {
     LOWER_SECTOR_COMMANDER_GRAB_HOOK as GRAB_HOOK,
     LOWER_SECTOR_COMMANDER_ID as ID,
     LOWER_SECTOR_COMMANDER_OBJECT_KIND as OBJECT_KIND,
+    LOWER_SECTOR_COMMANDER_SECTOR_ID as SECTOR_ID,
     LOWER_SECTOR_COMMANDER_STATE as STATE,
     LOWER_SECTOR_COMMANDER_SURFACE_KIND as SURFACE_KIND
 } from "./LowerSectorCommanderDefinition.js";
@@ -74,6 +75,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.config = this.#configuration();
         this.summonPattern = new BossEnemySummonPattern({
             bossStageId: definition.id,
+            sectorId: SECTOR_ID,
             ...this.config.summonPattern
         });
         this.stateCatalog = createLowerSectorCommanderStateCatalog();

@@ -56,6 +56,7 @@
 ## 멀티와 표현
 
 - Player Spell은 owner가 먼저 생성하고, 중립 Enemy·Boss는 서버, 원격 Player 피격은 피해 Player가 최초 판정한다. 상태 pulse는 전송하지 않는다.
-- owner-motion v11은 projectile·area·charge·지속 버프·Passive, augment-impact v5는 impulse, WorldSnapshot v19는 확장 Player 상태와 Boss Polygon ImpactTarget을 전송한다. player-impact v16은 피격 후 시간 기반 무적을 상태나 성공 `duplicate` 결과로 사용하지 않는다.
+- owner-motion v11은 projectile·area·charge·지속 버프·Passive, augment-impact v5는 impulse, WorldSnapshot v22는 확장 Player 상태와 Boss Polygon ImpactTarget을 전송한다. player-impact v16은 피격 후 시간 기반 무적을 상태나 성공 `duplicate` 결과로 사용하지 않는다.
 - 메테오는 암석 핵·화염 꼬리·반경 350 폭발, 전기 구체는 본체와 반경 175 영역, 열선·검격·빙결 폭발은 판정 형상을 표시한다. 증강 선택 카드는 Stable ID 기반 이미지 아이콘과 기존 이름·family·tagline·설명을 함께 표시하고, 장착 뒤 Spell 4슬롯과 Rope·Passive 상태 HUD가 같은 이미지를 재사용한다. 현재 증강 일러스트는 96×96 저작본을 48×48 런타임 PNG로 정규화하고 더 작은 UI 표시에는 고품질 보간을 사용해 비율과 안티앨리어싱을 유지한다. 아이콘 package가 없거나 실패하면 카테고리 Canvas 도형으로 복구하며 gameplay·network 상태는 바뀌지 않는다.
+- 모바일 경험치 바는 14px 높이로 표시하고 Spell 슬롯과 10px을 띄운다. 이 표현 변경은 `MobileControlLayout`의 슬롯 표시·입력 사각형을 움직이지 않는다.
 - `npm run simulate:multiplayer-combat`은 브라우저·오디오 없이 command·owner motion·impact claim·World snapshot wire를 통과해 신규 Spell·상태·Passive·사망 XP 수렴을 검증한다.
