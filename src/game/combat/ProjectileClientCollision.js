@@ -1,11 +1,7 @@
 import { createSimulationCapabilityMixin } from "../simulation/SimulationCapability.js";
-import { colliderSnapshotOverlapsCircle } from "../physics/colliders/Collider.js";
+import { colliderSnapshotBoundingRadius, colliderSnapshotsOverlap } from "../physics/colliders/Collider.js";
 import { ropeAttachmentPoint } from "../rope/RopeAttachment.js";
-import {
-    combatTargetBlocksImpactFrom,
-    combatTargetOverlapsCircle,
-    combatTargetSweptCircleContact
-} from "./CombatTargetGeometry.js";
+import { combatTargetBlocksImpactFrom, combatTargetColliderSnapshot } from "./CombatTargetGeometry.js";
 import { IMPACT_TARGET_KIND } from "./ImpactTarget.js";
 
 export const CLIENT_PROJECTILE_COLLISION_CAPABILITY = "client-projectile-collision";
@@ -30,16 +26,57 @@ function distancePointToSegment(point, start, end) {
     return Math.hypot(point.x - (start.x + segmentX * projection), point.y - (start.y + segmentY * projection));
 }
 
+function pointAlongSegment(start, end, ratio) {
+    return Object.freeze({
+        x: start.x + (end.x - start.x) * ratio,
+        y: start.y + (end.y - start.y) * ratio
+    });
+}
+
+function projectileOverlapsTarget(projectile, target, position, collider = projectile.colliderSnapshot()) {
+    return colliderSnapshotsOverlap(combatTargetColliderSnapshot(target), target.position, collider, position);
+}
+
+function projectileSweptTargetContact(projectile, target, { start, end, collider }) {
+    if (projectileOverlapsTarget(projectile, target, start, collider)) {
+        return Object.freeze({ ratio: 0, position: start });
+    }
+    const travel = Math.hypot(end.x - start.x, end.y - start.y);
+    const stepDistance = Math.max(1, colliderSnapshotBoundingRadius(collider) * 0.25);
+    const sampleCount = Math.min(128, Math.max(1, Math.ceil(travel / stepDistance)));
+    let previousRatio = 0;
+    for (let sample = 1; sample <= sampleCount; sample += 1) {
+        const ratio = sample / sampleCount;
+        const position = pointAlongSegment(start, end, ratio);
+        if (!projectileOverlapsTarget(projectile, target, position, collider)) {
+            previousRatio = ratio;
+            continue;
+        }
+        let low = previousRatio;
+        let high = ratio;
+        for (let iteration = 0; iteration < 10; iteration += 1) {
+            const middle = (low + high) * 0.5;
+            if (projectileOverlapsTarget(projectile, target, pointAlongSegment(start, end, middle), collider)) {
+                high = middle;
+            } else {
+                low = middle;
+            }
+        }
+        return Object.freeze({ ratio: high, position: pointAlongSegment(start, end, high) });
+    }
+    return null;
+}
+
 export const withEnemyHitPrediction = createSimulationCapabilityMixin({
     id: CLIENT_PROJECTILE_COLLISION_CAPABILITY,
     order: 30,
     apply({ state, clientTick }) {
         const target = state?.combatTargets?.find(({ id }) => id === this.targetId);
         const segments = this.consumeClientCollisionSegments();
-        const currentOverlap = Boolean(target && combatTargetOverlapsCircle(target, this.position, this.radius));
+        const currentOverlap = Boolean(target && projectileOverlapsTarget(this, target, this.position));
         const hitContact = target
             ? segments
-                  .map(({ start, end }) => combatTargetSweptCircleContact(target, start, end, this.radius))
+                  .map((segment) => projectileSweptTargetContact(this, target, segment))
                   .find((contact) => contact !== null)
             : null;
         if (
@@ -93,12 +130,12 @@ export const withPlayerImpactPrediction = createSimulationCapabilityMixin({
             canHitPlayer &&
             !currentRopeHit &&
             player.health > 0 &&
-            colliderSnapshotOverlapsCircle(player.collider, player.position, this.position, this.radius)
+            projectileOverlapsTarget(this, player, this.position)
         );
         const bodyHitContact =
             canHitPlayer && !currentRopeHit && player.health > 0
                 ? segments
-                      .map(({ start, end }) => combatTargetSweptCircleContact(player, start, end, this.radius))
+                      .map((segment) => projectileSweptTargetContact(this, player, segment))
                       .find((contact) => contact !== null)
                 : null;
         const ropeHit = currentRopeHit || sweptRopeHit;

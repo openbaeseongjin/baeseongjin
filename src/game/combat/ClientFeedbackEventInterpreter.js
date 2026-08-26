@@ -1,4 +1,5 @@
 import {
+    areaAttackRingRequest,
     spellParticlePreset,
     augmentEffectLifetime,
     CLIENT_FEEDBACK_EVENT_CONFIG,
@@ -35,6 +36,7 @@ export class ClientFeedbackEventInterpreter {
         this.ropeCutFeedback = null;
         this.augmentEffects = [];
         this.seenParticleCausalIds = new Set();
+        this.seenAreaRingCausalIds = new Set();
     }
 
     apply(events, { effectBuffer, visibleWorldBounds, suppressDetach }) {
@@ -42,6 +44,7 @@ export class ClientFeedbackEventInterpreter {
         const context = {
             suppressDetach,
             appendAugmentEffect: (event) => this.appendAugmentEffect(event),
+            appendAreaAttackRing: (event) => this.appendAreaAttackRing(event),
             appendParticle: (event, request) => this.appendParticle(event, request, effectBuffer, visibleWorldBounds),
             appendCombatEvent: (event, resolution) =>
                 feedbackEvents.push(this.combatEvent(event, resolution, feedbackEvents.length))
@@ -65,6 +68,22 @@ export class ClientFeedbackEventInterpreter {
             sourcePosition: event.sourcePosition ?? event.parameters?.sourcePosition ?? null,
             age: this.config.INITIAL_AGE,
             lifetime: augmentEffectLifetime(effectId)
+        });
+    }
+
+    appendAreaAttackRing(event) {
+        const request = areaAttackRingRequest(event);
+        if (!request || !rememberBounded(this.seenAreaRingCausalIds, request.causalId, this.config.CAUSAL_LIMIT))
+            return;
+        this.augmentEffects.push({
+            id: request.causalId,
+            type: request.effectId,
+            rangeRing: true,
+            position: request.position,
+            radius: request.radius,
+            color: request.color,
+            age: this.config.INITIAL_AGE,
+            lifetime: augmentEffectLifetime(request.effectId)
         });
     }
 

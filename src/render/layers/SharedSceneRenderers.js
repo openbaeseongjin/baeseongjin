@@ -65,6 +65,25 @@ function drawRope(context, rope, player, { electrified = false, time = 0 } = {})
     context.fill();
 }
 
+function drawAreaBoundaryRing(
+    context,
+    { position, radius, color, fillColor = null, alpha = 1, lineWidth = 3, shadowBlur = 0 }
+) {
+    context.save();
+    context.globalAlpha = alpha;
+    context.globalCompositeOperation = "lighter";
+    context.strokeStyle = color;
+    context.fillStyle = fillColor ?? color;
+    context.lineWidth = lineWidth;
+    context.shadowColor = color;
+    context.shadowBlur = shadowBlur;
+    context.beginPath();
+    context.arc(position.x, position.y, radius, 0, Math.PI * 2);
+    if (fillColor) context.fill();
+    context.stroke();
+    context.restore();
+}
+
 export class BackdropRenderer {
     draw({ context, scene, viewport }) {
         const { cssWidth, cssHeight } = viewport;
@@ -1160,15 +1179,15 @@ export class SpellEffectRenderer {
 
     drawElectricOrb(context, projectile) {
         const radius = projectile.auraRadius ?? 175;
+        drawAreaBoundaryRing(context, {
+            position: projectile.position,
+            radius,
+            color: "rgba(96, 165, 250, 0.72)",
+            fillColor: "rgba(34, 211, 238, 0.09)",
+            lineWidth: 3
+        });
         context.save();
         context.globalCompositeOperation = "lighter";
-        context.fillStyle = "rgba(34, 211, 238, 0.09)";
-        context.strokeStyle = "rgba(96, 165, 250, 0.72)";
-        context.lineWidth = 3;
-        context.beginPath();
-        context.arc(projectile.position.x, projectile.position.y, radius, 0, Math.PI * 2);
-        context.fill();
-        context.stroke();
         context.fillStyle = "#e0f2fe";
         context.beginPath();
         context.arc(projectile.position.x, projectile.position.y, projectile.radius ?? 20, 0, Math.PI * 2);
@@ -1243,6 +1262,17 @@ export class EventEffectRenderer {
         if (!effect.position) return;
         const progress = Math.min(1, effect.age / effect.lifetime);
         const alpha = Math.max(0, 1 - progress);
+        if (effect.rangeRing && Number.isFinite(effect.radius) && effect.radius > 0) {
+            drawAreaBoundaryRing(context, {
+                position: effect.position,
+                radius: effect.radius,
+                color: effect.color,
+                alpha: alpha * 0.7,
+                lineWidth: Math.max(1, 6 * (1 - progress)),
+                shadowBlur: 14 * (1 - progress)
+            });
+            return;
+        }
         context.save();
         context.globalAlpha = alpha;
         context.globalCompositeOperation = "lighter";

@@ -43,7 +43,7 @@
 
 ### 다른 게임 엔진 기준 충족 점검
 
-현재 구조는 2인 협동 브라우저 프로토타입에 필요한 멀티플레이 핵심 축을 충족한다. 아래 표는 기능을 더 만들기 위한 목록이 아니라, 다른 엔진의 공식 네트워크 모델과 비교해 현재 구조에 핵심 공백이 없는지 바로 판단하기 위한 기준이다.
+현재 구조는 최대 4인 협동 브라우저 프로토타입에 필요한 멀티플레이 핵심 축을 충족한다. 아래 표는 기능을 더 만들기 위한 목록이 아니라, 다른 엔진의 공식 네트워크 모델과 비교해 현재 구조에 핵심 공백이 없는지 바로 판단하기 위한 기준이다.
 
 | 엔진 기준                                                                                                                                                                                                                                                                                                                                                    | 현재 구현                                                                                                                                                                                                                                                     | 판정                                  |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
@@ -55,7 +55,7 @@
 | 원격 입력은 소유권·형식·범위와 호출 빈도를 검증한다. Godot도 RPC 인자를 적용 전에 검증하고 위치·타이머·쿨다운을 무검증 신뢰하지 말 것을 권고한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html))                                                                                  | 인증된 player ID, 프로토콜 버전, 유한값·tick 순서와 사건 claim별 tick·쿨다운·대상·중복 ID를 검증한다. `owner-motion`은 협동 최종 수렴 정책상 물리량 봉투로 거부하지 않고, 예외 전체 상태는 서버가 발급한 일회용 challenge와 전체 복구 스키마를 통과해야 한다. | 협동·클라이언트 우선 정책 안에서 충족 |
 | 상태 snapshot은 필요에 따라 unreliable/delta/relevancy를 사용한다. 브라우저 HTML5는 raw UDP를 사용할 수 없고 WebSocket 또는 WebRTC 경계를 사용한다. ([Godot High-level multiplayer](https://docs.godotengine.org/en/stable/tutorials/networking/high_level_multiplayer.html))                                                                                | 현재는 2인·20Hz의 단일 reliable WebSocket을 유지하되 v9에서 authored enemy 정적 정의를 제외하고 동적 상태만 보낸다. 동적 delta·관심 영역·WebRTC는 실제 계측에서 head-of-line 지연이나 대역폭 문제가 다시 확인될 때 검토한다.                                  | 현재 규모에서는 핵심 누락 아님        |
 
-서버 rewind·공격자 lag compensation은 움직이는 서버 소유 표적이나 경쟁 PvP가 추가될 때 필요한 조건부 항목이다. 현재처럼 피해자가 자기 피격을 판정하고 적중 대상 수가 작은 2인 PvE에서는 선행 구현하지 않는다. 상태 지문은 우연한 시뮬레이션 불일치를 찾는 도구이지 신뢰 증명이나 치트 방지 수단이 아니므로 암호학적 해시로 바꾸는 것도 현재 핵심 요구가 아니다.
+서버 rewind·공격자 lag compensation은 움직이는 서버 소유 표적이나 경쟁 PvP가 추가될 때 필요한 조건부 항목이다. 현재처럼 피해자가 자기 피격을 판정하고 적중 대상 수가 작은 최대 4인 PvE에서는 선행 구현하지 않는다. 상태 지문은 우연한 시뮬레이션 불일치를 찾는 도구이지 신뢰 증명이나 치트 방지 수단이 아니므로 암호학적 해시로 바꾸는 것도 현재 핵심 요구가 아니다.
 
 ### impact claim과 최종 수렴
 
@@ -364,7 +364,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 `AuthorityWireAdapter`는 실제 WebSocket 앞의 유일한 게임 전송 경계다. 인증된 playerId와 직렬화된 command batch 문자열을 받아 receipt 문자열을 반환하고, 권위 세션의 120Hz 틱을 진행해 20Hz 예정 시점에만 snapshot 문자열을 반환한다. 소켓 런타임은 JSON 내부 게임 객체를 직접 읽거나 변경하지 않는다.
 
-`npm run start:multiplayer`는 개발 환경에서 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 서버 프로세스는 여러 4자리 채널을 동시에 소유하고 각 채널마다 새 32비트 시드의 독립된 `GameSimulation`, 명령 큐, 120Hz 시계와 최대 2명의 연결을 둔다. 클라이언트 예측은 welcome snapshot의 서버 시드로 동일한 지형을 생성한다. 한 명이 나가면 해당 플레이어만 제거하고 남은 유저는 같은 채널 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간 해당 채널과 월드를 폐기하며, 다음 새 채널은 새 시드의 절차 생성 월드를 만든다.
+`npm run start:multiplayer`는 개발 환경에서 정적 게임과 `/multiplayer` WebSocket을 같은 localhost 포트에서 연다. 서버 프로세스는 여러 4자리 채널을 동시에 소유하고 각 채널마다 새 32비트 시드의 독립된 `GameSimulation`, 명령 큐, 120Hz 시계와 최대 4명의 연결을 둔다. 다섯 번째 연결은 `channel-full`로 거부한다. 클라이언트 예측은 welcome snapshot의 서버 시드로 동일한 지형을 생성한다. 한 명이 나가면 해당 플레이어만 제거하고 남은 유저는 같은 채널 월드의 적·체크포인트·진행 틱을 이어간다. 접속자가 0명이 되는 순간 해당 채널과 월드를 폐기하며, 다음 새 채널은 새 시드의 절차 생성 월드를 만든다.
 
 브라우저 첫 화면은 싱글과 멀티를 선택한다. GitHub Pages의 `index.html`에 있는 `meta[name="multiplayer-server"]`가 항상 실행 중인 게임 서버의 HTTPS/WSS 주소를 제공하고, 클라이언트는 이를 `/multiplayer?channel=...`로 정규화한다. 서버 주소는 배포 설정이며 플레이어가 입력하지 않는다. 방장은 **새 채널 만들기**로 4자리 번호를 받고, 참가자는 모바일 숫자 키패드로 그 번호만 입력한다.
 
@@ -386,7 +386,7 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 
 로프 입력은 누르는 순간과 해제 전이, 짧은 부착 버퍼, 부착당 한 번인 스윙 드래그 진행과 `RopeImpactState`에 상태가 있다. 자기 플레이어 재적용은 승인 틱의 `aimWorld`, 마지막 pointer·viewport, `wasPointerDown`, `attachBufferRemaining`, `swingDrag`, 성공 스윙·해제 carry·접촉 집합에서 시작한다. `attachmentCandidate`는 정적 월드와 aim으로 다시 계산하며 전송하지 않는다.
 
-`PredictableProjectileStore`는 최근 이벤트를 명시적으로 drain해 `spawn`을 투사체 팩토리에 전달하고 `resolve`에서 제거한다. 저장소는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 소유하며 투사체 종류를 보고 운동·충돌 정책을 분기하지 않는다. 늦게 받은 생성 이벤트는 현재 serverTick과 생성 tick의 차이만큼 먼저 진행한다. 적·플레이어 투사체는 Player·Enemy와 같은 공통 `PhysicsMixin` 및 단일 `projectile-motion` capability를 사용하고 lifetime과 Homing steering만 선택 mixin으로 조합한다. Boss06 점프 정점의 5발 미사일은 서버만 enemy+homing 객체를 생성하고, fan 초기 속도·target Player ID·제한 turn rate·개별 lifetime을 spawn 사건으로 공유한다. owner prediction은 별도 미사일을 만들지 않으며 Boss defeat/wipe는 Boss 소유 잔탄을 resolve한다. 클라이언트 충돌은 같은 `client-projectile-collision` ID의 서로 다른 믹스인을 사용하고, 서로 다른 projectile ID의 유효 swept contact를 frame 전체 quota로 합치지 않는다. 서버와 클라이언트는 동일 초기 상태·tick의 위치와 속도가 정확히 일치하는 진단으로 잠근다. claim 대기 객체의 표시와 재충돌 가능 여부도 객체 수명주기가 결정한다. 자기 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 적중으로 소비되며 receipt 거절로 되살리지 않는다. 투사체 매 틱 좌표 배열은 스냅샷에 추가하지 않는다.
+`PredictableProjectileStore`는 최근 이벤트를 명시적으로 drain해 `spawn`을 투사체 팩토리에 전달하고 `resolve`에서 제거한다. 저장소는 객체 등록·prediction ID와 authority ID 대응·사건 전달만 소유하며 투사체 종류를 보고 운동·충돌 정책을 분기하지 않는다. 늦게 받은 생성 이벤트는 현재 serverTick과 생성 tick의 차이만큼 먼저 진행한다. 싱글·멀티 snapshot은 모두 `players` 배열을 표적 권위로 제공하며 로컬 `player` projection으로 Homing 입력을 대체하지 않는다. 적·플레이어 투사체는 Player·Enemy와 같은 공통 `PhysicsMixin` 및 단일 `projectile-motion` capability를 사용하고 lifetime과 Homing steering만 선택 mixin으로 조합한다. Boss06 점프 정점의 5발 미사일은 서버만 enemy+homing 객체를 생성하고, fan 초기 속도·target Player ID·제한 turn rate·개별 lifetime을 spawn 사건으로 공유한다. 미사일의 속도 방향 Rect collider snapshot은 화면·디버그·현재 overlap·tick별 swept contact가 함께 사용한다. owner prediction은 별도 미사일을 만들지 않으며 Boss defeat/wipe는 Boss 소유 잔탄을 resolve한다. 클라이언트 충돌은 같은 `client-projectile-collision` ID의 서로 다른 믹스인을 사용하고, 서로 다른 projectile ID의 유효 swept contact를 frame 전체 quota로 합치지 않는다. 서버와 클라이언트는 동일 초기 상태·tick의 위치와 속도가 정확히 일치하는 진단으로 잠근다. claim 대기 객체의 표시와 재충돌 가능 여부도 객체 수명주기가 결정한다. 자기 탄환과 피해 클라이언트가 충돌 처리한 적 탄환은 첫 적중으로 소비되며 receipt 거절로 되살리지 않는다. 투사체 매 틱 좌표 배열은 스냅샷에 추가하지 않는다.
 
 - `snapshot()`은 화면이 읽을 소유자 로컬 상태와 원격·중립 공유 상태를 구분해 반환한다.
 - 연결 상태와 네트워크 지표는 게임 규칙 스냅샷과 분리한다.
@@ -394,6 +394,8 @@ RTT 표본을 만들기 위한 sequence별 송신 시각은 receipt 수신 시 �
 실제 소켓은 `ws` 기반 Node 권위 서버와 브라우저 WebSocket 클라이언트로 연결됐다. GitHub Pages는 정적 화면만 제공하고 별도로 항상 실행되는 게임 서버에 연결한다. 운영 서버는 `BAESEONGJIN_ALLOWED_ORIGINS=https://openbaeseongjin.github.io`처럼 허용 Origin을 제한하며, 4자리 채널 번호는 접속 편의 수단이지 인증 정보로 취급하지 않는다.
 
 ## 증강 선택·피해 동기화
+
+공용 Player snapshot의 Experience는 싱글·멀티에서 같은 상태 계약이며, owner prediction도 pending `augment-selection`이 없을 때 서버의 `totalExperience`와 `resolvedRewardLevel`을 함께 흡수한다. 선택 중에는 로컬 loadout·Experience를 보존하고, claim 승인 뒤 authoritative snapshot으로 수렴한다. 선택 적용은 카드 추가와 reward level 해결을 하나의 transaction으로 처리해 어느 한쪽만 남기지 않는다.
 
 - offer는 owner와 서버가 `runSeed + stablePlayerId + rewardLevel`로 독립 재계산하고 snapshot의 pending XP reward를 보존한다.
 - Rope·Spell의 Enemy·Boss 적중은 공격 owner가 먼저 시뮬레이션하고 서버가 확정한다. 다른 Player 피격은 피해 Player가 먼저 적용해 claim한다. 서버 Enemy는 마지막으로 확정한 양수 Player 피해 source를 완전 회복·Encounter reset까지 보존하고, 이후 비Player 원인 사망에도 해당 Player XP를 한 번 귀속한다. 중앙 Enemy 제거 경계가 모든 일반 Enemy 사망에 canonical `enemy-defeated`를 한 번 공유하며, 공격 owner의 predicted 사망 폭발과 서버 echo는 같은 causal ID로 합쳐지고 동료는 canonical 사건으로 같은 폭발을 본다.
