@@ -606,6 +606,10 @@ export class OwnerPredictionRuntime {
         return this.initialized ? this.simulation.snapshot() : null;
     }
 
+    collisionDebugSnapshot() {
+        return this.initialized ? this.simulation.collisionDebugSnapshot() : null;
+    }
+
     worldSnapshot() {
         return this.initialized ? this.simulation.world : null;
     }

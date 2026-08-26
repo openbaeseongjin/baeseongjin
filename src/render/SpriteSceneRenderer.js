@@ -50,6 +50,7 @@ import { LowerSectorCommanderSpriteObjectRendererCatalog } from "./boss/LowerSec
 import { BossStageSpriteObjectRendererCatalog } from "./boss/BossStageSpriteObjectRendererCatalog.js";
 import { CONTINUITY_WARDEN_PROJECTILE_PRESET_ID } from "../game/boss/ContinuityWardenDefinition.js";
 import { HomingMissileRenderer } from "./projectiles/HomingMissileRenderer.js";
+import { DebugCollisionRenderer } from "./debug/DebugCollisionRenderer.js";
 
 function renderingAtlases(definition) {
     const ids = environmentRenderingAtlasIds(definition);
@@ -418,6 +419,7 @@ export class SpriteSceneRenderer {
                 }),
                 polygonRenderer: new PolygonLocalPlayerRenderer()
             }),
+            new DebugCollisionRenderer(),
             new ActorStatusRenderer()
         ]);
 

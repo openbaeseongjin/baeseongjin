@@ -5,6 +5,31 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
+function boundsContains(bounds, position) {
+    return (
+        position.x >= bounds.x &&
+        position.x <= bounds.x + bounds.width &&
+        position.y >= bounds.y &&
+        position.y <= bounds.y + bounds.height
+    );
+}
+
+export function previewFlightBoundsForWorld(world, position) {
+    const landmarks = world?.landmarks ?? [];
+    const containing = landmarks.find(({ bounds }) => boundsContains(bounds, position));
+    if (containing) return containing.bounds;
+    const nearest = landmarks
+        .map(({ bounds }) => ({
+            bounds,
+            distance: Math.hypot(
+                position.x - (bounds.x + bounds.width * 0.5),
+                position.y - (bounds.y + bounds.height * 0.5)
+            )
+        }))
+        .sort((left, right) => left.distance - right.distance)[0];
+    return nearest?.bounds ?? null;
+}
+
 export class PreviewFlightController {
     constructor({ speed = DEFAULT_FLIGHT_SPEED } = {}) {
         this.enabled = false;

@@ -1761,6 +1761,33 @@ export class GameSimulation {
         return this.collisionBroadPhase.snapshot();
     }
 
+    collisionDebugSnapshot() {
+        const colliderSnapshot = (collider) =>
+            typeof collider?.snapshot === "function" ? collider.snapshot() : (collider ?? null);
+        const bossActors = this.#bossCollisionActors().map((actor) =>
+            Object.freeze({
+                id: actor.id,
+                position: Object.freeze({ x: actor.position.x, y: actor.position.y }),
+                collider: colliderSnapshot(actor.collider)
+            })
+        );
+        const bossHazards = (this.bossRuntime?.activeHazards?.(this.#bossWorldOffset()) ?? []).map((hazard) =>
+            Object.freeze({
+                id: hazard.id,
+                kind: hazard.kind,
+                ...(hazard.position ? { position: Object.freeze({ x: hazard.position.x, y: hazard.position.y }) } : {}),
+                ...(hazard.bounds ? { bounds: Object.freeze({ ...hazard.bounds }) } : {}),
+                ...(Number.isFinite(hazard.radius) ? { radius: hazard.radius } : {}),
+                ...(hazard.collider ? { collider: colliderSnapshot(hazard.collider) } : {})
+            })
+        );
+        return Object.freeze({
+            surfaces: this.activeCollisionSurfaces,
+            bossActors: Object.freeze(bossActors),
+            bossHazards: Object.freeze(bossHazards)
+        });
+    }
+
     advanceWorldProgressToArea(areaId) {
         if (!this.worldProgress || this.isSeamlessSectorWorld) return false;
         const target = this.world.areas.find(({ id }) => id === areaId);

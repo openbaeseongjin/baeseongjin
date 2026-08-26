@@ -6,17 +6,6 @@ import { selectWorldSeed } from "../world/WorldSeed.js";
 import { LocalAuthority } from "./LocalAuthority.js";
 import { PreviewFlightController } from "./PreviewFlightController.js";
 
-class AreaPreviewAuthority extends LocalAuthority {
-    applyFlightMotion(position) {
-        this.simulation.applyOwnerMotion(this.playerId, {
-            ...this.ownerState(),
-            position,
-            velocity: { x: 0, y: 0 },
-            isGrounded: false
-        });
-    }
-}
-
 function assertPreviewAreaId(areaId) {
     if (typeof areaId !== "string" || areaId.trim() === "") {
         throw new TypeError("map-editor-preview-area-required");
@@ -59,7 +48,7 @@ export class AreaPreviewGameApp extends GameApp {
             debugAugmentIds: options.debugAugmentIds ?? []
         });
         const previewLandmark = productionLandmarkForArea(simulation.world, previewAreaId);
-        const authority = new AreaPreviewAuthority(simulation);
+        const authority = new LocalAuthority(simulation);
         super({ ...options, worldSeed, startAreaId: previewAreaId, authority });
         this.previewAreaId = previewAreaId;
         this.previewLandmarkId = previewLandmark.id;

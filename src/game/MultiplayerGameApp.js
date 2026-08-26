@@ -78,6 +78,7 @@ export class MultiplayerGameApp {
         onDiagnostics = () => {},
         audioBindings = null,
         metricsVisible = false,
+        colliderOverlayVisible = false,
         hudVisible = true,
         playerDefinition = null,
         directionDefinitions = [],
@@ -94,6 +95,7 @@ export class MultiplayerGameApp {
         this.disconnectHandled = false;
         this.mobileView = globalThis.matchMedia?.("(pointer: coarse)").matches ?? false;
         this.metricsVisible = metricsVisible;
+        this.colliderOverlayVisible = colliderOverlayVisible === true;
         this.hudVisible = hudVisible !== false;
         this.onDiagnostics = onDiagnostics;
         this.audioBindings = audioBindings;
@@ -181,6 +183,11 @@ export class MultiplayerGameApp {
         this.metricsVisible = Boolean(visible);
     }
 
+    setColliderOverlayVisible(visible) {
+        this.colliderOverlayVisible = Boolean(visible);
+        return this.colliderOverlayVisible;
+    }
+
     setHudVisible(visible) {
         this.hudVisible = Boolean(visible);
         return this.hudVisible;
@@ -199,8 +206,13 @@ export class MultiplayerGameApp {
         }
     }
 
-    applyDebugSettings({ metrics = this.metricsVisible, startAreaId = null } = {}) {
+    applyDebugSettings({
+        metrics = this.metricsVisible,
+        colliderOverlay = this.colliderOverlayVisible,
+        startAreaId = null
+    } = {}) {
         this.setMetricsVisible(metrics);
+        this.setColliderOverlayVisible(colliderOverlay);
         if (startAreaId) this.authority.requestDebugTeleport(startAreaId);
     }
 
@@ -678,6 +690,9 @@ export class MultiplayerGameApp {
             stats: this.stats,
             mobileView: this.mobileView,
             metricsVisible: this.metricsVisible,
+            collisionDebugGeometry: this.colliderOverlayVisible
+                ? (this.authority.collisionDebugSnapshot?.() ?? null)
+                : null,
             hudVisible: this.hudVisible,
             metrics: remote.state.metrics,
             networkMetrics,

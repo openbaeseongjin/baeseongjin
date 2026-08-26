@@ -46,6 +46,9 @@ export class DebugPanel {
         this.windowTarget = windowTarget;
         this.onActivate = onActivate;
         this.metricsInput = null;
+        this.colliderOverlayInput = null;
+        this.flightModeInput = null;
+        this.flightModeOutput = null;
         this.startAreaSelect = null;
         this.applyButton = null;
         this.ropeFieldset = null;
@@ -61,6 +64,7 @@ export class DebugPanel {
         this.augmentResetButton = null;
         this.augmentModeOutput = null;
         this.ropeTuningEnabled = true;
+        this.singlePlayerToolsEnabled = true;
         this.holdTimerId = null;
         this.lastActivatedAt = 0;
         this.attached = false;
@@ -79,6 +83,8 @@ export class DebugPanel {
             this.lastActivatedAt = 0;
         };
         this.onMetricsChange = () => this.settings.setMetrics(this.metricsInput.checked);
+        this.onColliderOverlayChange = () => this.settings.setColliderOverlay(this.colliderOverlayInput.checked);
+        this.onFlightModeChange = () => this.settings.setFlightMode(this.flightModeInput.checked);
         this.onStartAreaChange = () =>
             this.settings.setStartAreaId(this.startAreaSelect.value.trim() ? this.startAreaSelect.value : null);
         this.onApplyClick = () => {
@@ -114,6 +120,9 @@ export class DebugPanel {
     attach() {
         if (this.attached) return false;
         this.metricsInput = this.documentTarget.querySelector("[data-debug-metrics]");
+        this.colliderOverlayInput = this.documentTarget.querySelector("[data-debug-collider-overlay]");
+        this.flightModeInput = this.documentTarget.querySelector("[data-debug-flight-mode]");
+        this.flightModeOutput = this.documentTarget.querySelector("[data-debug-flight-mode-status]");
         this.startAreaSelect = this.documentTarget.querySelector("[data-debug-start-area]");
         this.applyButton = this.documentTarget.querySelector("[data-debug-apply]");
         this.ropeFieldset = this.documentTarget.querySelector("[data-debug-rope-tuning]");
@@ -129,6 +138,9 @@ export class DebugPanel {
         this.augmentModeOutput = this.documentTarget.querySelector("[data-debug-augment-mode]");
         if (
             !this.metricsInput ||
+            !this.colliderOverlayInput ||
+            !this.flightModeInput ||
+            !this.flightModeOutput ||
             !this.startAreaSelect ||
             !this.applyButton ||
             !this.ropeFieldset ||
@@ -182,6 +194,8 @@ export class DebugPanel {
         this.trigger.addEventListener("contextmenu", this.onContextMenu);
         this.trigger.addEventListener("click", this.onClickCapture, true);
         this.metricsInput.addEventListener("change", this.onMetricsChange);
+        this.colliderOverlayInput.addEventListener("change", this.onColliderOverlayChange);
+        this.flightModeInput.addEventListener("change", this.onFlightModeChange);
         this.startAreaSelect.addEventListener("change", this.onStartAreaChange);
         this.applyButton.addEventListener("click", this.onApplyClick);
         for (const input of this.ropeInputs) {
@@ -198,12 +212,15 @@ export class DebugPanel {
         this.augmentResetButton.addEventListener("click", this.onAugmentReset);
         this.unsubscribe = this.settings.subscribe((value) => this.render(value));
         this.renderRopeTuningAvailability();
+        this.renderSinglePlayerToolsAvailability();
         this.attached = true;
         return true;
     }
 
     render(value) {
         this.metricsInput.checked = value.metrics;
+        this.colliderOverlayInput.checked = value.colliderOverlay;
+        this.flightModeInput.checked = value.flightMode;
         this.startAreaSelect.value = value.startAreaId ?? "";
         const effective = resolveEffectiveRopeConfig(value.ropeTuning);
         for (const input of this.ropeInputs) {
@@ -282,6 +299,18 @@ export class DebugPanel {
         if (this.attached) this.renderRopeTuningAvailability();
     }
 
+    setSinglePlayerToolsEnabled(enabled) {
+        this.singlePlayerToolsEnabled = Boolean(enabled);
+        if (this.attached) this.renderSinglePlayerToolsAvailability();
+    }
+
+    renderSinglePlayerToolsAvailability() {
+        this.flightModeInput.disabled = !this.singlePlayerToolsEnabled;
+        this.flightModeOutput.textContent = this.singlePlayerToolsEnabled
+            ? "싱글 전용 · WASD·방향키 이동, 중력·지형 충돌·Rope 입력 비활성"
+            : "멀티 세션에서는 비활성 · 소유자 이동 권한을 변경하지 않음";
+    }
+
     renderRopeTuningAvailability() {
         this.ropeFieldset.disabled = !this.ropeTuningEnabled;
         this.augmentFieldset.disabled = !this.ropeTuningEnabled;
@@ -302,6 +331,8 @@ export class DebugPanel {
         this.trigger.removeEventListener("contextmenu", this.onContextMenu);
         this.trigger.removeEventListener("click", this.onClickCapture, true);
         this.metricsInput.removeEventListener("change", this.onMetricsChange);
+        this.colliderOverlayInput.removeEventListener("change", this.onColliderOverlayChange);
+        this.flightModeInput.removeEventListener("change", this.onFlightModeChange);
         this.startAreaSelect.removeEventListener("change", this.onStartAreaChange);
         this.applyButton.removeEventListener("click", this.onApplyClick);
         for (const input of this.ropeInputs) {

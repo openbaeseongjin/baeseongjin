@@ -32,6 +32,7 @@
 - [0.68.0] 보상 가능 Augment 24장, projectile·area·charge·지속 이동 Spell, Rope 회복·2단 점프, 등비 XP와 사망 손실, 동적 Enemy 공통 외부 Impulse
 - 초반 난이도 판단용 활성 시간·처치·피해·로프 절단·첫 generic Augment 선택 지표 수집
 - 원격 배포에서 설정 버튼 길게 누르기로 여는 옵트인 런 지표 패널
+- 디버그 패널의 실제 Runtime 충돌·상호작용 도형 오버레이와 Map Editor Gameplay View 이동 모델을 재사용한 싱글 전용 비행 모드
 - 첫 화면의 싱글·멀티 선택, 고정 게임 서버 연결과 모바일 4자리 채널 생성·참가
 - 시작 화면·설정의 통합 Help는 PC `Q/E/R/Shift` 직접 Spell 슬롯과 Rope 동시 사용, 모바일 Rope 기본 선택과 `슬롯 선택 → 월드 터치 1회 시전`, 네 슬롯 쿨다운, 몹 처치 경험치와 자동 장착 증강을 현재 Runtime과 동일하게 설명한다.
 - 2인 권위 서버의 명령 receipt, 20Hz 스냅샷, 자기 예측과 동료 보간

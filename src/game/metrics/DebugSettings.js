@@ -2,12 +2,15 @@ import { normalizeRopeTuningOverride } from "../config.js";
 import { augmentById, isAugmentCompatibleWithSelection, MAX_AUGMENT_SELECTIONS } from "../augments/AugmentCatalog.js";
 
 export const DEBUG_SETTINGS_STORAGE_KEY = "baeseongjin.debug-settings.v2";
-export const DEBUG_SETTINGS_VERSION = 2;
+export const DEBUG_SETTINGS_VERSION = 3;
+const LEGACY_DEBUG_SETTINGS_VERSION = 2;
 export const MAX_DEBUG_AUGMENT_COUNT = MAX_AUGMENT_SELECTIONS;
 
 export const DEFAULT_DEBUG_SETTINGS = Object.freeze({
     version: DEBUG_SETTINGS_VERSION,
     metrics: false,
+    colliderOverlay: false,
+    flightMode: false,
     startAreaId: null,
     ropeTuning: null,
     debugAugmentIds: Object.freeze([])
@@ -46,6 +49,8 @@ function cloneSettings(settings) {
     return Object.freeze({
         version: DEBUG_SETTINGS_VERSION,
         metrics: settings.metrics,
+        colliderOverlay: settings.colliderOverlay,
+        flightMode: settings.flightMode,
         startAreaId: settings.startAreaId,
         ropeTuning: settings.ropeTuning,
         debugAugmentIds: Object.freeze([...settings.debugAugmentIds])
@@ -53,16 +58,26 @@ function cloneSettings(settings) {
 }
 
 export function normalizeDebugSettings(value, validAreaIds = null) {
-    if (!value || typeof value !== "object" || Array.isArray(value) || value.version !== DEBUG_SETTINGS_VERSION) {
+    if (
+        !value ||
+        typeof value !== "object" ||
+        Array.isArray(value) ||
+        (value.version !== DEBUG_SETTINGS_VERSION && value.version !== LEGACY_DEBUG_SETTINGS_VERSION)
+    ) {
         return DEFAULT_DEBUG_SETTINGS;
     }
     if (typeof value.metrics !== "boolean") return DEFAULT_DEBUG_SETTINGS;
+    const colliderOverlay = value.version === LEGACY_DEBUG_SETTINGS_VERSION ? false : value.colliderOverlay;
+    const flightMode = value.version === LEGACY_DEBUG_SETTINGS_VERSION ? false : value.flightMode;
+    if (typeof colliderOverlay !== "boolean" || typeof flightMode !== "boolean") return DEFAULT_DEBUG_SETTINGS;
     if (value.startAreaId !== null && (typeof value.startAreaId !== "string" || !value.startAreaId.trim())) {
         return DEFAULT_DEBUG_SETTINGS;
     }
     const startAreaId = validAreaIds && !validAreaIds.has(value.startAreaId) ? null : value.startAreaId;
     return cloneSettings({
         metrics: value.metrics,
+        colliderOverlay,
+        flightMode,
         startAreaId,
         ropeTuning: normalizeRopeTuningOverride(value.ropeTuning),
         debugAugmentIds: normalizeDebugAugmentIds(value.debugAugmentIds)
@@ -102,6 +117,16 @@ export class DebugSettings {
     setMetrics(metrics) {
         if (typeof metrics !== "boolean") throw new Error("debug metrics setting must be boolean");
         this.#replace({ ...this.value, metrics });
+    }
+
+    setColliderOverlay(colliderOverlay) {
+        if (typeof colliderOverlay !== "boolean") throw new Error("debug collider overlay setting must be boolean");
+        this.#replace({ ...this.value, colliderOverlay });
+    }
+
+    setFlightMode(flightMode) {
+        if (typeof flightMode !== "boolean") throw new Error("debug flight mode setting must be boolean");
+        this.#replace({ ...this.value, flightMode });
     }
 
     setStartAreaId(startAreaId) {
