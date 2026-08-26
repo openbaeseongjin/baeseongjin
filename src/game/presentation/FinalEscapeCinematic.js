@@ -1,5 +1,6 @@
-const VIDEO_SRC = "/assets/runtime/cinematics/final-escape/one_rope_final_escape_original_image_16x9.mp4";
-const GIF_SRC = "/assets/runtime/cinematics/final-escape/one_rope_final_escape_with_english_credits_preview.gif";
+const FINAL_ESCAPE_ASSET_ROOT = new URL("../../../assets/runtime/cinematics/final-escape/", import.meta.url);
+const VIDEO_SRC = new URL("one_rope_final_escape_original_image_16x9.mp4", FINAL_ESCAPE_ASSET_ROOT).href;
+const GIF_SRC = new URL("one_rope_final_escape_with_english_credits_preview.gif", FINAL_ESCAPE_ASSET_ROOT).href;
 
 export class FinalEscapeCinematic {
     constructor(canvas) {

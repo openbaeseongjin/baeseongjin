@@ -1,5 +1,6 @@
 import { AreaPreviewGameApp } from "../../src/game/runtime/AreaPreviewGameApp.js";
 import { BossStagePreviewGameApp } from "../../src/game/boss-authoring/editor/BossStagePreviewGameApp.js";
+import { BOSS_PRESENTATION_PREVIEW_MODE } from "../../src/game/boss-authoring/editor/BossPresentationMotionPreview.js";
 import { createGameRenderer, resolveRendererProfile } from "../../src/render/GameRendererFactory.js";
 import { SpriteSceneResourceBundle } from "../../src/render/SpriteSceneRenderer.js";
 import { loadDefaultPlayerSpriteDefinition } from "../../src/render/sprites/PlayerSpriteCatalog.js";
@@ -14,6 +15,8 @@ const reloadButton = document.querySelector("#reload-preview");
 const flightMode = document.querySelector("#preview-flight-mode");
 const flightStatus = document.querySelector("#preview-flight-status");
 const focusBossButton = document.querySelector("#preview-focus-boss");
+const boss03GrabLaunchButton = document.querySelector("#preview-boss03-grab-launch");
+const bossMotionStatus = document.querySelector("#preview-boss-motion-status");
 const weakpointStrikeButton = document.querySelector("#preview-weakpoint-strike");
 const stageId = new URLSearchParams(globalThis.location.search).get("stage");
 let currentApp = null;
@@ -63,6 +66,16 @@ function syncFlightMode() {
     flightEnabled = flightMode.checked;
     currentApp?.setPreviewFlightEnabled?.(flightEnabled);
     flightStatus.textContent = flightEnabled ? "켜짐 · 로프 입력 비활성" : "꺼짐";
+}
+
+function syncBossPresentationPreview() {
+    const preview = currentApp?.bossPresentationPreviewState?.() ?? null;
+    const active = preview?.mode === BOSS_PRESENTATION_PREVIEW_MODE.BOSS03_GRAB_LAUNCH;
+    boss03GrabLaunchButton.setAttribute("aria-pressed", String(active));
+    boss03GrabLaunchButton.textContent = active ? "실전 AI 상태로 돌아가기" : "Boss03 실전 거리 그랩 발사 반복";
+    bossMotionStatus.textContent = active
+        ? "표현 검증 중 · 전투 정지 · 실전 약 370px 거리와 1600px/s로 발사 clip·사슬·hook 반복"
+        : "실전 AI 상태";
 }
 
 async function requestPreview() {
@@ -126,6 +139,8 @@ async function createPreview() {
         syncFlightMode();
         focusBossButton.hidden = preview.specType !== "boss-stage";
         weakpointStrikeButton.hidden = preview.specType !== "boss-stage";
+        boss03GrabLaunchButton.hidden = preview.spec.id !== "boss-03";
+        bossMotionStatus.hidden = preview.spec.id !== "boss-03";
         if (preview.specType === "boss-stage") {
             const authoredAreaEnvironmentDefinitions = await environmentDefinitionsForPreview(
                 preview.spec.sourceAreaId,
@@ -146,6 +161,7 @@ async function createPreview() {
                 throw new Error("선택한 Boss Stage 하나를 활성 전투로 시작할 수 없습니다.");
             }
             currentApp.start();
+            syncBossPresentationPreview();
             label.textContent = `${stageId} · ${preview.spec.name} · 실제 게임 화면의 Boss Stage 실행`;
             setStatus(
                 `미리보기 리비전 ${revision} 실행 중 · Boss 전용 지형 ${previewScope.surfaceCount}개 · 이동·Rope·일반 공격·Boss HUD 입력을 실제 GameSimulation에서 처리합니다.`
@@ -191,6 +207,27 @@ focusBossButton.addEventListener("click", () => {
         return;
     }
     setStatus(`Boss 옆으로 이동 · x ${Math.round(outcome.position.x)} / y ${Math.round(outcome.position.y)}`);
+});
+boss03GrabLaunchButton.addEventListener("click", () => {
+    const current = currentApp?.bossPresentationPreviewState?.();
+    const active = current?.mode === BOSS_PRESENTATION_PREVIEW_MODE.BOSS03_GRAB_LAUNCH;
+    if (!active) {
+        flightMode.checked = false;
+        syncFlightMode();
+    }
+    const outcome = currentApp?.setBossPresentationPreviewMode?.(
+        active ? BOSS_PRESENTATION_PREVIEW_MODE.ACTUAL : BOSS_PRESENTATION_PREVIEW_MODE.BOSS03_GRAB_LAUNCH
+    );
+    if (!outcome?.accepted) {
+        setStatus("현재 Boss는 선택한 표현 검증 모드를 지원하지 않습니다.", "error");
+        return;
+    }
+    syncBossPresentationPreview();
+    setStatus(
+        outcome.active
+            ? "Boss03 실전 거리의 그랩 발사만 반복합니다. 끝 발사 자세는 hook 도착까지 유지됩니다."
+            : "Boss03 실전 AI 상태로 돌아왔습니다."
+    );
 });
 weakpointStrikeButton.addEventListener("click", () => {
     const outcome = currentApp?.debugStrikeWeakpoint?.();

@@ -113,7 +113,14 @@ export class CompositeBossEncounterRuntime {
         }
         this.participants.set(playerId, PARTICIPANT_STATUS.DISCONNECTED);
         this.emit("boss-participant-left", { playerId, attempt: this.attempt, scalingChanged: false });
-        return freezeComposite({ accepted: true, changed: true, scalingChanged: false });
+        const retryStarted = this.#restartIfAllConnectedSpectating();
+        return freezeComposite({
+            accepted: true,
+            changed: true,
+            scalingChanged: false,
+            retryStarted,
+            attempt: this.attempt
+        });
     }
 
     recoverParticipant(playerId) {
@@ -205,20 +212,7 @@ export class CompositeBossEncounterRuntime {
             });
         }
         this.participants.set(playerId, PARTICIPANT_STATUS.SPECTATING);
-        const connected = [...this.participants.values()].filter(
-            (status) => status !== PARTICIPANT_STATUS.DISCONNECTED
-        );
-        const retryStarted =
-            connected.length > 0 && connected.every((status) => status === PARTICIPANT_STATUS.SPECTATING);
-        if (retryStarted) {
-            this.attempt += 1;
-            for (const [id, status] of this.participants) {
-                if (status !== PARTICIPANT_STATUS.DISCONNECTED) this.participants.set(id, PARTICIPANT_STATUS.ACTIVE);
-            }
-            this.processedHazardContactIds.clear();
-            this.resetAttempt({ preserveCompleted: true });
-            this.emit("boss-attempt-started", { attempt: this.attempt, health: this.totalHealth() });
-        }
+        const retryStarted = this.#restartIfAllConnectedSpectating();
         return freezeComposite({
             accepted: true,
             changed: true,
@@ -227,6 +221,23 @@ export class CompositeBossEncounterRuntime {
             recoveredHealth,
             health: this.totalHealth()
         });
+    }
+
+    #restartIfAllConnectedSpectating() {
+        const connected = [...this.participants.values()].filter(
+            (status) => status !== PARTICIPANT_STATUS.DISCONNECTED
+        );
+        if (connected.length === 0 || connected.some((status) => status !== PARTICIPANT_STATUS.SPECTATING)) {
+            return false;
+        }
+        this.attempt += 1;
+        for (const [id, status] of this.participants) {
+            if (status !== PARTICIPANT_STATUS.DISCONNECTED) this.participants.set(id, PARTICIPANT_STATUS.ACTIVE);
+        }
+        this.processedHazardContactIds.clear();
+        this.resetAttempt({ preserveCompleted: true });
+        this.emit("boss-attempt-started", { attempt: this.attempt, health: this.totalHealth() });
+        return true;
     }
 
     drainEvents() {
