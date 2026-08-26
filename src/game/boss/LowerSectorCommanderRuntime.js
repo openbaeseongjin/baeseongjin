@@ -12,14 +12,17 @@ import { CombatStatusEffectPool } from "../status-effects/CombatStatusEffectPool
 import { BossStatePool, BOSS_STATE_LANE } from "./BossStatePool.js";
 import { createLowerSectorCommanderStateCatalog } from "./LowerSectorCommanderStateCatalog.js";
 import { CommanderLocomotion } from "./CommanderLocomotion.js";
+import { CommanderGrabHookFlight } from "./CommanderGrabHookFlight.js";
 import { BOSS_ARENA_SUPPORT_KIND, BossArenaSpatialQuery } from "./BossArenaSpatialQuery.js";
 import { KinematicJumpMotion } from "./KinematicJumpMotion.js";
 import { BOSS_ENEMY_SUMMON_EVENT, BossEnemySummonPattern } from "./BossEnemySummonPattern.js";
 import {
     LOWER_SECTOR_COMMANDER_ACTION_PHASE as ACTION_PHASE,
+    LOWER_SECTOR_COMMANDER_BODY_GEOMETRY as BODY_GEOMETRY,
     LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITION as CAPTURE_DEFINITION,
     LOWER_SECTOR_COMMANDER_HAZARD as HAZARD,
     LOWER_SECTOR_COMMANDER_GRAB_STAGE as GRAB_STAGE,
+    LOWER_SECTOR_COMMANDER_GRAB_HOOK as GRAB_HOOK,
     LOWER_SECTOR_COMMANDER_ID as ID,
     LOWER_SECTOR_COMMANDER_OBJECT_KIND as OBJECT_KIND,
     LOWER_SECTOR_COMMANDER_STATE as STATE,
@@ -118,6 +121,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             position: definition.arena.boss.position,
             gravity: this.config.jumpGravity
         });
+        this.grabHookFlight = new CommanderGrabHookFlight({ speed: GRAB_HOOK.SPEED, radius: GRAB_HOOK.RADIUS });
         this.resetAttempt({ preserveCompleted: false });
         if (snapshot) this.restore(snapshot);
     }
@@ -199,6 +203,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.grabCooldownRemaining = 0;
         this.grabCapturedPlayerId = null;
         this.grabStage = GRAB_STAGE.IDLE;
+        this.grabHookFlight?.reset();
         this.chargeDistanceRemaining = 0;
         this.summonPattern.reset();
         this.victoryRemaining = completed ? 0 : this.victoryRemaining;
@@ -295,18 +300,33 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.targetPosition = { ...target.position };
     }
 
-    #capturePosition(facing = this.facing, support = this.#currentSupport()) {
+    #capturePosition(facing = this.facing) {
         const edge = this.body.collider.outsidePointToward(
             this.body.position,
             { x: this.body.position.x + facing, y: this.body.position.y },
             this.config.captureFrontGap + PLAYER_RADIUS
         );
-        return { x: edge.x, y: (support?.topY ?? this.config.mainBounds.y) - PLAYER_RADIUS };
+        return {
+            x: edge.x,
+            y: this.body.position.y - this.config.bodyHeight * BODY_GEOMETRY.EYE_HEIGHT_RATIO
+        };
+    }
+
+    #grabHookStart() {
+        return {
+            x: this.body.position.x + this.facing * GRAB_HOOK.HAND_OFFSET_X,
+            y: this.body.position.y + GRAB_HOOK.HAND_OFFSET_Y
+        };
+    }
+
+    #beginGrabHookFlight() {
+        if (!this.targetPosition) return this.grabHookFlight.reset();
+        return this.grabHookFlight.begin({ start: this.#grabHookStart(), target: this.targetPosition });
     }
 
     #safeCapturePosition(facing = this.facing) {
         const support = this.#currentSupport();
-        const position = this.#capturePosition(facing, support);
+        const position = this.#capturePosition(facing);
         const bounds = support?.bounds ?? this.config.mainBounds;
         const minimumX = bounds.x + this.config.captureCliffMargin;
         const maximumX = bounds.x + bounds.width - this.config.captureCliffMargin;
@@ -354,6 +374,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
     beginGrab(target) {
         this.#beginAttack(STATE.GRAB, target, this.config.grabLeadSeconds);
         this.grabStage = GRAB_STAGE.LEAD;
+        this.grabHookFlight.reset();
     }
 
     beginHammer(target) {
@@ -424,6 +445,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.targetPosition = null;
         this.grabCapturedPlayerId = null;
         this.grabStage = GRAB_STAGE.IDLE;
+        this.grabHookFlight.reset();
         this.chargeDistanceRemaining = 0;
         this.locomotion.stop();
     }
@@ -442,13 +464,17 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         }
         if (this.actionPhase === ACTION_PHASE.TELEGRAPH && this.grabStage === GRAB_STAGE.TELEGRAPH && this.timer <= 0) {
             this.grabStage = GRAB_STAGE.SEARCH;
+            this.#beginGrabHookFlight();
             this.#activateHazard(HAZARD.GRAB, this.config.grabTimeoutSeconds);
             return;
+        }
+        if (this.actionPhase === ACTION_PHASE.ACTIVE && this.grabStage === GRAB_STAGE.SEARCH && this.targetPosition) {
+            this.grabHookFlight.advance(dt, this.targetPosition);
         }
         if (this.actionPhase !== ACTION_PHASE.ACTIVE || this.timer > 0) return;
         if (this.grabStage === GRAB_STAGE.CAPTURED) {
             this.grabStage = GRAB_STAGE.HAMMER;
-            this.#activateHazard(HAZARD.HAMMER, this.config.hammerActiveSeconds);
+            this.#activateHazard(HAZARD.GRAB_HAMMER, this.config.hammerActiveSeconds);
             return;
         }
         if (this.grabStage === GRAB_STAGE.HAMMER) {
@@ -598,15 +624,15 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             sequence: this.hazardSequence,
             direction: this.facing
         };
-        if (this.state === STATE.GRAB && !this.grabCapturedPlayerId) {
+        if (this.state === STATE.GRAB && !this.grabCapturedPlayerId && this.grabHookFlight.active) {
             return Object.freeze([
                 freezeComposite({
                     ...common,
                     kind: HAZARD.GRAB,
                     damage: this.config.grabDamage,
                     targetPlayerId: this.targetPlayerId,
-                    position: compositeWorldPoint(this.body.position, worldOffset),
-                    radius: this.config.grabRange,
+                    position: compositeWorldPoint(this.grabHookFlight.position, worldOffset),
+                    radius: this.grabHookFlight.radius,
                     capture: {
                         interactionId: ID.CAPTURE_INTERACTION(this.attempt, this.hazardSequence, this.targetPlayerId),
                         definitionId: ID.CAPTURE_DEFINITION,
@@ -621,7 +647,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             return Object.freeze([
                 freezeComposite({
                     ...common,
-                    kind: HAZARD.HAMMER,
+                    kind: HAZARD.GRAB_HAMMER,
                     damage: this.config.grabHammerDamage,
                     targetPlayerId: this.grabCapturedPlayerId,
                     automaticTarget: true,
@@ -669,7 +695,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         if (!Number.isFinite(targetPosition?.x) || !Number.isFinite(targetPosition?.y)) return false;
         return (
             Math.hypot(targetPosition.x - hazard.position.x, targetPosition.y - hazard.position.y) <=
-            this.config.grabRange
+            hazard.radius + PLAYER_RADIUS
         );
     }
 
@@ -679,6 +705,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         if (!this.grabCapturedPlayerId) {
             this.grabCapturedPlayerId = playerId;
             this.grabStage = GRAB_STAGE.CAPTURED;
+            this.grabHookFlight.reset();
             this.timer = this.config.grabHoldSeconds;
             return outcome;
         }
@@ -824,6 +851,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
     }
 
     presentationObjects(worldOffset = { x: 0, y: 0 }) {
+        const grabHookFlight = this.grabHookFlight.snapshot();
         const objects = [
             {
                 id: ID.BODY,
@@ -837,6 +865,10 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
                 movementProgress: this.locomotion.distance,
                 jumpPhase: this.jumpMotion.phase,
                 grabStage: this.grabStage,
+                grabHookPosition: grabHookFlight.active
+                    ? compositeWorldPoint(grabHookFlight.position, worldOffset)
+                    : null,
+                grabHookProgress: grabHookFlight.progress,
                 direction: this.facing,
                 physicsBody: this.state !== STATE.DEFEATED,
                 ropeAttachable: false,
@@ -945,6 +977,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
             grabCooldownRemaining: this.grabCooldownRemaining,
             grabCapturedPlayerId: this.grabCapturedPlayerId,
             grabStage: this.grabStage,
+            grabHookFlight: this.grabHookFlight.snapshot(),
             chargeDistanceRemaining: this.chargeDistanceRemaining,
             summonPattern: this.summonPattern.snapshot(),
             victoryRemaining: this.victoryRemaining,
@@ -969,6 +1002,7 @@ export class LowerSectorCommanderRuntime extends CompositeBossEncounterRuntime {
         this.grabCooldownRemaining = snapshot.grabCooldownRemaining ?? 0;
         this.grabCapturedPlayerId = snapshot.grabCapturedPlayerId ?? null;
         this.grabStage = snapshot.grabStage ?? GRAB_STAGE.IDLE;
+        this.grabHookFlight.restore(snapshot.grabHookFlight ?? null);
         this.chargeDistanceRemaining = snapshot.chargeDistanceRemaining ?? 0;
         this.summonPattern.restore(snapshot.summonPattern ?? null);
         this.victoryRemaining = snapshot.victoryRemaining ?? 0;

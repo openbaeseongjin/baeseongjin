@@ -180,7 +180,7 @@
 | Boss kinematic body·Beam/Ram/Charge/Slam/Dive 피격 | Boss motion은 서버, Player 반응은 피해 클라이언트 | 활성 Boss Stage ID와 mechanism snapshot을 결정적으로 진행해 공통 actor collision·피해를 즉시 적용하고 `boss-hazard` state digest claim으로 수렴 |
 | 예측 가능한 투사체·낙하물                          | 플레이어 소유는 담당 클라이언트, 중립 객체는 서버 | 생성 tick·초기 상태 공유 후 로컬 재생                                                                                                           |
 | 자기 사망·active Stage checkpoint 부활             | 피해·소유 클라이언트, 서버 검증·공유              | 즉시 로컬 복귀 후 검증 claim                                                                                                                    |
-| 월드 시드·지형·Sector entry                        | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v20 검증                                                                                |
+| 월드 시드·지형·Sector entry                        | 서버                                              | 시드로 생성 후 `worldRevision`과 WorldSnapshot protocol v21 검증                                                                                |
 | Sector objective                                   | 서버                                              | 독립 trigger/source/prerequisite 결과를 공유하며 마지막 objective는 content boundary 유지                                                       |
 | 플레이어별 Augment 선택·효과                       | 행동·피해 클라이언트 선행, 서버 검증·공유         | 경험치 보상 선택과 효과를 즉시 적용하고 `augment-selection`·`augment-impact` 뒤 Player별 상태를 수렴                                            |
 | 카메라·HUD·파티클                                  | 클라이언트                                        | 자기 상태는 로컬, 원격·중립 상태는 검증된 공유값 사용                                                                                           |
@@ -195,7 +195,7 @@ Boss 입장은 Player별 위치 주도 사건이다. source Gate trigger에 들�
 
 피해 클라이언트와 서버는 같은 멱등 Boss hazard 사망에서 `CompositeBossEncounterRuntime.handlePlayerDefeat()`를 한 번 호출한다. 직접 Boss 처치면 공통 Runtime이 Boss HP를 최대 HP 이내에서 100 회복하고 `boss-participant-defeated` 사건과 다음 Boss snapshot이 같은 회복 결과를 공유한다. 일반 Enemy·환경·낙사 같은 다른 원인의 참가자 사망은 Boss HP를 회복시키지 않으며 Boss별 별도 회복 경로를 두지 않는다.
 
-Boss03 사슬 훅 Grab은 서버 중립 Boss가 target·telegraph를 시작하고 피해 Player client가 로컬 위치에서 사거리 충돌을 먼저 적용하는 Boss hazard claim이다. 성공 시 Rope 해제·20 피해와 `ActorCaptureInteractionState`의 Pull/입력 잠금을 즉시 적용하며 2초 뒤 target-only Hammer 40을 같은 멱등 hazard 경계로 확정한다. 사망·연결 종료·Boss 행동 불가·처치에는 interaction을 취소하고 정상 snapshot·receipt가 owner 상태를 되감지 않는다.
+Boss03 사슬 훅 Grab은 서버 중립 Boss가 target·telegraph를 시작하고 `CommanderGrabHookFlight`의 tip을 Commander 손에서 고정 대상으로 진행하는 중립 Boss 객체다. 800px 중심 범위는 선택·예고 취소에만 사용하고, 피해 Player client는 snapshot으로 복원한 같은 tip collider와 자기 collider의 실제 접촉을 먼저 claim한다. 성공 시 Rope 해제·20 피해와 `ActorCaptureInteractionState`의 0.35초 눈높이 Pull/총 0.5초 입력 잠금을 즉시 적용한다. target-only Grab Hammer 40은 별도 source type으로 확정하고 피해 클라이언트가 즉시 하강 속도를 시작하며, 첫 실제 지형 상면 충돌은 플랫폼 충돌 피해 claim 대신 위쪽 반동으로 소비한다. 서버는 같은 해머 claim의 하강 결과를 적용하고 이후 위치·반동 속도는 owner motion으로 수렴한다. 사망·연결 종료·Boss 행동 불가·처치에는 hook flight·interaction·pending 반동을 취소하고 정상 snapshot·receipt가 owner 상태를 되감지 않는다.
 
 Boss06 승리 뒤 Boarding은 Player별 위치 주도 사건과 공용 완료 상태를 분리한다. 각 소유 Player는 Gate/Bridge를 직접 건너 boarding zone에 들어가고 서버는 Player별 ready ID를 공유한다. 연결된 모든 참가자가 ready일 때만 run completion을 확정하며 첫 ready Player가 동료를 순간이동시키지 않는다. Boss spectator는 승리 시 ID 순서로 final safe Bridge deck에 간격을 두고 복귀하며 참가 상태도 `active`로 함께 전환한 뒤 같은 Boarding 경로를 사용한다. Wipe respawn도 같은 정렬·간격 계약을 사용한다.
 
@@ -207,7 +207,7 @@ Boss06 공격 선택은 `worldSeed + attempt + selectionSequence`로 재현한�
 
 generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 상태로 두어 각자의 선택을 보존한다. `AugmentLoadoutState`, `augment-selection`, `augmentRewards`는 이전 snapshot과 wire 호환을 위한 이름이며 과거 Augment 3종 gameplay를 뜻하지 않는다. 선택 UI는 행동 클라이언트가 즉시 진행하고 서버가 호환 `augment-selection` claim을 검증한 뒤 공유한다. 사망·낙사는 대상 Player state의 `respawnAnchorId`가 가리키는 최근 직접 접촉 Stage checkpoint로 되돌리며 선택 카드와 효과는 유지한다. 치명 impact는 부활 결과까지 상태 지문에 포함하고, 서버의 같은 결정적 전이와 다르면 피해자의 최신 상태를 한 번 흡수해 서버 복제본·동료와 수렴한다. impact pending 동안 이전 스냅샷은 로컬 결과를 되돌리지 않는다. 동료 선택 상태는 수정하지 않는다.
 
-기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. WorldSnapshot v20은 v19의 Player 상태와 Boss03 active capture interaction을 복제하며 피격 후 무적 타이머는 포함하지 않는다.
+기본 Sector Runtime의 공용 landmark 진행과 Player별 checkpoint는 분리한다. WorldSnapshot v21은 v20의 Player·active capture interaction에 Boss03 hook tip 비행 snapshot을 추가하며 피격 후 무적 타이머는 포함하지 않는다.
 
 이전 Area revision의 체크포인트 도달은 소유 클라이언트가 자기 120Hz 예측 위치에서 먼저 감지한다. 클라이언트는 전이 직전 최신 `owner-motion`을 먼저 보낸 뒤 같은 로컬 `GameSimulation`의 활성 체크포인트·로프 해제와 피드백을 즉시 적용하고, 체크포인트 ID·clientTick·authorityTick·현재 위치만 `checkpoint-claim`으로 보낸다. 이 계약은 compatibility test와 이전 world revision에만 남는다.
 
@@ -232,7 +232,7 @@ generic Augment loadout은 `PlayerRuntimeFactory`가 만드는 플레이어별 �
 각도·각속도와 부착 손 local offset은 입력 주도 플레이어의 소유 상태다. 소유 클라이언트가 로프 joint와 지면 복원 토크를 120Hz 예측에 먼저 적용하며 서버 receipt를 기다려 몸체 회전이나 로프 해제를 시작하지 않는다.
 
 - `owner-motion` protocol v11은 Rope joint와 함께 Spell·Experience·공통 상태이상 Pool을 보낸다.
-- `WorldSnapshot` protocol v20의 각 Player는 Rope joint, `selectedAugmentIds`, `augmentRuntimeState`, Experience와 공통 `statusEffects`를 포함하고 top-level state는 active combat interaction을 포함한다.
+- `WorldSnapshot` protocol v21의 각 Player는 Rope joint, `selectedAugmentIds`, `augmentRuntimeState`, Experience와 공통 `statusEffects`를 포함하고 top-level state는 active combat interaction과 Boss03 hook tip 비행 상태를 포함한다.
 - 로프 부착 순간 선택한 손 local offset은 부착이 유지되는 동안 바뀌지 않는다. 공용 rope renderer와 투사체-로프 충돌은 복제된 angle·offset으로 같은 world-space 손 관절점을 계산한다.
 - 로컬 수동 해제와 피해 클라이언트의 로프 절단은 각속도를 보존하고 설정된 접선 속도 전달을 즉시 적용한다. 서버에 도착한 최신 detached `owner-motion`은 같은 tick의 위치·속도·각도와 함께 해제를 원자적으로 확정하며, 이후 도착한 과거 tick은 성공한 no-op으로 무시한다.
 - `player-impact` protocol v13의 `recovery-required` 전체 상태에는 angle·angularVelocity·Rope attachment ID/surface/local anchor/length·Hook tip·`RopeImpactState`·개인 `respawnAnchorId`·`lifeState`·감전 상태와 generic Augment 선택·순간 상태가 포함된다. Boss hazard claim은 Stage·hazard kind·sequence를, Jammer claim은 field group·target surface·cycle sequence를 서버 중립 상태와 대조한다. 부활 결과 지문에도 회전·부착 손·상태 효과·Augment·checkpoint 상태를 포함하지만, 정상 비치명 impact마다 전체 상태를 별도 전송하지 않는다.

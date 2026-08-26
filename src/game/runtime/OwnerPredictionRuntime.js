@@ -6,7 +6,7 @@ import { GameSimulation } from "../simulation/GameSimulation.js";
 import { ROPE_AUTHORITY_EVENT_TYPE } from "../network/RopeAuthorityEvent.js";
 import { SPELL_SOURCE_KIND } from "../spells/SpellRuntimeDefinition.js";
 import { IncomingSpellImpactDetector } from "../spells/IncomingSpellImpactDetector.js";
-import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
+import { LOWER_SECTOR_COMMANDER_CAPTURE_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
 import {
     PLATFORM_COLLISION_DAMAGE_EVENT_TYPE,
     PLATFORM_COLLISION_DAMAGE_ID
@@ -442,7 +442,10 @@ export class OwnerPredictionRuntime {
             return true;
         }
         this.pendingImpacts.delete(impactId);
-        if (pending.event.parameters?.sourceType === LOWER_SECTOR_COMMANDER_HAZARD.GRAB && snapshot) {
+        const commanderCaptureImpact =
+            LOWER_SECTOR_COMMANDER_CAPTURE_HAZARD[pending.event.parameters?.sourceType] === true;
+        if (commanderCaptureImpact) this.simulation.cancelCapturedSlamMotion(this.ownerId);
+        if (commanderCaptureImpact && snapshot) {
             const displayedBefore = this.presentationState();
             const targetTick = this.simulation.getTick();
             const progress = this.simulation.predictionProgressState(this.ownerId);

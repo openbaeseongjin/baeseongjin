@@ -49,13 +49,32 @@ class MotionSpec:
     rows: int
     durations_ms: tuple[int, ...]
     loop: bool = False
+    logical_size: tuple[int, int] = LOGICAL_MOTION_SIZE
+    output_size: tuple[int, int] = MOTION_OUTPUT_SIZE
 
 
 MOTIONS = (
     MotionSpec("idle", "idle-4-imagegen.png", 4, 1, (320, 320, 320, 320), True),
     MotionSpec("walk", "walk-8-imagegen.png", 4, 2, (120, 120, 120, 120, 120, 120, 120, 120), True),
     MotionSpec("grab-lock", "grab-lock-4-imagegen.png", 4, 1, (200, 300, 400, 600)),
-    MotionSpec("grab-pull", "grab-pull-6-imagegen.png", 3, 2, (120, 160, 220, 140, 180, 240)),
+    MotionSpec(
+        "grab-pull",
+        "grab-pull-6-imagegen-v2.png",
+        3,
+        2,
+        (120, 160, 220, 140, 180, 240),
+        logical_size=(144, 128),
+        output_size=(288, 256),
+    ),
+    MotionSpec(
+        "enemy-summon",
+        "enemy-summon-6-imagegen-v1.png",
+        3,
+        2,
+        (160, 160, 180, 180, 160, 160),
+        logical_size=(144, 128),
+        output_size=(288, 256),
+    ),
     MotionSpec("hammer-slam", "hammer-slam-8-imagegen.png", 4, 2, (180, 180, 200, 240, 70, 70, 120, 220)),
     MotionSpec("body-charge", "body-charge-6-imagegen.png", 3, 2, (300, 500, 120, 120, 120, 260)),
     MotionSpec("hit", "hit-3-imagegen.png", 3, 1, (80, 80, 120)),
@@ -173,9 +192,9 @@ def normalize_motion(spec: MotionSpec) -> list[Image.Image]:
     first_height = first[3] - first[1]
     scale = TARGET_STANDING_HEIGHT / first_height
     logical_frames = [
-        normalized_frame(cell, LOGICAL_MOTION_SIZE, scale, bottom_y=MOTION_FOOT_Y) for cell in cells
+        normalized_frame(cell, spec.logical_size, scale, bottom_y=MOTION_FOOT_Y) for cell in cells
     ]
-    output_frames = [frame.resize(MOTION_OUTPUT_SIZE, Image.Resampling.NEAREST) for frame in logical_frames]
+    output_frames = [frame.resize(spec.output_size, Image.Resampling.NEAREST) for frame in logical_frames]
     save_atlas(output_frames, MOTION_EXPORT / f"{spec.clip_id}.png")
     save_atlas(output_frames, RUNTIME_ROOT / f"{spec.clip_id}.png")
     return output_frames
@@ -273,7 +292,11 @@ def main() -> None:
         directory.mkdir(parents=True, exist_ok=True)
     motion_rows = [(spec.clip_id, normalize_motion(spec)) for spec in MOTIONS]
     effects = normalize_effects()
-    save_review(motion_rows, MOTION_PREVIEW / "boss03-motion-runtime-review.png", MOTION_OUTPUT_SIZE)
+    motion_review_size = (
+        max(frame.width for _, frames in motion_rows for frame in frames),
+        max(frame.height for _, frames in motion_rows for frame in frames),
+    )
+    save_review(motion_rows, MOTION_PREVIEW / "boss03-motion-runtime-review.png", motion_review_size)
     save_review(list(effects.items()), EFFECT_PREVIEW / "boss03-chain-hook-runtime-review.png", (128, 64))
 
 

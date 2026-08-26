@@ -130,6 +130,7 @@ export class PlayerPhysics extends withAngularPhysics(withGravityPhysics(withSur
         );
         return Object.freeze({
             startedSurfaceCollision,
+            collisionNormals: surfaceResolution.collisionNormals,
             collidedActorIds: surfaceResolution.collidedActorIds,
             impactSpeed: startedSurfaceCollision
                 ? Math.max(PLAYER_PHYSICS.MINIMUM_IMPACT_SPEED, Math.hypot(impactVelocity.x, impactVelocity.y))

@@ -26,7 +26,7 @@ import { WORLD_CONFIG } from "../config.js";
 import { createGameSimulationForWorldRevision } from "../simulation/GameSimulationFactory.js";
 import { routeServerMessage } from "./RemoteServerMessageRouter.js";
 import { ClientServerTickProjection } from "./ClientServerTickProjection.js";
-import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
+import { LOWER_SECTOR_COMMANDER_CAPTURE_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
 import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "../combat/PlatformCollisionDamage.js";
 import {
     AUGMENT_IMPACT_EVENT_SOURCE_KIND,
@@ -372,7 +372,7 @@ export class RemoteGameAuthority {
     submitPredictedBossImpact(event) {
         if (this.socket?.readyState !== this.WebSocketImpl.OPEN || !this.ownerRuntime) return false;
         if (!this.submitOwnerMotion()) {
-            if (event.parameters?.sourceType === LOWER_SECTOR_COMMANDER_HAZARD.GRAB) {
+            if (LOWER_SECTOR_COMMANDER_CAPTURE_HAZARD[event.parameters?.sourceType] === true) {
                 this.ownerRuntime.recordImpactReceipt(
                     { impactId: event.impactId, accepted: false },
                     this.latestSnapshot
@@ -388,7 +388,7 @@ export class RemoteGameAuthority {
         };
         this.pendingImpactClaims.set(event.impactId, { event, outcome });
         const submitted = this.submitImpactClaim(event, outcome);
-        if (!submitted && event.parameters?.sourceType === LOWER_SECTOR_COMMANDER_HAZARD.GRAB) {
+        if (!submitted && LOWER_SECTOR_COMMANDER_CAPTURE_HAZARD[event.parameters?.sourceType] === true) {
             this.pendingImpactClaims.delete(event.impactId);
             this.ownerRuntime.recordImpactReceipt({ impactId: event.impactId, accepted: false }, this.latestSnapshot);
         }
