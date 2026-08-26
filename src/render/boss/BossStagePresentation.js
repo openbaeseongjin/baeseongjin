@@ -12,6 +12,11 @@ function freezeWorldObject(object) {
         ropeAttachable: object.ropeAttachable === true,
         hazardKind: object.hazardKind ?? null,
         actionState: object.actionState ?? null,
+        grabStage: object.grabStage ?? null,
+        grabHookPosition: object.grabHookPosition
+            ? Object.freeze({ x: finite(object.grabHookPosition.x), y: finite(object.grabHookPosition.y) })
+            : null,
+        grabHookProgress: Math.max(0, Math.min(1, finite(object.grabHookProgress))),
         locomotionState: object.locomotionState ?? null,
         defeatStage: object.defeatStage ?? null,
         damaging: object.damaging === true,
