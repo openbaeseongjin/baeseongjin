@@ -40,8 +40,8 @@ Mandatory Safe Route는 같은 구간을 `A3 → M1 → A4`로 우회하며(4-1 
 이 감사 §24가 지정한 나머지 항목 중 실제로 유효했던 것들은 반영했다:
 4-1/4-2 metadata 정렬, Wind Strength 360 재분류(Sector01 baseline이 아니라
 Sector04 고유 hypothesis — 다만 shipped catalog가 그대로 사용 중인 CURRENT
-RUNTIME 값), Sector 04 Master REV 1.1, `scenario-development-integration.md`
-갱신(#29). 또한 이 감사 작성 이후 별도 세션에서 이미 반영된 항목도 확인했다:
+RUNTIME 값), Sector 04 Master REV 1.1, 당시 통합 현황 갱신(#29). 또한 이 감사
+작성 이후 별도 세션에서 이미 반영된 항목도 확인했다:
 P0-C의 Wind Shadow/Grounded Attenuation 문서 정합(PR #510), Sector 04
 Master의 stale 상태 문구 정렬(#541/PR #542), Cutter Fire opt-in 강화(#513,
 `canCutRope = rules.includes("cutter-fire")` — 이 감사 §8/§34가 "harden 검토
@@ -143,7 +143,7 @@ P0-2
 Sector 04 Master가 4-2~4-8을 outline-only로 기록
 
 P0-3
-scenario-development-integration이 stage-count 31 / 4-8 outline으로 stale
+당시 중앙 통합 현황이 stage-count 31 / 4-8 outline으로 stale
 
 P0-4
 Wind Runtime이 PR #507에서 확장됐는데
@@ -1551,7 +1551,7 @@ REV 1.1+
 
 ---
 
-## 22. scenario-development-integration Drift
+## 22. 당시 중앙 통합 현황 Drift
 
 현재 integration document는 latest main에서도 일부 stale.
 
@@ -1934,7 +1934,7 @@ Post-Sector04 Boss / Sector05 wiring은
 - [ ] 4-1 current
 - [ ] 4-2 metadata current
 - [ ] Wind Stage docs current
-- [ ] scenario-development-integration current
+- [ ] 당시 중앙 통합 현황 current
 - [x] 4-8 detailed Stage exists on `main`
 
 ---
@@ -1945,7 +1945,7 @@ Post-Sector04 Boss / Sector05 wiring은
 
 1. 4-1 408.9px fix
 2. Sector04 Master revision
-3. scenario-development-integration revision
+3. 당시 중앙 통합 현황 revision
 4. Wind runtime sections update
 5. Strength360 HYPOTHESIS reclassification
 6. 4-1/4-2 progression metadata update
@@ -2020,7 +2020,7 @@ SECTOR 04 ALIGNMENT PATCH PACKAGE
 4-2 metadata patch
 4-3/4-5/4-7/4-8 Wind patch
 Sector04 Master revision
-scenario-development-integration revision
+당시 중앙 통합 현황 revision
 ```
 
 그 뒤 Sector04를:

@@ -102,4 +102,4 @@ Timer는 speedrun 점수가 아니라 안전한 하층 정체를 막는 상승 �
 
 과거 `960초 / 내부 Gate +45초 / cap 960초 / 상승 붕괴 80px/s / 다음 Gate 자동 합류`는 폐기됐다. 대체 이유와 당시 맥락은 [`decision-history.md`](./decision-history.md)에 보존한다.
 
-전체 제품 방향은 [`game-hackathon-planning.md`](./game-hackathon-planning.md), 현재 구현 순서는 [`implementation-roadmap.md`](./implementation-roadmap.md), seamless topology는 [`architecture.md`](./architecture.md)를 함께 따른다.
+전체 제품 방향과 우선순위는 [`game-hackathon-planning.md`](./game-hackathon-planning.md), 확정된 Boss·Timer·NPC·Ending 계약은 [`design-decision-resolution-package.md`](./design-decision-resolution-package.md), seamless topology는 [`architecture.md`](./architecture.md)를 함께 따른다.

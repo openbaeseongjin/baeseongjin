@@ -1,6 +1,6 @@
 # 1-5~1-8 Camera Zone / Story Presentation 구현 Handoff
 
-`docs/scenario-development-integration.md`의 열린 게이트 목록에 있던 항목 —
+당시 중앙 통합 현황의 열린 게이트에 있던 항목 —
 **1-5~1-8은 `CROSS-REVIEWED` 기획 문서가 있지만 Runtime `cameraZones`는
 placeholder 문자열 배열이고, Story Trigger는 `AuthoredStoryPresentation.js`에
 전혀 연결돼 있지 않다** — 를 구현 가능한 형태로 정리한 문서다.
@@ -272,10 +272,8 @@ Camera Zone 경계와 맞물리는 핵심 비트만 우선 연결했다.
 3. `tests/authoredStoryPresentation.mjs`(#507이 1-1~1-8 일부·2-x 일부
    케이스를 이미 추가함)에 이 문서가 추가하는 `POSITION_PRESENTATIONS`
    케이스를 보강한다.
-4. `docs/scenario-development-integration.md`의 "열린 기획·구현 게이트"
-   3번 문항과 이번 항목은 별개(그건 Sector 03)이므로, 이 작업이 끝나면
-   "최근 반영된 시나리오 변화"에 새 항목을 추가하고 `stage-coverage`/해시
-   checkpoint를 재계산해야 한다.
+4. 이 작업이 끝나면 영향받은 Stage `PRODUCTION-ALIGNMENT.md`에 근거를
+   기록하고 `stage-coverage`/해시 checkpoint를 재계산해야 한다.
 
 ## 범위에서 제외한 것 — Sector 02 (2-1~2-8)
 

@@ -22,7 +22,7 @@
 - `git status --short --branch`로 브랜치와 기존 변경을 확인한다.
 - `package.json`의 스크립트와 관련 문서를 먼저 확인한다.
 - 수정 대상의 import, export, caller와 기준 문서를 함께 조사한다.
-- fixed step·공간 질의·snapshot·render 또는 Runtime 객체 수를 바꾸는 작업은 [`performance-architecture.md`](./performance-architecture.md)를 읽고 `호출 빈도 × 전체 개수 × 객체당 비용`과 재사용할 권위 컴포넌트를 먼저 적는다.
+- fixed step·공간 질의·snapshot·render 또는 Runtime 객체 수를 바꾸는 작업은 [`performance-architecture.md`](./performance-architecture.md)를 읽고 `호출 빈도 × 전체 개수 × 객체당 비용`과 재사용할 권위 컴포넌트를 먼저 적는다. authored world 크기에 비례하는 renderer collection은 매 frame 전수 순회하지 않으며, 기존 도메인 공간 index로 현재 expanded viewport 후보만 조회한다.
 - 현재 제품·구현 결정은 주제별 기준 문서에서, 아직 승격되지 않은 대화 결정은 `SESSION-HANDOFF.md`에서, 전체 이력은 `docs/decision-history.md`에서 확인한다.
 - 변경의 완료 기준과 하지 않을 일을 짧게 고정한다.
 
@@ -30,6 +30,7 @@
 
 - 관련 validator와 문법 검사를 실행하고 실제 사용자 경로를 확인한다.
 - 사용자 화면 변경은 실제 브라우저에서 확인한다.
+- renderer culling 변경은 같은 world에서 candidate/total과 render duration을 전후 비교하고, 빠른 낙하·포탈·부활처럼 서로 겹치지 않는 viewport로 즉시 이동한 다음 frame에 새 화면 객체가 누락 없이 포함되는지 확인한다. 이전 viewport 후보를 재사용한 결과는 합격 근거로 인정하지 않으며 세부 계약은 [`performance-architecture.md`](./performance-architecture.md)를 따른다.
 - 에이전트가 게임 브라우저 검증을 실행할 때는 오디오가 발생하지 않는 상태 probe를 우선한다. 실제 gameplay 페이지가 필요하면 시작 전에 tab 또는 게임 master mute가 적용됐음을 확인하고, 음소거 수단을 확인할 수 없으면 gameplay를 시작하지 않는다. 검증 증거를 얻은 즉시 에이전트가 만든 테스트 탭과 로컬 서버를 닫으며 사용자가 조용한 환경을 요청한 뒤에는 이 규칙을 모든 후속 브라우저 검증에 적용한다.
 - `git diff --check`를 통과한다.
 - 코드, README, 개발 규칙, 설계 문서가 같은 동작을 설명하는지 확인한다.
@@ -366,7 +367,7 @@ class Player extends RopeAttachable(GameObject) {}
 - player sprite definition은 여러 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 일반 몹은 별도 `enemy-sprite-asset-format.md` 계약으로 타입별 presentation state coverage·alias, clip frame 순서·양수 duration·loop와 fallback 순환을 검증한다. 자산 로더는 각 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미나 생성 도구 형식을 자체 해석하지 않는다.
 - PixelLab·SpriteCook 같은 생성 도구의 ZIP·metadata·개별 frame은 import 입력으로만 다룬다. 도구별 adapter가 표준 manifest를 만들고 renderer와 gameplay에는 도구 이름 분기를 추가하지 않는다. GIF·WebP는 미리보기로만 사용한다.
 - sprite manifest는 frame 순서·duration·loop·fallback과 표현 cue만 소유한다. collider·hitbox·피해량·무적 시간·물리·네트워크 권위 상태를 넣지 않으며 생성 도구 keypoint를 collider로 자동 변환하지 않는다.
-- 스프라이트 관련 개발·에셋 작업은 루트 `AGENTS.md`에서 `sprite-asset-format.md`의 JSON Schema·example manifest·표준 validator 명령으로 진입하게 한다. loader, schema, example, validator 중 하나를 바꾸면 같은 계약 변경으로 함께 갱신하며 새 결과물은 validator 통과 전 완료로 보지 않는다.
+- 스프라이트 관련 개발·에셋 작업은 이 문서가 연결하는 `graphics-asset-guide.md`, `sprite-asset-format.md`와 `enemy-sprite-asset-format.md`의 JSON Schema·example manifest·표준 validator 명령으로 진입한다. loader, schema, example, validator 중 하나를 바꾸면 같은 계약 변경으로 함께 갱신하며 새 결과물은 validator 통과 전 완료로 보지 않는다.
 - 환경 리소스 작업은 `environment-asset-format.md`의 PNG 묶음·JSON Schema·example manifest와 `validate:environment-assets` 명령으로 진입한다. PixelLab·SpriteCook 원본 배열과 metadata는 import 입력일 뿐 renderer에 도구별 분기를 만들지 않는다.
 - 오디오 리소스 작업은 `audio-asset-guide.md`의 authoring 인계와 `audio-asset-format.md`의 runtime package를 분리한다. 생성 Skill·MCP·DAW 원본은 입력 자료이며 schema·parser·mock·validator가 공유하는 도구 중립 manifest로 정규화한다.
 - 오디오 manifest는 clip source·load·loop와 cue 표현 정책만 소유한다. 게임 사건 연결은 package 밖 `AudioEventBindings`의 조합 가능한 handler가 소유하고 싱글·멀티 앱은 같은 `presentFrame` 경계만 호출한다. Web Audio graph와 voice 수명은 audio host가 소유하며 gameplay·simulation·network state는 음원 경로나 mixer를 import하지 않는다.
@@ -467,6 +468,7 @@ git diff --check
 
 ## 14. 문서 관리
 
+- 루트 `AGENTS.md`는 점진적 공개(Progressive Disclosure) 인덱스다. Level 1은 이 개발 규칙, Level 2는 멀티 동기화·성능 아키텍처, Level 3은 그 기준 문서가 작업별로 연결하는 세부 문서이며 `AGENTS.md`에 상세 규칙·현재 현황·완료 이력을 복제하지 않는다.
 - 루트 README는 실행과 진입점, `docs/README.md`는 문서 인덱스와 읽는 순서만 설명한다. 문서 작성 위치·파일 형식·이미지 첨부와 인덱스 운영의 상세 기준은 `docs/documentation-rules.md`를 따른다.
 - 같은 내용을 여러 문서에 복제하지 않고 기준 문서를 링크한다.
 - 기능이 바뀌면 관련 기획·아키텍처·도움말을 같은 작업에서 현행화한다.
@@ -474,11 +476,11 @@ git diff --check
 - 아직 기준 문서가 소유하지 않는 결정·진행 중 전환·열린 위험만 `SESSION-HANDOFF.md`에 유지한다. 기준 문서에 충분히 흡수된 항목은 핸드오프에서 제거한다.
 - 설계·점검·인계 문서는 세부 나열보다 `핵심 목표 → 우선순위 → 확정 결정 → 제외 범위 → 실행 순서`를 먼저 제시한다. 현재 판정·영향·다음 행동을 앞에 두고, 근거와 구현 상세는 뒤에 둔다. 문서와 사용자 문구는 한국어를 기본으로 하되 코드 식별자·파일 경로·확정 문자열은 원문을 유지한다.
 
-### 시나리오 기획·개발 통합 체크포인트
+### 시나리오 기획·개발 통합
 
-- `docs/bsh/scenario/`는 Sector·Stage의 기획·제작 계약을 소유하고, `docs/scenario-development-integration.md`는 전체 Stage 목록과 현재 authored Runtime 연결 상태·차단 요소·마지막 확인 근거를 소유한다.
+- 시나리오·authored area·관련 gameplay를 수정하기 전에 해당 Sector·Stage README, 구현 중인 Stage의 `PRODUCTION-ALIGNMENT.md`와 실제 Runtime source를 함께 읽는다. 중앙 현황 문서를 따로 만들지 않는다.
 - 상세 Stage README의 존재, 기획 교차검토, Runtime 연결과 실제 플레이테스트를 서로 다른 상태로 기록한다. 문서가 추가됐다는 이유만으로 구현 또는 검증 완료로 표시하지 않는다.
-- 시나리오 문서와 `src/game/world/areas/`, `src/game/world/sectors/` 또는 Sector validator를 바꾼 작업은 `npm run check:scenario-integration`의 fingerprint 경보를 해소해야 한다. 실제 변경 영향과 검증 근거를 통합 현황에 기록한 뒤 marker를 갱신하며 hash만 맞추지 않는다.
+- 시나리오 문서와 `src/game/world/areas/`, `src/game/world/sectors/` 또는 Sector validator를 바꾼 작업은 시작·종료에 `npm run check:scenario-integration`을 실행한다. fingerprint가 달라지면 관련 Stage `PRODUCTION-ALIGNMENT.md`와 Runtime 근거를 실제로 재검토한 뒤 `scripts/checkpoints/scenario-integration.v1.json`을 갱신하며 hash만 맞추지 않는다.
 - 좌표·문구·cue처럼 기존 계약 안에서 흡수할 변경과 맵 순서·핵심 기믹·완료 조건·Gate 연결·asset 경계처럼 사용자 검토가 필요한 변경을 분리한다.
 - Stage 문서에 고정 SHA를 남길 때는 `AUTHORING SNAPSHOT`으로 표시한다. 현재 main·Runtime 상태를 뜻하는 `CURRENT MAIN` 표기로 고정 SHA를 남기지 않는다.
 
@@ -496,8 +498,8 @@ git diff --check
 
 | 결정 종류                                                            | 기준 문서                                                           |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| 게임 방향, 플레이 흐름, 열린 기획 결정                               | `docs/game-hackathon-planning.md`, `docs/implementation-roadmap.md` |
-| 시나리오 Stage 목록, Runtime 연결 상태, 차단 요소와 마지막 확인 근거 | `docs/scenario-development-integration.md`                          |
+| 게임 방향, 플레이 흐름, 열린 기획 결정                               | `docs/game-hackathon-planning.md`                                  |
+| 시나리오 Stage 계약과 Runtime 연결 근거                               | 해당 Sector·Stage README와 `PRODUCTION-ALIGNMENT.md`                |
 | 모듈 책임, 상태 소유권, 의존 방향                                    | `docs/architecture.md`                                              |
 | 멀티 권위, 전송, 채널과 세션 정책                                    | `docs/multiplayer-synchronization.md`                               |
 | 클래스·믹스인·컴포넌트·검증·Git과 대화 결정 흡수 절차                | `docs/development-rules.md`                                         |

@@ -5,7 +5,7 @@ import { extname, relative, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const projectRoot = resolve(process.cwd());
-const statusPath = "docs/scenario-development-integration.md";
+const checkpointPath = "scripts/checkpoints/scenario-integration.v1.json";
 export const scenarioRoot = "docs/bsh/scenario";
 export const authoredAreaRoot = "src/game/world/areas";
 export const authoredSectorRoot = "src/game/world/sectors";
@@ -63,24 +63,7 @@ function collectStageCoverage(scenarioFiles) {
 }
 
 function readExpectedCheckpoint() {
-    const content = normalizeContent(readFileSync(resolve(projectRoot, statusPath), "utf8"));
-    const marker = content.match(/<!-- scenario-integration-checkpoint:v1\n([\s\S]*?)\n-->/);
-    if (!marker) {
-        throw new Error(`${statusPath}에 scenario-integration-checkpoint:v1 marker가 없습니다.`);
-    }
-
-    const checkpoint = Object.fromEntries(
-        marker[1]
-            .split("\n")
-            .filter(Boolean)
-            .map((line) => {
-                const separatorIndex = line.indexOf(":");
-                if (separatorIndex < 1) {
-                    throw new Error(`잘못된 checkpoint 항목: ${line}`);
-                }
-                return [line.slice(0, separatorIndex).trim(), line.slice(separatorIndex + 1).trim()];
-            })
-    );
+    const checkpoint = JSON.parse(readFileSync(resolve(projectRoot, checkpointPath), "utf8"));
 
     for (const key of [
         "scenario-source-sha256",
@@ -91,20 +74,20 @@ function readExpectedCheckpoint() {
         "reviewed-upstream"
     ]) {
         if (!checkpoint[key]) {
-            throw new Error(`${statusPath} checkpoint에 ${key}가 없습니다.`);
+            throw new Error(`${checkpointPath}에 ${key}가 없습니다.`);
         }
     }
 
     for (const key of ["scenario-source-sha256", "authored-area-sha256", "authored-sector-sha256"]) {
         if (!/^[0-9a-f]{64}$/.test(checkpoint[key])) {
-            throw new Error(`${statusPath} checkpoint의 ${key}가 SHA-256 형식이 아닙니다.`);
+            throw new Error(`${checkpointPath}의 ${key}가 SHA-256 형식이 아닙니다.`);
         }
     }
     if (!/^\d+$/.test(checkpoint["stage-count"])) {
-        throw new Error(`${statusPath} checkpoint의 stage-count가 정수가 아닙니다.`);
+        throw new Error(`${checkpointPath}의 stage-count가 정수가 아닙니다.`);
     }
     if (!/^[0-9a-f]{40}$/.test(checkpoint["reviewed-upstream"])) {
-        throw new Error(`${statusPath} checkpoint의 reviewed-upstream이 Git SHA 형식이 아닙니다.`);
+        throw new Error(`${checkpointPath}의 reviewed-upstream이 Git SHA 형식이 아닙니다.`);
     }
 
     return checkpoint;
@@ -202,7 +185,8 @@ function main() {
             console.error("Scenario integration checkpoint가 현재 source와 다릅니다.");
             for (const difference of differences) console.error(`- ${difference}`);
             console.error(
-                `변경 내용을 Runtime 상태·차단 요소·확인 근거와 함께 ${statusPath}에서 재검토한 뒤 marker를 갱신하세요.`
+                "변경 내용을 관련 Stage PRODUCTION-ALIGNMENT.md와 Runtime source에서 재검토한 뒤 " +
+                    `${checkpointPath}를 갱신하세요.`
             );
             process.exit(1);
         }

@@ -95,7 +95,7 @@ Camera 검토는 수치를 발명해 재설계하는 과정이 아니라 근거�
 3. Camera 데이터 변경마다 Map Editor Draft → Validate → Apply를 사용하고 결정적 generated output의 최신성을 확인한다.
 4. 영향을 받은 Stage Apply마다 새로운 격리된 싱글플레이 Preview를 실행한다. 실행 중인 일반 싱글플레이 또는 멀티플레이 게임은 바꾸지 않는다.
 5. 데스크톱·모바일 화면 크기에서 1-3 Cover 시야 차단, 1-4 Calibration 표시와 출구 진행, 1-5 Camera 구도와 Cover 시야 차단, 1-7 Camera 구도, Sector 01 경로·저장 지점 가독성을 직접 확인한다.
-6. 영향받은 `PRODUCTION-ALIGNMENT.md`와 `docs/scenario-development-integration.md`에 각 결과를 `VERIFIED`, `PARTIAL`, `NOT IMPLEMENTED`으로 구분해 기록한다.
+6. 영향받은 `PRODUCTION-ALIGNMENT.md`에 각 결과를 `VERIFIED`, `PARTIAL`, `NOT IMPLEMENTED`으로 구분해 기록하고 scenario checkpoint를 갱신한다.
 
 구현은 1-4·1-5·1-7 Production Alignment 문서와 통합 현황을 갱신한다. 기준 문서가 모든 승인 결정을 소유하면 임시 Sector 01 항목은 `SESSION-HANDOFF.md`에서 중복 보관하지 않고 제거한다.
 

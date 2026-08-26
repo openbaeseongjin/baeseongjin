@@ -97,7 +97,7 @@ display가 같은 데크(같은 공간, 서로 다른 터미널)에 배치돼 �
    `TRIGGER_CUE_PRESENTATIONS`에 위 cueId별 문구 순서 추가.
 3. `tests/authoredStoryPresentation.mjs`에 3-2 access-control·3-7
    access-directory·3-8 evacuation/access archive 케이스 보강.
-4. `docs/scenario-development-integration.md` 반영 기록과 fingerprint 갱신.
+4. 영향받은 Stage `PRODUCTION-ALIGNMENT.md` 반영 기록과 fingerprint 갱신.
 
 Sector 03의 `storyTriggers` 배열은 기존 catalog 필드로 유지하고, 이 문서가
 추가하는 것은 display object + cue 바인딩뿐이다.

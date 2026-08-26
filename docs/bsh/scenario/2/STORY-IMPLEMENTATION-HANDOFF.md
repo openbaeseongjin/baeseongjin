@@ -176,5 +176,5 @@ gap과 달리 "안 넣는 것"도 유효한 해석이라 임의로 확정하지 
 2. 공백 3(`sector-02-06` `ENTRY_PRESENTATIONS`)은 위에 적은 대로 해석이
    갈릴 수 있어 적용 전 확인 필요.
 3. `tests/authoredStoryPresentation.mjs`에 추가되는 케이스를 보강한다.
-4. 적용 후 `docs/scenario-development-integration.md`의 "최근 반영된
-   시나리오 변화"에 항목을 추가하고 checkpoint를 재계산한다.
+4. 적용 후 영향받은 Stage `PRODUCTION-ALIGNMENT.md`에 근거를 기록하고
+   checkpoint를 재계산한다.

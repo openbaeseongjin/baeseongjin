@@ -4,6 +4,7 @@
 
 ## 1. 인덱스와 기준 문서
 
+- 루트 `AGENTS.md`는 상세 규칙을 담지 않는 점진적 공개(Progressive Disclosure) 인덱스다. Level 1은 모든 작업의 공통 기준, Level 2는 영역별 필수 기준, Level 3은 앞선 기준 문서가 연결하는 작업별 세부 문서로 제한한다.
 - `docs/README.md`는 문서 인덱스다. 각 문서의 링크와 역할을 한 줄로 안내하고 주제별 상세 설명을 직접 담지 않는다.
 - 한 주제에는 현재 기준 문서를 하나만 둔다. 설명이 길어지거나 독립된 관점이 생기면 별도 문서로 분리하고 인덱스에서 연결한다.
 - 새 문서를 추가하거나 문서의 역할을 바꾸면 같은 작업에서 `docs/README.md`의 분류와 설명을 갱신한다.
@@ -20,9 +21,9 @@
 ## 3. 시나리오 문서와 현재 상태
 
 - `docs/bsh/scenario/`의 Sector·Stage 문서는 해당 기획과 제작 기준을 소유한다.
-- [`scenario-development-integration.md`](./scenario-development-integration.md)는 여러 Sector에 걸친 상세 Stage 목록, 현재 authored Runtime 연결 상태, 열린 차단 요소와 마지막 확인 근거를 소유한다.
-- `implementation-roadmap.md`는 구현 우선순위, `scenario-development-integration.md`는 시나리오·Runtime 현재 상태를 소유한다. `SESSION-HANDOFF.md`는 두 문서의 요약이나 날짜별 Stage 개수·Runtime 상태를 복제하지 않는다.
-- Stage 문서의 고정 Git SHA는 작성 당시 근거인 `AUTHORING SNAPSHOT`으로 표시하고 현재 상태는 통합 현황에서 확인한다.
+- 각 Stage의 `PRODUCTION-ALIGNMENT.md`는 해당 Stage의 authored Runtime 연결 상태와 마지막 확인 근거를 소유한다. 여러 Stage의 현황을 수동 중앙 목록으로 다시 만들지 않는다.
+- 제품 우선순위는 `game-hackathon-planning.md`, 아직 기준 문서에 흡수되지 않은 진행 상태만 `SESSION-HANDOFF.md`가 소유한다. 완료 이력과 날짜별 Stage 개수는 Git과 `decision-history.md`가 소유한다.
+- Stage 문서의 고정 Git SHA는 작성 당시 근거인 `AUTHORING SNAPSHOT`으로 표시하고 현재 상태는 해당 `PRODUCTION-ALIGNMENT.md`와 Runtime source에서 확인한다.
 
 ## 4. 파일 형식
 

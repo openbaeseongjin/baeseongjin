@@ -65,7 +65,6 @@ node scripts/map-editor/serveMapEditor.mjs --port=4178
 - [기술 스택](docs/tech-stack.md) — 언어, UI, 렌더링, 검증, 배포 기반
 - [버전 관리](docs/version-management.md) — SemVer, 배포 버전 표시와 갱신 절차
 - [재사용 가능한 기반](docs/reusable-game-resources.md) — 공용 게임 기반과 재사용 정책
-- [구현 로드맵](docs/implementation-roadmap.md) — 현재 구현 상태, 다음 게임성 우선순위와 완료 기준
 - [두 기기 협동 플레이테스트](docs/two-device-playtest-protocol.md) — 실제 기기 한 세션의 실행 순서, 기록 양식과 판정 기준
 - [오디오 작업 가이드](docs/audio-asset-guide.md) — 오디오 작업자의 제작·인계 경로와 체크리스트
 - [오디오 교환 형식](docs/audio-asset-format.md) — runtime package, manifest와 validator 계약

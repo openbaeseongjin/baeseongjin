@@ -4,8 +4,8 @@
 
 ## AS-IS → TO-BE
 
-1. AS-IS: Quadtree는 충돌에만 적용되고 Rope·Boss·snapshot·renderer가 전체 월드를 다시 순회한다.
-2. TO-BE: 모든 공간 후보는 도메인별 공간 인덱스가 고르고 구체 판정만 호출자가 수행한다.
+1. AS-IS: Quadtree가 있어도 renderer가 authored world 전체를 매 frame 순회하거나 이전 camera 후보를 재사용한다.
+2. TO-BE: 모든 공간 후보는 도메인별 공간 index가 현재 viewport에서 고르고 구체 판정과 draw order만 renderer가 수행한다.
 3. AS-IS: 비활성 객체의 `active` 확인이 전체 snapshot 생성까지 일으킨다.
 4. TO-BE: 활성 여부는 allocation 없는 O(1) 상태이며 비활성 객체는 tick 작업에서 제외한다.
 5. AS-IS: 같은 fixed tick에서 전체 render snapshot을 여러 번 생성한다.
@@ -26,7 +26,7 @@
 | Render DTO | 객체별 `render-snapshot` capability + `GameSimulation.snapshot()` | detached DTO는 출력 경계에서 논리 sample당 한 번 만들고 tick·render·audio가 같은 sample을 재사용한다. |
 | Network DTO | `AuthoritySnapshotBuilder` + `WorldSnapshotReplication` | canonical sample은 한 번 만들고 welcome·late join·resync만 baseline, 20Hz 반복 전송은 소켓별 ACK baseline과 비교한 field/object delta를 사용한다. |
 | 정적 World 자료 | immutable world와 소유자별 index/cache | ID lookup·bounds·edge·배치·고정 대응표는 world 변경 때만 만들고 frame/tick마다 재생성하지 않는다. |
-| 화면 후보 | `RenderViewport` + 하위 renderer cache/culling | renderer는 viewport 후보만 그리며 정적 geometry와 backdrop layer 정렬을 매 frame 다시 만들지 않는다. |
+| 화면 후보 | `RenderViewport` + 하위 renderer별 정적 `Quadtree` | renderer는 immutable world source가 바뀔 때만 bounds index를 다시 만들고 매 frame 현재 expanded viewport를 query한다. 이전 camera 후보를 재사용하지 않으므로 빠른 낙하·포탈 뒤에도 새 화면 객체가 즉시 포함된다. |
 | 관측 | `CollisionBroadPhase.snapshot()` + `RenderPerformanceMetrics` | candidate/total, fixed-step drop, frame interval, draw duration을 읽기 전용으로 제공한다. |
 
 ## Hot-path 불변식
@@ -42,6 +42,7 @@
 7. **군집은 전체 roster에 곱하지 않음:** member별 이웃 계산은 동일 group 또는 spatial candidate만 사용한다. member마다 전체 Enemy 배열을 훑는 O(N²) 구현을 금지한다.
 8. **렌더 정적 계산 캐시:** gradient·layer order·surface bounds처럼 상태가 바뀌지 않는 자료는 owner가 cache하고 world·asset·viewport 정책 변경 때만 무효화한다.
 9. **월드 규모 곡선은 실선으로 제한:** 매 frame 그리는 Rope 사거리처럼 화면보다 큰 Canvas 곡선에 `setLineDash()`의 비어 있지 않은 패턴을 적용하지 않는다. 브라우저·GPU 조합에 따라 dash tessellation이 draw budget을 고갈시키므로 실선 또는 개수가 고정된 작은 primitive로 표현한다.
+10. **현재 viewport가 화면 후보의 권위:** immutable authored source의 공간 index는 source 변경 때만 다시 만들되 draw마다 현재 expanded viewport를 새로 query한다. 이전 frame의 후보를 다음 frame의 입력으로 사용하지 않으며 빠른 낙하·포탈·부활처럼 camera가 한 frame에 멀리 이동해도 새 영역 객체를 즉시 포함하고 떠난 영역 객체는 즉시 제외한다.
 
 ## 변경 전 감사
 
@@ -52,6 +53,7 @@
 - `snapshot()`, `renderSnapshot()`, `activeSnapshots()` 또는 collider snapshot 호출을 추가한다.
 - collision·Rope·targeting·LOS·viewport처럼 위치 기반 후보 검색을 추가한다.
 - cache, index, active set 또는 culling을 새로 만들거나 우회한다.
+- renderer가 authored collection을 읽거나 camera·viewport 이동 뒤 후보를 보존한다.
 
 검토자는 `호출 빈도 × 전체 개수 × 객체당 비용`을 적고, 현재 권위 컴포넌트를 재사용하지 못하는 이유가 있을 때만 새 index/cache를 허용한다.
 
@@ -62,6 +64,7 @@
 3. 120Hz fixed step은 p95가 8.33ms를 넘지 않아야 하며, 새 기능이 base 대비 설명되지 않은 회귀를 만들면 완료 처리하지 않는다.
 4. 60Hz 화면은 두 fixed step과 render를 포함한 frame p95·dropped steps를 확인한다. 브라우저 검증은 정적·headless 병목을 제거한 뒤 표현 변경이 있을 때 수행한다.
 5. content 수를 늘린 변경은 현재 sample뿐 아니라 허용 최대 수에서 복잡도가 `전체 월드`나 `N²`로 바뀌지 않음을 기록한다.
+6. renderer culling은 동일 world의 base와 candidate에서 `visible candidate / total authored`와 draw duration p50/p95를 비교한다. 시작 viewport와 겹치지 않는 위·아래·좌·우 viewport를 연속 질의해 각 위치의 객체가 첫 frame에 포함되고 이전 위치 객체가 남지 않는지 확인하며, 실제 gameplay에서는 빠른 낙하·포탈·부활 경로 중 관련 경계를 검증한다.
 
 자동 테스트를 새로 추가하지 않는다. 이 게이트는 기존 headless simulation·진단·profile과 저장소 공통 검사로 증명하며, 사용자가 해당 작업에서 테스트를 명시했을 때만 테스트 코드를 추가한다.
 
@@ -71,7 +74,8 @@
 - Multiplayer snapshot v23은 비활성 Boss DTO를 만들지 않고 `bossStage` 하나만 기록한다. Enemy 198개 canonical sample은 ACK baseline과 비교하되 각 소켓의 반복 wire에는 관심 영역 안에서 실제 변경된 `objectId` patch와 전역 tombstone만 포함한다. 고정 seed 정지 20-frame application wire 합계는 `tests/multiplayerSnapshotReplication.mjs`가 64KiB/s를 초과하면 field byte와 함께 실패한다.
 - Rope attachment는 `GameObjectManager`가 소유한 surface Quadtree 후보만 narrow phase에 전달한다.
 - 싱글 앱은 fixed step에서 만든 최신 snapshot을 render까지 재사용하고 실제 예측 impact가 상태를 바꾼 경우에만 같은 step에서 다시 읽는다.
-- 남은 renderer 전체 순회와 정적 backdrop 재합성은 viewport candidate·cache 경계의 후속 최적화 대상이다.
+- `AuthoredWorldObjectRenderer`는 mock world object의 presentation bounds를 immutable source당 한 번 `Quadtree`로 구성하고 매 draw의 현재 `RenderViewport.worldBounds`로 query한다. 서로 멀리 떨어진 viewport를 연속 질의해도 이전 후보를 보존하지 않으며 원래 authored draw order만 현재 후보 안에서 복원한다.
+- 남은 renderer 전체 순회와 정적 backdrop 재합성은 같은 viewport candidate·cache 경계의 후속 최적화 대상이다.
 - `SpriteSceneResourceBundle`은 manifest definition에서 lazy Image asset set을 한 번 조립한다. startup은 Player와 기본 시작 Area package만 우선 load·decode하고, 다른 Sector package는 current Area gate와 분리된 background promise로 준비한다. 싱글·멀티·디버그 재시작은 같은 bundle을 재사용하므로 gameplay frame과 모드 전환이 atlas 요청을 다시 만들지 않는다. Environment component는 definition별 frozen atlas ID 배열을 Object lookup으로 선택해 frame마다 전체 package 목록을 재조립하지 않는다.
 - Boss06 지지면 판정은 Runtime 생성 때 Main·Ledge 4개만 immutable support catalog로 정규화하고, 활성 Boss의 neutral locomotion tick에서 이 고정 후보만 좌표 질의한다. 전체 world surface를 순회하거나 플랫폼 진입 이벤트·snapshot 상태를 만들지 않는다.
 - Boss03은 고정 Arena support 4개(주 바닥 1개·Ledge 3개)와 active participant 최대 4명만 지지면·대상 질의에 사용한다. Anchor surface 9개는 Rope spatial query가 처리하며 Boss locomotion이 매 tick 순회하지 않는다. `CombatInteractionController`의 동적 Map도 참가자당 최대 하나의 capture만 보관하며 비활성 interaction은 완료 tick에 제거한다. 월드 surface·전체 Player 이력·Boss catalog를 fixed step마다 순회하지 않는다.

@@ -96,4 +96,4 @@ PENDING`
    TRIGGER_CUE 바인딩 추가.
 2. `tests/authoredStoryPresentation.mjs`에 4-1 entry, 4-4 SEGMENTED, 4-7
    ISOLATED, 4-8 archive cue 케이스 보강.
-3. `docs/scenario-development-integration.md` 반영 기록과 fingerprint 갱신.
+3. 영향받은 Stage `PRODUCTION-ALIGNMENT.md` 반영 기록과 fingerprint 갱신.
