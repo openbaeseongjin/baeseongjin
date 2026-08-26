@@ -2174,16 +2174,19 @@ export class GameSimulation {
             player.weapon.damage = shared.weapon.damage;
             player.weapon.fireInterval = shared.weapon.fireInterval;
         }
-        if (
-            !preservePendingAugment &&
-            JSON.stringify(shared.selectedAugmentIds ?? []) !== JSON.stringify(player.augmentLoadout.selectedAugmentIds)
-        ) {
-            player.augmentLoadout.restore(shared.augmentRuntimeState);
-            player.augmentCombat.restore(
-                shared.augmentRuntimeState?.combat ?? null,
-                player.augmentLoadout,
-                player.maxHealth
-            );
+        if (!preservePendingAugment) {
+            if (
+                JSON.stringify(shared.selectedAugmentIds ?? []) !==
+                JSON.stringify(player.augmentLoadout.selectedAugmentIds)
+            ) {
+                player.augmentLoadout.restore(shared.augmentRuntimeState);
+                player.augmentCombat.restore(
+                    shared.augmentRuntimeState?.combat ?? null,
+                    player.augmentLoadout,
+                    player.maxHealth
+                );
+            }
+            player.experience.restore(shared.experience ?? shared.augmentRuntimeState?.experience ?? null);
         }
         this.tick = Math.max(this.tick, predictionTick);
         return this.ownerPredictionState(ownerId);
@@ -3260,7 +3263,7 @@ export class GameSimulation {
                 causalId: claim.eventId ?? claim.predictionId
             });
             const statusEffectId = SPELL_STATUS_EFFECT[claim.effectId] ?? null;
-            if (result.accepted && result.damage > 0 && statusEffectId) {
+            if (result.accepted && statusEffectId) {
                 this.bossRuntime?.statusEffects?.apply(statusEffectId, { sourceId: authenticatedPlayerId });
             }
             if (replicate && result.accepted) {
@@ -3838,6 +3841,9 @@ export class GameSimulation {
         if (player.augmentLoadout.selectedAugmentIds.length >= MAX_AUGMENT_SELECTIONS) {
             return Object.freeze({ accepted: false, reason: "selection-exhausted" });
         }
+        if (player.experience.pendingRewardCount <= 0) {
+            return Object.freeze({ accepted: false, reason: "selection-conflict" });
+        }
         const expectedReward = reward;
         if (!expectedReward) return Object.freeze({ accepted: false, reason: "reward-unavailable" });
         if (!expectedReward.choices.some(({ id }) => id === augment.id)) {
@@ -3848,6 +3854,8 @@ export class GameSimulation {
         }
         player.augmentCombat.syncLoadout(player.augmentLoadout, player.maxHealth);
         if (!player.experience.resolveNextReward()) {
+            player.augmentLoadout.deselect(augment.id);
+            player.augmentCombat.syncLoadout(player.augmentLoadout, player.maxHealth);
             return Object.freeze({ accepted: false, reason: "selection-conflict" });
         }
         this.augmentRewards.delete(playerId);
@@ -4730,12 +4738,14 @@ export class GameSimulation {
 
     snapshot() {
         const player = this.#primaryPlayer();
-        const playerState = this.playerState(player.id);
+        const players = Object.freeze(this.players.map(({ id }) => this.playerState(id)));
+        const playerState = players.find(({ id }) => id === player.id);
         const ropeState = player.ropeObject.renderSnapshot();
         const bossStage = this.bossStageSnapshot();
         return {
             tick: this.tick,
             world: this.world,
+            players,
             player: playerState,
             rope: playerState.rope,
             aimWorld: playerState.control.aimWorld,

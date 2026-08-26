@@ -18,6 +18,7 @@ import {
 } from "../game/network/PartyChatMessage.js";
 
 const CHANNEL_PATTERN = /^\d{4}$/;
+export const MULTIPLAYER_CHANNEL_MAX_PLAYERS = 4;
 const DEFAULT_MAX_UNACKNOWLEDGED_SNAPSHOTS = 4;
 const DEFAULT_MAX_PENDING_SNAPSHOT_BYTES = 256 * 1024;
 
@@ -52,7 +53,7 @@ export class MultiplayerGameServer {
         httpServer,
         {
             path = "/multiplayer",
-            maxPlayers = 2,
+            maxPlayers = MULTIPLAYER_CHANNEL_MAX_PLAYERS,
             allowedOrigins = [],
             channelNumber = () => randomInt(1000, 10000),
             worldSeed = () => randomInt(1, 0x100000000),
@@ -62,6 +63,9 @@ export class MultiplayerGameServer {
         } = {}
     ) {
         if (!httpServer) throw new Error("httpServer is required");
+        if (!Number.isSafeInteger(maxPlayers) || maxPlayers < 1) {
+            throw new Error("maxPlayers must be a positive safe integer");
+        }
         if (!Number.isSafeInteger(maxUnacknowledgedSnapshots) || maxUnacknowledgedSnapshots < 1) {
             throw new Error("maxUnacknowledgedSnapshots must be a positive safe integer");
         }

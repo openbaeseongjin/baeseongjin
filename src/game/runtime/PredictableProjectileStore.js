@@ -6,11 +6,14 @@ const FIXED_DT = 1 / 120;
 const simulationDispatcher = new SimulationDispatcher();
 
 function projectileSimulationState(state) {
-    if (Array.isArray(state?.combatTargets)) return state;
     const bossStage = state?.bossStage ?? state?.bossRuntime ?? null;
+    const combatTargets = Array.isArray(state?.combatTargets)
+        ? state.combatTargets
+        : Object.freeze([...(state?.enemies ?? []), ...(bossStage?.impactTargets ?? [])]);
     return Object.freeze({
         ...state,
-        combatTargets: Object.freeze([...(state?.enemies ?? []), ...(bossStage?.impactTargets ?? [])])
+        players: Object.freeze([...(state?.players ?? [])]),
+        combatTargets
     });
 }
 

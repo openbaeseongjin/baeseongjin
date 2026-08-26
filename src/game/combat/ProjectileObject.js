@@ -8,6 +8,7 @@ import {
 } from "../physics/ProjectileMotionMixin.js";
 import { withEnemyHitPrediction, withPlayerImpactPrediction } from "./ProjectileClientCollision.js";
 import {
+    PROJECTILE_COLLIDER_PRESET_ID,
     PROJECTILE_COLLISION_STATE,
     PROJECTILE_DEFINITION,
     PROJECTILE_HOMING,
@@ -16,7 +17,8 @@ import {
     PROJECTILE_KEY,
     PROJECTILE_MOTION_KIND,
     PROJECTILE_REJECTED_COLLISION_STATE,
-    PROJECTILE_TYPE
+    PROJECTILE_TYPE,
+    projectileColliderDefinition
 } from "./ProjectileDefinition.js";
 import { withProjectileRenderSnapshot } from "./ProjectileRenderSnapshot.js";
 
@@ -68,7 +70,8 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
         targetStateCollection,
         renderCollection,
         collisionRejectionPolicy,
-        usesOwnerPredictionId
+        usesOwnerPredictionId,
+        colliderPresetId
     }) {
         super({ id });
         defineObjectOwner(this, ownerId);
@@ -82,7 +85,8 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
             motionKind,
             visualPresetId,
             turnRateRadiansPerSecond,
-            lifetimeSeconds: resolveProjectileLifetime(lifetimeSeconds)
+            lifetimeSeconds: resolveProjectileLifetime(lifetimeSeconds),
+            colliderPresetId
         });
         this.canCutRope = canCutRope;
         if (predictionId !== null) this.predictionId = predictionId;
@@ -122,6 +126,17 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
         return this.definition.lifetimeSeconds;
     }
 
+    get colliderPresetId() {
+        return this.definition.colliderPresetId;
+    }
+
+    colliderSnapshot() {
+        return projectileColliderDefinition(this.colliderPresetId).snapshot({
+            radius: this.radius,
+            velocity: this.velocity
+        });
+    }
+
     isClientCollisionPredictionEnabled() {
         return this.#clientCollisionState !== PROJECTILE_COLLISION_STATE.DISABLED;
     }
@@ -139,7 +154,8 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
         this.#clientCollisionSegments.push(
             Object.freeze({
                 start: Object.freeze({ x: start.x, y: start.y }),
-                end: Object.freeze({ x: end.x, y: end.y })
+                end: Object.freeze({ x: end.x, y: end.y }),
+                collider: this.colliderSnapshot()
             })
         );
         if (this.#clientCollisionSegments.length > MAX_CLIENT_COLLISION_SEGMENTS) {
@@ -180,6 +196,7 @@ class ProjectileObject extends withProjectileLifetime(withProjectileRenderSnapsh
             visualPresetId: this.visualPresetId,
             turnRateRadiansPerSecond: this.turnRateRadiansPerSecond,
             lifetimeSeconds: this.lifetimeSeconds,
+            colliderPresetId: this.colliderPresetId,
             ownerId: this.ownerId,
             targetId: this.targetId ?? null,
             predictionId: this.predictionId ?? null,
@@ -227,7 +244,8 @@ export class EnemyHomingProjectileObject extends withPlayerImpactPrediction(
             ...options,
             ...PROJECTILE_DEFINITION[PROJECTILE_TYPE.ENEMY],
             motionKind: PROJECTILE_MOTION_KIND.HOMING,
-            turnRateRadiansPerSecond
+            turnRateRadiansPerSecond,
+            colliderPresetId: PROJECTILE_COLLIDER_PRESET_ID.HOMING_MISSILE_RECT
         });
     }
 }

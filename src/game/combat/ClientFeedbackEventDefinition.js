@@ -1,11 +1,12 @@
 import { ELECTRIFIED_STATUS_ID } from "../status-effects/ElectrifiedStatusEffect.js";
-import { SPELL_ID } from "../spells/SpellDefinition.js";
+import { SPELL_ID, SPELL_SPEC } from "../spells/SpellDefinition.js";
 import { SPELL_EVENT_TYPE, SPELL_IMPACT_RESOLUTION } from "../spells/SpellRuntimeDefinition.js";
 import { PLAYER_IMPACT_TYPE } from "../network/PlayerImpactClaim.js";
 import { ENEMY_LIFECYCLE_EVENT_TYPE } from "./EnemyImpactTombstones.js";
 import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "./PlatformCollisionDamage.js";
 import { LOWER_SECTOR_COMMANDER_HAZARD } from "../boss/LowerSectorCommanderDefinition.js";
 import { AUGMENT_IMPACT_EVENT_SOURCE_KIND } from "../augments/AugmentImpactEventDefinition.js";
+import { ROPE_AUGMENT_STATIC_VALUES } from "../augments/rope/RopeAugmentTuning.js";
 import { PLAYER_DAMAGE_REPLICATION_EVENT_TYPE } from "./PlayerDamageEvent.js";
 import { ENEMY_BEHAVIOR_REPLICATION_EVENT_TYPE } from "./enemy-behavior/EnemyBehaviorDefinition.js";
 
@@ -47,6 +48,7 @@ export const CLIENT_FEEDBACK_SOURCE_KIND = Object.freeze({
 });
 
 export const CLIENT_FEEDBACK_EFFECT_ID = Object.freeze({
+    COLLISION_EXPLOSION_DIRECT: "collision-explosion-direct",
     ELECTRIFIED_ROPE: "electrified-rope",
     ELECTRIFIED_STATUS: ELECTRIFIED_STATUS_ID
 });
@@ -191,6 +193,88 @@ const BOSS_WARDEN_IMPACT_DIRECTION_BY_FAMILY = Object.freeze({
 const AUGMENT_EFFECT_LIFETIME = Object.freeze({ DEFAULT: 0.45 });
 const BOSS_COMMANDER_GROUND_IMPACT_DIRECTION = Object.freeze({ x: 0, y: -1 });
 
+const AREA_ATTACK_RING_TRIGGER = Object.freeze({
+    CAST: "cast",
+    IMPACT: "impact",
+    PROJECTILE_ENDED: "projectile-ended"
+});
+
+const AREA_ATTACK_RING_TRIGGER_BY_EVENT_TYPE = Object.freeze({
+    [CLIENT_FEEDBACK_EVENT_TYPE.SPELL_CAST_STARTED]: AREA_ATTACK_RING_TRIGGER.CAST,
+    [CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_SPELL_CAST_STARTED]: AREA_ATTACK_RING_TRIGGER.CAST,
+    [CLIENT_FEEDBACK_EVENT_TYPE.RESOLVE]: AREA_ATTACK_RING_TRIGGER.IMPACT,
+    [CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_RESOLVE]: AREA_ATTACK_RING_TRIGGER.IMPACT,
+    [CLIENT_FEEDBACK_EVENT_TYPE.SPELL_PROJECTILE_ENDED]: AREA_ATTACK_RING_TRIGGER.PROJECTILE_ENDED,
+    [CLIENT_FEEDBACK_EVENT_TYPE.PREDICTED_SPELL_PROJECTILE_ENDED]: AREA_ATTACK_RING_TRIGGER.PROJECTILE_ENDED
+});
+
+class AreaAttackRingDefinition {
+    constructor({ trigger, radius, color }) {
+        if (!Object.values(AREA_ATTACK_RING_TRIGGER).includes(trigger)) {
+            throw new Error("AreaAttackRingDefinition requires a supported trigger");
+        }
+        if (!Number.isFinite(radius) || radius <= 0) {
+            throw new Error("AreaAttackRingDefinition requires a positive radius");
+        }
+        if (typeof color !== "string" || color.length === 0) {
+            throw new Error("AreaAttackRingDefinition requires a color");
+        }
+        this.trigger = trigger;
+        this.radius = radius;
+        this.color = color;
+        Object.freeze(this);
+    }
+
+    request(event) {
+        if (AREA_ATTACK_RING_TRIGGER_BY_EVENT_TYPE[event.eventType] !== this.trigger || !event.position) return null;
+        const causalId =
+            event.projectileId ??
+            event.activationId ??
+            event.parameters?.eventId ??
+            event.predictionId ??
+            event.eventId;
+        if (typeof causalId !== "string" || causalId.length === 0) return null;
+        return Object.freeze({
+            causalId,
+            effectId: event.spellId ?? eventEffectId(event),
+            position: event.position,
+            radius: this.radius,
+            color: this.color
+        });
+    }
+}
+
+const AREA_ATTACK_RING_BY_SPELL = Object.freeze({
+    [SPELL_ID.GATHERING_ORB]: new AreaAttackRingDefinition({
+        trigger: AREA_ATTACK_RING_TRIGGER.PROJECTILE_ENDED,
+        radius: SPELL_SPEC.GATHERING_ORB.projectile.explosionRadius,
+        color: "#c084fc"
+    }),
+    [SPELL_ID.METEOR]: new AreaAttackRingDefinition({
+        trigger: AREA_ATTACK_RING_TRIGGER.PROJECTILE_ENDED,
+        radius: SPELL_SPEC.METEOR.projectile.explosionRadius,
+        color: "#fb923c"
+    }),
+    [SPELL_ID.FROST_BURST]: new AreaAttackRingDefinition({
+        trigger: AREA_ATTACK_RING_TRIGGER.CAST,
+        radius: SPELL_SPEC.FROST_BURST.area.radius,
+        color: "#6f9fff"
+    }),
+    [SPELL_ID.SHATTER_BOMB]: new AreaAttackRingDefinition({
+        trigger: AREA_ATTACK_RING_TRIGGER.PROJECTILE_ENDED,
+        radius: SPELL_SPEC.SHATTER_BOMB.projectile.explosionRadius,
+        color: "#fbbf24"
+    })
+});
+
+const AREA_ATTACK_RING_BY_EFFECT = Object.freeze({
+    [CLIENT_FEEDBACK_EFFECT_ID.COLLISION_EXPLOSION_DIRECT]: new AreaAttackRingDefinition({
+        trigger: AREA_ATTACK_RING_TRIGGER.IMPACT,
+        radius: ROPE_AUGMENT_STATIC_VALUES.collisionExplosionRadius,
+        color: "#fbbf24"
+    })
+});
+
 export class ClientFeedbackEventDefinition {
     constructor({ predicate, present }) {
         if (typeof predicate !== "function" || typeof present !== "function") {
@@ -237,6 +321,11 @@ export function mergeImpactState(current, incoming) {
 
 export function augmentEffectLifetime(effectId) {
     return AUGMENT_EFFECT_LIFETIME[effectId] ?? AUGMENT_EFFECT_LIFETIME.DEFAULT;
+}
+
+export function areaAttackRingRequest(event) {
+    const definition = AREA_ATTACK_RING_BY_SPELL[event.spellId] ?? AREA_ATTACK_RING_BY_EFFECT[eventEffectId(event)];
+    return definition?.request(event) ?? null;
 }
 
 export function eventEffectId(event) {
@@ -311,6 +400,10 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
             Boolean(eventEffectId(event)) &&
             event.resolution !== CLIENT_FEEDBACK_RESOLUTION.TARGET_ALREADY_DEAD,
         present: (event, context) => context.appendAugmentEffect(event)
+    }),
+    AREA_ATTACK_RING: new ClientFeedbackEventDefinition({
+        predicate: (event) => areaAttackRingRequest(event) !== null,
+        present: (event, context) => context.appendAreaAttackRing(event)
     }),
     SPELL_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) => EVENT_GROUP.SPELL_STARTED.includes(event.eventType),

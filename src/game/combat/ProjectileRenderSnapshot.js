@@ -11,6 +11,8 @@ export const withProjectileRenderSnapshot = createRenderSnapshotCapabilityMixin(
             velocity: snapshotVector(this.velocity),
             damage: this.damage,
             radius: this.radius,
+            collider: this.colliderSnapshot(),
+            colliderPresetId: this.colliderPresetId,
             ageSeconds: this.ageSeconds,
             speed: this.speed,
             objectType: this.objectType,
