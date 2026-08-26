@@ -16,7 +16,7 @@
 | --- | --- | --- | --- |
 | `grapple-landmark` | `available` | 경로 안내용 랜드마크. 전용 부착 목록이 아니며 기존의 모든 유효 지형 부착 규칙 유지 | Cyan target, attach/release cue |
 | `terminal` | `idle → available → completed` | 근접 interaction으로 stable objective ID 완료 | 화면 문구, interaction/complete cue |
-| `gate-panel` | `blocked → ready → opened` | 영역별 선행 objective 뒤 활성화되고 공통 interaction으로 Gate 개방 | 문 옆 장착 패널, 잠금/준비/개방 상태색과 cue |
+| `gate-panel` | `blocked → ready → opened` | authored 직사각형 interaction Polygon과 Player collider가 겹친 W 입력으로 Gate 활성화 | 문 옆 장착 패널, 잠금/준비/개방 상태색과 cue |
 | `augment-node` | `idle → selecting → selected` | Foundation Augment 선택과 `augment-selected` 완료 사건 | 선택 UI, node animation, 선택별 cue |
 | `gate` | `locked → unlocked → crossed` | 요구 objective 집계 뒤 해제, 플레이어가 직접 통과할 때 다음 영역 활성화 | 잠금/해제/통과 표현 |
 | `sentry` | `idle → acquire → track → lock → fire → cooldown` | 기존 Sentry FSM 재사용. 지정 activation 영역과 no-rope-cut/no-crossfire 규칙 적용. 피해는 받지만 위치 넉백은 받지 않음 | telegraph, fire, cooldown cue |

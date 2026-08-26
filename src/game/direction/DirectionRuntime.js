@@ -5,7 +5,7 @@ function insideOptionalRange(value, minimum, maximum) {
 
 function eventMatches(trigger, event) {
     if (!trigger.eventTypes.includes(event.eventType)) return false;
-    if (trigger.objectiveId && trigger.objectiveId !== event.objectiveId) return false;
+    if (trigger.objectiveId && trigger.objectiveId !== (event.sourceObjectiveId ?? event.objectiveId)) return false;
     if (trigger.gateId && trigger.gateId !== event.gateId) return false;
     return true;
 }

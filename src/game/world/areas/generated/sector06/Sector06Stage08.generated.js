@@ -246,7 +246,7 @@ const SPEC = {
     },
     "exit": {
       "id": "sector-06-08:exit",
-      "x": 1750,
+      "x": 1752,
       "y": -1670
     },
     "gate": {
@@ -259,7 +259,7 @@ const SPEC = {
       "trigger": {
         "height": 160,
         "width": 96,
-        "x": 1702,
+        "x": 1704,
         "y": -1766
       }
     },
@@ -278,11 +278,21 @@ const SPEC = {
         "coordinateAnchor": "bottom-center",
         "gateId": "sector-06-08:gate",
         "id": "sector-06-08:exit-panel",
-        "interactionRadius": 72,
+        "interactionSpec": {
+          "anchor": "bottom-center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 144,
+            "width": 96
+          }
+        },
         "kind": "gate-panel",
         "objectiveId": "sector-06-08:exit-panel-engaged",
         "position": {
-          "x": 1750,
+          "x": 1640,
           "y": -1705
         },
         "presentationId": "world-object:gate-panel"
@@ -293,7 +303,7 @@ const SPEC = {
         "id": "sector-06-08:exit-gate",
         "kind": "gate",
         "position": {
-          "x": 1862,
+          "x": 1752,
           "y": -1705
         },
         "presentationId": "world-object:gate"
@@ -567,7 +577,7 @@ const SPEC = {
       {
         "id": "sector-06-08:route-exit",
         "sourceId": "exit",
-        "x": 1686,
+        "x": 1688,
         "y": -1670
       }
     ],

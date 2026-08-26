@@ -55,7 +55,7 @@ Bounds는 삭제할 수 없다. Entry·Exit와 Surface·Anchor·Recovery/Route·
 - `저장 버전`은 마지막 Git `HEAD` 기준과 각 `저장 적용` 직전의 Stage source snapshot을 보여 준다. `버전 복원`은 선택한 snapshot을 다시 적용할 뿐 새 version을 만들지 않는다. 이 local `.map-editor-history/` 기록은 commit·merge를 만들거나 Git history를 바꾸지 않으며, Stage별 최근 20개만 보관한다.
 - 메모리 초안 저장은 로컬 v2 검사와 서버 검증을 통과한 Draft만 보관하며, 요청 중 상태와 최종 성공·실패를 상태 줄에 즉시 표시한다. 이후 Draft를 다시 수정하면 메모리 저장 상태와 Gameplay View 준비 상태를 해제한다.
 - 시작 지점은 아래 지지 플랫폼 상단 32px을 기준으로 하는 최대 1개의 Entry 컴포넌트다. 둘은 독립 좌표로 편집하지 않으며 서버도 저장 전에 같은 이동량으로 다시 구성한다.
-- 출구는 Stage당 최대 1개다. 전용 출구 데크가 있는 Stage는 데크 위치가 복합 객체 이동의 권위이며, 과거 Stable ID 형식 때문에 전용 데크를 명확히 식별할 수 없는 Stage도 출구점 자체를 편집 손잡이로 사용해 출구를 누락하지 않는다. 출구점·Gate trigger·Gate panel·Gate visual과 명확히 식별된 전용 데크·출구 route point는 에디터와 서버가 같은 이동량으로 다시 구성하며 독립 좌표로 편집하지 않는다. `nextAreaId`, Gate ID와 해제 조건은 이동 대상이 아니며 일반 Runtime의 Stage 전환 계약을 유지한다.
+- 출구는 Stage당 최대 1개다. 전용 출구 데크가 있는 Stage는 데크 위치가 복합 객체 이동의 권위이며, 과거 Stable ID 형식 때문에 전용 데크를 명확히 식별할 수 없는 Stage도 출구점 자체를 편집 손잡이로 사용해 출구를 누락하지 않는다. 출구점·Gate trigger·Gate panel·Gate visual과 명확히 식별된 전용 데크·출구 route point는 에디터와 서버가 같은 이동량으로 다시 구성하며 독립 좌표로 편집하지 않는다. `Exit X = Gate visual X = Gate trigger 중심 X`가 문 위치를 소유하고, Panel 활성화는 그 왼쪽 별도 Panel 위치에 붙은 authored 직사각형 `interactionSpec`, 통과는 Gate trigger가 소유한다. `nextAreaId`, Gate ID와 해제 조건은 이동 대상이 아니며 일반 Runtime의 Stage 전환 계약을 유지한다.
 - 해커톤 운영에서는 맵 에디터를 한 번에 한 명만 사용한다. 다중 사용자 mutex와 서버 crash까지 견디는 완전한 다중 파일 원자 저장은 후속 범위다.
 - generated output은 수기 편집하지 않는다. 특수 동작은 Stable ID를 수기 Behavior Registry에서 해석한다.
 - Boss Stage Apply도 진행 중 전투를 hot reload하지 않는다. 저장된 Spec은 다음 Boss Stage 시작 또는 새 게임에서만 읽으며, 참가자 수와 scaled Phase HP는 최초 Boss Stage 시작에서 고정한다.

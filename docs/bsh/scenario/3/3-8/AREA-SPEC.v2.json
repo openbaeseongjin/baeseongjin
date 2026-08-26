@@ -510,11 +510,21 @@
         "coordinateAnchor": "bottom-center",
         "gateId": "sector-03-08:gate",
         "id": "sector-03-08:exit-panel",
-        "interactionRadius": 72,
+        "interactionSpec": {
+          "anchor": "bottom-center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 96,
+            "height": 144
+          }
+        },
         "kind": "gate-panel",
         "objectiveId": "sector-03-08:exit-panel-engaged",
         "position": {
-          "x": 880,
+          "x": 848,
           "y": -2070
         },
         "presentationId": "world-object:gate-panel"
@@ -773,6 +783,12 @@
         "sourceId": "route-5-3-east-path-5-50",
         "x": 384,
         "y": -1888
+      },
+      {
+        "id": "sector-03-08:route-exit",
+        "sourceId": "EXIT",
+        "x": 960,
+        "y": -2070
       }
     ],
     "routes": [

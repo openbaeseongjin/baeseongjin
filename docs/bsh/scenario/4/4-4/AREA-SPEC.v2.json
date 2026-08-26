@@ -267,7 +267,7 @@
     },
     "exit": {
       "id": "sector-04-04:exit",
-      "x": 2144,
+      "x": 2336,
       "y": -1888
     },
     "gate": {
@@ -279,7 +279,7 @@
       "trigger": {
         "height": 128,
         "width": 96,
-        "x": 2096,
+        "x": 2288,
         "y": -1984
       }
     },
@@ -361,7 +361,17 @@
         "coordinateAnchor": "bottom-center",
         "gateId": "sector-04-04:gate",
         "id": "sector-04-04:exit-panel",
-        "interactionRadius": 72,
+        "interactionSpec": {
+          "anchor": "bottom-center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 96,
+            "height": 144
+          }
+        },
         "kind": "gate-panel",
         "objectiveId": "exit-panel-engaged",
         "position": {
@@ -557,6 +567,12 @@
         "id": "sector-04-04:route-t11",
         "sourceId": "t11",
         "x": 2144,
+        "y": -1888
+      },
+      {
+        "id": "sector-04-04:route-exit",
+        "sourceId": "EXIT",
+        "x": 2336,
         "y": -1888
       }
     ],

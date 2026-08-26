@@ -288,7 +288,17 @@ const SPEC = {
         "coordinateAnchor": "bottom-center",
         "gateId": "sector-05-02:gate",
         "id": "sector-05-02:exit-panel",
-        "interactionRadius": 72,
+        "interactionSpec": {
+          "anchor": "bottom-center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 144,
+            "width": 96
+          }
+        },
         "kind": "gate-panel",
         "objectiveId": "exit-panel-engaged",
         "position": {

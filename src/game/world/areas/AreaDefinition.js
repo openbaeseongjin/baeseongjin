@@ -80,6 +80,8 @@ export function gatePortalBounds(x, bottomY) {
     return anchoredRectangleBounds({ x, y: bottomY }, GATE_PORTAL_APERTURE_SIZE, "bottom-center");
 }
 
+export const EXIT_PANEL_INTERACTION_SPEC = objectTriggerSpec("bottom-center", 96, 144);
+
 export function cameraZone(id, minY, maxY, desktopZoom, mobileZoom, properties = {}) {
     return freezeValue({ id, minY, maxY, desktopZoom, mobileZoom, ...properties });
 }
@@ -95,7 +97,7 @@ export const EXIT_BLOCK_SPEC = Object.freeze({
     doorHeight: 96,
     reachWidth: 320,
     reachHeight: 96,
-    interactionRadius: 72
+    interactionSpec: EXIT_PANEL_INTERACTION_SPEC
 });
 
 export function exitBlock({
@@ -139,7 +141,7 @@ export function exitBlock({
         ),
         panel: worldObject(`${areaId}:exit-panel`, "gate-panel", doorX - spec.panelInsetFromDoor, deckTopY, {
             coordinateAnchor: "bottom-center",
-            interactionRadius: spec.interactionRadius,
+            interactionSpec: spec.interactionSpec,
             objectiveId: panelObjectiveId,
             gateId,
             ...panelProperties

@@ -236,6 +236,7 @@
             "detail": "ACCESS OPEN"
           },
           "timing": {
+            "atSeconds": 2.7,
             "durationSeconds": 1.2
           }
         },
@@ -246,7 +247,7 @@
             "text": "…일단 위로."
           },
           "timing": {
-            "minDelaySeconds": 1.2
+            "minDelaySeconds": 3.9
           }
         }
       ]

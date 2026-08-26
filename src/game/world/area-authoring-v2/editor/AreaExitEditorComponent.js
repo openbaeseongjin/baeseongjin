@@ -1,3 +1,5 @@
+import { EXIT_PANEL_INTERACTION_SPEC } from "../../areas/AreaDefinition.js";
+
 const EXIT_DECK_ID = Object.freeze({
     candidates: (areaId) => Object.freeze([`${areaId}:exit-deck`, "exit-deck"])
 });
@@ -63,7 +65,7 @@ export class AreaExitEditorDefinition {
                     presentationId: "world-object:gate-panel",
                     position: { x: doorX + EXIT_OFFSETS.panelFromDoorX, y: position.y },
                     coordinateAnchor: "bottom-center",
-                    interactionRadius: 72,
+                    interactionSpec: EXIT_PANEL_INTERACTION_SPEC,
                     objectiveId: panelObjective.id,
                     gateId
                 },

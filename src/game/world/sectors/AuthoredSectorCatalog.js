@@ -54,6 +54,7 @@ function importObjectives(area, landmarkId, stageId) {
     return area.objectives.map((objective) =>
         sectorObjective({
             id: objectiveIdBySourceId[objective.id],
+            sourceObjectiveId: objective.id,
             type: objective.type,
             bounds: objective.bounds ?? null,
             requiredObjectiveIds: (objective.requiredObjectiveIds ?? []).map(
