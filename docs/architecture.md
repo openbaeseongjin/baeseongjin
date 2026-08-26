@@ -51,6 +51,8 @@ index.html
 
 ## 실행 흐름
 
+`StartupSplashScreen`은 서비스 워커, 시작 Player·Enemy·Environment·Direction 정의, 첫 Area 그래픽과 멀티 서버 확인의 고정 bootstrap 단계 완료 수를 `0~100%`로 표시한다. 시간 경과로 퍼센트를 추정하지 않으며 실제 로딩이 끝나고 최소 표시 시간만 남으면 `100%`에서 모드 선택 화면 전환을 기다린다.
+
 1. `InputSampler`가 키보드·마우스 또는 멀티터치 입력을 하나의 불변 스냅샷으로 만든다.
 2. `GameApp`이 화면 좌표를 월드 좌표로 바꾸고 공용 `PlayerCommand`를 생성한다.
 3. `InputDispatcher`가 명령을 소유 사용자의 `InputDrivenObject`에 배포하고, 각 입력 capability 믹스인이 자신이 담당하는 intent만 반영한다.

@@ -60,6 +60,16 @@ const DEFAULT_GAME_AUDIO_SELECTION = Object.freeze({
     packId: "default-mock",
     packageOverrides: Object.freeze({ bgm: "main-theme" })
 });
+const STARTUP_LOADING_STEP = Object.freeze({
+    SERVICE_WORKER: "service-worker",
+    PLAYER_DEFINITION: "player-definition",
+    ENEMY_DEFINITIONS: "enemy-definitions",
+    ENVIRONMENT_DEFINITIONS: "environment-definitions",
+    DIRECTION_DEFINITIONS: "direction-definitions",
+    INITIAL_GRAPHICS: "initial-graphics",
+    MULTIPLAYER_AVAILABILITY: "multiplayer-availability"
+});
+const STARTUP_LOADING_STEPS = Object.freeze(Object.values(STARTUP_LOADING_STEP));
 const modeMenu = new GameModeMenu(document.getElementById("game-mode-menu"));
 const startupSplashScreen = new StartupSplashScreen(document.getElementById("startup-splash"));
 const channelBadge = document.getElementById("channel-badge");
@@ -372,16 +382,20 @@ function returnToMenu(message) {
 }
 
 async function bootstrap() {
+    startupSplashScreen.begin(STARTUP_LOADING_STEPS);
     startupSplashScreen.show();
     const minimumSplashDuration = startupSplashScreen.waitForMinimumDuration();
-    await serviceWorkerUpdater.ready;
+    await startupSplashScreen.track(STARTUP_LOADING_STEP.SERVICE_WORKER, serviceWorkerUpdater.ready);
     if (pageClosing) return;
     [playerDefinition, enemyDefinitionsBySectorId, authoredAreaEnvironmentDefinitions, directionDefinitions] =
         await Promise.all([
-            loadDefaultPlayerSpriteDefinition(),
-            loadEnemySpriteDefinitions(),
-            loadAuthoredAreaEnvironmentDefinitions(),
-            loadDefaultDirectionDefinitions()
+            startupSplashScreen.track(STARTUP_LOADING_STEP.PLAYER_DEFINITION, loadDefaultPlayerSpriteDefinition()),
+            startupSplashScreen.track(STARTUP_LOADING_STEP.ENEMY_DEFINITIONS, loadEnemySpriteDefinitions()),
+            startupSplashScreen.track(
+                STARTUP_LOADING_STEP.ENVIRONMENT_DEFINITIONS,
+                loadAuthoredAreaEnvironmentDefinitions()
+            ),
+            startupSplashScreen.track(STARTUP_LOADING_STEP.DIRECTION_DEFINITIONS, loadDefaultDirectionDefinitions())
         ]);
     enemyDefinition = enemyDefinitionsBySectorId[DEFAULT_ENEMY_SPRITE_SECTOR_ID] ?? null;
     debugEnemyTrainingControls.setDefinition(enemyDefinition);
@@ -393,8 +407,9 @@ async function bootstrap() {
         });
         await prepareGraphicsResources(DEFAULT_GRAPHICS_RESOURCE_IDENTITY);
     }
+    startupSplashScreen.completeStep(STARTUP_LOADING_STEP.INITIAL_GRAPHICS);
     if (pageClosing) return;
-    await refreshMultiplayerAvailability();
+    await startupSplashScreen.track(STARTUP_LOADING_STEP.MULTIPLAYER_AVAILABILITY, refreshMultiplayerAvailability());
     startMultiplayerAvailabilityMonitor();
     await minimumSplashDuration;
     if (pageClosing) return;
