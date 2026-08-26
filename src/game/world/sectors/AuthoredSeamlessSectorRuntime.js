@@ -531,6 +531,7 @@ export function createAuthoredSeamlessSectorRuntimeWorld({
                 routeLocks.push(
                     freezeValue({
                         id: lockId,
+                        gateId: previousLandmark.gateId,
                         sourceLandmarkId: previousLandmark.id,
                         targetLandmarkId: runtimeLandmark.id,
                         stageTransitionId: stageTransition.id,

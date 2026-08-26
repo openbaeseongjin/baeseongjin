@@ -293,6 +293,8 @@ Player Bark는 gameplay/network 사건이 아니라 각 클라이언트의 local
 
 0.45.0부터 1-1/1-2 Direction command는 `scope/authority`를 compile 때 검증한다. Camera·Story·Bark·Audio·Lighting·Character는 각 클라이언트의 local `DirectionRuntime`이 즉시 실행하며 wire에 animation frame을 넣지 않는다. Player command는 `owner-player/owner`, Enemy·Collision·Objective·Gate command는 `shared-world/server` 계약만 허용한다. 첫 migration에는 gameplay mutation command를 실제 Stage에 넣지 않았으며 향후 구현도 기존 owner-first/server-neutral 사건 규칙을 우회하지 않고 해당 domain adapter로 전달한다.
 
+seamless Runtime의 `objective-completed`·`objective-sequence-started` 사건은 canonical `sourceObjectiveId`, `route-unlocked` 사건은 canonical `gateId`를 함께 운반한다. 각 클라이언트 Direction은 Runtime에서 재작성된 objective·route ID를 문자열 패턴으로 역해석하지 않고 이 authored source identity로 같은 System Text·Bark를 로컬 재생한다.
+
 `GameSimulation`은 처리한 스텝마다 단조 증가하는 `tick`을 기록한다. 명시적으로 활성화한 싱글 자동 무기 발사, 멀티에서 승인된 플레이어 발사 claim, 서버 중립 발사와 투사체 종료는 이 틱의 `PredictableObjectEvent`를 발행하며, 권위 전송 계층은 `drainReplicationEvents()`로 각 사건을 한 번만 가져간다. 플레이어·적 투사체는 8초의 서버 수명이 끝나면 `expired` resolve로 제거한다. 활성 투사체는 원래 spawn 이벤트를 내부에 보존해 welcome 복원에만 재사용하며 일반 스냅샷마다 반복하지 않는다. 로컬 렌더링은 기존 투사체 배열을 계속 사용하지만 네트워크 상태에는 그 배열을 넣지 않는다.
 
 `AuthoritySnapshotBuilder`는 `GameSimulation`의 로컬 렌더 상태를 그대로 복제하지 않는다. 플레이어별 물리·로프·생명·무기·generic Augment, enemy 동적 상태와 월드 진행만 뽑고, 정적 지형과 authored enemy 정적 정의 대신 `worldSeed`, `worldRevision`과 stable `objectId`를 보낸다. 활성 Boss DTO는 snapshot 한 회당 한 번만 만들고 `bossStage`와 호환 `bossRuntime`이 같은 객체를 가리키며 envelope 정규화도 이 별칭을 보존한다. 클라이언트는 이 값으로 월드와 enemy 정의를 재생성하며 revision이 다르면 세션 참가를 중단한다.

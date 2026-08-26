@@ -1,5 +1,5 @@
 import { assertAuthoredCoordinateAnchor } from "./AuthoredCoordinateAnchor.js";
-import { resolveObjectTriggerBounds } from "./areas/AreaDefinition.js";
+import { EXIT_PANEL_INTERACTION_SPEC, resolveObjectTriggerBounds } from "./areas/AreaDefinition.js";
 
 function issue(code, areaId, details = {}) {
     return Object.freeze({ code, areaId, ...details });
@@ -40,9 +40,11 @@ function boundsInside(areaBounds, bounds, { allowFloorOverlap = false, allowConn
     }
     const maximumY = allowFloorOverlap ? 160 : 0;
     const minimumY = allowConnectorOverlap ? -areaBounds.height - 160 : -areaBounds.height;
+    const minimumX = allowConnectorOverlap ? -areaBounds.width * 0.5 - 160 : -areaBounds.width * 0.5;
+    const maximumX = allowConnectorOverlap ? areaBounds.width * 0.5 + 160 : areaBounds.width * 0.5;
     return (
-        bounds.x >= -areaBounds.width * 0.5 &&
-        bounds.x + bounds.width <= areaBounds.width * 0.5 &&
+        bounds.x >= minimumX &&
+        bounds.x + bounds.width <= maximumX &&
         bounds.y >= minimumY &&
         bounds.y + bounds.height <= maximumY
     );
@@ -146,10 +148,39 @@ function validatePortalContract(area, issues) {
     if (panels[0].gateId !== area.gate.id) {
         issues.push(issue("non-portal-panel-identity", area.id, { objectId: panels[0].id }));
     }
+    const interactionSpec = panels[0].interactionSpec;
+    if (
+        panels[0].interactionRadius !== undefined ||
+        interactionSpec?.anchor !== EXIT_PANEL_INTERACTION_SPEC.anchor ||
+        interactionSpec?.offset?.x !== EXIT_PANEL_INTERACTION_SPEC.offset.x ||
+        interactionSpec?.offset?.y !== EXIT_PANEL_INTERACTION_SPEC.offset.y ||
+        interactionSpec?.size?.width !== EXIT_PANEL_INTERACTION_SPEC.size.width ||
+        interactionSpec?.size?.height !== EXIT_PANEL_INTERACTION_SPEC.size.height
+    ) {
+        issues.push(issue("portal-panel-interaction-spec", area.id, { objectId: panels[0].id }));
+    } else if (
+        !boundsInside(area.bounds, resolveObjectTriggerBounds(panels[0].position, panels[0].interactionSpec), {
+            allowFloorOverlap: true,
+            allowConnectorOverlap: true
+        })
+    ) {
+        issues.push(issue("portal-panel-interaction-bounds", area.id, { objectId: panels[0].id }));
+    }
     if (gates.length !== 1) {
         issues.push(issue("portal-gate-count", area.id, { expected: 1, actual: gates.length }));
     } else if (gates[0].presentationId !== "world-object:gate") {
         issues.push(issue("portal-gate-presentation", area.id, { objectId: gates[0].id }));
+    } else if (
+        gates[0].position.x !== area.exit.x ||
+        gates[0].position.x !== area.gate.trigger.x + area.gate.trigger.width * 0.5 ||
+        panels[0].position.y !== gates[0].position.y
+    ) {
+        issues.push(
+            issue("portal-gate-layout", area.id, {
+                panelId: panels[0].id,
+                gateId: gates[0].id
+            })
+        );
     }
     const objectiveIds = area.gate.requiredObjectiveIds ?? [];
     if (objectiveIds.length !== 1) {

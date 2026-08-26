@@ -1,4 +1,5 @@
 import { pointInsideBounds } from "./WorldForceField.js";
+import { playerOverlapsWorldObjectInteraction } from "./WorldInteractionGeometry.js";
 
 function activePlayers(players) {
     return players.filter(({ lifeState }) => lifeState === "active");
@@ -10,10 +11,7 @@ function interactingPlayers(objective, world, progress, players, commandsByPlaye
     if (!object) return [];
     return activePlayers(players).filter((player) => {
         const command = commandsByPlayerId.get(player.id);
-        return (
-            command?.interact === true &&
-            player.physics.position.distanceTo(object.position) <= object.interactionRadius
-        );
+        return command?.interact === true && playerOverlapsWorldObjectInteraction(player, object);
     });
 }
 

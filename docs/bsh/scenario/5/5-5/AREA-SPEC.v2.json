@@ -389,7 +389,17 @@
         "coordinateAnchor": "bottom-center",
         "gateId": "sector-05-05:gate",
         "id": "sector-05-05:exit-panel",
-        "interactionRadius": 72,
+        "interactionSpec": {
+          "anchor": "bottom-center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "width": 96,
+            "height": 144
+          }
+        },
         "kind": "gate-panel",
         "objectiveId": "exit-panel-engaged",
         "position": {

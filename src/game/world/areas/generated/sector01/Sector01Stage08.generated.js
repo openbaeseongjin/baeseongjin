@@ -242,7 +242,7 @@ const SPEC = {
       "trigger": {
         "height": 160,
         "width": 96,
-        "x": 272,
+        "x": 240,
         "y": -1856
       }
     },
@@ -422,7 +422,17 @@ const SPEC = {
         "coordinateAnchor": "bottom-center",
         "gateId": "sector-01-08:gate",
         "id": "sector-01-08:exit-panel",
-        "interactionRadius": 72,
+        "interactionSpec": {
+          "anchor": "bottom-center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 144,
+            "width": 96
+          }
+        },
         "kind": "gate-panel",
         "objectiveId": "sector-01-08:maintenance-override",
         "position": {

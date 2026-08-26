@@ -391,11 +391,21 @@ const SPEC = {
         "coordinateAnchor": "bottom-center",
         "gateId": "sector-06-07:gate",
         "id": "sector-06-07:exit-panel",
-        "interactionRadius": 72,
+        "interactionSpec": {
+          "anchor": "bottom-center",
+          "offset": {
+            "x": 0,
+            "y": 0
+          },
+          "size": {
+            "height": 144,
+            "width": 96
+          }
+        },
         "kind": "gate-panel",
         "objectiveId": "sector-06-07:exit-panel-engaged",
         "position": {
-          "x": 500,
+          "x": 388,
           "y": -2175
         },
         "presentationId": "world-object:gate-panel"
@@ -406,7 +416,7 @@ const SPEC = {
         "id": "sector-06-07:exit-gate",
         "kind": "gate",
         "position": {
-          "x": 612,
+          "x": 500,
           "y": -2175
         },
         "presentationId": "world-object:gate"

@@ -3,17 +3,17 @@
 이 문서는 [`bsh/scenario/`](./bsh/scenario/)의 기획과 현재 Runtime 연결 상태만 소유한다. 대체된 구현 chronology는 Git 이력과 [`decision-history.md`](./decision-history.md)가 소유하며 현재 계약과 함께 나열하지 않는다.
 
 <!-- scenario-integration-checkpoint:v1
-scenario-source-sha256: a11bc4aa67ecce807b411b848328d551a3c6dfd62023ae744d1fd063aca7d6fc
-authored-area-sha256: 38b2a04cb7ab8b5f2bd5e90523258056556ab3fca841ae0ac9b3b0fd6b6a60f5
-authored-sector-sha256: 592379e8682443826596c349dfded4f7969f5b4d41489449d51cf4dc12edf521
+scenario-source-sha256: 803307ab939748a7d646c91d8725af4e0c65b59880c929521720e9955bec1ef8
+authored-area-sha256: 19b7c7ef3ed318655d4bc73d145393ac64422ee1768e6139a1c68fca0e3c94e6
+authored-sector-sha256: ccc9ea935b4d2d460159611adc870415b3fa5becc6671f9c22ce9ff3b0ae267e
 stage-count: 48
 stage-coverage: 1-1,1-2,1-3,1-4,1-5,1-6,1-7,1-8,2-1,2-2,2-3,2-4,2-5,2-6,2-7,2-8,3-1,3-2,3-3,3-4,3-5,3-6,3-7,3-8,4-1,4-2,4-3,4-4,4-5,4-6,4-7,4-8,5-1,5-2,5-3,5-4,5-5,5-6,5-7,5-8,6-1,6-2,6-3,6-4,6-5,6-6,6-7,6-8
-reviewed-upstream: eef04a24c52f453d6a33e433dbc8b5baa176a39c
+reviewed-upstream: f6cdf777e9df28b383a194f8a20610044cdbf6cd
 -->
 
 ## 현재 확인 체크포인트
 
-- Sector 01~06의 48개 canonical `AREA-SPEC.v2.json`은 generated Stage/catalog를 거쳐 authored Stage 48개와 개별 Player portal 47개로 compile된다. 모든 target Entry는 source Exit와 같은 X·2160px 위의 desktop/mobile 기준 시야 밖에 있고, 각 Stage는 Entry·Exit·Gate·Exit Panel을 하나씩 소유해 W 상호작용으로만 전진한다. Runtime derived geometry와 scenario-only Stage는 0개다.
+- Sector 01~06의 48개 canonical `AREA-SPEC.v2.json`은 generated Stage/catalog를 거쳐 authored Stage 48개와 개별 Player portal 47개로 compile된다. 모든 target Entry는 source Exit와 같은 X·2160px 위의 desktop/mobile 기준 시야 밖에 있고, 각 Stage는 Entry·Exit·Gate·Exit Panel을 하나씩 소유한다. Panel의 authored 직사각형 interaction Polygon과 Player collider가 겹친 W 입력이 출구를 활성화하고, 활성화 뒤 Gate trigger를 통과해야 전진한다. Runtime derived geometry와 scenario-only Stage는 0개다.
 - Enemy slot은 1-1·1-2만 도입부 예외로 두고 1-3 이후 최소 3개를 보장한다. Sector 01~02는 최소 3개, 03~04는 최소 4개, 05~06은 최소 5개이며 exact Stage 예산은 `enemy-density-composition.md`가 소유한다.
 - 0.67.0은 기존 연속 Stage portal을 유지하고 1-4·2-3·3-5의 authored Augment Node와 선택 prerequisite만 제거했다. 증강은 마지막으로 확정한 양수 Player 피해 귀속 XP 레벨업이 소유한다.
 - Player별 Stage Save·Gate 이동과 공용 objective를 유지한다. Sector Key/Access만 portal 사용 가능 여부를 바꾸며 barrier collision이나 영구 Stage cursor를 만들지 않는다. 부족한 상태의 Exit Panel W 입력은 당사자 화면 상단에 현재 수집 수와 필요 수를 표시한다.
@@ -30,6 +30,8 @@ reviewed-upstream: eef04a24c52f453d6a33e433dbc8b5baa176a39c
 | Sector 06 / 6-1~6-8 | canonical v2/generated 8개, `6-8→Boss06→Boarding→Escape`   | Boss06 full combat·1~4인 boarding        |
 
 ## 최근 반영된 시나리오 변화
+
+- 0.78.1은 Panel 활성화와 Gate 통과를 분리했다. 48개 Exit Panel의 중심점 원형 반경을 authored 96×144 직사각형 interaction Polygon으로 교체하고 Player collider overlap으로 판정한다. Sector 03의 Panel 8개와 4-4·4-7·4-8·Sector 06의 이전 불일치를 정리해 `Exit X = Gate visual X = Gate trigger 중심 X`를 복구하고 Panel+Player 영역과 Gate trigger를 분리했다. Gate 중심·Gate visual·Gate trigger는 Panel 상호작용을 대신하지 않는다. seamless objective·route 사건은 canonical objective·Gate source ID를 보존해 1-1의 Terminal 3문구와 `SERVICE SHAFT 02 / ACCESS OPEN`을 실제 Runtime 사건에서 순서대로 재생한다. surface geometry·Gate trigger shape/size·Sector Key·network authority는 변경하지 않았다.
 
 - 48개 Stage 출구 표현을 전수 감사해 Sector 05를 포함한 32개 정상 Stage는 유지하고, canonical과 generated Runtime에서 누락됐던 Sector 04·06의 Gate 16개를 각 Exit Panel 옆 authored surface top에 복구했다. 1-1의 유일한 2.7초 출구 objective 지연도 제거해 W/점프 입력 tick에 즉시 문을 열고 Terminal 텍스트는 Direction이 별도 재생한다. geometry·objective 의미·portal trigger·Sector Key·network 계약은 바꾸지 않았으며 validator가 Stage별 Gate·Exit Panel 정확히 1개와 출구 objective 무지연을 검사한다.
 

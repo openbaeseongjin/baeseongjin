@@ -176,6 +176,9 @@ export function validateSectorCatalog(catalog) {
                 if (!isNonEmptyString(objective.type)) {
                     issues.push(issue("objective-type-missing", sector.id, { id: objective.id }));
                 }
+                if (!isNonEmptyString(objective.sourceObjectiveId)) {
+                    issues.push(issue("objective-source-id-missing", sector.id, { id: objective.id }));
+                }
                 if (objectiveIds.has(objective.id)) {
                     issues.push(issue("objective-id-duplicate", sector.id, { id: objective.id }));
                 }

@@ -22,6 +22,9 @@ import { AUTHORED_SECTOR_CATALOG } from "../src/game/world/sectors/AuthoredSecto
 import { createAuthoredSeamlessSectorRuntimeWorld } from "../src/game/world/sectors/AuthoredSeamlessSectorRuntime.js";
 import { SectorProgressState } from "../src/game/world/SectorProgressState.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "../src/game/world/sectors/SectorDefinition.js";
+import { EXIT_PANEL_INTERACTION_SPEC, resolveObjectTriggerBounds } from "../src/game/world/areas/AreaDefinition.js";
+import { CircleCollider } from "../src/game/physics/colliders/CircleCollider.js";
+import { playerOverlapsWorldObjectInteraction } from "../src/game/world/WorldInteractionGeometry.js";
 import { collisionSurfacesForSectorProgress } from "../src/game/world/WorldGateGeometry.js";
 import { STAGE_TRANSITION_LAYOUT } from "../src/game/world/StageTransitionLayout.js";
 import { worldFallRecoveryY } from "../src/game/world/WorldFallBoundary.js";
@@ -547,6 +550,15 @@ function surfaceBounds(surface) {
     };
 }
 
+function boundsOverlap(left, right) {
+    return !(
+        left.x + left.width < right.x ||
+        left.x > right.x + right.width ||
+        left.y + left.height < right.y ||
+        left.y > right.y + right.height
+    );
+}
+
 function validateGroundedWorldObjectPresentations(area, stageId, issues) {
     const exitPresentations = (area.objects ?? []).filter(({ gateId }) => gateId === area.gate?.id);
     for (const [presentationId, code] of [
@@ -555,6 +567,39 @@ function validateGroundedWorldObjectPresentations(area, stageId, issues) {
     ]) {
         const count = exitPresentations.filter((object) => object.presentationId === presentationId).length;
         if (count !== 1) issue(issues, code, { stageId, expected: 1, actual: count });
+    }
+    const panel = exitPresentations.find(({ presentationId }) => presentationId === "world-object:gate-panel");
+    const gate = exitPresentations.find(({ presentationId }) => presentationId === "world-object:gate");
+    if (
+        panel &&
+        gate &&
+        playerOverlapsWorldObjectInteraction(
+            {
+                physics: {
+                    position: gate.position,
+                    collider: new CircleCollider({ radius: PLAYER_CONFIG.radius })
+                }
+            },
+            panel
+        )
+    ) {
+        issue(issues, "gate-center-activates-exit-panel", { stageId, panelId: panel.id, gateId: gate.id });
+    }
+    if (panel?.interactionSpec) {
+        const bounds = resolveObjectTriggerBounds(panel.position, panel.interactionSpec);
+        const playerCenterBounds = {
+            x: bounds.x - PLAYER_CONFIG.radius,
+            y: bounds.y - PLAYER_CONFIG.radius,
+            width: bounds.width + PLAYER_CONFIG.radius * 2,
+            height: bounds.height + PLAYER_CONFIG.radius * 2
+        };
+        if (boundsOverlap(playerCenterBounds, area.gate.trigger)) {
+            issue(issues, "exit-panel-gate-trigger-overlap", {
+                stageId,
+                panelId: panel.id,
+                gateId: area.gate.id
+            });
+        }
     }
     for (const object of area.objects ?? []) {
         const expectedKind = GROUNDED_WORLD_OBJECT_KIND_BY_PRESENTATION_ID[object.presentationId];
@@ -569,6 +614,17 @@ function validateGroundedWorldObjectPresentations(area, stageId, issues) {
         }
         if (object.presentationId === "world-object:gate-panel" && typeof object.gateId !== "string") {
             issue(issues, "gate-panel-identity-mismatch", { stageId, objectId: object.id });
+        }
+        if (
+            object.presentationId === "world-object:gate-panel" &&
+            (object.interactionRadius !== undefined ||
+                object.interactionSpec?.anchor !== EXIT_PANEL_INTERACTION_SPEC.anchor ||
+                object.interactionSpec?.offset?.x !== EXIT_PANEL_INTERACTION_SPEC.offset.x ||
+                object.interactionSpec?.offset?.y !== EXIT_PANEL_INTERACTION_SPEC.offset.y ||
+                object.interactionSpec?.size?.width !== EXIT_PANEL_INTERACTION_SPEC.size.width ||
+                object.interactionSpec?.size?.height !== EXIT_PANEL_INTERACTION_SPEC.size.height)
+        ) {
+            issue(issues, "gate-panel-interaction-spec-mismatch", { stageId, objectId: object.id });
         }
         if (object.coordinateAnchor !== "bottom-center") {
             issue(issues, "grounded-world-object-anchor-mismatch", {
@@ -906,6 +962,7 @@ function validateEditorEntityCoverage(spec, issues) {
     const entityKeys = Object.freeze(Object.fromEntries(entities.map(({ domain, id }) => [`${domain}:${id}`, true])));
     const entry = AreaEntryEditorComponent.from(definition);
     const exit = AreaExitEditorComponent.from(definition);
+    if (exit && !exit.routePoint) issue(issues, "exit-route-point-missing", { stageId: spec.stage.id });
     const expected = [
         ["bounds", `${definition.id}:bounds`],
         ...(entry ? [["entry", entry.id]] : []),

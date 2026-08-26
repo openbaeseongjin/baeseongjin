@@ -1,6 +1,7 @@
 import { pointInsideBounds } from "./WorldForceField.js";
 import { playerOverlapsStageSavePoint } from "./StageSavePointGeometry.js";
 import { ACCESS_MODULE_SOURCE_KIND } from "./sectors/SectorDefinition.js";
+import { playerOverlapsWorldObjectInteraction } from "./WorldInteractionGeometry.js";
 
 function activePlayers(players) {
     return players.filter(({ lifeState }) => lifeState === "active");
@@ -12,10 +13,7 @@ function interactingPlayers(objective, world, progress, players, commandsByPlaye
     if (!object) return [];
     return activePlayers(players).filter((player) => {
         const command = commandsByPlayerId.get(player.id);
-        return (
-            command?.interact === true &&
-            player.physics.position.distanceTo(object.position) <= object.interactionRadius
-        );
+        return command?.interact === true && playerOverlapsWorldObjectInteraction(player, object);
     });
 }
 
@@ -27,7 +25,7 @@ function portalInteractionAttempt(objective, world, progress, players, commandsB
         const command = commandsByPlayerId.get(candidate.id);
         return (
             command?.interact === true &&
-            candidate.physics.position.distanceTo(object.position) <= object.interactionRadius &&
+            playerOverlapsWorldObjectInteraction(candidate, object) &&
             progress.consumePortalInteraction(candidate.id, object.routeLockId, command.interactSequence)
         );
     });
@@ -69,12 +67,13 @@ function completingPlayer(objective, world, progress, players, commandsByPlayerI
     return interactingPlayers(objective, world, progress, players, commandsByPlayerId)[0] ?? null;
 }
 
-function completionEvents({ result, objective, player, beforeRoutes, afterRoutes }) {
+function completionEvents({ result, objective, player, beforeRoutes, afterRoutes, world }) {
     if (!result.changed) return [];
     const events = [
         Object.freeze({
             type: "objective-completed",
             objectiveId: objective.id,
+            sourceObjectiveId: objective.sourceObjectiveId ?? objective.id,
             landmarkId: objective.landmarkId,
             playerId: player.id,
             position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
@@ -112,10 +111,12 @@ function completionEvents({ result, objective, player, beforeRoutes, afterRoutes
     }
     for (const routeId of afterRoutes) {
         if (beforeRoutes.has(routeId)) continue;
+        const route = world.routeLocks.find(({ id }) => id === routeId);
         events.push(
             Object.freeze({
                 type: "route-unlocked",
                 routeId,
+                gateId: route?.gateId ?? null,
                 landmarkId: objective.landmarkId,
                 playerId: player.id,
                 position: Object.freeze({ x: player.physics.position.x, y: player.physics.position.y })
@@ -173,7 +174,8 @@ export function advanceSectorProgress({
                     objective,
                     player,
                     beforeRoutes,
-                    afterRoutes: progress.snapshot().unlockedRouteIds
+                    afterRoutes: progress.snapshot().unlockedRouteIds,
+                    world
                 })
             );
             continue;
@@ -198,6 +200,7 @@ export function advanceSectorProgress({
                     Object.freeze({
                         type: "objective-sequence-started",
                         objectiveId: objective.id,
+                        sourceObjectiveId: objective.sourceObjectiveId ?? objective.id,
                         landmarkId: objective.landmarkId,
                         playerId: player.id,
                         durationSeconds: objective.completionDelaySeconds,
@@ -215,7 +218,8 @@ export function advanceSectorProgress({
                 objective,
                 player,
                 beforeRoutes,
-                afterRoutes: progress.snapshot().unlockedRouteIds
+                afterRoutes: progress.snapshot().unlockedRouteIds,
+                world
             })
         );
     }

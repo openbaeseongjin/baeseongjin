@@ -162,7 +162,7 @@ function normalizedTrigger(trigger, { areaId, beat }) {
         case "gate-unlocked":
             return deepFreeze({
                 kind: "event",
-                eventTypes: ["gate-unlocked"],
+                eventTypes: ["gate-unlocked", "route-unlocked"],
                 gateId: trigger.gateId ?? `${areaId}:gate`
             });
         default:
@@ -203,6 +203,7 @@ function storyCommands(track, context) {
         optional: track.optional === true
     };
     if (track.content) {
+        const offsetSeconds = track.timing?.atSeconds ?? 0;
         const durationSeconds = track.timing?.durationSeconds ?? 1.2;
         return [
             presentationCommand({
@@ -210,6 +211,7 @@ function storyCommands(track, context) {
                 commandId: commandIdentity(beat.beatId, trackId),
                 payload: { id: `${beat.dedupeToken}:story`, ...track.content, durationSeconds },
                 causalId: `${beat.dedupeToken}:story`,
+                offsetSeconds,
                 durationSeconds
             })
         ];
