@@ -37,6 +37,12 @@ const COLORS = Object.freeze({
     hookTip: "#f8fafc"
 });
 
+const ATTACH_RANGE_STYLE = Object.freeze({
+    stroke: "rgba(167, 243, 208, 0.2)",
+    lineWidth: 2,
+    lineDash: Object.freeze([])
+});
+
 const SPRITE_STATE_BY_OPENED = Object.freeze({
     false: WORLD_OBJECT_SPRITE_STATE.CLOSED,
     true: WORLD_OBJECT_SPRITE_STATE.OPENED
@@ -1011,8 +1017,9 @@ export class AttachRangeRenderer {
         if (rope.isAttached || !attachmentCandidate) return;
         if (scene.ropeShot?.shot) return;
         context.save();
-        context.setLineDash([7, 10]);
-        context.strokeStyle = "rgba(167, 243, 208, 0.2)";
+        context.setLineDash(ATTACH_RANGE_STYLE.lineDash);
+        context.strokeStyle = ATTACH_RANGE_STYLE.stroke;
+        context.lineWidth = ATTACH_RANGE_STYLE.lineWidth;
         context.beginPath();
         context.arc(player.position.x, player.position.y, maxAttachDistance, 0, Math.PI * 2);
         context.stroke();

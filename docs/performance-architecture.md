@@ -40,6 +40,7 @@
 6. **공간 index를 우회하지 않음:** Quadtree가 있어도 호출자가 원본 배열을 직접 전수 검사하면 최적화 계약 위반이다. 새 공간 판정은 기존 query를 확장하거나 도메인 index를 조합한다.
 7. **군집은 전체 roster에 곱하지 않음:** member별 이웃 계산은 동일 group 또는 spatial candidate만 사용한다. member마다 전체 Enemy 배열을 훑는 O(N²) 구현을 금지한다.
 8. **렌더 정적 계산 캐시:** gradient·layer order·surface bounds처럼 상태가 바뀌지 않는 자료는 owner가 cache하고 world·asset·viewport 정책 변경 때만 무효화한다.
+9. **월드 규모 곡선은 실선으로 제한:** 매 frame 그리는 Rope 사거리처럼 화면보다 큰 Canvas 곡선에 `setLineDash()`의 비어 있지 않은 패턴을 적용하지 않는다. 브라우저·GPU 조합에 따라 dash tessellation이 draw budget을 고갈시키므로 실선 또는 개수가 고정된 작은 primitive로 표현한다.
 
 ## 변경 전 감사
 
