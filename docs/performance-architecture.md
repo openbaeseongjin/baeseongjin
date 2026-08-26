@@ -24,6 +24,7 @@
 | 전투 대상 membership | `GameObjectManager.impactTargets` / `ImpactTargetManager` | 등록·활성 membership만 소유한다. `active` 조회는 snapshot·collider 생성·배열 복사를 호출하지 않는다. |
 | Rope 부착 후보 | `RopePointerInput`이 사용하는 surface spatial query | 입력과 reach bounds로 후보를 먼저 제한한 뒤에만 `findRopeAttachment()`의 edge 판정을 수행한다. 전체 surface 전수 검사는 금지한다. |
 | Render DTO | 객체별 `render-snapshot` capability + `GameSimulation.snapshot()` | detached DTO는 출력 경계에서 논리 sample당 한 번 만들고 tick·render·audio가 같은 sample을 재사용한다. |
+| Network DTO | `AuthoritySnapshotBuilder` + `WorldSnapshotReplication` | canonical sample은 한 번 만들고 welcome·late join·resync만 baseline, 20Hz 반복 전송은 소켓별 ACK baseline과 비교한 field/object delta를 사용한다. |
 | 정적 World 자료 | immutable world와 소유자별 index/cache | ID lookup·bounds·edge·배치·고정 대응표는 world 변경 때만 만들고 frame/tick마다 재생성하지 않는다. |
 | 화면 후보 | `RenderViewport` + 하위 renderer cache/culling | renderer는 viewport 후보만 그리며 정적 geometry와 backdrop layer 정렬을 매 frame 다시 만들지 않는다. |
 | 관측 | `CollisionBroadPhase.snapshot()` + `RenderPerformanceMetrics` | candidate/total, fixed-step drop, frame interval, draw duration을 읽기 전용으로 제공한다. |
@@ -35,7 +36,7 @@
 1. **전체 컬렉션 금지:** 크기가 Stage 수와 함께 증가하는 `world.surfaces`, `world.objects`, 전체 Enemy roster를 hot path에서 `filter`·`map`·`find`·`sort`하지 않는다. 공간 index, ID index, active collection 또는 무효화 가능한 cache를 사용한다.
 2. **활성 predicate는 O(1):** `active`, `enabled`, `visible` 확인은 primitive 상태만 읽고 새 객체를 만들지 않는다. snapshot을 만들어 활성 여부를 판정하지 않는다.
 3. **비활성은 무비용:** 비활성 Boss·Enemy·Projectile·effect는 registry에 남아 있어도 behavior, physics, target snapshot, collider 생성과 render DTO 생성 대상에서 제외한다.
-4. **snapshot은 경계당 한 번:** 같은 tick·server sample·render frame에서 동일 상태의 snapshot을 반복 생성하지 않는다. alias 필드가 필요하면 한 객체 참조를 공유하며 같은 resolver를 두 번 호출하지 않는다.
+4. **snapshot은 경계당 한 번:** 같은 tick·server sample·render frame에서 동일 상태의 snapshot을 반복 생성하지 않는다. 내부 호환 alias가 필요해도 wire serializer는 같은 DTO를 여러 key로 기록하지 않는다.
 5. **정적·동적 상태 분리:** world definition, authored geometry와 static collider 정보는 snapshot마다 복제하지 않는다. 동적 위치·속도·수명·진행만 sample에 넣는다.
 6. **공간 index를 우회하지 않음:** Quadtree가 있어도 호출자가 원본 배열을 직접 전수 검사하면 최적화 계약 위반이다. 새 공간 판정은 기존 query를 확장하거나 도메인 index를 조합한다.
 7. **군집은 전체 roster에 곱하지 않음:** member별 이웃 계산은 동일 group 또는 spatial candidate만 사용한다. member마다 전체 Enemy 배열을 훑는 O(N²) 구현을 금지한다.
@@ -67,6 +68,7 @@
 ## 현재 상태
 
 - `ImpactTargetManager`는 allocation 없는 Boss 활성 predicate를 먼저 확인하므로 비활성 Boss snapshot을 만들지 않는다.
+- Multiplayer snapshot v23은 비활성 Boss DTO를 만들지 않고 `bossStage` 하나만 기록한다. Enemy 198개 canonical sample은 ACK baseline과 비교하되 각 소켓의 반복 wire에는 관심 영역 안에서 실제 변경된 `objectId` patch와 전역 tombstone만 포함한다. 고정 seed 정지 20-frame application wire 합계는 `tests/multiplayerSnapshotReplication.mjs`가 64KiB/s를 초과하면 field byte와 함께 실패한다.
 - Rope attachment는 `GameObjectManager`가 소유한 surface Quadtree 후보만 narrow phase에 전달한다.
 - 싱글 앱은 fixed step에서 만든 최신 snapshot을 render까지 재사용하고 실제 예측 impact가 상태를 바꾼 경우에만 같은 step에서 다시 읽는다.
 - 남은 renderer 전체 순회와 정적 backdrop 재합성은 viewport candidate·cache 경계의 후속 최적화 대상이다.

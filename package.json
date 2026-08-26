@@ -1,6 +1,6 @@
 {
     "name": "baeseongjin-rope-roguelike",
-    "version": "0.81.3",
+    "version": "0.82.0",
     "private": true,
     "type": "module",
     "scripts": {
@@ -15,6 +15,7 @@
         "simulate:multiplayer-combat:coverage": "node scripts/simulateTwoPlayerCombatWire.mjs --coverage",
         "simulate:multiplayer-combat:wire": "node scripts/simulateTwoPlayerCombatWire.mjs",
         "test": "node tests/sector03BackgroundTransition.mjs",
+        "test:multiplayer-snapshot": "node tests/multiplayerSnapshotReplication.mjs",
         "check": "node scripts/checkSyntax.mjs && node scripts/simulateSingleGameplayCombat.mjs && node scripts/validateAreaSpecs.mjs && node scripts/area-authoring-v2/generateAreaCatalogs.mjs --check && node scripts/map-editor/validateBossStageSpecs.mjs && node scripts/validateProductionMapParity.mjs && node scripts/validateDirectionSpecs.mjs && node scripts/checkScenarioIntegration.mjs",
         "check:scenario-integration": "node scripts/checkScenarioIntegration.mjs",
         "validate:area-specs": "node scripts/validateAreaSpecs.mjs",

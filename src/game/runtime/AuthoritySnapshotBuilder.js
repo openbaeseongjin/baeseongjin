@@ -1,4 +1,5 @@
 import { createWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
+import { createBaselineSnapshotReplication } from "../network/WorldSnapshotReplication.js";
 import { WORLD_GENERATION_REVISION } from "../world/WorldGenerator.js";
 
 export function buildAuthoritySnapshot({
@@ -19,14 +20,14 @@ export function buildAuthoritySnapshot({
               ).values()
           ]
         : drainedEvents;
-    const bossStage = simulation.bossStageSnapshot();
+    const bossStage = simulation.bossStageNetworkSnapshot();
     return createWorldSnapshotEnvelope({
         snapshotSequence,
         serverTick: simulation.getTick(),
         worldSeed: simulation.world.seed,
         worldRevision: simulation.world.definitionRevision ?? WORLD_GENERATION_REVISION,
         acknowledgements,
-        state: {
+        replication: createBaselineSnapshotReplication({
             players: simulation.playerStates().map((player) => ({
                 ...player,
                 ownerMotionTick: ownerMotionTicks[player.id] ?? simulation.getTick()
@@ -45,13 +46,12 @@ export function buildAuthoritySnapshot({
             metrics: simulation.metrics.snapshot(),
             worldProgress: simulation.worldProgress?.snapshot() ?? null,
             bossStage,
-            bossRuntime: bossStage,
             combatInteractions: simulation.combatInteractions.snapshot(),
             worldElapsedSeconds: simulation.elapsedSeconds,
             windStates: simulation.windStateSnapshots(),
             hardpointJammerStates: simulation.hardpointJammers.snapshot(),
             completed: simulation.runState === "completed"
-        },
+        }),
         events
     });
 }

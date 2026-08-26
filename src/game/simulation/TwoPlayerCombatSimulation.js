@@ -4,7 +4,12 @@ import {
     deserializePlayerCommandBatch,
     serializePlayerCommandBatch
 } from "../network/PlayerCommandBatch.js";
-import { deserializeWorldSnapshotEnvelope, serializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
+import {
+    deserializeWorldSnapshotEnvelope,
+    normalizeWorldSnapshotState,
+    serializeWorldSnapshotEnvelope
+} from "../network/WorldSnapshotEnvelope.js";
+import { materializeSnapshotReplication } from "../network/WorldSnapshotReplication.js";
 import { buildAuthoritySnapshot } from "../runtime/AuthoritySnapshotBuilder.js";
 import { GameSimulation } from "./GameSimulation.js";
 
@@ -131,11 +136,12 @@ export class TwoPlayerCombatSimulation {
                 })
             )
         );
+        const snapshotState = normalizeWorldSnapshotState(materializeSnapshotReplication(envelope.replication));
         const state = Object.freeze({
             tick: envelope.serverTick,
-            players: envelope.state.players,
-            enemies: envelope.state.enemies,
-            rewards: envelope.state.augmentRewards
+            players: snapshotState.players,
+            enemies: snapshotState.enemies,
+            rewards: snapshotState.augmentRewards
         });
         const replica = new GameSimulation({ worldSeed: this.worldSeed, playerId: this.playerIds[0] });
         replica.addPlayer(state.players[1].position, this.playerIds[1]);
