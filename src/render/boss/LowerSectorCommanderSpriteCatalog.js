@@ -2,6 +2,7 @@ import { runtimeAssetUrl } from "../assets/RuntimeAssetCatalog.js";
 import { SpriteAnimation } from "../sprites/SpriteAnimation.js";
 import {
     LOWER_SECTOR_COMMANDER_ACTION_PHASE,
+    LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITION,
     LOWER_SECTOR_COMMANDER_GRAB_STAGE,
     LOWER_SECTOR_COMMANDER_STATE
 } from "../../game/boss/LowerSectorCommanderDefinition.js";
@@ -18,6 +19,7 @@ const AUTHORED_FACING_BY_ATLAS_ID = Object.freeze({
     jump: FACING.RIGHT,
     "grab-lock": FACING.LEFT,
     "grab-pull": FACING.LEFT,
+    "enemy-summon": FACING.RIGHT,
     "hammer-slam": FACING.RIGHT,
     "body-charge": FACING.RIGHT,
     hit: FACING.RIGHT,
@@ -36,7 +38,12 @@ const ATLAS = Object.freeze({
     "grab-pull": Object.freeze({
         file: "grab-pull.png",
         frames: 6,
-        cell: Object.freeze({ width: 256, height: 256 })
+        cell: Object.freeze({ width: 288, height: 256 })
+    }),
+    "enemy-summon": Object.freeze({
+        file: "enemy-summon.png",
+        frames: 6,
+        cell: Object.freeze({ width: 288, height: 256 })
     }),
     "hammer-slam": Object.freeze({
         file: "hammer-slam.png",
@@ -77,6 +84,7 @@ const FRAME_DURATION_SECONDS = Object.freeze({
     jump: Object.freeze([0.08, 0.08, 0.22, 0.18, 0.39, 0.3]),
     "grab-lock": Object.freeze([0.2, 0.3, 0.4, 0.6]),
     "grab-pull": Object.freeze([0.12, 0.16, 0.22, 0.14, 0.18, 0.24]),
+    "enemy-summon": Object.freeze([0.16, 0.16, 0.18, 0.18, 0.16, 0.16]),
     "hammer-slam": Object.freeze([0.18, 0.18, 0.2, 0.24, 0.07, 0.07, 0.12, 0.22]),
     "body-charge": Object.freeze([0.3, 0.5, 0.12, 0.12, 0.12, 0.26]),
     hit: Object.freeze([0.08, 0.08, 0.12]),
@@ -89,7 +97,8 @@ const SEGMENT = Object.freeze({
     JUMP_ACTIVE: Object.freeze({ id: "jump-active", atlasId: "jump", offset: 0, count: 5 }),
     JUMP_LANDING: Object.freeze({ id: "jump-landing", atlasId: "jump", offset: 5, count: 1 }),
     GRAB_LAUNCH: Object.freeze({ id: "grab-launch", atlasId: "grab-pull", offset: 0, count: 3 }),
-    GRAB_HOLD: Object.freeze({ id: "grab-hold", atlasId: "grab-pull", offset: 3, count: 3 }),
+    GRAB_PULL: Object.freeze({ id: "grab-pull", atlasId: "grab-pull", offset: 3, count: 2 }),
+    GRAB_HOLD: Object.freeze({ id: "grab-hold", atlasId: "grab-pull", offset: 5, count: 1 }),
     HAMMER_TELEGRAPH: Object.freeze({ id: "hammer-telegraph", atlasId: "hammer-slam", offset: 0, count: 4 }),
     HAMMER_IMPACT: Object.freeze({ id: "hammer-impact", atlasId: "hammer-slam", offset: 4, count: 3 }),
     HAMMER_RECOVERY: Object.freeze({ id: "hammer-recovery", atlasId: "hammer-slam", offset: 7, count: 1 }),
@@ -105,6 +114,7 @@ const SUPPORTED_STATE = Object.freeze({
     [LOWER_SECTOR_COMMANDER_STATE.GRAB]: true,
     [LOWER_SECTOR_COMMANDER_STATE.HAMMER]: true,
     [LOWER_SECTOR_COMMANDER_STATE.CHARGE]: true,
+    [LOWER_SECTOR_COMMANDER_STATE.SUMMON]: true,
     [LOWER_SECTOR_COMMANDER_STATE.DEFEATED]: true
 });
 
@@ -175,7 +185,9 @@ export class LowerSectorCommanderSpriteDefinition {
             "jump-landing": segmentedClip(SEGMENT.JUMP_LANDING),
             "grab-lock": clip("grab-lock"),
             "grab-launch": segmentedClip(SEGMENT.GRAB_LAUNCH),
+            "grab-pull": segmentedClip(SEGMENT.GRAB_PULL),
             "grab-hold": segmentedClip(SEGMENT.GRAB_HOLD),
+            "enemy-summon": clip("enemy-summon"),
             "hammer-telegraph": segmentedClip(SEGMENT.HAMMER_TELEGRAPH),
             "hammer-impact": segmentedClip(SEGMENT.HAMMER_IMPACT),
             "hammer-recovery": segmentedClip(SEGMENT.HAMMER_RECOVERY),
@@ -232,7 +244,12 @@ export class LowerSectorCommanderSpriteDefinition {
                 return this.clips["grab-launch"].frameAt(animation.grabStageElapsedSeconds);
             }
             if (object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.CAPTURED) {
-                return this.clips["grab-hold"].frameAt(animation.grabStageElapsedSeconds);
+                if (animation.grabStageElapsedSeconds < LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITION.pullSeconds) {
+                    return this.clips["grab-pull"].frameAt(animation.grabStageElapsedSeconds);
+                }
+                return this.clips["grab-hold"].frameAt(
+                    animation.grabStageElapsedSeconds - LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITION.pullSeconds
+                );
             }
             if (object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.HAMMER) {
                 return this.clips["hammer-impact"].frameAt(animation.phaseElapsedSeconds);
@@ -257,6 +274,9 @@ export class LowerSectorCommanderSpriteDefinition {
                       : "charge-recovery";
             return this.clips[clipId].frameAt(animation.phaseElapsedSeconds);
         }
+        if (object.state === LOWER_SECTOR_COMMANDER_STATE.SUMMON) {
+            return this.clips["enemy-summon"].frameAt(animation.stateElapsedSeconds);
+        }
         if (object.state === LOWER_SECTOR_COMMANDER_STATE.DEFEATED) {
             return this.clips.defeated.frameAt(animation.stateElapsedSeconds);
         }
@@ -269,6 +289,14 @@ export class LowerSectorCommanderSpriteDefinition {
 
     tensionFrameAt(elapsedSeconds) {
         return this.effectClips.pullTension.frameAt(elapsedSeconds);
+    }
+
+    idleFrameAt(elapsedSeconds) {
+        return this.clips.idle.frameAt(elapsedSeconds);
+    }
+
+    sizeFor(frame) {
+        return ATLAS[frame.atlasId]?.cell ?? this.size;
     }
 
     flipX(object, frame) {

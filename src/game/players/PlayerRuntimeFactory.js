@@ -11,6 +11,7 @@ import { RopeObject } from "../rope/RopeObject.js";
 import { PlayerObject } from "./PlayerObject.js";
 import { CombatStatusEffectPool } from "../status-effects/CombatStatusEffectPool.js";
 import { PlayerExperienceState } from "../experience/PlayerExperienceState.js";
+import { CapturedSlamMotionState } from "../interactions/CapturedSlamMotionState.js";
 
 export function createPlayerRuntime({
     registry,
@@ -37,6 +38,7 @@ export function createPlayerRuntime({
     const weapon = new AutomaticWeaponObject({ id: `${id}:weapon`, ownerId: id, config: combatConfig });
     const ropeImpactAttack = new RopeImpactAttack(ROPE_IMPACT_CONFIG);
     const ropeImpactState = new RopeImpactState(ROPE_IMPACT_CONFIG);
+    const capturedSlamMotion = new CapturedSlamMotionState();
     const entity = new PlayerObject({
         id,
         physics,
@@ -48,6 +50,7 @@ export function createPlayerRuntime({
         weapon,
         ropeImpactAttack,
         ropeImpactState,
+        capturedSlamMotion,
         combatConfig,
         respawnAnchorId
     });
@@ -64,6 +67,7 @@ export function createPlayerRuntime({
         weapon,
         ropeImpactAttack,
         ropeImpactState,
+        capturedSlamMotion,
         entity,
         inputDrivenObjects
     });

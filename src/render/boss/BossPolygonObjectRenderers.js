@@ -13,6 +13,7 @@ import {
 import { resolveContinuityWardenPose } from "./ContinuityWardenPoseResolver.js";
 import {
     LOWER_SECTOR_COMMANDER_ACTION_PHASE,
+    LOWER_SECTOR_COMMANDER_BODY_GEOMETRY,
     LOWER_SECTOR_COMMANDER_GRAB_STAGE,
     LOWER_SECTOR_COMMANDER_OBJECT_KIND,
     LOWER_SECTOR_COMMANDER_STATE,
@@ -341,7 +342,13 @@ class LowerSectorCommanderRenderer extends BossPolygonObjectRenderer {
         context.fillStyle = "#f97316";
         for (const sensorX of [-0.14, 0.14]) {
             context.beginPath();
-            context.arc(sign * width * 0.25 + sensorX * width, -height * 0.25, 5, 0, Math.PI * 2);
+            context.arc(
+                sign * width * 0.25 + sensorX * width,
+                -height * LOWER_SECTOR_COMMANDER_BODY_GEOMETRY.EYE_HEIGHT_RATIO,
+                5,
+                0,
+                Math.PI * 2
+            );
             context.fill();
         }
 

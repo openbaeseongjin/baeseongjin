@@ -25,8 +25,25 @@ export const LOWER_SECTOR_COMMANDER_ACTION_PHASE = Object.freeze({
 
 export const LOWER_SECTOR_COMMANDER_HAZARD = Object.freeze({
     GRAB: "commander-grab",
+    GRAB_HAMMER: "commander-grab-hammer",
     HAMMER: "commander-hammer",
     CHARGE: "commander-charge"
+});
+
+export const LOWER_SECTOR_COMMANDER_CAPTURE_HAZARD = Object.freeze({
+    [LOWER_SECTOR_COMMANDER_HAZARD.GRAB]: true,
+    [LOWER_SECTOR_COMMANDER_HAZARD.GRAB_HAMMER]: true
+});
+
+export const LOWER_SECTOR_COMMANDER_BODY_GEOMETRY = Object.freeze({
+    EYE_HEIGHT_RATIO: 0.25
+});
+
+export const LOWER_SECTOR_COMMANDER_GRAB_HOOK = Object.freeze({
+    SPEED: 1600,
+    RADIUS: 24,
+    HAND_OFFSET_X: 50,
+    HAND_OFFSET_Y: -20
 });
 
 export const LOWER_SECTOR_COMMANDER_OBJECT_KIND = Object.freeze({

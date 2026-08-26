@@ -1446,6 +1446,9 @@ export class GameSimulation {
                 if (Number.isFinite(hazard.knockback) && hazard.knockback > 0) {
                     player.physics.applyImpulse({ x: hazard.direction < 0 ? -1 : 1, y: 0 }, hazard.knockback);
                 }
+                if (hazard.kind === LOWER_SECTOR_COMMANDER_HAZARD.GRAB_HAMMER) {
+                    this.#beginCapturedSlamMotion(player);
+                }
                 const defeated = player.health <= 0;
                 if (defeated) {
                     this.#resolveBossParticipantDefeat(
@@ -1514,6 +1517,11 @@ export class GameSimulation {
             control: ropeSnapshot.control,
             launcher: ropeSnapshot.launcher
         };
+    }
+
+    cancelCapturedSlamMotion(playerId) {
+        const player = this.#findPlayer(playerId);
+        return player?.capturedSlamMotion.reset() ?? false;
     }
 
     playerStates() {
@@ -1906,6 +1914,7 @@ export class GameSimulation {
         player.ropeObject.swingDrag = null;
         player.ropeObject.launcher.clear();
         player.ropeImpactState.reset();
+        player.capturedSlamMotion.reset();
         this.portalTransitions.set(player.id, Object.freeze({ gateId, position, tick }));
         this.collisionBroadPhase.invalidateFrame();
         return this.ownerPredictionState(player.id);
@@ -2779,6 +2788,7 @@ export class GameSimulation {
                     this.eventFlash = { ...eventFlash, playerId: player.id };
                 },
                 onSurfaceCollision: (collision) => {
+                    if (this.#resolveCapturedSlamSurfaceCollision(player, collision)) return;
                     const event = this.#applySurfaceCollisionImpact(player, collision, {
                         replicate: replicateSurfaceCollisionImpacts
                     });
@@ -2847,6 +2857,23 @@ export class GameSimulation {
         this.eventFlash = { type: PLATFORM_COLLISION_DAMAGE_RESOLUTION, age: 0, ...event };
         if (respawned) this.respawnPlayerAtCheckpoint(player, PLATFORM_COLLISION_DAMAGE_RESOLUTION, impactId);
         return event;
+    }
+
+    #beginCapturedSlamMotion(player) {
+        const motion = player.capturedSlamMotion.begin(player.physics.config.jumpSpeed);
+        const velocity = player.physics.physicsStepVelocity();
+        player.physics.applyImpulse({ x: 0, y: motion.downwardSpeed - velocity.y });
+        player.physics.isGrounded = false;
+        return motion;
+    }
+
+    #resolveCapturedSlamSurfaceCollision(player, collision) {
+        const rebound = player.capturedSlamMotion.resolveSurfaceCollision(collision);
+        if (!rebound) return false;
+        const velocity = player.physics.physicsStepVelocity();
+        player.physics.applyImpulse({ x: 0, y: rebound.reboundVelocityY - velocity.y });
+        player.physics.isGrounded = false;
+        return true;
     }
 
     #advanceRopeImpactAttacks(player, { commit = true } = {}) {
@@ -3390,6 +3417,7 @@ export class GameSimulation {
     #prepareOwnerStep(player, dt) {
         player.ropeDisabledRemaining = Math.max(0, player.ropeDisabledRemaining - dt);
         player.ropeImpactState.advance(dt);
+        player.capturedSlamMotion.advance(dt);
         player.augmentLoadout.advance(dt);
         for (const outcome of player.statusEffects.advance(dt)) {
             if (outcome.type !== "damage" || outcome.damage <= 0 || player.lifeState !== "active") continue;
@@ -4407,7 +4435,9 @@ export class GameSimulation {
                 COMBAT_CONFIG.playerHitKnockback
             );
         } else if (bossHazard) {
-            if (claim.sourceType === "counter-bash" && this.bossRuntime?.bodyPosition) {
+            if (claim.sourceType === LOWER_SECTOR_COMMANDER_HAZARD.GRAB_HAMMER) {
+                this.#beginCapturedSlamMotion(player);
+            } else if (claim.sourceType === "counter-bash" && this.bossRuntime?.bodyPosition) {
                 const offset = this.#bossWorldOffset();
                 const originX = this.bossRuntime.bodyPosition.x + offset.x;
                 const originY = this.bossRuntime.bodyPosition.y + offset.y;
@@ -4602,6 +4632,7 @@ export class GameSimulation {
         player.ropeObject.swingDrag = null;
         player.ropeObject.launcher.clear();
         player.ropeImpactState.reset();
+        player.capturedSlamMotion.reset();
         player.health = player.maxHealth;
         player.weapon.cooldown = 0;
         player.ropeDisabledRemaining = 0;

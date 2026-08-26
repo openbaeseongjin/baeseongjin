@@ -158,6 +158,10 @@ const IMPACT_STATE = Object.freeze({
     [CLIENT_FEEDBACK_RESOLUTION.BOSS_PHASE_COMPLETED]: Object.freeze({ lifetime: 0.16, strength: 4 }),
     DEFAULT: Object.freeze({ lifetime: 0.12, strength: 2.5 })
 });
+const COMMANDER_HAMMER_GROUND_HAZARD = Object.freeze({
+    [LOWER_SECTOR_COMMANDER_HAZARD.HAMMER]: true,
+    [LOWER_SECTOR_COMMANDER_HAZARD.GRAB_HAMMER]: true
+});
 
 const BOSS_WARDEN_HAZARD_FAMILY = Object.freeze({
     MELEE: "melee",
@@ -377,7 +381,7 @@ export const CLIENT_FEEDBACK_EVENT = Object.freeze({
     BOSS_COMMANDER_HAMMER_GROUND_PARTICLE: new ClientFeedbackEventDefinition({
         predicate: (event) =>
             event.eventType === CLIENT_FEEDBACK_EVENT_TYPE.BOSS_ATTACK_STARTED &&
-            event.kind === LOWER_SECTOR_COMMANDER_HAZARD.HAMMER &&
+            COMMANDER_HAMMER_GROUND_HAZARD[event.kind] === true &&
             Number.isFinite(event.impactPosition?.x) &&
             Number.isFinite(event.impactPosition?.y),
         present: (event, context) =>

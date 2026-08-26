@@ -4,7 +4,8 @@ export const MULTIPLAYER_COMBAT_SIMULATION_ID = Object.freeze({
     WIRE_OWNER_MOTION_NEUTRAL_WORLD: "wire-owner-motion-neutral-world",
     WIRE_ENERGY_ORB_PLAYER_HIT: "wire-energy-orb-player-hit",
     WIRE_METEOR_IGNITED_PRESENTATION: "wire-meteor-ignited-presentation",
-    WIRE_DEATH_RESPAWN: "wire-death-respawn"
+    WIRE_DEATH_RESPAWN: "wire-death-respawn",
+    WIRE_BOSS03_GRAB_SLAM: "wire-boss03-grab-slam"
 });
 
 export const MULTIPLAYER_COMBAT_SIMULATION_COVERAGE = Object.freeze({
@@ -63,6 +64,17 @@ export const MULTIPLAYER_COMBAT_SIMULATION_COVERAGE = Object.freeze({
             "피해 Player 개별 checkpoint 부활",
             "동료 HP·위치 유지",
             "서버·동료 부활 상태 수렴과 사건 뒤 서버 health"
+        ])
+    }),
+    [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_BOSS03_GRAB_SLAM]: Object.freeze({
+        runner: "scripts/simulateTwoPlayerCombatWire.mjs",
+        boundary: "production-wire-with-controlled-boss03",
+        verifies: Object.freeze([
+            "Boss03 hook tip 비행 WorldSnapshot v21 직렬화",
+            "피해자 로컬 눈높이 pull과 Grab Hammer 하강",
+            "첫 지형 상면 충돌 반동과 플랫폼 피해 중복 억제",
+            "서버·동료 owner-motion 반동 속도 수렴",
+            "사건 뒤 서버 health"
         ])
     })
 });

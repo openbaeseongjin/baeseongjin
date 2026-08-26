@@ -5,6 +5,12 @@ import { WebSocket } from "ws";
 import { createPlayerCommand } from "../src/game/commands/PlayerCommand.js";
 import { ClientCombatFeedback } from "../src/game/combat/ClientCombatFeedback.js";
 import { CLIENT_FEEDBACK_PRESET_ID } from "../src/game/combat/ClientFeedbackEventDefinition.js";
+import { PLATFORM_COLLISION_DAMAGE_EVENT_TYPE } from "../src/game/combat/PlatformCollisionDamage.js";
+import {
+    LOWER_SECTOR_COMMANDER_GRAB_STAGE,
+    LOWER_SECTOR_COMMANDER_HAZARD,
+    LOWER_SECTOR_COMMANDER_OBJECT_KIND
+} from "../src/game/boss/LowerSectorCommanderDefinition.js";
 import { RemoteGameAuthority } from "../src/game/runtime/RemoteGameAuthority.js";
 import { channelSocketUrl } from "../src/game/runtime/MultiplayerServerEndpoint.js";
 import { createCurrentGameSimulation } from "../src/game/simulation/GameSimulationFactory.js";
@@ -101,13 +107,14 @@ async function stopServer(runtime) {
     await stopped;
 }
 
-async function startInspectableServer(debugAugmentIds) {
+async function startInspectableServer(debugAugmentIds, { startAreaId = null } = {}) {
     const httpServer = createServer(createGameServerRequestHandler({ version: "wire-test" }));
     const multiplayer = new MultiplayerGameServer(httpServer, {
         allowedOrigins: [TEST_ORIGIN],
         channelNumber: () => 9001,
         worldSeed: () => 1,
-        createSimulation: (options) => createCurrentGameSimulation({ ...options, debugAugmentIds })
+        createSimulation: (options) =>
+            createCurrentGameSimulation({ ...options, debugAugmentIds, ...(startAreaId ? { startAreaId } : {}) })
     });
     await new Promise((resolve, reject) => {
         httpServer.once("error", reject);
@@ -659,13 +666,176 @@ async function simulateDeathRespawnWire() {
     }
 }
 
+export async function simulateBoss03GrabSlamWire() {
+    const runtime = await startInspectableServer([], { startAreaId: "3-8" });
+    const WebSocketImpl = websocketFromOrigin(TEST_ORIGIN);
+    const first = new RemoteGameAuthority({ url: channelSocketUrl(runtime.serverUrl, "new"), WebSocketImpl });
+    let second = null;
+    try {
+        await first.connect();
+        second = new RemoteGameAuthority({ url: channelSocketUrl(runtime.serverUrl, first.channelId), WebSocketImpl });
+        await second.connect();
+        await waitFor(
+            () => first.latestSnapshot?.state.players.length === 2 && second.latestSnapshot?.state.players.length === 2,
+            "Boss03 wire 시나리오의 2인 snapshot을 받지 못했습니다",
+            runtime
+        );
+        const room = runtime.multiplayer.rooms.get(first.channelId);
+        const serverSimulation = room?.simulation;
+        assert(serverSimulation, "Boss03 wire 시나리오의 서버 simulation을 찾지 못했습니다");
+        const participantIds = [first.playerId, second.playerId];
+        const started = serverSimulation.startBossEncounter(participantIds);
+        assert(started.accepted, `Boss03 encounter를 시작하지 못했습니다: ${started.reason ?? "unknown"}`);
+        const bossSnapshot = serverSimulation.bossStageSnapshot();
+        const body = bossSnapshot.presentation.objects.find(
+            ({ kind }) => kind === LOWER_SECTOR_COMMANDER_OBJECT_KIND.BODY
+        );
+        const floor = serverSimulation.world.surfaces.find(
+            ({ bossStageId, kind }) => bossStageId === "boss-03" && kind === "commander-main-runway"
+        );
+        assert(body && floor, "Boss03 body 또는 main floor를 찾지 못했습니다");
+        const floorY = Math.min(...floor.vertices.map(({ y }) => y));
+        const victimPosition = Object.freeze({ x: body.position.x + 500, y: floorY - 15 });
+        const teammatePosition = Object.freeze({ x: body.position.x - 500, y: floorY - 15 });
+        serverSimulation.applyPortalTransition(
+            second.playerId,
+            victimPosition,
+            serverSimulation.getTick(),
+            "boss03-wire"
+        );
+        serverSimulation.applyPortalTransition(
+            first.playerId,
+            teammatePosition,
+            serverSimulation.getTick(),
+            "boss03-wire"
+        );
+        first.ownerRuntime.simulation.applyPortalTransition(
+            first.playerId,
+            teammatePosition,
+            first.ownerRuntime.simulation.getTick(),
+            "boss03-wire"
+        );
+        second.ownerRuntime.simulation.applyPortalTransition(
+            second.playerId,
+            victimPosition,
+            second.ownerRuntime.simulation.getTick(),
+            "boss03-wire"
+        );
+        first.submitOwnerMotion();
+        second.submitOwnerMotion();
+        serverSimulation.bossRuntime.beginGrab({ id: second.playerId, position: victimPosition });
+
+        let hookSnapshotObserved = false;
+        let hookSnapshotProgress = null;
+        let minimumCapturedY = Number.POSITIVE_INFINITY;
+        let localReboundVelocity = null;
+        let peerReboundVelocity = null;
+        let serverReboundVelocity = null;
+        let platformDamagePredictionCount = 0;
+        const expectedEyeY = body.position.y - 48;
+        const deadline = performance.now() + 8_000;
+        let sequence = 0;
+        while (performance.now() < deadline) {
+            sequence += 1;
+            const firstCommand = movementCommand(0, first.ownerState().position);
+            const secondCommand = movementCommand(0, second.ownerState().position);
+            first.advance(firstCommand);
+            second.advance(secondCommand);
+            if (sequence % 2 === 0) {
+                first.submit(firstCommand);
+                second.submit(secondCommand);
+            }
+            const firstPredicted = first.drainPredictedEvents();
+            const secondPredicted = second.drainPredictedEvents();
+            for (const event of secondPredicted) {
+                if (event.eventType === PLATFORM_COLLISION_DAMAGE_EVENT_TYPE.PREDICTED) {
+                    platformDamagePredictionCount += 1;
+                }
+                if (event.parameters?.sourceKind === "boss-hazard") second.submitPredictedBossImpact(event);
+            }
+            for (const event of firstPredicted) {
+                if (event.parameters?.sourceKind === "boss-hazard") first.submitPredictedBossImpact(event);
+            }
+            const sharedBoss = second.latestSnapshot?.state.bossStage;
+            if (
+                sharedBoss?.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.SEARCH &&
+                sharedBoss.grabHookFlight?.active === true &&
+                sharedBoss.grabHookFlight.progress > 0 &&
+                sharedBoss.grabHookFlight.progress < 1
+            ) {
+                hookSnapshotObserved = true;
+                hookSnapshotProgress = sharedBoss.grabHookFlight.progress;
+            }
+            const localVictim = second.ownerState();
+            if (localVictim.health === 80) minimumCapturedY = Math.min(minimumCapturedY, localVictim.position.y);
+            if (localVictim.health === 40 && localVictim.velocity.y < 0) {
+                localReboundVelocity = localVictim.velocity.y;
+            }
+            const peerVictim = first.latestSnapshot?.state.players.find(({ id }) => id === second.playerId);
+            if (peerVictim?.health === 40 && peerVictim.velocity.y < 0) peerReboundVelocity = peerVictim.velocity.y;
+            const serverVictim = serverSimulation.players.find(({ id }) => id === second.playerId);
+            if (serverVictim?.health === 40 && serverVictim.physics.physicsStepVelocity().y < 0) {
+                serverReboundVelocity = serverVictim.physics.physicsStepVelocity().y;
+            }
+            if (
+                hookSnapshotObserved &&
+                Math.abs(minimumCapturedY - expectedEyeY) <= 0.2 &&
+                localReboundVelocity !== null &&
+                peerReboundVelocity !== null &&
+                serverReboundVelocity !== null
+            ) {
+                break;
+            }
+            await delay(8);
+        }
+        const diagnostic = JSON.stringify({
+            hookSnapshotObserved,
+            hookSnapshotProgress,
+            minimumCapturedY,
+            expectedEyeY,
+            localHealth: second.ownerState().health,
+            localVelocity: second.ownerState().velocity,
+            localReboundVelocity,
+            peerReboundVelocity,
+            serverReboundVelocity,
+            platformDamagePredictionCount
+        });
+        assert(hookSnapshotObserved, "Boss03 hook tip 비행 snapshot이 두 클라이언트 wire를 통과하지 못했습니다");
+        assert(
+            Math.abs(minimumCapturedY - expectedEyeY) <= 0.2,
+            "피해 클라이언트가 Boss03 눈높이 pull 위치에 수렴하지 못했습니다"
+        );
+        assert(localReboundVelocity < 0, `피해 클라이언트가 지형 충돌에서 위로 반동하지 않았습니다: ${diagnostic}`);
+        assert(peerReboundVelocity < 0, `동료 snapshot에 Boss03 반동 속도가 수렴하지 않았습니다: ${diagnostic}`);
+        assert(serverReboundVelocity < 0, `서버 snapshot에 Boss03 반동 속도가 수렴하지 않았습니다: ${diagnostic}`);
+        assert(platformDamagePredictionCount === 0, "Boss03 slam 반동에 플랫폼 충돌 피해가 중복 발생했습니다");
+        const finalHealth = await health(runtime.serverUrl);
+        return Object.freeze({
+            serverStatus: finalHealth.status,
+            hookSnapshotObserved,
+            hookSnapshotProgress,
+            capturedEyeY: minimumCapturedY,
+            localReboundVelocity,
+            peerReboundVelocity,
+            serverReboundVelocity,
+            platformDamagePredictionCount,
+            serverAliveAfterSlam: true
+        });
+    } finally {
+        await closeAuthority(second);
+        await closeAuthority(first);
+        await runtime.stop();
+    }
+}
+
 export async function simulateTwoPlayerCombatWire() {
     return Object.freeze({
         [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_SESSION_LIFECYCLE]: await simulateSessionLifecycleWire(),
         [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_OWNER_MOTION_NEUTRAL_WORLD]: await simulateOwnerMotionNeutralWorldWire(),
         [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_ENERGY_ORB_PLAYER_HIT]: await simulateEnergyOrbWire(),
         [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_METEOR_IGNITED_PRESENTATION]: await simulateMeteorParticleWire(),
-        [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_DEATH_RESPAWN]: await simulateDeathRespawnWire()
+        [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_DEATH_RESPAWN]: await simulateDeathRespawnWire(),
+        [MULTIPLAYER_COMBAT_SIMULATION_ID.WIRE_BOSS03_GRAB_SLAM]: await simulateBoss03GrabSlamWire()
     });
 }
 

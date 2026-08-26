@@ -2,7 +2,7 @@
 
 > 상태: **APPROVED AUTHORING SOURCE / LOCAL RUNTIME INTEGRATED**
 
-사용자가 승인한 Boss03 본체·장비·상태별 reference와 Player 스타일 모션 원본을 보존한다. 정규화한 8개 본체 모션과 그랩 VFX는 `assets/runtime/characters/lower-sector-commander-v1/`에 연결하지만, 이 authoring 폴더는 충돌·피해·물리·네트워크 권위를 만들지 않는다.
+사용자가 승인한 Boss03 본체·장비·상태별 reference와 Player 스타일 모션 원본을 보존한다. 정규화한 10개 본체 모션과 그랩 VFX는 `assets/runtime/characters/lower-sector-commander-v1/`에 연결하지만, 이 authoring 폴더는 충돌·피해·물리·네트워크 권위를 만들지 않는다.
 
 ## 파일
 
@@ -31,7 +31,7 @@
 | 기본 대기 픽셀 저작 후보 | [`source/boss03-idle-pixel-authoring-v1.png`](./source/boss03-idle-pixel-authoring-v1.png) | `1024×1536px` RGB · 체크무늬 포함 ImageGen source |
 | Player 스타일 대기 후보 | [`source/boss03-idle-player-style-authoring-v2.png`](./source/boss03-idle-player-style-authoring-v2.png) | `1024×1536px` RGBA · 모션 스타일 탐색 source |
 | Player 스타일 대기 선택본 | [`source/boss03-idle-player-style-selected-v1.png`](./source/boss03-idle-player-style-selected-v1.png) | `1024×1536px` · 사용자 선택 모션 외형 기준 |
-| 모션 저작 v1 | [`source/motion-authoring-v1/README.md`](./source/motion-authoring-v1/README.md) | 8개 클립·47개 생성 프레임·결정적 Runtime 정규화 |
+| 모션 저작 v1 | [`source/motion-authoring-v1/README.md`](./source/motion-authoring-v1/README.md) | pull v2·summon을 포함한 9개 클립·53개 생성 프레임·결정적 Runtime 정규화 |
 | 점프 모션 v2 | [`source/motion-authoring-v2-jump/README.md`](./source/motion-authoring-v2-jump/README.md) | `jump` 6프레임·투명 atlas·대표 apex·Runtime 연결 |
 
 ## 승인 외형
@@ -67,7 +67,7 @@
 ## Runtime v1 정규화
 
 - ImageGen 모션 보드는 [`source/motion-authoring-v1/`](./source/motion-authoring-v1/)에 보존하고, `normalize_runtime_assets.py`가 frame 분리·16색 palette·alpha `0/255`·nearest-neighbor 2배 확대를 결정적으로 수행한다.
-- 본체 8개 clip은 `256×256` cell과 anchor `(0.5, 0.59375)`를 공유한다. 각 clip 첫 기준 자세의 불투명 높이는 `184px`이며 긴 해머·훅은 본체를 줄이지 않고 투명 canvas를 사용한다.
+- 본체 기본 clip은 `256×256`, 좌우 동작 폭이 큰 pull·summon은 `288×256` cell을 사용하고 공통 anchor Y `(0.59375)`를 유지한다. 각 clip 첫 기준 자세의 불투명 높이는 `184px`이며 긴 해머·훅은 본체를 줄이지 않고 투명 canvas를 사용한다.
 - `walk` 8프레임은 이동 거리 `144px`마다 한 주기를 재생한다. collider·이동 속도·AI와 분리된 표현 주기다.
 - 공격 clip은 gameplay `direction`과 원본 방향을 비교해 그랩·해머·돌진이 판정 방향을 바라보게 한다.
 - 사출 훅·반복 사슬·당김 장력은 [`assets/artwork/effects/boss03-chain-hook-pull/`](../../effects/boss03-chain-hook-pull/)에서 분리 저작한다.

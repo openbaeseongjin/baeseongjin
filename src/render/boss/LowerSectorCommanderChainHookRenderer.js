@@ -1,13 +1,13 @@
 import { paintSpriteFrame } from "../sprites/SpriteCanvasPainter.js";
 import {
     LOWER_SECTOR_COMMANDER_GRAB_STAGE,
+    LOWER_SECTOR_COMMANDER_GRAB_HOOK,
     LOWER_SECTOR_COMMANDER_STATE
 } from "../../game/boss/LowerSectorCommanderDefinition.js";
 
 const CHAIN_IMAGE = Object.freeze({
-    handOffsetX: 50,
-    handOffsetY: -20,
-    extensionSeconds: 0.22,
+    handOffsetX: LOWER_SECTOR_COMMANDER_GRAB_HOOK.HAND_OFFSET_X,
+    handOffsetY: LOWER_SECTOR_COMMANDER_GRAB_HOOK.HAND_OFFSET_Y,
     initialSag: 36,
     linkSpacing: 22,
     linkSize: Object.freeze({ width: 28, height: 18 }),
@@ -37,11 +37,15 @@ function quadraticPoint(start, control, end, ratio) {
     };
 }
 
-function chainPath(object, animation) {
+function chainPath(object) {
     if (
         object.state !== LOWER_SECTOR_COMMANDER_STATE.GRAB ||
         ACTIVE_STAGE[object.grabStage] !== true ||
-        !validPoint(object.targetPosition)
+        !validPoint(
+            object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.SEARCH
+                ? object.grabHookPosition
+                : object.targetPosition
+        )
     ) {
         return null;
     }
@@ -51,12 +55,10 @@ function chainPath(object, animation) {
     };
     const progress =
         object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.SEARCH
-            ? Math.min(1, animation.grabStageElapsedSeconds / CHAIN_IMAGE.extensionSeconds)
+            ? Math.max(0, Math.min(1, object.grabHookProgress ?? 0))
             : 1;
-    const end = {
-        x: start.x + (object.targetPosition.x - start.x) * progress,
-        y: start.y + (object.targetPosition.y - start.y) * progress
-    };
+    const end =
+        object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.SEARCH ? object.grabHookPosition : object.targetPosition;
     const control = {
         x: (start.x + end.x) * 0.5,
         y: (start.y + end.y) * 0.5 + (1 - progress) * CHAIN_IMAGE.initialSag
@@ -71,11 +73,12 @@ export class LowerSectorCommanderChainHookRenderer {
     }
 
     drawBehind(context, object, animation) {
-        const path = chainPath(object, animation);
+        const path = chainPath(object);
         if (!path) return;
         const distance = Math.hypot(path.end.x - path.start.x, path.end.y - path.start.y);
         const linkCount = Math.max(1, Math.ceil(distance / CHAIN_IMAGE.linkSpacing));
         const frame = this.definition.chainLinkFrame;
+        if (this.assets.statusFor([frame.atlasId]) !== "ready") return;
         const image = this.assets.imageFor(frame.atlasId);
         for (let index = 0; index < linkCount; index += 1) {
             const ratio = (index + 0.5) / linkCount;
@@ -96,11 +99,12 @@ export class LowerSectorCommanderChainHookRenderer {
     }
 
     drawFront(context, object, animation) {
-        const path = chainPath(object, animation);
+        const path = chainPath(object);
         if (!path) return;
         const angle = Math.atan2(path.end.y - path.start.y, path.end.x - path.start.x);
         if (object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.SEARCH) {
             const frame = this.definition.hookFrameAt(animation.grabStageElapsedSeconds);
+            if (this.assets.statusFor([frame.atlasId]) !== "ready") return;
             paintSpriteFrame({
                 context,
                 image: this.assets.imageFor(frame.atlasId),
@@ -114,6 +118,7 @@ export class LowerSectorCommanderChainHookRenderer {
             return;
         }
         const frame = this.definition.tensionFrameAt(animation.grabStageElapsedSeconds);
+        if (this.assets.statusFor([frame.atlasId]) !== "ready") return;
         paintSpriteFrame({
             context,
             image: this.assets.imageFor(frame.atlasId),
