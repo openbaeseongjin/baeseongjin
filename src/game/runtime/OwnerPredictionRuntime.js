@@ -50,7 +50,8 @@ function ownerPortalTransition(event, ownerId) {
         return Object.freeze({
             ...event,
             eventType: "gate-portal-entered",
-            gateId: `debug:${event.areaId}`
+            gateId: `debug:${event.areaId}`,
+            debugTransition: true
         });
     }
     return null;
@@ -112,6 +113,7 @@ export class OwnerPredictionRuntime {
         this.incomingSpellImpacts = new IncomingSpellImpactDetector();
         this.appliedPortalEventIds = new Set();
         this.appliedPortalEventIdOrder = [];
+        this.debugTransitionId = null;
         this.appliedRopeReleaseEventIds = new Set();
         this.appliedRopeReleaseEventIdOrder = [];
         this.simulation.preparePrediction();
@@ -127,7 +129,10 @@ export class OwnerPredictionRuntime {
             while (this.appliedPortalEventIdOrder.length > APPLIED_AUTHORITY_EVENT_HISTORY_LIMIT) {
                 this.appliedPortalEventIds.delete(this.appliedPortalEventIdOrder.shift());
             }
-            if (
+            if (transition.debugTransition) {
+                this.simulation.applyDebugPlayerRelocation(this.ownerId, transition);
+                this.debugTransitionId = transition.eventId;
+            } else if (
                 !this.simulation.confirmPortalTransition(
                     this.ownerId,
                     transition.gateId,
@@ -143,6 +148,10 @@ export class OwnerPredictionRuntime {
             this.presentationOffset = { x: 0, y: 0 };
             this.correctionRemaining = 0;
         }
+    }
+
+    currentDebugTransitionId() {
+        return this.debugTransitionId;
     }
 
     applyRopeAnchorReleaseEvents(events) {

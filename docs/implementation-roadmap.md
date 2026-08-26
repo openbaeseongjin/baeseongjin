@@ -48,6 +48,7 @@
 - Boss03·06은 공용 소환 컴포넌트의 `2마리 / 15초 / live 6 skip` 공격형 몹 패턴을 사용하며 서버만 해당 Boss ID의 소환몹을 생성·정리한다. Boss06 유도미사일 fan의 서로 다른 projectile contact는 각 객체별로 소비해 같은 frame과 지연 catch-up에서도 피격을 누락하지 않는다.
 - [0.79.0] Boss03 그랩은 Commander 손에서 `1600px/s` 실제 hook tip과 반복 사슬이 날아가 Player collider 접촉 뒤에만 포획한다. pull v2로 Player를 눈높이에 고정한 뒤 하강·지형 반동을 적용하고, summon 전용 6프레임과 Sector03 terrain skin을 사용하며 초기 진입·소환·active hazard에서 Polygon 표현을 섞지 않는다.
 - [0.80.0] Boss03 Arena는 stable `boss-03` 환경 package에서 Sector03 backdrop·palette와 Boss06식 긴 장갑 panel을 조합하고, Boss03·06 소환몹은 definition의 `sectorId`를 Enemy snapshot까지 보존한다. 모바일 경험치 바는 14px와 Spell 슬롯 위 10px 간격을 사용하며, Boss06 Security Beam은 3초 active 시작과 이후 0.5초 간격의 20 피해 pulse 6개를 피해자 owner claim으로 수렴한다.
+- [0.81.1] 멀티 디버그 Stage 이동은 요청 Player만 선택 Entry로 옮긴다. Boss 진행 중 다른 Stage를 선택하면 기존 참가자를 source Stage로 안전 복귀시키고 Boss 소환몹·투사체·hazard·capture를 정리한 뒤 대상 진행의 다음 Boss를 inactive 상태로 다시 구성하며, 전환 사건 이전 owner-motion은 새 위치를 덮지 않는다.
 - Sector 01~~06의 48개 canonical AREA-SPEC v2를 여는 Map Editor. Gameplay View와 production Runtime은 authored bounds·surface·world object만 사용하며 Runtime 자동 geometry는 0개다. Entry·Save 표현, Exit portal 복합 객체, Story display, Enemy·Wind·Boss, Route·activation, 메모리 초안과 read-only 보호를 지원한다.
 - `npm run check`의 production map parity gate는 48개 Stage별 authored surface와 Runtime landmark surface의 정확한 일치, derived surface 0개, Editor entity 전수 노출, 47개 동일 X·2160px 화면 밖 Gate→Entry 배치, 전체 authored world bottom 낙사 경계, Access/Jammer/proof 권위를 검증한다.
 - 채널별로 한 명이라도 남아 있으면 유지되고 0명이 된 뒤 삭제되는 독립 오픈월드 세션
