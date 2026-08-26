@@ -727,7 +727,13 @@ export class GameSimulation {
             if (snapshot) throw new Error("cannot restore Boss runtime outside a seamless Sector world");
             return null;
         }
-        if (snapshot) {
+        if (!snapshot && this.bossRuntime.status !== "inactive") {
+            this.#clearBossMissiles("boss-runtime-cleared");
+            this.#clearBossSummonedEnemies("boss-runtime-cleared");
+            this.bossRuntime = createBossEncounterRuntime(this.bossRuntime.definition, null, {
+                worldSeed: this.world.seed
+            });
+        } else if (snapshot) {
             const stageId = snapshot.stageId ?? snapshot.encounterId;
             const preservedHazardContacts =
                 preserveOwnerHazardContacts &&
@@ -805,6 +811,10 @@ export class GameSimulation {
                 objects: Object.freeze([...suppliedObjects, ...grappleAnchors])
             })
         });
+    }
+
+    bossStageNetworkSnapshot() {
+        return !this.bossRuntime || this.bossRuntime.status === "inactive" ? null : this.bossStageSnapshot();
     }
 
     #registerBossImpactTargets() {
@@ -1697,7 +1707,9 @@ export class GameSimulation {
         return this.enemyStates()
             .filter((enemy) => !this.debugTrainingDummy.matches(enemy))
             .map((enemy) => {
-                if (!enemy.objectId || !this.objects.enemies.isAuthoredObjectId(enemy.objectId)) return enemy;
+                if (!enemy.objectId || !this.objects.enemies.isAuthoredObjectId(enemy.objectId)) {
+                    return { ...enemy, objectId: enemy.objectId ?? enemy.id };
+                }
                 return {
                     id: enemy.id,
                     objectId: enemy.objectId,
@@ -4849,7 +4861,6 @@ export class GameSimulation {
             metrics: this.metrics.snapshot(),
             worldProgress: this.worldProgress?.snapshot() ?? null,
             bossStage,
-            bossRuntime: bossStage,
             combatInteractions: this.combatInteractions.snapshot(),
             windStates: this.windStateSnapshots(),
             accessScanStates: this.world.scannerGroups

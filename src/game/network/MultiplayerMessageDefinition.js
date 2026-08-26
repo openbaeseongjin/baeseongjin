@@ -27,7 +27,8 @@ export const MULTIPLAYER_MESSAGE_TYPE = Object.freeze({
     DEBUG_TELEPORT_RECEIPT: "debug-teleport-receipt",
     PARTY_CHAT_SUBMIT: "party-chat-submit",
     PARTY_CHAT_MESSAGE: "party-chat-message",
-    SNAPSHOT_ACK: "snapshot-ack"
+    SNAPSHOT_ACK: "snapshot-ack",
+    SNAPSHOT_RESYNC: "snapshot-resync"
 });
 
 export const MULTIPLAYER_ERROR_CODE = Object.freeze({

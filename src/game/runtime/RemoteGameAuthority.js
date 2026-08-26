@@ -18,7 +18,11 @@ import {
 } from "../network/PlayerProjectileSpawnClaim.js";
 import { createRopeImpactClaim, serializeRopeImpactClaim } from "../network/RopeImpactClaim.js";
 import { createOwnerMotionState, serializeOwnerMotionState } from "../network/OwnerMotionState.js";
-import { deserializeWorldSnapshotEnvelope } from "../network/WorldSnapshotEnvelope.js";
+import { deserializeWorldSnapshotEnvelope, normalizeWorldSnapshotState } from "../network/WorldSnapshotEnvelope.js";
+import {
+    materializeSnapshotReplication,
+    WORLD_SNAPSHOT_REPLICATION_KIND
+} from "../network/WorldSnapshotReplication.js";
 import { MULTIPLAYER_MESSAGE_TYPE } from "../network/MultiplayerMessageDefinition.js";
 import { OwnerPredictionRuntime } from "./OwnerPredictionRuntime.js";
 import { RemoteWorldStateBuffer } from "./RemoteWorldStateBuffer.js";
@@ -39,6 +43,7 @@ import {
 } from "../network/PartyChatMessage.js";
 
 const MAX_TRACKED_COMMANDS = 2048;
+const MAX_MATERIALIZED_SNAPSHOT_STATES = 64;
 
 function requestSnapshotFlowControl(url) {
     const requested = new URL(url);
@@ -110,6 +115,9 @@ export class RemoteGameAuthority {
         this.closeReason = null;
         this.intentionalClose = false;
         this.snapshotFlowControl = false;
+        this.materializedStateBySequence = new Map();
+        this.materializedStateSequenceOrder = [];
+        this.snapshotResyncRequested = false;
     }
 
     connect() {
@@ -159,6 +167,18 @@ export class RemoteGameAuthority {
 
     acceptSnapshot(serialized) {
         const receivedSnapshot = deserializeWorldSnapshotEnvelope(serialized);
+        if (receivedSnapshot.snapshotSequence <= (this.stream?.latestSnapshotSequence ?? -1)) return false;
+        const baselineState =
+            receivedSnapshot.replication.kind === WORLD_SNAPSHOT_REPLICATION_KIND.DELTA
+                ? this.materializedStateBySequence.get(receivedSnapshot.replication.baseSequence)
+                : null;
+        if (receivedSnapshot.replication.kind === WORLD_SNAPSHOT_REPLICATION_KIND.DELTA && !baselineState) {
+            this.requestSnapshotResync();
+            return false;
+        }
+        const materializedState = normalizeWorldSnapshotState(
+            materializeSnapshotReplication(receivedSnapshot.replication, baselineState)
+        );
         this.ownerRuntime ??= new OwnerPredictionRuntime({
             ownerId: this.playerId,
             simulation: createGameSimulationForWorldRevision({
@@ -170,11 +190,21 @@ export class RemoteGameAuthority {
         const snapshot = Object.freeze({
             ...receivedSnapshot,
             state: Object.freeze({
-                ...receivedSnapshot.state,
-                enemies: Object.freeze(this.ownerRuntime.hydrateEnemyNetworkStates(receivedSnapshot.state.enemies))
+                ...materializedState,
+                enemies: Object.freeze(this.ownerRuntime.hydrateEnemyNetworkStates(materializedState.enemies))
             })
         });
         if (!this.stream.acceptSnapshot(snapshot)) return false;
+        if (receivedSnapshot.replication.kind === WORLD_SNAPSHOT_REPLICATION_KIND.BASELINE) {
+            this.materializedStateBySequence.clear();
+            this.materializedStateSequenceOrder.length = 0;
+            this.snapshotResyncRequested = false;
+        }
+        this.materializedStateBySequence.set(snapshot.snapshotSequence, materializedState);
+        this.materializedStateSequenceOrder.push(snapshot.snapshotSequence);
+        while (this.materializedStateSequenceOrder.length > MAX_MATERIALIZED_SNAPSHOT_STATES) {
+            this.materializedStateBySequence.delete(this.materializedStateSequenceOrder.shift());
+        }
         this.pruneSentCommands(snapshot.acknowledgements?.[this.playerId]);
         const receivedAt = this.now();
         if (this.previousSnapshotReceivedAt !== null) {
@@ -195,6 +225,19 @@ export class RemoteGameAuthority {
         this.reconcile();
         this.reanchorTickProjection();
         this.acknowledgeSnapshot(snapshot.snapshotSequence);
+        return true;
+    }
+
+    requestSnapshotResync() {
+        if (
+            this.snapshotResyncRequested ||
+            !this.snapshotFlowControl ||
+            this.socket?.readyState !== this.WebSocketImpl.OPEN
+        ) {
+            return false;
+        }
+        this.snapshotResyncRequested = true;
+        this.socket.send(JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT_RESYNC }));
         return true;
     }
 

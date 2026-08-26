@@ -486,11 +486,7 @@ export class MultiplayerGameApp {
             this.combatFeedback.syncContinuous(
                 {
                     ...presentationState,
-                    bossStage:
-                        current.state.bossStage ??
-                        current.state.bossStageRuntime ??
-                        current.state.bossRuntime ??
-                        presentationState.bossStage,
+                    bossStage: current.state.bossStage ?? presentationState.bossStage,
                     players: current.state.players.map((player) =>
                         player.id === this.authority.playerId ? presentationState.player : player
                     ),
@@ -521,10 +517,7 @@ export class MultiplayerGameApp {
             dt,
             player,
             authoredWorld,
-            this.authority.bossStageSnapshot() ??
-                current.state.bossStage ??
-                current.state.bossStageRuntime ??
-                current.state.bossRuntime
+            this.authority.bossStageSnapshot() ?? current.state.bossStage
         );
         const directionAudioContext = this.createAudioContext(
             player.position,
@@ -619,11 +612,7 @@ export class MultiplayerGameApp {
         if (!localState) return;
         const base = this.authority.renderSnapshot();
         if (!base) return;
-        const bossStageSnapshot =
-            this.authority.bossStageSnapshot() ??
-            remote.state.bossStage ??
-            remote.state.bossStageRuntime ??
-            remote.state.bossRuntime;
+        const bossStageSnapshot = this.authority.bossStageSnapshot() ?? remote.state.bossStage;
         const predictableProjectiles = this.predictableProjectiles.snapshot();
         const player = renderPlayer(localState, remote.predicted, bossStageSnapshot);
         const otherPlayers = remote.state.players

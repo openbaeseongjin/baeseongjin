@@ -46,7 +46,7 @@ function boundsContains(bounds, position) {
 }
 
 function debugFlightBounds(state) {
-    const bossBounds = state.bossStage?.arena?.bounds ?? state.bossRuntime?.arena?.bounds ?? null;
+    const bossBounds = state.bossStage?.arena?.bounds ?? null;
     if (bossBounds && boundsContains(bossBounds, state.player.position)) return bossBounds;
     return previewFlightBoundsForWorld(state.world, state.player.position);
 }
@@ -381,12 +381,7 @@ export class GameApp {
         if (predictedImpacts.length > 0) state = this.authority.snapshot();
         this.currentRenderSnapshot = state;
         this.finalEscapeCinematic.sync(state.runState);
-        const cameraShot = this.updatePresentationCamera(
-            dt,
-            state.player,
-            state.world,
-            state.bossStage ?? state.bossStageRuntime ?? state.bossRuntime
-        );
+        const cameraShot = this.updatePresentationCamera(dt, state.player, state.world, state.bossStage);
         this.combatFeedback.syncContinuous(state, dt, particleBounds);
         this.combatFeedback.update(dt);
         const audioScene = this.createAudioContext(state.player.position, state.tick, state.runState);
@@ -518,7 +513,7 @@ export class GameApp {
         this.queuePlayerPresentationEvents([state.eventFlash]);
         const playerPresentationEvents = Object.freeze(this.playerPresentationEvents.splice(0));
         const bossPresentationEvents = Object.freeze(this.bossPresentationEvents.splice(0));
-        const bossStageSnapshot = renderState.bossStage ?? renderState.bossStageRuntime ?? renderState.bossRuntime;
+        const bossStageSnapshot = renderState.bossStage;
         const localBossStage = localBossStageSnapshot(bossStageSnapshot, renderState.player);
         const bossStagePresentation = createBossStagePresentation(
             localBossStage,

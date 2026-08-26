@@ -7,10 +7,19 @@ import { createCurrentGameSimulation } from "../game/simulation/GameSimulationFa
 import {
     createWorldSnapshotEnvelope,
     deserializeWorldSnapshotEnvelope,
+    normalizeWorldSnapshotState,
     serializeWorldSnapshotEnvelope
 } from "../game/network/WorldSnapshotEnvelope.js";
+import {
+    createBaselineSnapshotReplication,
+    createDeltaSnapshotReplication,
+    materializeSnapshotReplication,
+    WORLD_SNAPSHOT_REPLICATION_KIND
+} from "../game/network/WorldSnapshotReplication.js";
 import { routeClientMessage } from "./ClientMessageRouter.js";
 import { MULTIPLAYER_ERROR_CODE, MULTIPLAYER_MESSAGE_TYPE } from "../game/network/MultiplayerMessageDefinition.js";
+import { COLLISION_BROAD_PHASE_CONFIG } from "../game/config.js";
+import { createSimulationInterestBounds } from "../game/physics/spatial/CollisionBroadPhase.js";
 import {
     createPartyChatMessage,
     deserializePartyChatSubmission,
@@ -24,28 +33,70 @@ const DEFAULT_MAX_PENDING_SNAPSHOT_BYTES = 256 * 1024;
 
 function createSnapshotEntry(payload) {
     const snapshot = deserializeWorldSnapshotEnvelope(payload);
+    if (snapshot.replication.kind !== WORLD_SNAPSHOT_REPLICATION_KIND.BASELINE) {
+        throw new Error("authority source snapshot must be a baseline");
+    }
+    const state = normalizeWorldSnapshotState(materializeSnapshotReplication(snapshot.replication));
     return Object.freeze({
         snapshot,
+        state,
         payload,
-        message: JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT, payload })
+        message: JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT, payload }),
+        relevantEnemyIds: null,
+        includedEventIds: Object.freeze(snapshot.events.map(({ eventId }) => eventId))
     });
 }
 
-function coalesceSnapshotEntries(previous, next) {
-    if (!previous) return next;
-    const events = new Map(
-        [...previous.snapshot.events, ...next.snapshot.events].map((event) => [event.eventId, event])
-    );
-    const snapshot = createWorldSnapshotEnvelope({
-        snapshotSequence: next.snapshot.snapshotSequence,
-        serverTick: next.snapshot.serverTick,
-        worldSeed: next.snapshot.worldSeed,
-        worldRevision: next.snapshot.worldRevision,
-        acknowledgements: next.snapshot.acknowledgements,
-        state: next.snapshot.state,
-        events: [...events.values()]
+function relevantEnemyIds(state, playerId) {
+    const player = state.players.find(({ id }) => id === playerId);
+    if (!player) return new Set();
+    const [interest] = createSimulationInterestBounds([player], COLLISION_BROAD_PHASE_CONFIG, {
+        includeInactive: true
     });
-    return createSnapshotEntry(serializeWorldSnapshotEnvelope(snapshot));
+    if (!interest) return new Set();
+    return new Set(
+        state.enemies
+            .filter(
+                (enemy) =>
+                    enemy.position.x >= interest.x &&
+                    enemy.position.x <= interest.x + interest.width &&
+                    enemy.position.y >= interest.y &&
+                    enemy.position.y <= interest.y + interest.height
+            )
+            .map(({ objectId }) => objectId)
+    );
+}
+
+function createDeltaEntry(source, delivery, playerId) {
+    const relevant = relevantEnemyIds(source.state, playerId);
+    const replication = createDeltaSnapshotReplication({
+        baseSequence: delivery.acknowledgedSequence,
+        previousState: delivery.acknowledgedState,
+        currentState: source.state,
+        relevantEnemyIds: relevant,
+        previouslyRelevantEnemyIds: delivery.acknowledgedRelevantEnemyIds
+    });
+    const events = [...delivery.pendingEvents.values()];
+    const snapshot = createWorldSnapshotEnvelope({
+        snapshotSequence: source.snapshot.snapshotSequence,
+        serverTick: source.snapshot.serverTick,
+        worldSeed: source.snapshot.worldSeed,
+        worldRevision: source.snapshot.worldRevision,
+        acknowledgements: source.snapshot.acknowledgements,
+        replication,
+        events
+    });
+    const payload = serializeWorldSnapshotEnvelope(snapshot);
+    return Object.freeze({
+        snapshot,
+        state: normalizeWorldSnapshotState(
+            materializeSnapshotReplication(snapshot.replication, delivery.acknowledgedState)
+        ),
+        payload,
+        message: JSON.stringify({ type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT, payload }),
+        relevantEnemyIds: relevant,
+        includedEventIds: Object.freeze(events.map(({ eventId }) => eventId))
+    });
 }
 
 export class MultiplayerGameServer {
@@ -97,10 +148,13 @@ export class MultiplayerGameServer {
             if (this.allowedOrigins.size > 0 && !this.allowedOrigins.has(request.headers.origin)) {
                 return this.rejectUpgrade(socket, 403, "origin denied");
             }
+            if (requestUrl.searchParams.get("snapshotAck") !== "1") {
+                return this.rejectUpgrade(socket, 400, "snapshot acknowledgement required");
+            }
             try {
                 request.createChannel = requestedChannel === "new";
                 request.channelId = request.createChannel ? this.allocateChannelId() : requestedChannel;
-                request.snapshotFlowControl = requestUrl.searchParams.get("snapshotAck") === "1";
+                request.snapshotFlowControl = true;
             } catch {
                 return this.rejectUpgrade(socket, 503, "channel unavailable");
             }
@@ -205,7 +259,12 @@ export class MultiplayerGameServer {
         const delivery = {
             flowControlled: snapshotFlowControl === true,
             unacknowledgedSequences: [],
-            pendingSnapshot: null,
+            pendingSource: null,
+            pendingEvents: new Map(),
+            sentBySequence: new Map(),
+            acknowledgedSequence: -1,
+            acknowledgedState: null,
+            acknowledgedRelevantEnemyIds: new Set(),
             highestSentSequence: -1
         };
         this.snapshotDeliveryBySocket.set(socket, delivery);
@@ -213,7 +272,11 @@ export class MultiplayerGameServer {
         socket.on("close", () => this.leave(socket));
         socket.on("error", () => this.leave(socket));
         const welcomeSnapshot = room.adapter.snapshot({ includeActivePredictableObjects: true });
-        const welcomeSequence = deserializeWorldSnapshotEnvelope(welcomeSnapshot).snapshotSequence;
+        const welcomeEntry = createSnapshotEntry(welcomeSnapshot);
+        const welcomeSequence = welcomeEntry.snapshot.snapshotSequence;
+        delivery.acknowledgedSequence = welcomeSequence;
+        delivery.acknowledgedState = welcomeEntry.state;
+        delivery.acknowledgedRelevantEnemyIds = relevantEnemyIds(welcomeEntry.state, playerId);
         socket.send(
             JSON.stringify({
                 type: MULTIPLAYER_MESSAGE_TYPE.WELCOME,
@@ -223,7 +286,7 @@ export class MultiplayerGameServer {
                 snapshot: welcomeSnapshot
             })
         );
-        this.recordSentSnapshot(delivery, welcomeSequence);
+        this.recordSentSnapshot(delivery, welcomeEntry);
         this.broadcast(
             room,
             { type: MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT, payload: welcomeSnapshot },
@@ -262,32 +325,47 @@ export class MultiplayerGameServer {
         room.interval = null;
     }
 
-    recordSentSnapshot(delivery, snapshotSequence) {
-        delivery.highestSentSequence = Math.max(delivery.highestSentSequence, snapshotSequence);
-        if (delivery.flowControlled) delivery.unacknowledgedSequences.push(snapshotSequence);
+    recordSentSnapshot(delivery, entry) {
+        const sequence = entry.snapshot.snapshotSequence;
+        delivery.highestSentSequence = Math.max(delivery.highestSentSequence, sequence);
+        if (!delivery.flowControlled) return;
+        delivery.unacknowledgedSequences.push(sequence);
+        delivery.sentBySequence.set(
+            sequence,
+            Object.freeze({
+                state: entry.state,
+                relevantEnemyIds: entry.relevantEnemyIds ?? delivery.acknowledgedRelevantEnemyIds,
+                includedEventIds: entry.includedEventIds
+            })
+        );
     }
 
     sendSnapshot(socket, delivery, entry) {
         if (socket.readyState !== WebSocket.OPEN) return false;
         socket.send(entry.message);
-        this.recordSentSnapshot(delivery, entry.snapshot.snapshotSequence);
+        this.recordSentSnapshot(delivery, entry);
         return true;
     }
 
-    queueSnapshot(socket, entry) {
+    queueSnapshot(socket, source) {
         if (socket.readyState !== WebSocket.OPEN) return false;
         const delivery = this.snapshotDeliveryBySocket.get(socket);
         if (!delivery?.flowControlled) {
-            socket.send(entry.message);
-            if (delivery) delivery.highestSentSequence = entry.snapshot.snapshotSequence;
+            socket.send(source.message);
+            if (delivery) delivery.highestSentSequence = source.snapshot.snapshotSequence;
             return true;
         }
+        for (const event of source.snapshot.events) delivery.pendingEvents.set(event.eventId, event);
+        const room = this.connections.get(socket);
+        const playerId = room?.sockets.get(socket);
+        if (!room || !playerId || !delivery.acknowledgedState) return false;
         if (delivery.unacknowledgedSequences.length < this.maxUnacknowledgedSnapshots) {
-            return this.sendSnapshot(socket, delivery, entry);
+            return this.sendSnapshot(socket, delivery, createDeltaEntry(source, delivery, playerId));
         }
-        delivery.pendingSnapshot = coalesceSnapshotEntries(delivery.pendingSnapshot, entry);
-        if (Buffer.byteLength(delivery.pendingSnapshot.payload) > this.maxPendingSnapshotBytes) {
-            delivery.pendingSnapshot = null;
+        delivery.pendingSource = source;
+        const pendingEntry = createDeltaEntry(source, delivery, playerId);
+        if (Buffer.byteLength(pendingEntry.payload) > this.maxPendingSnapshotBytes) {
+            delivery.pendingSource = null;
             socket.close(1013, "snapshot backlog exceeded");
             return false;
         }
@@ -303,13 +381,58 @@ export class MultiplayerGameServer {
         if (snapshotSequence > delivery.highestSentSequence) {
             throw new Error("snapshot acknowledgement exceeds the latest sent sequence");
         }
+        const acknowledged = delivery.sentBySequence.get(snapshotSequence);
+        if (!acknowledged) throw new Error("snapshot acknowledgement does not reference a sent snapshot");
+        delivery.acknowledgedSequence = snapshotSequence;
+        delivery.acknowledgedState = acknowledged.state;
+        delivery.acknowledgedRelevantEnemyIds = new Set(acknowledged.relevantEnemyIds);
+        for (const eventId of acknowledged.includedEventIds) delivery.pendingEvents.delete(eventId);
         delivery.unacknowledgedSequences = delivery.unacknowledgedSequences.filter(
             (sequence) => sequence > snapshotSequence
         );
-        if (delivery.pendingSnapshot && delivery.unacknowledgedSequences.length < this.maxUnacknowledgedSnapshots) {
-            const pending = delivery.pendingSnapshot;
-            delivery.pendingSnapshot = null;
-            this.sendSnapshot(socket, delivery, pending);
+        for (const sequence of delivery.sentBySequence.keys()) {
+            if (sequence <= snapshotSequence) delivery.sentBySequence.delete(sequence);
+        }
+        if (delivery.pendingSource && delivery.unacknowledgedSequences.length < this.maxUnacknowledgedSnapshots) {
+            const pending = delivery.pendingSource;
+            delivery.pendingSource = null;
+            const room = this.connections.get(socket);
+            const playerId = room?.sockets.get(socket);
+            if (playerId) this.sendSnapshot(socket, delivery, createDeltaEntry(pending, delivery, playerId));
+        }
+        return true;
+    }
+
+    requestSnapshotResync(socket) {
+        const room = this.connections.get(socket);
+        const playerId = room?.sockets.get(socket);
+        const delivery = this.snapshotDeliveryBySocket.get(socket);
+        if (!room || !playerId || !delivery) throw new Error("snapshot resync requires an active connection");
+        const source = createSnapshotEntry(room.adapter.snapshot({ includeActivePredictableObjects: true }));
+        const pendingEvents = new Map([
+            ...delivery.pendingEvents,
+            ...source.snapshot.events.map((event) => [event.eventId, event])
+        ]);
+        const baselineSnapshot = createWorldSnapshotEnvelope({
+            snapshotSequence: source.snapshot.snapshotSequence,
+            serverTick: source.snapshot.serverTick,
+            worldSeed: source.snapshot.worldSeed,
+            worldRevision: source.snapshot.worldRevision,
+            acknowledgements: source.snapshot.acknowledgements,
+            replication: createBaselineSnapshotReplication(source.state),
+            events: [...pendingEvents.values()]
+        });
+        const baseline = createSnapshotEntry(serializeWorldSnapshotEnvelope(baselineSnapshot));
+        delivery.unacknowledgedSequences = [];
+        delivery.pendingSource = null;
+        delivery.pendingEvents = pendingEvents;
+        delivery.sentBySequence.clear();
+        delivery.acknowledgedSequence = baseline.snapshot.snapshotSequence;
+        delivery.acknowledgedState = baseline.state;
+        delivery.acknowledgedRelevantEnemyIds = relevantEnemyIds(baseline.state, playerId);
+        this.sendSnapshot(socket, delivery, baseline);
+        for (const peer of room.sockets.keys()) {
+            if (peer !== socket) this.queueSnapshot(peer, source);
         }
         return true;
     }

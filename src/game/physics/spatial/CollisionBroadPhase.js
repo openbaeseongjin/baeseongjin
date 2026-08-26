@@ -36,10 +36,14 @@ function sweptColliderBounds(collider, start, end, padding = 0) {
     return padding > 0 ? expandBounds(swept, padding) : swept;
 }
 
-export function createSimulationInterestBounds(players, { interestHalfWidth, interestHalfHeight }) {
+export function createSimulationInterestBounds(
+    players,
+    { interestHalfWidth, interestHalfHeight },
+    { includeInactive = false } = {}
+) {
     return Object.freeze(
         players
-            .filter(({ lifeState }) => lifeState === undefined || lifeState === "active")
+            .filter(({ lifeState }) => includeInactive || lifeState === undefined || lifeState === "active")
             .map((player) => {
                 const position = player.position ?? player.physics?.position;
                 return Object.freeze({

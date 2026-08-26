@@ -16,6 +16,11 @@ class SnapshotAckHandler {
         server.acknowledgeSnapshot(socket, message.snapshotSequence);
     }
 }
+class SnapshotResyncHandler {
+    handle({ server, socket }) {
+        server.requestSnapshotResync(socket);
+    }
+}
 class PartyChatHandler {
     handle({ server, room, playerId, message }) {
         if (typeof message.payload !== "string") throw new Error("party chat payload must be serialized");
@@ -66,7 +71,8 @@ const CLIENT_MESSAGE_HANDLER = Object.freeze({
         MULTIPLAYER_MESSAGE_TYPE.DEBUG_TELEPORT_RECEIPT
     ),
     [MULTIPLAYER_MESSAGE_TYPE.PARTY_CHAT_SUBMIT]: Object.freeze(new PartyChatHandler()),
-    [MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT_ACK]: Object.freeze(new SnapshotAckHandler())
+    [MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT_ACK]: Object.freeze(new SnapshotAckHandler()),
+    [MULTIPLAYER_MESSAGE_TYPE.SNAPSHOT_RESYNC]: Object.freeze(new SnapshotResyncHandler())
 });
 
 export function routeClientMessage(context) {

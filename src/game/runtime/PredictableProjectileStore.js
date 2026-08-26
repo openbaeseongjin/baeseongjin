@@ -6,7 +6,7 @@ const FIXED_DT = 1 / 120;
 const simulationDispatcher = new SimulationDispatcher();
 
 function projectileSimulationState(state) {
-    const bossStage = state?.bossStage ?? state?.bossRuntime ?? null;
+    const bossStage = state?.bossStage ?? null;
     const combatTargets = Array.isArray(state?.combatTargets)
         ? state.combatTargets
         : Object.freeze([...(state?.enemies ?? []), ...(bossStage?.impactTargets ?? [])]);

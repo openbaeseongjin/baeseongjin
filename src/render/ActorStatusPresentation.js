@@ -125,7 +125,7 @@ function drawStatusParticle(context, particle) {
 }
 
 function sceneBoss(scene) {
-    const boss = scene.bossStage ?? scene.bossRuntime ?? null;
+    const boss = scene.bossStage ?? null;
     return boss?.body && boss?.statusEffects
         ? { ...boss.body, statusEffects: boss.statusEffects, health: boss.health, maxHealth: boss.maxHealth }
         : null;
