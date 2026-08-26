@@ -6,6 +6,7 @@ import { LocalAuthority } from "../../runtime/LocalAuthority.js";
 import { PreviewFlightController } from "../../runtime/PreviewFlightController.js";
 import { GameSimulation } from "../../simulation/GameSimulation.js";
 import { createAuthoredSeamlessSectorRuntimeWorld } from "../../world/sectors/AuthoredSeamlessSectorRuntime.js";
+import { BOSS_PRESENTATION_PREVIEW_MODE, BossPresentationMotionPreview } from "./BossPresentationMotionPreview.js";
 
 const BOSS_PREVIEW_DEBUG_WEAKPOINT_DAMAGE = 100;
 const BOSS_PREVIEW_EDGE_INSET = 64;
@@ -44,6 +45,7 @@ export class BossStagePreviewGameApp extends GameApp {
         const spec = requireBossStageSpec(bossStageSpec);
         const definition = defineBossStage(spec);
         const previewRevision = requirePreviewRevision(revision);
+        const bossPresentationMotionPreview = new BossPresentationMotionPreview({ bossStageId: spec.id });
         const worldFactory = (worldOptions) =>
             createAuthoredSeamlessSectorRuntimeWorld({ ...worldOptions, bossStageSpec: spec });
         const simulation = new GameSimulation({
@@ -71,12 +73,14 @@ export class BossStagePreviewGameApp extends GameApp {
             ...options,
             authority,
             startAreaId: null,
-            bossStageSpecResolver: (id) => (id === spec.id ? spec : null)
+            bossStageSpecResolver: (id) => (id === spec.id ? spec : null),
+            bossStagePresentationSnapshot: (snapshot) => bossPresentationMotionPreview.project(snapshot)
         });
         this.previewBossStageId = spec.id;
         this.previewBossStageSpec = spec;
         this.previewRevision = previewRevision;
         this.previewFlight = new PreviewFlightController();
+        this.bossPresentationMotionPreview = bossPresentationMotionPreview;
         this.debugWeakpointStrikeSequence = 0;
     }
 
@@ -98,6 +102,14 @@ export class BossStagePreviewGameApp extends GameApp {
 
     setPreviewFlightEnabled(enabled) {
         return this.previewFlight.setEnabled(enabled);
+    }
+
+    setBossPresentationPreviewMode(mode = BOSS_PRESENTATION_PREVIEW_MODE.ACTUAL) {
+        return this.bossPresentationMotionPreview.setMode(mode);
+    }
+
+    bossPresentationPreviewState() {
+        return this.bossPresentationMotionPreview.snapshot();
     }
 
     debugStrikeWeakpoint() {
@@ -140,6 +152,11 @@ export class BossStagePreviewGameApp extends GameApp {
     }
 
     update(dt, input) {
+        if (this.bossPresentationMotionPreview.active) {
+            this.latestInput = input;
+            this.bossPresentationMotionPreview.advance(dt);
+            return;
+        }
         if (!this.previewFlight.enabled) return super.update(dt, input);
         const owner = this.authority.ownerState();
         const stage = this.authority.simulation.world.bossStages?.find(({ id }) => id === this.previewBossStageId);

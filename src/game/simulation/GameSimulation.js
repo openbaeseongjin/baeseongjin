@@ -496,7 +496,13 @@ export class GameSimulation {
     removePlayer(playerId) {
         const removed = this.objects.removePlayer(playerId);
         if (!removed) return false;
-        if (this.bossRuntime?.status === "active") this.bossRuntime.removeParticipant(playerId);
+        const bossDeparture =
+            this.bossRuntime?.status === "active" ? this.bossRuntime.removeParticipant(playerId) : null;
+        if (bossDeparture?.retryStarted) {
+            this.#clearBossMissiles("boss-attempt-reset");
+            this.#clearBossSummonedEnemies("boss-attempt-reset");
+            this.#respawnBossParticipants("boss-wipe");
+        }
         this.combatInteractions.cancelTarget(playerId);
         this.bossRuntime?.cancelTargetCapture?.(playerId);
         this.portalTransitions.delete(playerId);
@@ -4591,18 +4597,20 @@ export class GameSimulation {
     #restoreBossHazardRecovery(player, claim) {
         const recoveredState = claim.outcome.state;
         const fatal = claim.outcome.respawned || recoveredState.lifeState === "spectating";
+        let retryStarted = false;
         if (fatal) {
             const defeat = this.bossRuntime.handlePlayerDefeat(player.id, {
                 cause: `boss-${claim.sourceType}`,
                 source: BOSS_PARTICIPANT_DEFEAT_SOURCE.BOSS
             });
             if (defeat.retryStarted) {
+                retryStarted = true;
                 this.#clearBossMissiles("boss-attempt-reset");
                 this.#clearBossSummonedEnemies("boss-attempt-reset");
                 this.#respawnBossParticipants("boss-wipe");
             }
         }
-        this.#restorePlayer(player, recoveredState);
+        if (!retryStarted) this.#restorePlayer(player, recoveredState);
     }
 
     #finalizeVictimImpact(player, claim, projectile, damage) {

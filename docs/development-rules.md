@@ -359,6 +359,7 @@ class Player extends RopeAttachable(GameObject) {}
 - 사용자 입력, 성공, 실패, 쿨다운은 화면에서 구분 가능해야 한다.
 - 화면 밖 objective 안내는 방향을 문장으로 하드코딩하지 않고 world position을 현재 camera로 투영한 screen-edge indicator를 사용한다. viewport 안에서는 world marker, 밖에서는 edge arrow 중 하나만 표시하고 safe-area·고정 HUD·모바일 조작 bounds를 피한다. 여러 후보가 있으면 제품 계약이 정한 다음 대상 하나만 안내해 화살표 중첩을 만들지 않으며 공용 HUD 표시 토글을 따른다.
 - Canvas 변경은 시작·동작 중·종료 또는 해제 상태를 실제 화면으로 검증한다.
+- Boss·Enemy 애니메이션 검증은 AI의 랜덤 상태 선택을 기다리는 절차로 대체하지 않는다. 로컬 Preview가 검증할 presentation 상태와 부착 VFX를 결정적으로 반복하고, 활성 중 gameplay 진행을 정지하며, 사용자가 같은 Canvas에서 직접 시작·중간·종료를 확인할 수 있어야 한다. 이 강제 상태는 저작 Spec·전투 판정·일반 게임·멀티 snapshot에 저장하지 않는다.
 - 렌더 최적화는 실제 브라우저에서 보이는 결과가 같은지와 화면 안/밖 객체를 함께 둔 draw 감소를 증명한다. 설정 버튼 길게 누르기로 디버그 수치 표시를 켜고 CSS/backing 크기, DPR, frame p50/p95, draw p50/p95와 dropped steps를 확인한다.
 - 스프라이트 clip은 자산이 실제로 표현하는 행동 의미와 일치해야 한다. 지원하지 않는 행동을 방향 전환용 프레임 등 무관한 프레임에 임의 대응하지 않고, 불가피한 대체는 definition에 명시적 fallback으로 선언한다.
 - player sprite definition은 여러 atlas·frame·출력 크기, anchor·offset, 상태 coverage, frame 경계와 fallback 순환을 검증한다. 일반 몹은 별도 `enemy-sprite-asset-format.md` 계약으로 타입별 presentation state coverage·alias, clip frame 순서·양수 duration·loop와 fallback 순환을 검증한다. 자산 로더는 각 실제 이미지 크기를 atlas 선언과 대조하며 renderer는 행·열 의미나 생성 도구 형식을 자체 해석하지 않는다.

@@ -241,7 +241,9 @@ export class LowerSectorCommanderSpriteDefinition {
                 return this.clips["grab-lock"].frameAt(animation.grabStageElapsedSeconds);
             }
             if (object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.SEARCH) {
-                return this.clips["grab-launch"].frameAt(animation.grabStageElapsedSeconds);
+                const launchClip = this.clips["grab-launch"];
+                const launchProgress = Math.max(0, Math.min(1, object.grabHookProgress ?? 0));
+                return launchClip.frameAt(launchProgress * launchClip.totalDurationSeconds);
             }
             if (object.grabStage === LOWER_SECTOR_COMMANDER_GRAB_STAGE.CAPTURED) {
                 if (animation.grabStageElapsedSeconds < LOWER_SECTOR_COMMANDER_CAPTURE_DEFINITION.pullSeconds) {

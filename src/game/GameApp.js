@@ -76,6 +76,7 @@ export class GameApp {
         directionDefinitions = [],
         enemyDefinition = null,
         bossStageSpecResolver = bossStageSpecById,
+        bossStagePresentationSnapshot = (snapshot) => snapshot,
         onDebugTrainingDummyChange = () => {}
     }) {
         if (!canvas) throw new Error("GameApp requires a canvas element");
@@ -107,6 +108,7 @@ export class GameApp {
         this.enemyDefinition = enemyDefinition ?? this.renderer.sceneRenderer?.enemyDefinition ?? null;
         this.onDebugTrainingDummyChange = onDebugTrainingDummyChange;
         this.bossStageSpecResolver = bossStageSpecResolver;
+        this.bossStagePresentationSnapshot = bossStagePresentationSnapshot;
         this.debugTrainingDummyControl = null;
         this.debugTrainingDummySignature = "";
         this.camera = this.createCamera();
@@ -515,9 +517,12 @@ export class GameApp {
         const bossPresentationEvents = Object.freeze(this.bossPresentationEvents.splice(0));
         const bossStageSnapshot = renderState.bossStage;
         const localBossStage = localBossStageSnapshot(bossStageSnapshot, renderState.player);
+        const presentationBossStage = this.bossStagePresentationSnapshot(localBossStage);
         const bossStagePresentation = createBossStagePresentation(
-            localBossStage,
-            this.bossStageSpecResolver(localBossStage?.stageId ?? localBossStage?.id ?? localBossStage?.encounterId),
+            presentationBossStage,
+            this.bossStageSpecResolver(
+                presentationBossStage?.stageId ?? presentationBossStage?.id ?? presentationBossStage?.encounterId
+            ),
             bossPresentationEvents
         );
         const renderMetrics = this.renderer.draw({

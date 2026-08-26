@@ -204,6 +204,8 @@ Boss03 사슬 훅 Grab은 서버 중립 Boss가 target·telegraph를 시작하�
 
 Boss06 승리 뒤 Boarding은 Player별 위치 주도 사건과 공용 완료 상태를 분리한다. 각 소유 Player는 Gate/Bridge를 직접 건너 boarding zone에 들어가고 서버는 Player별 ready ID를 공유한다. 연결된 모든 참가자가 ready일 때만 run completion을 확정하며 첫 ready Player가 동료를 순간이동시키지 않는다. Boss spectator는 승리 시 ID 순서로 final safe Bridge deck에 간격을 두고 복귀하며 참가 상태도 `active`로 함께 전환한 뒤 같은 Boarding 경로를 사용한다. Wipe respawn도 같은 정렬·간격 계약을 사용한다.
 
+Boss06 shared wipe는 Player 사망과 참가자 연결 종료를 같은 roster 전이로 계산한다. 연결된 참가자가 모두 spectating이 되는 마지막 사건이 사망이든 동료 disconnect든 attempt를 한 번 증가시키고 남은 참가자의 Boss status와 Player `lifeState`를 active로 맞춘 뒤 Boss Entry에 복귀시킨다. impact recovery state가 이 전멸 복귀 뒤의 Player를 다시 spectating으로 덮어쓸 수 없다.
+
 Boss03·06 공격형 몹 소환은 서버 중립 사건이다. 공용 `BossEnemySummonPattern`이 15초 cooldown·live 6개 skip과 wave 순서를 결정하고 서버 `GameSimulation`만 각 Boss authored spawn point에 2개 Enemy를 등록한다. 클라이언트 owner prediction은 소환 Enemy를 별도 생성하지 않고 일반 Enemy snapshot으로 수렴하며, attempt reset·Boss defeat는 active Boss ID가 소유한 소환몹과 그 잔탄을 함께 제거한다.
 
 Boss06 body ImpactTarget은 WorldSnapshot의 Boss Stage 안에 Polygon collider로 포함한다. Player projectile client prediction은 일반 Enemy와 Boss ImpactTarget을 `combatTargets`로 조합해 같은 homing·swept collision capability를 실행하고, 실제 projectile 접촉 위치를 claim해 Guard/Counter 정면·후면 판정까지 보존한다. Neutral의 최근접 target 선택은 서버만 수행하고 owner prediction은 snapshot의 committed target을 덮어쓰지 않는다.
