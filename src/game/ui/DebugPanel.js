@@ -88,7 +88,6 @@ export class DebugPanel {
         this.onStartAreaChange = () =>
             this.settings.setStartAreaId(this.startAreaSelect.value.trim() ? this.startAreaSelect.value : null);
         this.onApplyClick = () => {
-            if (!this.ropeTuningEnabled) return;
             if (this.ropeTuningEnabled) this.settings.setRopeTuning(this.ropeTuningFromInputs());
             this.onApply?.();
         };
@@ -314,7 +313,7 @@ export class DebugPanel {
     renderRopeTuningAvailability() {
         this.ropeFieldset.disabled = !this.ropeTuningEnabled;
         this.augmentFieldset.disabled = !this.ropeTuningEnabled;
-        this.applyButton.disabled = !this.ropeTuningEnabled;
+        this.applyButton.disabled = false;
         this.ropeModeOutput.textContent = this.ropeTuningEnabled
             ? "싱글 전용 · 적용 버튼을 누르면 새 Run으로 즉시 재시작"
             : "멀티 세션에서는 비활성 · 공유 Rope 설정 프로토콜 미구현";

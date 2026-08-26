@@ -50,6 +50,7 @@ export class AuthorityServerSession {
         this.resolvedSummitClaim = null;
         this.lastOwnerMotionTicks = new Map();
         this.lastOwnerMotionClientTicks = new Map();
+        this.pendingDebugTransitionIds = new Map();
         this.nextImpactRecoverySequence = 0;
         this.nextSnapshotSequence = 0;
     }
@@ -359,15 +360,13 @@ export class AuthorityServerSession {
         if (typeof areaId !== "string" || areaId.length === 0) {
             return Object.freeze({ accepted: false, reason: "invalid-area" });
         }
-        const position = this.simulation.debugTeleportPlayer(authenticatedPlayerId, areaId);
-        if (!position) return Object.freeze({ accepted: false, reason: "unknown-area" });
-        this.simulation.recordReplicationEvent("debug-teleported", {
-            playerId: authenticatedPlayerId,
-            areaId,
-            position: Object.freeze({ ...position }),
-            tick: this.simulation.getTick()
-        });
-        return Object.freeze({ accepted: true, areaId, position: Object.freeze({ ...position }) });
+        const outcome = this.simulation.debugTeleportPlayer(authenticatedPlayerId, areaId);
+        if (!outcome) return Object.freeze({ accepted: false, reason: "unknown-area" });
+        for (const relocation of outcome.relocations) {
+            const event = this.simulation.recordReplicationEvent("debug-teleported", relocation);
+            this.pendingDebugTransitionIds.set(relocation.playerId, event.eventId);
+        }
+        return Object.freeze({ accepted: true, areaId, position: outcome.position });
     }
 
     submitOwnerMotion(authenticatedPlayerId, state) {
@@ -404,6 +403,17 @@ export class AuthorityServerSession {
                 resolution: "ignored-player-ineligible"
             });
         }
+        const pendingDebugTransitionId = this.pendingDebugTransitionIds.get(authenticatedPlayerId);
+        if (pendingDebugTransitionId && state.debugTransitionId !== pendingDebugTransitionId) {
+            this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.authorityTick);
+            this.lastOwnerMotionClientTicks.set(authenticatedPlayerId, state.clientTick);
+            return createOwnerMotionReceipt({
+                clientTick: state.clientTick,
+                accepted: true,
+                resolution: "ignored-debug-transition"
+            });
+        }
+        if (pendingDebugTransitionId) this.pendingDebugTransitionIds.delete(authenticatedPlayerId);
         if (state.position.y > this.simulation.fallRecoveryY(authenticatedPlayerId)) {
             this.simulation.resolvePlayerFall(authenticatedPlayerId);
             this.lastOwnerMotionTicks.set(authenticatedPlayerId, state.authorityTick);
@@ -532,6 +542,7 @@ export class AuthorityServerSession {
         this.inbox.removePlayer(playerId);
         this.lastOwnerMotionTicks.delete(playerId);
         this.lastOwnerMotionClientTicks.delete(playerId);
+        this.pendingDebugTransitionIds.delete(playerId);
         for (const key of this.pendingImpactRecoveries.keys()) {
             if (key.startsWith(`${playerId}\u0000`)) this.pendingImpactRecoveries.delete(key);
         }

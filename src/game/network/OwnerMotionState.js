@@ -1,7 +1,7 @@
 import { normalizeNetworkJson } from "./NetworkJson.js";
 import { ropeHookFlightSeconds, ropeHookReach } from "../config.js";
 
-export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 11;
+export const OWNER_MOTION_STATE_PROTOCOL_VERSION = 12;
 const LAUNCHER_NUMERIC_TOLERANCE = 1e-6;
 
 function assertTick(value, label) {
@@ -136,7 +136,8 @@ export function createOwnerMotionState({
     ropeImpactState,
     launcher = null,
     augmentRuntimeState = null,
-    respawnAnchorId = null
+    respawnAnchorId = null,
+    debugTransitionId = null
 }) {
     if (typeof isGrounded !== "boolean") throw new Error("isGrounded must be boolean");
     if (typeof rope?.isAttached !== "boolean") throw new Error("rope.isAttached must be boolean");
@@ -156,6 +157,9 @@ export function createOwnerMotionState({
     if (respawnAnchorId !== null && (typeof respawnAnchorId !== "string" || respawnAnchorId.length === 0)) {
         throw new Error("respawnAnchorId must be null or a non-empty string");
     }
+    if (debugTransitionId !== null && (typeof debugTransitionId !== "string" || debugTransitionId.length === 0)) {
+        throw new Error("debugTransitionId must be null or a non-empty string");
+    }
     return Object.freeze({
         protocolVersion: OWNER_MOTION_STATE_PROTOCOL_VERSION,
         clientTick: assertTick(clientTick, "clientTick"),
@@ -166,6 +170,7 @@ export function createOwnerMotionState({
         angularVelocity,
         isGrounded,
         respawnAnchorId,
+        debugTransitionId,
         rope: Object.freeze({
             isAttached: rope.isAttached,
             anchor: rope.isAttached ? finiteVector(rope.anchor, "rope.anchor") : null,

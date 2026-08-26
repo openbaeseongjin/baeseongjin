@@ -261,7 +261,8 @@ export class RemoteGameAuthority {
             ropeImpactState: predicted.ropeImpactState,
             launcher: predicted.launcher,
             augmentRuntimeState: predicted.augmentRuntimeState,
-            respawnAnchorId: predicted.respawnAnchorId ?? null
+            respawnAnchorId: predicted.respawnAnchorId ?? null,
+            debugTransitionId: this.ownerRuntime.currentDebugTransitionId()
         });
     }
 

@@ -7,7 +7,7 @@ import {
 } from "../augments/AugmentImpactEventDefinition.js";
 import { BOSS_STAGE_CATALOG } from "../boss-authoring/BossStageCatalog.js";
 import { createBossEncounterRuntime } from "../boss/BossEncounterRuntimeFactory.js";
-import { BOSS_PARTICIPANT_DEFEAT_SOURCE } from "../boss/CompositeBossEncounterRuntime.js";
+import { BOSS_PARTICIPANT_DEFEAT_SOURCE, COMPOSITE_BOSS_STAGE_STATUS } from "../boss/CompositeBossEncounterRuntime.js";
 import { CONTINUITY_WARDEN_EVENT, CONTINUITY_WARDEN_ID } from "../boss/ContinuityWardenDefinition.js";
 import { BOSS_ENEMY_SUMMON_EVENT, BOSS_SUMMONED_ENEMY_ID } from "../boss/BossEnemySummonPattern.js";
 import { BOSS_ANCHOR_ROLE } from "../boss-authoring/BossStageSpec.js";
@@ -937,8 +937,8 @@ export class GameSimulation {
         return true;
     }
 
-    #selectBossRuntime(stageId) {
-        if (this.bossRuntime?.definition.id === stageId) return this.bossRuntime;
+    #selectBossRuntime(stageId, { forceReset = false } = {}) {
+        if (!forceReset && this.bossRuntime?.definition.id === stageId) return this.bossRuntime;
         const definition = this.bossDefinitions.find(({ id }) => id === stageId);
         if (!definition) throw new Error(`unknown Boss Stage definition: ${stageId}`);
         this.bossRuntime = createBossEncounterRuntime(definition, null, { worldSeed: this.world.seed });
@@ -1868,6 +1868,67 @@ export class GameSimulation {
         return true;
     }
 
+    #applyDebugPlayerRelocation(playerId, landmark, { restoreActive = false } = {}) {
+        const position = Object.freeze({ x: landmark.entry.x, y: landmark.entry.y });
+        const relocation = Object.freeze({
+            playerId,
+            areaId: landmark.stageId ?? landmark.areaId ?? landmark.id,
+            position,
+            respawnAnchorId: landmark.respawnAnchorId,
+            restoreActive
+        });
+        this.applyDebugPlayerRelocation(playerId, relocation);
+        return relocation;
+    }
+
+    applyDebugPlayerRelocation(
+        playerId,
+        { position, respawnAnchorId = null, restoreActive = false, areaId = null } = {}
+    ) {
+        const player = this.#requirePlayer(playerId);
+        if (!Number.isFinite(position?.x) || !Number.isFinite(position?.y)) {
+            throw new Error("debug Player relocation requires a finite position");
+        }
+        if (respawnAnchorId !== null) this.setPlayerRespawnAnchor(playerId, respawnAnchorId);
+        const destination = Object.freeze({ x: position.x, y: position.y });
+        if (restoreActive) this.#resetPlayerAtCheckpoint(player, destination);
+        else this.applyPortalTransition(playerId, destination, this.tick, `debug:${areaId ?? playerId}`);
+        return destination;
+    }
+
+    #abortBossForDebugTeleport(requestingPlayerId) {
+        const stage = this.#bossStageWorld();
+        if (!stage || this.bossRuntime?.status === COMPOSITE_BOSS_STAGE_STATUS.INACTIVE) {
+            return Object.freeze([]);
+        }
+        const sourceLandmark = this.landmarkById[stage.sourceLandmarkId];
+        if (!sourceLandmark) throw new Error(`Boss source landmark missing: ${stage.sourceLandmarkId}`);
+        const participantIds = new Set(
+            (this.bossRuntime.snapshot().participantStates ?? [])
+                .filter(({ status }) => status !== BOSS_PARTICIPANT_STATUS.DISCONNECTED)
+                .map(({ playerId }) => playerId)
+        );
+        for (const player of this.players) {
+            if (pointInsideBounds(player.physics.position, stage.bounds)) participantIds.add(player.id);
+        }
+        const relocations = [];
+        for (const participantId of [...participantIds].sort((left, right) => left.localeCompare(right, "en"))) {
+            if (participantId === requestingPlayerId || !this.hasPlayer(participantId)) continue;
+            relocations.push(this.#applyDebugPlayerRelocation(participantId, sourceLandmark, { restoreActive: true }));
+        }
+        this.#clearBossMissiles("debug-boss-aborted");
+        this.#clearBossSummonedEnemies("debug-boss-aborted");
+        this.bossHazardRecords.clear();
+        this.combatInteractions.restore(null);
+        return Object.freeze(relocations);
+    }
+
+    #resetBossRuntimeForDebugProgress() {
+        const nextBossStage = this.world.bossStages?.find(({ id }) => !this.worldProgress.isBossStageComplete(id));
+        if (!nextBossStage) return null;
+        return this.#selectBossRuntime(nextBossStage.id, { forceReset: true });
+    }
+
     debugTeleportPlayer(playerId, areaId) {
         const player = this.#requirePlayer(playerId);
         if (this.isSeamlessSectorWorld) {
@@ -1875,10 +1936,17 @@ export class GameSimulation {
                 ({ id, areaId: sourceAreaId, stageId }) =>
                     id === areaId || sourceAreaId === areaId || stageId === areaId
             );
-            if (!landmark || !this.advanceSectorProgressToLandmark(landmark.id)) return null;
-            this.setPlayerRespawnAnchor(playerId, landmark.respawnAnchorId);
-            this.applyPortalTransition(playerId, landmark.entry, this.tick, `debug:${landmark.id}`);
-            return Object.freeze({ x: landmark.entry.x, y: landmark.entry.y });
+            if (!landmark) return null;
+            const relocations = [...this.#abortBossForDebugTeleport(playerId)];
+            if (!this.advanceSectorProgressToLandmark(landmark.id)) return null;
+            this.#resetBossRuntimeForDebugProgress();
+            const restoreActive = player.lifeState !== "active";
+            const requestedRelocation = this.#applyDebugPlayerRelocation(playerId, landmark, { restoreActive });
+            relocations.push(requestedRelocation);
+            return Object.freeze({
+                position: requestedRelocation.position,
+                relocations: Object.freeze(relocations)
+            });
         }
         const area = this.world.areas.find(({ id }) => id === areaId);
         if (!area) return null;
@@ -1886,7 +1954,13 @@ export class GameSimulation {
         this.activeCheckpoint =
             this.world.checkpoints.find(({ id }) => id === `checkpoint:${areaId}`) ?? this.activeCheckpoint;
         this.applyPortalTransition(playerId, { x: area.entry.x, y: area.entry.y }, this.tick, `debug:${areaId}`);
-        return Object.freeze({ x: area.entry.x, y: area.entry.y });
+        const position = Object.freeze({ x: area.entry.x, y: area.entry.y });
+        return Object.freeze({
+            position,
+            relocations: Object.freeze([
+                Object.freeze({ playerId, areaId: area.id, position, respawnAnchorId: null, restoreActive: false })
+            ])
+        });
     }
 
     getTick() {
@@ -4600,14 +4674,14 @@ export class GameSimulation {
     }
 
     recordReplicationEvent(eventType, payload) {
-        this.replicationEvents.push(
-            Object.freeze({
-                ...payload,
-                eventId: this.registry.createId("event"),
-                eventType,
-                tick: this.tick
-            })
-        );
+        const event = Object.freeze({
+            ...payload,
+            eventId: this.registry.createId("event"),
+            eventType,
+            tick: this.tick
+        });
+        this.replicationEvents.push(event);
+        return event;
     }
 
     recordProjectileResolution({ projectileId, resolution, position }, combatEvent = null) {
