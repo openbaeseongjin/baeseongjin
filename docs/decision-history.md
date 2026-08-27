@@ -287,6 +287,13 @@
 - 영향: 충돌 폭발은 Rope 몸체 충돌의 100%/50% 계약을 지키기 위해 같은 속력 기반 피해를 사용하며 augment-impact v2가 `impactSpeed`를 운반해 서버에서 공식 피해를 재계산한다. Action·Signature의 독립 기준 피해 25는 유지한다.
 - 현재 기준: `docs/game-hackathon-planning.md`, `docs/augment-v1.md`, `docs/architecture.md`, `docs/multiplayer-synchronization.md`.
 
+## [L2] 2026-08-27 · 플랫폼 충돌 피해의 50% cap을 제거한다
+
+- 이전: `800~1400px/s`에서 최대 체력 `0~50%`로 증가한 뒤 더 빠른 충돌도 50% 피해에 머물러, 여러 Stage를 추락해도 같은 피해만 받았다.
+- 대체: `1200px/s` 미만은 피해가 없고 `1200px/s`에서 최대 체력 10%(현재 10 피해)로 시작해 `2400px/s`의 100%(현재 100 피해)까지 선형 증가한다.
+- 영향: 여러 층·Sector 규모 추락은 별도 즉사 예외 없이 같은 비례 충돌 피해 규칙으로 사망한다. owner prediction과 서버 claim 검증은 공용 `PlatformCollisionDamage`를 계속 사용한다.
+- 현재 기준: `docs/game-hackathon-planning.md`, `docs/architecture.md`, `src/game/config.js`, `src/game/combat/PlatformCollisionDamage.js`.
+
 ## [L1] 2026-08-20 · 완료된 legacy 문서를 현재 기준에서 제거한다
 
 - 이전: `sector-01-world-structure-plan.md`, `p0-alignment-patch-package.md`, `client-first-network-feel.md`가 완료·대체된 뒤에도 문서 인덱스에 남아 현재 계약처럼 참조됐다. AREA-SPEC 표준과 통합 현황에는 intra-Sector connector를 objective로 잠그는 설명도 남아 있었다.

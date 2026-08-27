@@ -182,9 +182,9 @@ export function normalizeRopeTuningOverride(value) {
 }
 
 export const PLATFORM_COLLISION_DAMAGE_CONFIG = Object.freeze({
-    safeImpactSpeed: 800,
-    maximumDamageImpactSpeed: 1400,
-    damageScale: 0.5
+    damageStartImpactSpeed: 1200,
+    damageStartRatio: 0.1,
+    lethalImpactSpeed: 2400
 });
 
 export const ROPE_IMPACT_CONFIG = Object.freeze({
