@@ -18,19 +18,21 @@ export function platformCollisionDamageForImpactSpeed(impactSpeed, maxHealth, co
         throw new Error("maxHealth must be positive and finite");
     }
     if (
-        !Number.isFinite(config?.safeImpactSpeed) ||
-        !Number.isFinite(config?.maximumDamageImpactSpeed) ||
-        !Number.isFinite(config?.damageScale) ||
-        config.safeImpactSpeed < 0 ||
-        config.maximumDamageImpactSpeed <= config.safeImpactSpeed ||
-        config.damageScale <= 0
+        !Number.isFinite(config?.damageStartImpactSpeed) ||
+        !Number.isFinite(config?.damageStartRatio) ||
+        !Number.isFinite(config?.lethalImpactSpeed) ||
+        config.damageStartImpactSpeed < 0 ||
+        config.damageStartRatio <= 0 ||
+        config.damageStartRatio >= 1 ||
+        config.lethalImpactSpeed <= config.damageStartImpactSpeed
     ) {
-        throw new Error("platform collision damage config requires ordered impact speeds and a positive damage scale");
+        throw new Error("platform collision damage config requires ordered damage speeds and a start ratio below one");
     }
-    if (impactSpeed <= config.safeImpactSpeed) return 0;
-    const ratio = Math.min(
+    if (impactSpeed < config.damageStartImpactSpeed) return 0;
+    const progress = Math.min(
         1,
-        (impactSpeed - config.safeImpactSpeed) / (config.maximumDamageImpactSpeed - config.safeImpactSpeed)
+        (impactSpeed - config.damageStartImpactSpeed) / (config.lethalImpactSpeed - config.damageStartImpactSpeed)
     );
-    return Math.min(maxHealth, Math.ceil(maxHealth * ratio * config.damageScale));
+    const startDamage = maxHealth * config.damageStartRatio;
+    return Math.ceil(startDamage + (maxHealth - startDamage) * progress);
 }
